@@ -12,6 +12,11 @@ const envSchema = zod_1.default.object({
     JWT_REFRESH_SECRET: zod_1.default.string(),
     JWT_ACCESS_EXPIRATION_IN_SECONDS: zod_1.default.coerce.number(),
     JWT_REFRESH_EXPIRATION_IN_SECONDS: zod_1.default.coerce.number(),
+    REDIS_USERNAME: zod_1.default.string(),
+    REDIS_PASSWORD: zod_1.default.string(),
+    REDIS_HOST: zod_1.default.string(),
+    REDIS_PORT: zod_1.default.coerce.number(),
+    REDIS_DATABASE: zod_1.default.coerce.number().optional(),
 });
 const validateEnv = (config) => {
     const result = envSchema.safeParse(config);

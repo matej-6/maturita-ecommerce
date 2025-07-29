@@ -26,7 +26,12 @@ let CategoriesService = class CategoriesService {
             },
         });
     }
-    findAll() {
+    findAll(parentId) {
+        if (parentId) {
+            return this.prisma.category.findMany({
+                where: { parentCategoryId: parentId },
+            });
+        }
         return this.prisma.category.findMany();
     }
     findOne(id) {

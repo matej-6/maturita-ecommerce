@@ -22,6 +22,7 @@ exports.UpdateUserInput = UpdateUserInput;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsUUID)(),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "id", void 0);
 __decorate([
@@ -29,6 +30,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(3),
     (0, class_validator_1.MaxLength)(128),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "firstName", void 0);
 __decorate([
@@ -36,11 +38,13 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(3),
     (0, class_validator_1.MaxLength)(128),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "lastName", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsEmail)(),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "email", void 0);
 exports.UpdateUserInput = UpdateUserInput = __decorate([

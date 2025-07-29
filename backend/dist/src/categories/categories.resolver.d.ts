@@ -7,48 +7,48 @@ export declare class CategoriesResolver {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
     createCategory(createCategoryInput: CreateCategoryInput): import("@prisma/client").Prisma.Prisma__CategoryClient<{
-        name: string;
         id: string;
+        name: string;
         description: string | null;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    findAll(): import("@prisma/client").Prisma.PrismaPromise<{
-        name: string;
+    findAll(parentId?: string): import("@prisma/client").Prisma.PrismaPromise<{
         id: string;
+        name: string;
         description: string | null;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
     }[]>;
     findOne(id: string): import("@prisma/client").Prisma.Prisma__CategoryClient<{
-        name: string;
         id: string;
+        name: string;
         description: string | null;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
     } | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     updateCategory(updateCategoryInput: UpdateCategoryInput): import("@prisma/client").Prisma.Prisma__CategoryClient<{
-        name: string;
         id: string;
+        name: string;
         description: string | null;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     removeCategory(id: string): import("@prisma/client").Prisma.Prisma__CategoryClient<{
-        name: string;
         id: string;
+        name: string;
         description: string | null;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     subcategories(category: Category, ctx: AppContext): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string | null;
         createdAt: Date;
         updatedAt: Date;

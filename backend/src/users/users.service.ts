@@ -3,7 +3,6 @@ import {
   BadRequestException,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,6 +10,7 @@ import bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { User } from '@prisma/client';
 import { UpdateUserInput } from './dto/update-user.input';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -64,11 +64,14 @@ export class UsersService {
     }
   }
 
-  async update(id: string, updateUserInput: UpdateUserInput) {
+  async update(id: string, updateUserInput: UpdateUserInput): Promise<UserDto> {
     try {
       const user = await this.prisma.user.update({
         where: { id },
         data: updateUserInput,
+        omit: {
+          hashedPassword: true,
+        },
       });
       this.logger.log(`User updated: ${user.id}`);
       return user;
@@ -98,9 +101,13 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserDto[]> {
     try {
-      const users = await this.prisma.user.findMany();
+      const users: UserDto[] = await this.prisma.user.findMany({
+        omit: {
+          hashedPassword: true,
+        },
+      });
       return users;
     } catch (err) {
       this.logger.error('Failed to find all users: ', err);
@@ -110,10 +117,13 @@ export class UsersService {
     }
   }
 
-  async findOne(id: string): Promise<User | null> {
+  async findOne(id: string): Promise<UserDto | null> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
+        omit: {
+          hashedPassword: true,
+        },
       });
       return user;
     } catch (err) {

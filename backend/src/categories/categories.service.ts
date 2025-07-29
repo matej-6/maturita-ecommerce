@@ -17,7 +17,12 @@ export class CategoriesService {
     });
   }
 
-  findAll() {
+  findAll(parentId?: string) {
+    if (parentId) {
+      return this.prisma.category.findMany({
+        where: { parentCategoryId: parentId },
+      });
+    }
     return this.prisma.category.findMany();
   }
 

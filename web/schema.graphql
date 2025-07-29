@@ -1,0 +1,102 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+input AuthInput {
+  email: String!
+  password: String!
+}
+
+type AuthResponse {
+  createdAt: DateTime!
+  email: String!
+  emailVerified: Boolean!
+  firstName: String
+  id: String!
+  lastName: String
+  updatedAt: DateTime!
+}
+
+type Category {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  name: String!
+  parentCategoryId: String
+  subcategories: [Category!]!
+  updatedAt: DateTime!
+}
+
+input CreateCategoryInput {
+  """Description of the category"""
+  description: String
+  """Name of the category"""
+  name: String!
+  """Parent category id"""
+  parentCategoryId: String
+}
+
+input CreateUserInput {
+  email: String!
+  lastName: String!
+  name: String!
+  password: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  createUser(createUserInput: CreateUserInput!): User!
+  login(authInput: AuthInput!): AuthResponse!
+  logout: Void!
+  logoutAll: Void!
+  refreshToken: Void!
+  removeCategory(id: ID!): Category!
+  removeUser(id: String!): User!
+  requestEmailVerification(email: String!): Void!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
+}
+
+type Query {
+  categories(parentId: ID): [Category!]!
+  category(id: ID!): Category!
+  user(id: String!): User!
+  users: [User!]!
+}
+
+input UpdateCategoryInput {
+  """Description of the category"""
+  description: String
+  id: ID!
+  """Name of the category"""
+  name: String
+  """Parent category id"""
+  parentCategoryId: String
+}
+
+input UpdateUserInput {
+  email: String!
+  firstName: String!
+  id: String!
+  lastName: String!
+}
+
+type User {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input VerifyEmailInput {
+  code: String!
+  email: String!
+}
+
+"""Represents NULL values"""
+scalar Void

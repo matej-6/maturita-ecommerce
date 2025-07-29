@@ -14,12 +14,13 @@ const passport_1 = require("@nestjs/passport");
 const jwt_1 = require("@nestjs/jwt");
 const auth_resolver_1 = require("./auth.resolver");
 const jwt_strategy_1 = require("./strategy/jwt.strategy");
+const redis_module_1 = require("../redis/redis.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [users_module_1.UsersModule, passport_1.PassportModule, jwt_1.JwtModule.register({})],
+        imports: [users_module_1.UsersModule, passport_1.PassportModule, jwt_1.JwtModule.register({}), redis_module_1.RedisModule],
         providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, auth_resolver_1.AuthResolver],
         exports: [auth_service_1.AuthService],
     })

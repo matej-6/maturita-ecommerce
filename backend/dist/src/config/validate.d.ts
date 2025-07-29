@@ -11,6 +11,11 @@ declare const envSchema: z.ZodObject<{
     JWT_REFRESH_SECRET: z.ZodString;
     JWT_ACCESS_EXPIRATION_IN_SECONDS: z.ZodCoercedNumber<unknown>;
     JWT_REFRESH_EXPIRATION_IN_SECONDS: z.ZodCoercedNumber<unknown>;
+    REDIS_USERNAME: z.ZodString;
+    REDIS_PASSWORD: z.ZodString;
+    REDIS_HOST: z.ZodString;
+    REDIS_PORT: z.ZodCoercedNumber<unknown>;
+    REDIS_DATABASE: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
 }, z.core.$strip>;
 export type Env = z.infer<typeof envSchema>;
 export declare const validateEnv: (config: Record<string, unknown>) => {
@@ -21,5 +26,10 @@ export declare const validateEnv: (config: Record<string, unknown>) => {
     JWT_REFRESH_SECRET: string;
     JWT_ACCESS_EXPIRATION_IN_SECONDS: number;
     JWT_REFRESH_EXPIRATION_IN_SECONDS: number;
+    REDIS_USERNAME: string;
+    REDIS_PASSWORD: string;
+    REDIS_HOST: string;
+    REDIS_PORT: number;
+    REDIS_DATABASE?: number | undefined;
 };
 export {};

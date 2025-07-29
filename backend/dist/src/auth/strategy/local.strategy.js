@@ -9,26 +9,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AccessTokenStrategy = void 0;
+exports.LocalStrategy = void 0;
 const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
 const passport_1 = require("@nestjs/passport");
-const passport_jwt_1 = require("passport-jwt");
-let AccessTokenStrategy = class AccessTokenStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt') {
-    constructor(configService) {
+const passport_local_1 = require("passport-local");
+const auth_service_1 = require("../auth.service");
+let LocalStrategy = class LocalStrategy extends (0, passport_1.PassportStrategy)(passport_local_1.Strategy, 'local') {
+    authService;
+    constructor(authService) {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.get('JWT_ACCESS_SECRET'),
-            ignoreExpiration: false,
+            usernameField: 'email',
+            passwordField: 'password',
         });
+        this.authService = authService;
     }
-    validate(payload) {
-        return payload;
+    async validate(email, password) {
+        return this.authService.validateUserWithCredentials(email, password);
     }
 };
-exports.AccessTokenStrategy = AccessTokenStrategy;
-exports.AccessTokenStrategy = AccessTokenStrategy = __decorate([
+exports.LocalStrategy = LocalStrategy;
+exports.LocalStrategy = LocalStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService])
-], AccessTokenStrategy);
-//# sourceMappingURL=access-token.strategy.js.map
+    __metadata("design:paramtypes", [auth_service_1.AuthService])
+], LocalStrategy);
+//# sourceMappingURL=local.strategy.js.map

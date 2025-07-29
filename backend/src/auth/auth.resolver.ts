@@ -1,6 +1,6 @@
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger, UseGuards } from '@nestjs/common';
 import { AuthResponse } from './dto/auth.response';
 import { AuthInput } from './dto/auth.input';
 import { UsersService } from 'src/users/users.service';
@@ -9,10 +9,15 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
 import { VerifyEmailInput } from './dto/verifyEmail.input';
 import { GraphQLVoid } from 'graphql-scalars';
-import { IsEmail } from 'class-validator';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CurrentUser } from './current-user.decorator';
+import { UserDto } from 'src/users/dto/user.dto';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
 
 @Resolver()
 export class AuthResolver {
+  private readonly logger = new Logger(AuthResolver.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
@@ -31,6 +36,26 @@ export class AuthResolver {
 
   //   return this.authService.login(user);
   // }
+
+  @UseGuards(JwtRefreshAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async refreshToken(
+    @Context() { res }: AppContext,
+    @CurrentUser() user: UserDto,
+  ) {
+    const {
+      accessToken,
+      refreshToken,
+      accessTokenExpirationDate,
+      refreshTokenExpirationDate,
+    } = await this.authService.login(user);
+
+    this.authService.setAuthCookies(
+      res,
+      { token: accessToken, expires: accessTokenExpirationDate },
+      { token: refreshToken, expires: refreshTokenExpirationDate },
+    );
+  }
 
   @Mutation(() => AuthResponse)
   async login(
@@ -62,7 +87,6 @@ export class AuthResolver {
     });
 
     res.cookie('Refresh', refreshToken, {
-      sameSite: 'lax',
       httpOnly: true,
       secure:
         this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
@@ -70,9 +94,7 @@ export class AuthResolver {
       expires: refreshTokenExpirationDate,
     });
 
-    return {
-      access_token: accessToken,
-    };
+    return user;
   }
 
   @Mutation(() => GraphQLVoid)
@@ -90,5 +112,32 @@ export class AuthResolver {
     @Args({ name: 'email', type: () => String }) email: string,
   ) {
     await this.authService.sendEmailVerification(email);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async logout(@Context() { res, req }: AppContext) {
+    let refreshToken: string;
+    try {
+      refreshToken = req.cookies?.Refresh as string;
+      if (refreshToken) {
+        await this.authService.signOut(refreshToken);
+      }
+    } catch (error) {
+      this.logger.debug('No refresh token found for logout: ', error);
+    }
+    res.clearCookie('Authentication');
+    res.clearCookie('Refresh');
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async logoutAll(
+    @Context() { res }: AppContext,
+    @CurrentUser() user: UserDto,
+  ) {
+    await this.authService.signOutAll(user.id);
+    res.clearCookie('Authentication');
+    res.clearCookie('Refresh');
   }
 }

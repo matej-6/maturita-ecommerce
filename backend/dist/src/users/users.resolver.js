@@ -18,6 +18,8 @@ const users_service_1 = require("./users.service");
 const user_entity_1 = require("./entities/user.entity");
 const create_user_input_1 = require("./dto/create-user.input");
 const update_user_input_1 = require("./dto/update-user.input");
+const common_1 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let UsersResolver = class UsersResolver {
     usersService;
     constructor(usersService) {
@@ -41,6 +43,7 @@ let UsersResolver = class UsersResolver {
 };
 exports.UsersResolver = UsersResolver;
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, graphql_1.Mutation)(() => user_entity_1.User),
     __param(0, (0, graphql_1.Args)('createUserInput')),
     __metadata("design:type", Function),
@@ -48,12 +51,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersResolver.prototype, "createUser", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, graphql_1.Query)(() => [user_entity_1.User], { name: 'users' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], UsersResolver.prototype, "findAll", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, graphql_1.Query)(() => user_entity_1.User, { name: 'user' }),
     __param(0, (0, graphql_1.Args)('id', { type: () => String })),
     __metadata("design:type", Function),
@@ -61,6 +66,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersResolver.prototype, "findOne", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, graphql_1.Mutation)(() => user_entity_1.User),
     __param(0, (0, graphql_1.Args)('updateUserInput')),
     __metadata("design:type", Function),
@@ -68,6 +74,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersResolver.prototype, "updateUser", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, graphql_1.Mutation)(() => user_entity_1.User),
     __param(0, (0, graphql_1.Args)('id', { type: () => String })),
     __metadata("design:type", Function),

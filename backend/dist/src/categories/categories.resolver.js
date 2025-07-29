@@ -26,8 +26,8 @@ let CategoriesResolver = class CategoriesResolver {
     createCategory(createCategoryInput) {
         return this.categoriesService.create(createCategoryInput);
     }
-    findAll() {
-        return this.categoriesService.findAll();
+    findAll(parentId) {
+        return this.categoriesService.findAll(parentId);
     }
     findOne(id) {
         return this.categoriesService.findOne(id);
@@ -54,8 +54,9 @@ __decorate([
 ], CategoriesResolver.prototype, "createCategory", null);
 __decorate([
     (0, graphql_1.Query)(() => [category_entity_1.Category], { name: 'categories' }),
+    __param(0, (0, graphql_1.Args)('parentId', { type: () => graphql_1.ID, nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CategoriesResolver.prototype, "findAll", null);
 __decorate([

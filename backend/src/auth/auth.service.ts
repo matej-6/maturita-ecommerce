@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
@@ -12,6 +13,8 @@ import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import * as crypto from 'crypto';
+import { UserDto } from 'src/users/dto/user.dto';
+import { Response } from 'express';
 
 const EMAIL_VERIFICATION_KEY = 'email-verification';
 const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
@@ -61,6 +64,68 @@ export class AuthService {
       return rest;
     }
     return null;
+  }
+
+  async verifyUserRefreshToken(
+    refreshToken: string,
+    userId: string,
+  ): Promise<UserDto> {
+    try {
+      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+      const refreshTokenSession =
+        await this.prismaService.refreshTokenSession.findUnique({
+          where: {
+            token: hashedRefreshToken,
+            userId: userId,
+          },
+          include: {
+            user: {
+              omit: {
+                hashedPassword: true,
+              },
+            },
+          },
+        });
+
+      if (!refreshTokenSession) throw new UnauthorizedException();
+
+      if (refreshTokenSession.expiresAt < new Date()) {
+        throw new UnauthorizedException();
+      }
+
+      return refreshTokenSession.user;
+    } catch (error) {
+      this.logger.error('Error verifying user refresh token: ', error);
+      throw new UnauthorizedException('Refresh token is not valid.');
+    }
+  }
+
+  setAuthCookies(
+    res: Response,
+    accessToken: {
+      token: string;
+      expires: Date;
+    },
+    refreshToken: {
+      token: string;
+      expires: Date;
+    },
+  ) {
+    res.cookie('Authentication', accessToken.token, {
+      httpOnly: true,
+      secure:
+        this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
+        'production',
+      expires: accessToken.expires,
+    });
+
+    res.cookie('Refresh', refreshToken.token, {
+      httpOnly: true,
+      secure:
+        this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
+        'production',
+      expires: refreshToken.expires,
+    });
   }
 
   async login(user: { id: string }): Promise<{
@@ -125,11 +190,15 @@ export class AuthService {
     const key = this.getEmailVerificationKey(email);
     const redisClient = this.redisService.client;
 
-    const value = await redisClient.getDel(key);
+    const value = await redisClient.get(key);
 
     if (!value || value !== code) {
       throw new BadRequestException('Invalid verification code.');
     }
+
+    redisClient.del(key).catch((error: any) => {
+      this.logger.error('Failed to delete email verification code.', error);
+    });
 
     try {
       await this.prismaService.user.update({

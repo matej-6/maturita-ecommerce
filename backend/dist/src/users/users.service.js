@@ -69,6 +69,9 @@ let UsersService = UsersService_1 = class UsersService {
             const user = await this.prisma.user.update({
                 where: { id },
                 data: updateUserInput,
+                omit: {
+                    hashedPassword: true,
+                },
             });
             this.logger.log(`User updated: ${user.id}`);
             return user;
@@ -96,7 +99,11 @@ let UsersService = UsersService_1 = class UsersService {
     }
     async findAll() {
         try {
-            const users = await this.prisma.user.findMany();
+            const users = await this.prisma.user.findMany({
+                omit: {
+                    hashedPassword: true,
+                },
+            });
             return users;
         }
         catch (err) {
@@ -108,6 +115,9 @@ let UsersService = UsersService_1 = class UsersService {
         try {
             const user = await this.prisma.user.findUnique({
                 where: { id },
+                omit: {
+                    hashedPassword: true,
+                },
             });
             return user;
         }

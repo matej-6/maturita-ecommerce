@@ -10,35 +10,12 @@ export declare class UsersResolver {
         updatedAt: Date;
         lastName: string | null;
         email: string;
+        emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
     }>;
-    findAll(): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        lastName: string | null;
-        email: string;
-        hashedPassword: string | null;
-        firstName: string | null;
-    }[]>;
-    findOne(id: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        lastName: string | null;
-        email: string;
-        hashedPassword: string | null;
-        firstName: string | null;
-    } | null>;
-    updateUser(updateUserInput: UpdateUserInput): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        lastName: string | null;
-        email: string;
-        hashedPassword: string | null;
-        firstName: string | null;
-    }>;
+    findAll(): Promise<import("./dto/user.dto").UserDto[]>;
+    findOne(id: string): Promise<import("./dto/user.dto").UserDto | null>;
+    updateUser(updateUserInput: UpdateUserInput): Promise<import("./dto/user.dto").UserDto>;
     removeUser(id: string): Promise<void>;
 }

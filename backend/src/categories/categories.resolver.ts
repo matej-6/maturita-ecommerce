@@ -26,8 +26,10 @@ export class CategoriesResolver {
   }
 
   @Query(() => [Category], { name: 'categories' })
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(
+    @Args('parentId', { type: () => ID, nullable: true }) parentId?: string,
+  ) {
+    return this.categoriesService.findAll(parentId);
   }
 
   @Query(() => Category, { name: 'category' })

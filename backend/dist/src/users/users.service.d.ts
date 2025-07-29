@@ -2,6 +2,7 @@ import { CreateUserInput } from './dto/create-user.input';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { UpdateUserInput } from './dto/update-user.input';
+import { UserDto } from './dto/user.dto';
 export declare class UsersService {
     private prisma;
     private readonly logger;
@@ -12,20 +13,13 @@ export declare class UsersService {
         updatedAt: Date;
         lastName: string | null;
         email: string;
+        emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
     }>;
     findOneByEmail(email: string): Promise<User | null>;
-    update(id: string, updateUserInput: UpdateUserInput): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        lastName: string | null;
-        email: string;
-        hashedPassword: string | null;
-        firstName: string | null;
-    }>;
+    update(id: string, updateUserInput: UpdateUserInput): Promise<UserDto>;
     remove(id: string): Promise<void>;
-    findAll(): Promise<User[]>;
-    findOne(id: string): Promise<User | null>;
+    findAll(): Promise<UserDto[]>;
+    findOne(id: string): Promise<UserDto | null>;
 }

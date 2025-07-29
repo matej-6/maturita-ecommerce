@@ -12,13 +12,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthResponse = void 0;
 const graphql_1 = require("@nestjs/graphql");
 let AuthResponse = class AuthResponse {
-    access_token;
+    id;
+    email;
+    emailVerified;
+    firstName;
+    lastName;
+    createdAt;
+    updatedAt;
 };
 exports.AuthResponse = AuthResponse;
 __decorate([
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], AuthResponse.prototype, "access_token", void 0);
+], AuthResponse.prototype, "id", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], AuthResponse.prototype, "email", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Boolean),
+    __metadata("design:type", Boolean)
+], AuthResponse.prototype, "emailVerified", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", Object)
+], AuthResponse.prototype, "firstName", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", Object)
+], AuthResponse.prototype, "lastName", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date),
+    __metadata("design:type", Date)
+], AuthResponse.prototype, "createdAt", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date),
+    __metadata("design:type", Date)
+], AuthResponse.prototype, "updatedAt", void 0);
 exports.AuthResponse = AuthResponse = __decorate([
     (0, graphql_1.ObjectType)()
 ], AuthResponse);
