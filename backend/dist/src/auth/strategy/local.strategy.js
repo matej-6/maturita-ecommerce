@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_local_1 = require("passport-local");
 const auth_service_1 = require("../auth.service");
+const zod_1 = require("zod");
 let LocalStrategy = class LocalStrategy extends (0, passport_1.PassportStrategy)(passport_local_1.Strategy, 'local') {
     authService;
     constructor(authService) {
@@ -24,7 +25,19 @@ let LocalStrategy = class LocalStrategy extends (0, passport_1.PassportStrategy)
         this.authService = authService;
     }
     async validate(email, password) {
-        return this.authService.validateUserWithCredentials(email, password);
+        const parsedEmail = zod_1.default.email().safeParse(email);
+        if (!parsedEmail.success) {
+            throw new common_1.UnauthorizedException('Invalid email');
+        }
+        const user = await this.authService.validateUserWithCredentials(parsedEmail.data, password);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Invalid credentials');
+        }
+        return {
+            id: user.id,
+            role: user.role,
+            email: user.email,
+        };
     }
 };
 exports.LocalStrategy = LocalStrategy;

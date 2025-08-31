@@ -17,6 +17,7 @@ import { Request, Response } from 'express';
 import { JwtModule } from '@nestjs/jwt';
 import { GraphQlContext } from './types/graphql-context';
 import { RedisModule } from './redis/redis.module';
+import { LocalesModule } from './locales/locales.module';
 
 @Module({
   imports: [
@@ -39,7 +40,7 @@ import { RedisModule } from './redis/redis.module';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.production', '.env.development'],
+      envFilePath: ['.env.production', '.env.development', '.env'],
       validate: validateEnv,
     }),
     PrismaModule,
@@ -48,6 +49,7 @@ import { RedisModule } from './redis/redis.module';
     AuthModule,
     JwtModule.register({}),
     RedisModule,
+    LocalesModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

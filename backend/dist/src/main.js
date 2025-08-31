@@ -17,6 +17,12 @@ async function bootstrap() {
         transform: true,
         whitelist: true,
         forbidNonWhitelisted: true,
+        exceptionFactory(errors) {
+            return new common_1.BadRequestException(errors.map((e) => ({
+                property: e.property,
+                constraints: e.constraints,
+            })));
+        },
     }));
     app.use(cookieParser());
     await app.listen(process.env.PORT ?? 3000);

@@ -11,11 +11,13 @@ export declare class UsersService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        role: import("@prisma/client").$Enums.Role;
         lastName: string | null;
         email: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
+        avatar: string | null;
     }>;
     findOneByEmail(email: string): Promise<User | null>;
     update(id: string, updateUserInput: UpdateUserInput): Promise<UserDto>;

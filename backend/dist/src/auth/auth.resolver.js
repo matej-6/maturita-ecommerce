@@ -23,9 +23,10 @@ const users_service_1 = require("../users/users.service");
 const config_1 = require("@nestjs/config");
 const verifyEmail_input_1 = require("./dto/verifyEmail.input");
 const graphql_scalars_1 = require("graphql-scalars");
-const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const current_user_decorator_1 = require("./current-user.decorator");
 const jwt_refresh_guard_1 = require("./guards/jwt-refresh.guard");
+const me_response_1 = require("./dto/me.response");
+const gql_jwt_auth_guard_1 = require("./guards/gql-jwt-auth.guard");
 let AuthResolver = AuthResolver_1 = class AuthResolver {
     authService;
     usersService;
@@ -63,27 +64,20 @@ let AuthResolver = AuthResolver_1 = class AuthResolver {
     async verifyEmail(verifyEmailInput) {
         await this.authService.validateEmail(verifyEmailInput.email, verifyEmailInput.code);
     }
-    async requestEmailVerification(email) {
-        await this.authService.sendEmailVerification(email);
-    }
-    async logout({ res, req }) {
-        let refreshToken;
-        try {
-            refreshToken = req.cookies?.Refresh;
-            if (refreshToken) {
-                await this.authService.signOut(refreshToken);
-            }
-        }
-        catch (error) {
-            this.logger.debug('No refresh token found for logout: ', error);
-        }
-        res.clearCookie('Authentication');
-        res.clearCookie('Refresh');
+    async requestEmailVerification(user) {
+        await this.authService.sendEmailVerification(user.email);
     }
     async logoutAll({ res }, user) {
         await this.authService.signOutAll(user.id);
         res.clearCookie('Authentication');
         res.clearCookie('Refresh');
+    }
+    async me(user) {
+        const foundUser = await this.usersService.findOne(user.id);
+        if (!foundUser) {
+            throw new common_1.NotFoundException();
+        }
+        return me_response_1.MeResponse.fromUser(foundUser);
     }
 };
 exports.AuthResolver = AuthResolver;
@@ -112,22 +106,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthResolver.prototype, "verifyEmail", null);
 __decorate([
+    (0, common_1.UseGuards)(gql_jwt_auth_guard_1.GqlJwtAuthGuard),
     (0, graphql_1.Mutation)(() => graphql_scalars_1.GraphQLVoid),
-    __param(0, (0, graphql_1.Args)({ name: 'email', type: () => String })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], AuthResolver.prototype, "requestEmailVerification", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, graphql_1.Mutation)(() => graphql_scalars_1.GraphQLVoid),
-    __param(0, (0, graphql_1.Context)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], AuthResolver.prototype, "logout", null);
+], AuthResolver.prototype, "requestEmailVerification", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(gql_jwt_auth_guard_1.GqlJwtAuthGuard),
     (0, graphql_1.Mutation)(() => graphql_scalars_1.GraphQLVoid),
     __param(0, (0, graphql_1.Context)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
@@ -135,6 +122,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthResolver.prototype, "logoutAll", null);
+__decorate([
+    (0, common_1.UseGuards)(gql_jwt_auth_guard_1.GqlJwtAuthGuard),
+    (0, graphql_1.Query)(() => me_response_1.MeResponse),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthResolver.prototype, "me", null);
 exports.AuthResolver = AuthResolver = AuthResolver_1 = __decorate([
     (0, graphql_1.Resolver)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService,

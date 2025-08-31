@@ -13,6 +13,7 @@ import { Category } from './entities/category.entity';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { AppContext } from 'src/app.module';
+import { CategoryTranslation } from './entities/category-translation.entity';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -27,9 +28,11 @@ export class CategoriesResolver {
 
   @Query(() => [Category], { name: 'categories' })
   findAll(
-    @Args('parentId', { type: () => ID, nullable: true }) parentId?: string,
+    @Args('locale', { name: 'locale', nullable: true }) locale?: string,
+    @Args('withParentId', { name: 'withParentId', nullable: true })
+    withParentId?: string,
   ) {
-    return this.categoriesService.findAll(parentId);
+    return this.categoriesService.findAll(withParentId);
   }
 
   @Query(() => Category, { name: 'category' })
@@ -60,5 +63,21 @@ export class CategoriesResolver {
     const { dataLoaderService } = ctx;
     const { id } = category;
     return dataLoaderService.getLoader('subcategoriesLoader').load(id);
+  }
+
+  @ResolveField(() => [CategoryTranslation], { name: 'translations' })
+  async translations(
+    @Parent() category: Category,
+    @Context() ctx: AppContext,
+    @Args('locale', { type: () => String, nullable: true }) locale?: string,
+  ) {
+    const { id } = category;
+
+    const translations = await this.categoriesService.findTranslations(
+      id,
+      locale,
+    );
+
+    return translations;
   }
 }

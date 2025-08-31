@@ -6,6 +6,8 @@ import { AppContext } from 'src/app.module';
 import { ConfigService } from '@nestjs/config';
 import { VerifyEmailInput } from './dto/verifyEmail.input';
 import { UserDto } from 'src/users/dto/user.dto';
+import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
+import { MeResponse } from './dto/me.response';
 export declare class AuthResolver {
     private readonly authService;
     private readonly usersService;
@@ -15,7 +17,7 @@ export declare class AuthResolver {
     refreshToken({ res }: AppContext, user: UserDto): Promise<void>;
     login(authInput: AuthInput, { res }: AppContext): Promise<AuthResponse>;
     verifyEmail(verifyEmailInput: VerifyEmailInput): Promise<void>;
-    requestEmailVerification(email: string): Promise<void>;
-    logout({ res, req }: AppContext): Promise<void>;
-    logoutAll({ res }: AppContext, user: UserDto): Promise<void>;
+    requestEmailVerification(user: AuthenticatedUserDto): Promise<void>;
+    logoutAll({ res }: AppContext, user: AuthenticatedUserDto): Promise<void>;
+    me(user: AuthenticatedUserDto): Promise<MeResponse>;
 }

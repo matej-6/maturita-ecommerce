@@ -17,18 +17,17 @@ let CreateUserInput = class CreateUserInput {
     lastName;
     email;
     password;
+    confirmPassword;
 };
 exports.CreateUserInput = CreateUserInput;
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Name is required' }),
-    (0, class_validator_1.MinLength)(3, { message: 'Name must be at least 3 characters long' }),
+    (0, class_validator_1.MinLength)(1, { message: 'Name is required' }),
     (0, class_validator_1.MaxLength)(128, { message: 'Name must be less than 128 characters long' }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Last name is required' }),
-    (0, class_validator_1.MinLength)(3, { message: 'Last name must be at least 3 characters long' }),
+    (0, class_validator_1.MinLength)(1, { message: 'Last name is required' }),
     (0, class_validator_1.MaxLength)(128, {
         message: 'Last name must be less than 128 characters long',
     }),
@@ -37,18 +36,33 @@ __decorate([
 ], CreateUserInput.prototype, "lastName", void 0);
 __decorate([
     (0, class_validator_1.IsEmail)({}, { message: 'Invalid email address' }),
+    (0, class_validator_1.MaxLength)(256, { message: 'Email must be less than 256 characters long' }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: 'Password is required' }),
     (0, class_validator_1.MinLength)(8, { message: 'Password must be at least 8 characters long' }),
-    (0, class_validator_1.MaxLength)(256, {
-        message: 'Password must be less than 256 characters long',
+    (0, class_validator_1.MaxLength)(512, {
+        message: 'Password must be less than 512 characters long',
     }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "password", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)({ message: 'Confirm password is required' }),
+    (0, class_validator_1.MinLength)(8, {
+        message: 'Confirm password must be at least 8 characters long',
+    }),
+    (0, class_validator_1.MaxLength)(512, {
+        message: 'Confirm password must be less than 512 characters long',
+    }),
+    (0, class_validator_1.ValidateIf)((o) => o.password === o.confirmPassword, {
+        message: 'Passwords do not match',
+    }),
+    (0, graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], CreateUserInput.prototype, "confirmPassword", void 0);
 exports.CreateUserInput = CreateUserInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateUserInput);

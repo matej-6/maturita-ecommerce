@@ -1,6 +1,8 @@
+import type { ExecutionResult } from "graphql";
 import type { TypedDocumentString } from "./graphql";
 
-export async function execute<TResult, TVariables>(
+export async function executeWithHeaders<TResult, TVariables>(
+  additionalHeaders: HeadersInit,
   query: TypedDocumentString<TResult, TVariables>,
   ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
 ) {
@@ -9,6 +11,7 @@ export async function execute<TResult, TVariables>(
     headers: {
       "Content-Type": "application/json",
       Accept: "application/graphql-response+json",
+      ...additionalHeaders,
     },
     body: JSON.stringify({
       query,
@@ -17,9 +20,12 @@ export async function execute<TResult, TVariables>(
     credentials: "include",
   });
 
-  if (!response.ok) {
-    throw new Error("Network error. Please try again later.");
-  }
+  return response.json() as ExecutionResult<TResult>;
+}
 
-  return response.json() as TResult;
+export async function execute<TResult, TVariables>(
+  query: TypedDocumentString<TResult, TVariables>,
+  ...variables: TVariables extends Record<string, never> ? [] : [TVariables]
+) {
+  return executeWithHeaders({}, query, ...variables);
 }

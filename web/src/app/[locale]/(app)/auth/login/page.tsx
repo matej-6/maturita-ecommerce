@@ -1,0 +1,148 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { JsonErrorResponse } from "@/lib/json-error-response";
+import { toast } from "sonner";
+import { getQueryClient } from "@/providers/queryProvider";
+import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-options";
+import { loginSchema } from "./login-schema";
+import { ContinueWithGoogleLightButton } from "@/components/buttons/continue-with-google-light-button";
+import { useTranslations } from "next-intl";
+
+export default function RegisterPage() {
+  const t = useTranslations("auth.sign-in");
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    mode: "all",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const [fieldErrors, setFieldErrors] = useState(new Map<string, string[]>());
+  const [globalErrors, setGlobalErrors] = useState<string[]>([]);
+
+  const queryClient = getQueryClient();
+  const router = useRouter();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: z.infer<typeof loginSchema>) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`,
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        const errorResponse = JsonErrorResponse.fromError(await res.json());
+        setGlobalErrors(errorResponse.getMessages());
+        setFieldErrors(errorResponse.getFieldValidationErrors());
+        throw new Error();
+      }
+    },
+
+    onSuccess: async () => {
+      toast.success(t("messages.success"));
+      await queryClient.invalidateQueries({
+        queryKey: CURRENT_SESSION_QUERY_KEY,
+      });
+
+      router.replace("/");
+    },
+  });
+
+  return (
+    <div className="w-full max-w-md mx-auto mt-10 flex flex-col gap-4">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>{t("title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(async (data) => {
+                await mutate(data);
+              })}
+              className="space-y-8 font-secondary"
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("form.email")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    <CustomFieldError errors={fieldErrors.get("email") || []} />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("form.password")}</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    <CustomFieldError
+                      errors={fieldErrors.get("password") || []}
+                    />
+                  </FormItem>
+                )}
+              />
+              {globalErrors.length > 0 && (
+                <div className="text-red-500 text-sm">
+                  {globalErrors.map((error) => (
+                    <p key={error}>{error}</p>
+                  ))}
+                </div>
+              )}
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isValid}
+              >
+                {isPending ? t("form.loading") : t("form.submit")}
+              </Button>
+            </form>
+          </Form>
+          <div className="h-px bg-muted-foreground rounded-full w-full" />
+          <div className="flex justify-center w-full flex-col px-8">
+            <ContinueWithGoogleLightButton />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function CustomFieldError({ errors }: { errors: string[] }) {
+  return <p className="text-red-500 text-sm">{errors.join(", ")}</p>;
+}

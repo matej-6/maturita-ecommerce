@@ -1,6 +1,11 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { BadRequestException, Logger, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Logger,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthResponse } from './dto/auth.response';
 import { AuthInput } from './dto/auth.input';
 import { UsersService } from 'src/users/users.service';
@@ -9,10 +14,12 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
 import { VerifyEmailInput } from './dto/verifyEmail.input';
 import { GraphQLVoid } from 'graphql-scalars';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './current-user.decorator';
 import { UserDto } from 'src/users/dto/user.dto';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
+import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
+import { MeResponse } from './dto/me.response';
+import { GqlJwtAuthGuard } from './guards/gql-jwt-auth.guard';
 
 @Resolver()
 export class AuthResolver {
@@ -107,37 +114,30 @@ export class AuthResolver {
     );
   }
 
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => GraphQLVoid)
-  async requestEmailVerification(
-    @Args({ name: 'email', type: () => String }) email: string,
-  ) {
-    await this.authService.sendEmailVerification(email);
+  async requestEmailVerification(@CurrentUser() user: AuthenticatedUserDto) {
+    await this.authService.sendEmailVerification(user.email);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Mutation(() => GraphQLVoid)
-  async logout(@Context() { res, req }: AppContext) {
-    let refreshToken: string;
-    try {
-      refreshToken = req.cookies?.Refresh as string;
-      if (refreshToken) {
-        await this.authService.signOut(refreshToken);
-      }
-    } catch (error) {
-      this.logger.debug('No refresh token found for logout: ', error);
-    }
-    res.clearCookie('Authentication');
-    res.clearCookie('Refresh');
-  }
-
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => GraphQLVoid)
   async logoutAll(
     @Context() { res }: AppContext,
-    @CurrentUser() user: UserDto,
+    @CurrentUser() user: AuthenticatedUserDto,
   ) {
     await this.authService.signOutAll(user.id);
     res.clearCookie('Authentication');
     res.clearCookie('Refresh');
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Query(() => MeResponse)
+  async me(@CurrentUser() user: AuthenticatedUserDto): Promise<MeResponse> {
+    const foundUser = await this.usersService.findOne(user.id);
+    if (!foundUser) {
+      throw new NotFoundException();
+    }
+    return MeResponse.fromUser(foundUser);
   }
 }

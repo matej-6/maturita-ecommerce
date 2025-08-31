@@ -1,0 +1,65 @@
+{
+  "LocaleLayout": {
+    "title": "GRABLY",
+    "description": "Najlepší online obchod pre všetky vaše potreby"
+  },
+  "header": {
+    "search": "Hľadať",
+    "browse-categories": "Prehľadávať kategórie",
+    "login": "Prihlásiť sa",
+    "register": "Registrovať sa",
+    "cart": "Košík",
+    "profile": "Profil",
+    "logout": "Odhlásiť sa",
+    "logging-out": "Odhlasovanie...",
+    "admin-dashboard": "Admin Panel"
+  },
+  "localeSwitcher": {
+    "label": "Jazyk",
+    "locale": "{locale, select, sk {🇸🇰 Slovenský} en {🇺🇸 English} other {Neznámy}}"
+  },
+  "footer": {
+    "copyright": "© 2025 GRABLY. Všetky práva vyhradené.",
+    "dark-mode": {
+      "light": "Svetlý",
+      "dark": "Tmavý",
+      "system": "Systémový"
+    }
+  },
+  "auth": {
+    "sign-in": {
+      "title": "Prihlásiť sa",
+      "form": {
+        "email": "Email",
+        "password": "Heslo",
+        "loading": "Prihlasovanie...",
+        "submit": "Prihlásiť sa"
+      },
+      "messages": {
+        "success": "Prihlásenie úspešné."
+      }
+    },
+    "register": {
+      "title": "Zaregistrovať nový účet",
+      "form": {
+        "firstName": "Meno",
+        "lastName": "Priezvisko",
+        "email": "Email",
+        "password": "Heslo",
+        "confirmPassword": "Potvrdiť heslo",
+        "loading": "Registrácia...",
+        "submit": "Registrovať sa"
+      },
+      "messages": {
+        "success": "Registrácia úspešná."
+      }
+    }
+  },
+  "not-found": {
+    "title": "Stránka nebola nájdená",
+    "message": "Stránka, ktorú hľadáte, nebola nájdená.",
+    "home-button": "Domovská stránka",
+    "back-button": "Späť na predchádzajúcu stránku",
+    "back-button-admin": "Späť na admin panel"
+  }
+}

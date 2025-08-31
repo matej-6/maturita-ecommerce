@@ -1,9 +1,11 @@
 import { IsUUID } from 'class-validator';
 import { CreateCategoryInput } from './create-category.input';
-import { InputType, Field, PartialType, ID } from '@nestjs/graphql';
+import { InputType, Field, ID, OmitType } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateCategoryInput extends PartialType(CreateCategoryInput) {
+export class UpdateCategoryInput extends OmitType(CreateCategoryInput, [
+  'translations',
+]) {
   @Field(() => ID)
   @IsUUID()
   id: string;

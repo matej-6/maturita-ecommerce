@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -17,6 +17,14 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+      exceptionFactory(errors) {
+        return new BadRequestException(
+          errors.map((e) => ({
+            property: e.property,
+            constraints: e.constraints,
+          })),
+        );
+      },
     }),
   );
   app.use(cookieParser());

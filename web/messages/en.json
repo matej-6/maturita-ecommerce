@@ -1,0 +1,65 @@
+{
+  "LocaleLayout": {
+    "title": "GRABLY",
+    "description": "Best online store for all your needs"
+  },
+  "header": {
+    "search": "Search",
+    "browse-categories": "Browse",
+    "login": "Sign in",
+    "register": "Register",
+    "cart": "Cart",
+    "profile": "Profile",
+    "logout": "Logout",
+    "logging-out": "Logging out...",
+    "admin-dashboard": "Admin Dashboard"
+  },
+  "localeSwitcher": {
+    "label": "Language",
+    "locale": "{locale, select, en {🇺🇸 English} sk {🇸🇰 Slovenský} other {Unknown}}"
+  },
+  "footer": {
+    "copyright": "© 2025 GRABLY. All rights reserved.",
+    "dark-mode": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "auth": {
+    "sign-in": {
+      "title": "Sign In",
+      "form": {
+        "email": "Email",
+        "password": "Password",
+        "loading": "Signing In...",
+        "submit": "Sign In"
+      },
+      "messages": {
+        "success": "Signed in successfully."
+      }
+    },
+    "register": {
+      "title": "Register a new account",
+      "form": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "loading": "Signing Up...",
+        "submit": "Sign Up"
+      },
+      "messages": {
+        "success": "Registered successfully."
+      }
+    }
+  },
+  "not-found": {
+    "title": "Page not found",
+    "message": "The page you are looking for does not exist.",
+    "home-button": "Homepage",
+    "back-button": "Go to previous page",
+    "back-button-admin": "Go back to admin dashboard"
+  }
+}

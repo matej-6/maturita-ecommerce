@@ -13,6 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  MODERATOR
+  USER
+}
+
 model User {
   id             String                @id @default(uuid())
   email          String                @unique
@@ -20,6 +26,8 @@ model User {
   hashedPassword String?
   firstName      String?
   lastName       String?
+  avatar         String?
+  role           Role                  @default(USER)
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   Session        RefreshTokenSession[]
@@ -44,15 +52,39 @@ model RefreshTokenSession {
 }
 
 model Category {
-  id               String     @id @default(uuid())
-  name             String
-  description      String?
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  subcategories    Category[] @relation("CategoryToSubcategory")
-  parentCategory   Category?  @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
-  parentCategoryId String?
+  id                  String                @id @default(uuid())
+  slug                String                @unique
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  subcategories       Category[]            @relation("CategoryToSubcategory")
+  parentCategory      Category?             @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
+  parentCategoryId    String?
+  CategoryTranslation CategoryTranslation[]
 
-  @@index([name])
+  @@index([slug])
   @@map("categories")
+}
+
+model CategoryTranslation {
+  id          String   @id @default(uuid())
+  localeId    String
+  locale      Locale   @relation(fields: [localeId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([localeId, categoryId])
+  @@map("category_translations")
+}
+
+model Locale {
+  id       String  @id @default(uuid())
+  code     String  @unique
+  name     String
+  isActive Boolean @default(true)
+
+  CategoryTranslations CategoryTranslation[]
+
+  @@map("locales")
 }

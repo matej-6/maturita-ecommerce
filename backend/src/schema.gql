@@ -19,26 +19,60 @@ type AuthResponse {
 
 type Category {
   createdAt: DateTime!
-  description: String
   id: ID!
-  name: String!
   parentCategoryId: String
+  slug: String!
   subcategories: [Category!]!
+
+  """Category translations"""
+  translations(locale: String): [CategoryTranslation!]!
   updatedAt: DateTime!
 }
 
-input CreateCategoryInput {
-  """Description of the category"""
+type CategoryTranslation {
+  categoryId: ID!
   description: String
-
-  """Name of the category"""
+  id: ID!
+  locale: Locale!
+  localeId: ID!
   name: String!
+}
 
+input CreateCategoryInput {
   """Parent category id"""
   parentCategoryId: String
+
+  """Slug of the category"""
+  slug: String!
+
+  """Category translations"""
+  translations: [CreateCategoryTranslationInput!]!
+}
+
+input CreateCategoryTranslationInput {
+  """Category description"""
+  description: String
+
+  """Locale code"""
+  localeCode: String!
+
+  """Category name"""
+  name: String!
+}
+
+input CreateLocaleInput {
+  """Locale code"""
+  code: String!
+
+  """Is the locale active?"""
+  isActive: Boolean!
+
+  """Native locale name"""
+  name: String!
 }
 
 input CreateUserInput {
+  confirmPassword: String!
   email: String!
   lastName: String!
   name: String!
@@ -50,38 +84,86 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Locale {
+  """Locale code"""
+  code: String!
+  id: ID!
+
+  """Is the locale active?"""
+  isActive: Boolean!
+
+  """Native locale name"""
+  name: String!
+}
+
+type MeResponse {
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  emailVerified: Boolean!
+  firstName: String
+  id: ID!
+  lastName: String
+  role: Role!
+  updatedAt: DateTime!
+}
+
 type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  createLocale(createLocaleInput: CreateLocaleInput!): Locale!
   createUser(createUserInput: CreateUserInput!): User!
   login(authInput: AuthInput!): AuthResponse!
-  logout: Void!
   logoutAll: Void!
   refreshToken: Void!
   removeCategory(id: ID!): Category!
+  removeLocale(id: String!): Locale!
   removeUser(id: String!): User!
-  requestEmailVerification(email: String!): Void!
+  requestEmailVerification: Void!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  updateLocale(updateLocaleInput: UpdateLocaleInput!): Locale!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
 }
 
 type Query {
-  categories(parentId: ID): [Category!]!
+  categories(locale: String, withParentId: String): [Category!]!
   category(id: ID!): Category!
+  locale(id: String!): Locale!
+  locales: [Locale!]!
+  me: MeResponse!
   user(id: String!): User!
   users: [User!]!
 }
 
-input UpdateCategoryInput {
-  """Description of the category"""
-  description: String
-  id: ID!
+"""User role"""
+enum Role {
+  ADMIN
+  MODERATOR
+  USER
+}
 
-  """Name of the category"""
-  name: String
+input UpdateCategoryInput {
+  id: ID!
 
   """Parent category id"""
   parentCategoryId: String
+
+  """Slug of the category"""
+  slug: String!
+}
+
+input UpdateLocaleInput {
+  """Locale code"""
+  code: String!
+
+  """Locale ID"""
+  id: ID!
+
+  """Is the locale active?"""
+  isActive: Boolean!
+
+  """Native locale name"""
+  name: String!
 }
 
 input UpdateUserInput {

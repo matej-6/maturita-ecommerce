@@ -1,5 +1,6 @@
+import { CreateCategoryTranslationInput } from './create-category-translation.input';
 export declare class CreateCategoryInput {
-    name: string;
-    description?: string;
+    slug: string;
     parentCategoryId?: string;
+    translations: CreateCategoryTranslationInput[];
 }

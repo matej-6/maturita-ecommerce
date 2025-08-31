@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var JwtStrategy_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtStrategy = void 0;
 const common_1 = require("@nestjs/common");
@@ -15,25 +16,39 @@ const config_1 = require("@nestjs/config");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
 const users_service_1 = require("../../users/users.service");
-let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt') {
+let JwtStrategy = JwtStrategy_1 = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt') {
     configService;
     usersService;
+    logger = new common_1.Logger(JwtStrategy_1.name);
     constructor(configService, usersService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
-                (request) => request.cookies?.Authentication,
+                (request) => {
+                    let token = null;
+                    if (request.cookies?.Authentication) {
+                        token = request.cookies.Authentication;
+                        this.logger.debug(`Extracted JWT from cookies: ${token}`);
+                    }
+                    return token;
+                },
+                passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ]),
             secretOrKey: configService.getOrThrow('JWT_ACCESS_SECRET'),
         });
         this.configService = configService;
         this.usersService = usersService;
     }
-    async validate(payload) {
-        return this.usersService.findOne(payload.userId);
+    validate(payload) {
+        this.logger.debug(`Validating JWT payload for user ID: ${payload.userId}`);
+        return {
+            id: payload.userId,
+            role: payload.role,
+            email: payload.email,
+        };
     }
 };
 exports.JwtStrategy = JwtStrategy;
-exports.JwtStrategy = JwtStrategy = __decorate([
+exports.JwtStrategy = JwtStrategy = JwtStrategy_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
         users_service_1.UsersService])

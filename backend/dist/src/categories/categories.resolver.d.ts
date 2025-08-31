@@ -6,52 +6,47 @@ import { AppContext } from 'src/app.module';
 export declare class CategoriesResolver {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
-    createCategory(createCategoryInput: CreateCategoryInput): import("@prisma/client").Prisma.Prisma__CategoryClient<{
+    createCategory(createCategoryInput: CreateCategoryInput): Promise<{
         id: string;
-        name: string;
-        description: string | null;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    findAll(parentId?: string): import("@prisma/client").Prisma.PrismaPromise<{
+    }>;
+    findAll(locale?: string, withParentId?: string): Promise<{
         id: string;
-        name: string;
-        description: string | null;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
     }[]>;
-    findOne(id: string): import("@prisma/client").Prisma.Prisma__CategoryClient<{
+    findOne(id: string): Promise<{
         id: string;
-        name: string;
-        description: string | null;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
-    } | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    updateCategory(updateCategoryInput: UpdateCategoryInput): import("@prisma/client").Prisma.Prisma__CategoryClient<{
+    } | null>;
+    updateCategory(updateCategoryInput: UpdateCategoryInput): Promise<{
         id: string;
-        name: string;
-        description: string | null;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    removeCategory(id: string): import("@prisma/client").Prisma.Prisma__CategoryClient<{
-        id: string;
-        name: string;
-        description: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        parentCategoryId: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    }>;
+    removeCategory(id: string): Promise<void>;
     subcategories(category: Category, ctx: AppContext): Promise<{
         id: string;
-        name: string;
-        description: string | null;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
+    }[]>;
+    translations(category: Category, ctx: AppContext, locale?: string): Promise<{
+        name: string;
+        id: string;
+        localeId: string;
+        description: string | null;
+        categoryId: string;
     }[]>;
 }

@@ -18,6 +18,7 @@ const categories_service_1 = require("./categories.service");
 const category_entity_1 = require("./entities/category.entity");
 const create_category_input_1 = require("./dto/create-category.input");
 const update_category_input_1 = require("./dto/update-category.input");
+const category_translation_entity_1 = require("./entities/category-translation.entity");
 let CategoriesResolver = class CategoriesResolver {
     categoriesService;
     constructor(categoriesService) {
@@ -26,8 +27,8 @@ let CategoriesResolver = class CategoriesResolver {
     createCategory(createCategoryInput) {
         return this.categoriesService.create(createCategoryInput);
     }
-    findAll(parentId) {
-        return this.categoriesService.findAll(parentId);
+    findAll(locale, withParentId) {
+        return this.categoriesService.findAll(withParentId);
     }
     findOne(id) {
         return this.categoriesService.findOne(id);
@@ -43,6 +44,11 @@ let CategoriesResolver = class CategoriesResolver {
         const { id } = category;
         return dataLoaderService.getLoader('subcategoriesLoader').load(id);
     }
+    async translations(category, ctx, locale) {
+        const { id } = category;
+        const translations = await this.categoriesService.findTranslations(id, locale);
+        return translations;
+    }
 };
 exports.CategoriesResolver = CategoriesResolver;
 __decorate([
@@ -54,9 +60,10 @@ __decorate([
 ], CategoriesResolver.prototype, "createCategory", null);
 __decorate([
     (0, graphql_1.Query)(() => [category_entity_1.Category], { name: 'categories' }),
-    __param(0, (0, graphql_1.Args)('parentId', { type: () => graphql_1.ID, nullable: true })),
+    __param(0, (0, graphql_1.Args)('locale', { name: 'locale', nullable: true })),
+    __param(1, (0, graphql_1.Args)('withParentId', { name: 'withParentId', nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], CategoriesResolver.prototype, "findAll", null);
 __decorate([
@@ -88,6 +95,15 @@ __decorate([
     __metadata("design:paramtypes", [category_entity_1.Category, Object]),
     __metadata("design:returntype", Promise)
 ], CategoriesResolver.prototype, "subcategories", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => [category_translation_entity_1.CategoryTranslation], { name: 'translations' }),
+    __param(0, (0, graphql_1.Parent)()),
+    __param(1, (0, graphql_1.Context)()),
+    __param(2, (0, graphql_1.Args)('locale', { type: () => String, nullable: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [category_entity_1.Category, Object, String]),
+    __metadata("design:returntype", Promise)
+], CategoriesResolver.prototype, "translations", null);
 exports.CategoriesResolver = CategoriesResolver = __decorate([
     (0, graphql_1.Resolver)(() => category_entity_1.Category),
     __metadata("design:paramtypes", [categories_service_1.CategoriesService])

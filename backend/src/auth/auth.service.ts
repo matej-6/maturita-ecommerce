@@ -15,14 +15,16 @@ import { RedisService } from 'src/redis/redis.service';
 import * as crypto from 'crypto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Response } from 'express';
+import { Prisma, Role } from '@prisma/client';
+import { RegisterDto } from './dto/register.dto';
 
 const EMAIL_VERIFICATION_KEY = 'email-verification';
 const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
 
 @Injectable()
 export class AuthService {
-  private readonly accessTokenExpirationInMiliseconds: number;
-  private readonly refreshTokenExpirationInMiliseconds: number;
+  private readonly accessTokenExpirationInSeconds: number;
+  private readonly refreshTokenExpirationInSeconds: number;
 
   private readonly accessTokenSecret: string;
   private readonly refreshTokenSecret: string;
@@ -36,10 +38,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
   ) {
-    this.accessTokenExpirationInMiliseconds = this.configService.getOrThrow<
+    this.accessTokenExpirationInSeconds = this.configService.getOrThrow<
       Env['JWT_ACCESS_EXPIRATION_IN_SECONDS']
     >('JWT_ACCESS_EXPIRATION_IN_SECONDS');
-    this.refreshTokenExpirationInMiliseconds = this.configService.getOrThrow<
+    this.refreshTokenExpirationInSeconds = this.configService.getOrThrow<
       Env['JWT_REFRESH_EXPIRATION_IN_SECONDS']
     >('JWT_REFRESH_EXPIRATION_IN_SECONDS');
     this.accessTokenSecret =
@@ -52,7 +54,10 @@ export class AuthService {
       );
   }
 
-  async validateUserWithCredentials(email: string, password: string) {
+  async validateUserWithCredentials(
+    email: string,
+    password: string,
+  ): Promise<UserDto | null> {
     const user = await this.usersService.findOneByEmail(email);
     if (
       user &&
@@ -71,11 +76,12 @@ export class AuthService {
     userId: string,
   ): Promise<UserDto> {
     try {
-      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-      const refreshTokenSession =
-        await this.prismaService.refreshTokenSession.findUnique({
+      const refreshTokenSessions =
+        await this.prismaService.refreshTokenSession.findMany({
           where: {
-            token: hashedRefreshToken,
+            expiresAt: {
+              gte: new Date(Date.now()),
+            },
             userId: userId,
           },
           include: {
@@ -87,16 +93,78 @@ export class AuthService {
           },
         });
 
-      if (!refreshTokenSession) throw new UnauthorizedException();
+      if (refreshTokenSessions.length === 0) {
+        this.logger.warn(
+          `No refresh token sessions found for this user id: ${userId}`,
+        );
+        throw new UnauthorizedException();
+      }
 
-      if (refreshTokenSession.expiresAt < new Date()) {
+      let refreshTokenSession = null;
+
+      for (const session of refreshTokenSessions) {
+        const isValid = await bcrypt.compare(refreshToken, session.token);
+        if (isValid) {
+          refreshTokenSession = session;
+          break;
+        }
+      }
+      if (refreshTokenSession === null) {
+        this.logger.warn(
+          `No refresh token sessions matches for this user id: ${userId}`,
+        );
+        throw new UnauthorizedException();
+      }
+
+      if (refreshTokenSession.blacklisted === true) {
+        this.logger.warn(
+          `Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`,
+        );
+        await this.signOutAll(refreshTokenSession.userId);
         throw new UnauthorizedException();
       }
 
       return refreshTokenSession.user;
     } catch (error) {
-      this.logger.error('Error verifying user refresh token: ', error);
-      throw new UnauthorizedException('Refresh token is not valid.');
+      this.logger.error(
+        'Error verifying user refresh token: ',
+        error instanceof Error ? error.message : JSON.stringify(error),
+      );
+      throw new UnauthorizedException();
+    }
+  }
+
+  async blacklistRefreshToken(
+    refreshToken: string,
+    userId: string,
+  ): Promise<void> {
+    try {
+      const refreshTokenSessions =
+        await this.prismaService.refreshTokenSession.findMany({
+          where: {
+            expiresAt: {
+              gte: new Date(),
+            },
+            userId: userId,
+          },
+        });
+
+      for (const session of refreshTokenSessions) {
+        const isValid = await bcrypt.compare(refreshToken, session.token);
+        if (isValid) {
+          await this.prismaService.refreshTokenSession.update({
+            where: {
+              id: session.id,
+            },
+            data: {
+              blacklisted: true,
+            },
+          });
+          break;
+        }
+      }
+    } catch (error) {
+      this.logger.error('Error blacklisting refresh token: ', error);
     }
   }
 
@@ -117,6 +185,7 @@ export class AuthService {
         this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
         'production',
       expires: accessToken.expires,
+      sameSite: 'lax',
     });
 
     res.cookie('Refresh', refreshToken.token, {
@@ -125,10 +194,11 @@ export class AuthService {
         this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
         'production',
       expires: refreshToken.expires,
+      sameSite: 'lax',
     });
   }
 
-  async login(user: { id: string }): Promise<{
+  async login(user: { id: string; role: Role; email: string }): Promise<{
     accessToken: string;
     refreshToken: string;
     accessTokenExpirationDate: Date;
@@ -136,25 +206,40 @@ export class AuthService {
   }> {
     try {
       const accessTokenExpirationDate = new Date(
-        Date.now() + this.accessTokenExpirationInMiliseconds,
+        Date.now() + this.accessTokenExpirationInSeconds * 1000,
       );
       const refreshTokenExpirationDate = new Date(
-        Date.now() + this.refreshTokenExpirationInMiliseconds,
+        Date.now() + this.refreshTokenExpirationInSeconds * 1000,
       );
 
-      const tokenPayload = {
+      this.logger.debug(`
+        Generating tokens for user ID: ${user.id} with role: ${user.role}
+        Access Token Expires at ${accessTokenExpirationDate.toUTCString()} (in ${this.accessTokenExpirationInSeconds} seconds)
+        Refresh Token Expires at ${refreshTokenExpirationDate.toUTCString()} (in ${this.refreshTokenExpirationInSeconds} seconds)
+      `);
+
+      const accessTokenPayload = {
+        userId: user.id,
+        role: user.role,
+        email: user.email,
+      };
+
+      const refreshTokenPayload = {
         userId: user.id,
       };
 
-      const accessToken = await this.jwtService.signAsync(tokenPayload, {
-        expiresIn: `${this.accessTokenExpirationInMiliseconds}ms`,
+      const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
+        expiresIn: `${this.accessTokenExpirationInSeconds.toString()}s`,
         secret: this.accessTokenSecret,
       });
 
-      const refreshToken = await this.jwtService.signAsync(tokenPayload, {
-        expiresIn: `${this.refreshTokenExpirationInMiliseconds}ms`,
-        secret: this.refreshTokenSecret,
-      });
+      const refreshToken = await this.jwtService.signAsync(
+        refreshTokenPayload,
+        {
+          expiresIn: `${this.refreshTokenExpirationInSeconds.toString()}s`,
+          secret: this.refreshTokenSecret,
+        },
+      );
 
       const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
@@ -167,6 +252,7 @@ export class AuthService {
           },
           token: hashedRefreshToken,
           expiresAt: refreshTokenExpirationDate,
+          blacklisted: false,
         },
       });
 
@@ -297,17 +383,65 @@ export class AuthService {
     }
   }
 
-  async signOut(refreshToken: string) {
-    try {
-      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-      await this.prismaService.refreshTokenSession.delete({
+  async signOut(refreshToken: string, userId: string) {
+    const refreshTokenSessions =
+      await this.prismaService.refreshTokenSession.findMany({
         where: {
-          token: hashedRefreshToken,
+          userId: userId,
+          expiresAt: {
+            gte: new Date(),
+          },
         },
       });
+
+    for (const session of refreshTokenSessions) {
+      const isValid = await bcrypt.compare(refreshToken, session.token);
+      if (isValid) {
+        if (session.blacklisted) {
+          this.logger.warn(
+            `Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`,
+          );
+          await this.signOutAll(userId);
+          throw new BadRequestException('Invalid refresh token.');
+        }
+        await this.prismaService.refreshTokenSession.update({
+          where: {
+            id: session.id,
+          },
+          data: {
+            blacklisted: true,
+          },
+        });
+        return; // Successfully blacklisted the token
+      }
+    }
+
+    throw new BadRequestException('Invalid refresh token.');
+  }
+
+  async register(registerDto: RegisterDto) {
+    try {
+      const user = await this.prismaService.user.create({
+        data: {
+          firstName: registerDto.firstName,
+          lastName: registerDto.lastName,
+          email: registerDto.email,
+          hashedPassword: await bcrypt.hash(registerDto.password, 10),
+          role: Role.USER,
+        },
+      });
+
+      return user;
     } catch (error) {
-      this.logger.error('Failed to sign out.', error);
-      throw new InternalServerErrorException('Something went wrong.');
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('This email is already in use.');
+        }
+      }
+      this.logger.error('Failed to register user.', error);
+      throw new InternalServerErrorException(
+        'Something went wrong. Please try again.',
+      );
     }
   }
 }

@@ -11,11 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Category = void 0;
 const graphql_1 = require("@nestjs/graphql");
+const category_translation_entity_1 = require("./category-translation.entity");
 let Category = class Category {
     id;
-    name;
-    description;
+    slug;
     parentCategoryId;
+    translations;
     createdAt;
     updatedAt;
 };
@@ -27,15 +28,15 @@ __decorate([
 __decorate([
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], Category.prototype, "name", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", Object)
-], Category.prototype, "description", void 0);
+], Category.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { nullable: true }),
     __metadata("design:type", Object)
 ], Category.prototype, "parentCategoryId", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [category_translation_entity_1.CategoryTranslation], { description: 'Category translations' }),
+    __metadata("design:type", Array)
+], Category.prototype, "translations", void 0);
 __decorate([
     (0, graphql_1.Field)(() => Date),
     __metadata("design:type", Date)

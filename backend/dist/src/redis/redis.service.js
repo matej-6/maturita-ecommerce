@@ -18,8 +18,8 @@ let RedisService = RedisService_1 = class RedisService {
     configService;
     redisClient;
     logger = new common_1.Logger(RedisService_1.name);
-    constructor(configService) {
-        this.configService = configService;
+    onModuleInit() {
+        this.logger.log('Initializing Redis client...');
         const redisDatabase = this.configService.get('REDIS_DATABASE');
         (0, redis_1.createClient)({
             username: this.configService.getOrThrow('REDIS_USERNAME'),
@@ -40,6 +40,13 @@ let RedisService = RedisService_1 = class RedisService {
             .catch((err) => {
             this.logger.error(err);
         });
+    }
+    async onModuleDestroy() {
+        this.logger.log('Disconnecting Redis client...');
+        await this.redisClient.quit();
+    }
+    constructor(configService) {
+        this.configService = configService;
     }
     async get(key) {
         return this.redisClient.get(key);

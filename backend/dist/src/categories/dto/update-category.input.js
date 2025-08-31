@@ -13,7 +13,9 @@ exports.UpdateCategoryInput = void 0;
 const class_validator_1 = require("class-validator");
 const create_category_input_1 = require("./create-category.input");
 const graphql_1 = require("@nestjs/graphql");
-let UpdateCategoryInput = class UpdateCategoryInput extends (0, graphql_1.PartialType)(create_category_input_1.CreateCategoryInput) {
+let UpdateCategoryInput = class UpdateCategoryInput extends (0, graphql_1.OmitType)(create_category_input_1.CreateCategoryInput, [
+    'translations',
+]) {
     id;
 };
 exports.UpdateCategoryInput = UpdateCategoryInput;

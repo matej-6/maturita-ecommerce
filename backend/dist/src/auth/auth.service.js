@@ -19,6 +19,7 @@ const config_1 = require("@nestjs/config");
 const prisma_service_1 = require("../prisma/prisma.service");
 const redis_service_1 = require("../redis/redis.service");
 const crypto = require("crypto");
+const client_1 = require("@prisma/client");
 const EMAIL_VERIFICATION_KEY = 'email-verification';
 const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
 let AuthService = AuthService_1 = class AuthService {
@@ -27,8 +28,8 @@ let AuthService = AuthService_1 = class AuthService {
     usersService;
     jwtService;
     redisService;
-    accessTokenExpirationInMiliseconds;
-    refreshTokenExpirationInMiliseconds;
+    accessTokenExpirationInSeconds;
+    refreshTokenExpirationInSeconds;
     accessTokenSecret;
     refreshTokenSecret;
     logger = new common_1.Logger(AuthService_1.name);
@@ -38,8 +39,8 @@ let AuthService = AuthService_1 = class AuthService {
         this.usersService = usersService;
         this.jwtService = jwtService;
         this.redisService = redisService;
-        this.accessTokenExpirationInMiliseconds = this.configService.getOrThrow('JWT_ACCESS_EXPIRATION_IN_SECONDS');
-        this.refreshTokenExpirationInMiliseconds = this.configService.getOrThrow('JWT_REFRESH_EXPIRATION_IN_SECONDS');
+        this.accessTokenExpirationInSeconds = this.configService.getOrThrow('JWT_ACCESS_EXPIRATION_IN_SECONDS');
+        this.refreshTokenExpirationInSeconds = this.configService.getOrThrow('JWT_REFRESH_EXPIRATION_IN_SECONDS');
         this.accessTokenSecret =
             this.configService.getOrThrow('JWT_ACCESS_SECRET');
         this.refreshTokenSecret =
@@ -57,10 +58,11 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async verifyUserRefreshToken(refreshToken, userId) {
         try {
-            const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-            const refreshTokenSession = await this.prismaService.refreshTokenSession.findUnique({
+            const refreshTokenSessions = await this.prismaService.refreshTokenSession.findMany({
                 where: {
-                    token: hashedRefreshToken,
+                    expiresAt: {
+                        gte: new Date(Date.now()),
+                    },
                     userId: userId,
                 },
                 include: {
@@ -71,16 +73,61 @@ let AuthService = AuthService_1 = class AuthService {
                     },
                 },
             });
-            if (!refreshTokenSession)
+            if (refreshTokenSessions.length === 0) {
+                this.logger.warn(`No refresh token sessions found for this user id: ${userId}`);
                 throw new common_1.UnauthorizedException();
-            if (refreshTokenSession.expiresAt < new Date()) {
+            }
+            let refreshTokenSession = null;
+            for (const session of refreshTokenSessions) {
+                const isValid = await bcrypt.compare(refreshToken, session.token);
+                if (isValid) {
+                    refreshTokenSession = session;
+                    break;
+                }
+            }
+            if (refreshTokenSession === null) {
+                this.logger.warn(`No refresh token sessions matches for this user id: ${userId}`);
+                throw new common_1.UnauthorizedException();
+            }
+            if (refreshTokenSession.blacklisted === true) {
+                this.logger.warn(`Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`);
+                await this.signOutAll(refreshTokenSession.userId);
                 throw new common_1.UnauthorizedException();
             }
             return refreshTokenSession.user;
         }
         catch (error) {
-            this.logger.error('Error verifying user refresh token: ', error);
-            throw new common_1.UnauthorizedException('Refresh token is not valid.');
+            this.logger.error('Error verifying user refresh token: ', error instanceof Error ? error.message : JSON.stringify(error));
+            throw new common_1.UnauthorizedException();
+        }
+    }
+    async blacklistRefreshToken(refreshToken, userId) {
+        try {
+            const refreshTokenSessions = await this.prismaService.refreshTokenSession.findMany({
+                where: {
+                    expiresAt: {
+                        gte: new Date(),
+                    },
+                    userId: userId,
+                },
+            });
+            for (const session of refreshTokenSessions) {
+                const isValid = await bcrypt.compare(refreshToken, session.token);
+                if (isValid) {
+                    await this.prismaService.refreshTokenSession.update({
+                        where: {
+                            id: session.id,
+                        },
+                        data: {
+                            blacklisted: true,
+                        },
+                    });
+                    break;
+                }
+            }
+        }
+        catch (error) {
+            this.logger.error('Error blacklisting refresh token: ', error);
         }
     }
     setAuthCookies(res, accessToken, refreshToken) {
@@ -89,27 +136,39 @@ let AuthService = AuthService_1 = class AuthService {
             secure: this.configService.getOrThrow('NODE_ENV') ===
                 'production',
             expires: accessToken.expires,
+            sameSite: 'lax',
         });
         res.cookie('Refresh', refreshToken.token, {
             httpOnly: true,
             secure: this.configService.getOrThrow('NODE_ENV') ===
                 'production',
             expires: refreshToken.expires,
+            sameSite: 'lax',
         });
     }
     async login(user) {
         try {
-            const accessTokenExpirationDate = new Date(Date.now() + this.accessTokenExpirationInMiliseconds);
-            const refreshTokenExpirationDate = new Date(Date.now() + this.refreshTokenExpirationInMiliseconds);
-            const tokenPayload = {
+            const accessTokenExpirationDate = new Date(Date.now() + this.accessTokenExpirationInSeconds * 1000);
+            const refreshTokenExpirationDate = new Date(Date.now() + this.refreshTokenExpirationInSeconds * 1000);
+            this.logger.debug(`
+        Generating tokens for user ID: ${user.id} with role: ${user.role}
+        Access Token Expires at ${accessTokenExpirationDate.toUTCString()} (in ${this.accessTokenExpirationInSeconds} seconds)
+        Refresh Token Expires at ${refreshTokenExpirationDate.toUTCString()} (in ${this.refreshTokenExpirationInSeconds} seconds)
+      `);
+            const accessTokenPayload = {
+                userId: user.id,
+                role: user.role,
+                email: user.email,
+            };
+            const refreshTokenPayload = {
                 userId: user.id,
             };
-            const accessToken = await this.jwtService.signAsync(tokenPayload, {
-                expiresIn: `${this.accessTokenExpirationInMiliseconds}ms`,
+            const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
+                expiresIn: `${this.accessTokenExpirationInSeconds.toString()}s`,
                 secret: this.accessTokenSecret,
             });
-            const refreshToken = await this.jwtService.signAsync(tokenPayload, {
-                expiresIn: `${this.refreshTokenExpirationInMiliseconds}ms`,
+            const refreshToken = await this.jwtService.signAsync(refreshTokenPayload, {
+                expiresIn: `${this.refreshTokenExpirationInSeconds.toString()}s`,
                 secret: this.refreshTokenSecret,
             });
             const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
@@ -122,6 +181,7 @@ let AuthService = AuthService_1 = class AuthService {
                     },
                     token: hashedRefreshToken,
                     expiresAt: refreshTokenExpirationDate,
+                    blacklisted: false,
                 },
             });
             return {
@@ -229,18 +289,57 @@ let AuthService = AuthService_1 = class AuthService {
             throw new common_1.InternalServerErrorException('Something went wrong.');
         }
     }
-    async signOut(refreshToken) {
+    async signOut(refreshToken, userId) {
+        const refreshTokenSessions = await this.prismaService.refreshTokenSession.findMany({
+            where: {
+                userId: userId,
+                expiresAt: {
+                    gte: new Date(),
+                },
+            },
+        });
+        for (const session of refreshTokenSessions) {
+            const isValid = await bcrypt.compare(refreshToken, session.token);
+            if (isValid) {
+                if (session.blacklisted) {
+                    this.logger.warn(`Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`);
+                    await this.signOutAll(userId);
+                    throw new common_1.BadRequestException('Invalid refresh token.');
+                }
+                await this.prismaService.refreshTokenSession.update({
+                    where: {
+                        id: session.id,
+                    },
+                    data: {
+                        blacklisted: true,
+                    },
+                });
+                return;
+            }
+        }
+        throw new common_1.BadRequestException('Invalid refresh token.');
+    }
+    async register(registerDto) {
         try {
-            const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-            await this.prismaService.refreshTokenSession.delete({
-                where: {
-                    token: hashedRefreshToken,
+            const user = await this.prismaService.user.create({
+                data: {
+                    firstName: registerDto.firstName,
+                    lastName: registerDto.lastName,
+                    email: registerDto.email,
+                    hashedPassword: await bcrypt.hash(registerDto.password, 10),
+                    role: client_1.Role.USER,
                 },
             });
+            return user;
         }
         catch (error) {
-            this.logger.error('Failed to sign out.', error);
-            throw new common_1.InternalServerErrorException('Something went wrong.');
+            if (error instanceof client_1.Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2002') {
+                    throw new common_1.BadRequestException('This email is already in use.');
+                }
+            }
+            this.logger.error('Failed to register user.', error);
+            throw new common_1.InternalServerErrorException('Something went wrong. Please try again.');
         }
     }
 };

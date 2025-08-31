@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var JwtRefreshStrategy_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtRefreshStrategy = void 0;
 const common_1 = require("@nestjs/common");
@@ -15,13 +16,21 @@ const config_1 = require("@nestjs/config");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
 const auth_service_1 = require("../auth.service");
-let JwtRefreshStrategy = class JwtRefreshStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt-refresh') {
+let JwtRefreshStrategy = JwtRefreshStrategy_1 = class JwtRefreshStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt-refresh') {
     configService;
     authService;
+    logger = new common_1.Logger(JwtRefreshStrategy_1.name);
     constructor(configService, authService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
-                (req) => req?.cookies?.Refresh,
+                (req) => {
+                    const refreshToken = req.cookies?.Refresh;
+                    if (typeof refreshToken === 'string') {
+                        this.logger.debug(`Extracted refresh token: ${refreshToken}`);
+                        return refreshToken;
+                    }
+                    return null;
+                },
             ]),
             secretOrKey: configService.getOrThrow('JWT_REFRESH_SECRET'),
             passReqToCallback: true,
@@ -30,11 +39,21 @@ let JwtRefreshStrategy = class JwtRefreshStrategy extends (0, passport_1.Passpor
         this.authService = authService;
     }
     async validate(req, payload) {
-        return this.authService.verifyUserRefreshToken(req.cookies?.Refresh, payload.userId);
+        this.logger.log(`Validating JWT refresh token for user ${payload.userId}`);
+        this.logger.debug(`Payload: ${JSON.stringify(payload)}`);
+        const refreshToken = req.cookies?.Refresh;
+        const user = await this.authService.verifyUserRefreshToken(refreshToken, payload.userId);
+        this.logger.debug(`User: ${JSON.stringify(user)}`);
+        await this.authService.blacklistRefreshToken(refreshToken, user.id);
+        return {
+            id: user.id,
+            role: user.role,
+            email: user.email,
+        };
     }
 };
 exports.JwtRefreshStrategy = JwtRefreshStrategy;
-exports.JwtRefreshStrategy = JwtRefreshStrategy = __decorate([
+exports.JwtRefreshStrategy = JwtRefreshStrategy = JwtRefreshStrategy_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
         auth_service_1.AuthService])

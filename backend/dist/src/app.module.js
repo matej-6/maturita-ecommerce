@@ -24,6 +24,7 @@ const auth_service_1 = require("./auth/auth.service");
 const auth_module_1 = require("./auth/auth.module");
 const jwt_1 = require("@nestjs/jwt");
 const redis_module_1 = require("./redis/redis.module");
+const locales_module_1 = require("./locales/locales.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -49,7 +50,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                envFilePath: ['.env.production', '.env.development'],
+                envFilePath: ['.env.production', '.env.development', '.env'],
                 validate: validate_1.validateEnv,
             }),
             prisma_module_1.PrismaModule,
@@ -58,6 +59,7 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             jwt_1.JwtModule.register({}),
             redis_module_1.RedisModule,
+            locales_module_1.LocalesModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, auth_service_1.AuthService],

@@ -12,30 +12,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateCategoryInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const create_category_translation_input_1 = require("./create-category-translation.input");
+const contains_english_translation_constraint_1 = require("../validators/contains-english-translation.constraint");
 let CreateCategoryInput = class CreateCategoryInput {
-    name;
-    description;
+    slug;
     parentCategoryId;
+    translations;
 };
 exports.CreateCategoryInput = CreateCategoryInput;
 __decorate([
-    (0, graphql_1.Field)(() => String, { description: 'Name of the category' }),
+    (0, graphql_1.Field)(() => String, { description: 'Slug of the category' }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(3),
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
-], CreateCategoryInput.prototype, "name", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => String, {
-        description: 'Description of the category',
-        nullable: true,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(4000),
-    __metadata("design:type", String)
-], CreateCategoryInput.prototype, "description", void 0);
+], CreateCategoryInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, {
         description: 'Parent category id',
@@ -45,6 +37,15 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateCategoryInput.prototype, "parentCategoryId", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [create_category_translation_input_1.CreateCategoryTranslationInput], {
+        description: 'Category translations',
+    }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_validator_1.ArrayMinSize)(1, { message: 'At least one translation is required' }),
+    (0, contains_english_translation_constraint_1.ContainsEnglishTranslation)(),
+    __metadata("design:type", Array)
+], CreateCategoryInput.prototype, "translations", void 0);
 exports.CreateCategoryInput = CreateCategoryInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateCategoryInput);

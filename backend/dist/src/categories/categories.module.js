@@ -11,12 +11,23 @@ const common_1 = require("@nestjs/common");
 const categories_service_1 = require("./categories.service");
 const categories_resolver_1 = require("./categories.resolver");
 const prisma_service_1 = require("../prisma/prisma.service");
+const redis_module_1 = require("../redis/redis.module");
+const redis_service_1 = require("../redis/redis.service");
+const locales_module_1 = require("../locales/locales.module");
+const locales_service_1 = require("../locales/locales.service");
 let CategoriesModule = class CategoriesModule {
 };
 exports.CategoriesModule = CategoriesModule;
 exports.CategoriesModule = CategoriesModule = __decorate([
     (0, common_1.Module)({
-        providers: [categories_resolver_1.CategoriesResolver, categories_service_1.CategoriesService, prisma_service_1.PrismaService],
+        imports: [redis_module_1.RedisModule, locales_module_1.LocalesModule],
+        providers: [
+            categories_resolver_1.CategoriesResolver,
+            categories_service_1.CategoriesService,
+            locales_service_1.LocalesService,
+            prisma_service_1.PrismaService,
+            redis_service_1.RedisService,
+        ],
     })
 ], CategoriesModule);
 //# sourceMappingURL=categories.module.js.map

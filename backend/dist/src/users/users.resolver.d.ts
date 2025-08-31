@@ -8,11 +8,13 @@ export declare class UsersResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        role: import("@prisma/client").$Enums.Role;
         lastName: string | null;
         email: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
+        avatar: string | null;
     }>;
     findAll(): Promise<import("./dto/user.dto").UserDto[]>;
     findOne(id: string): Promise<import("./dto/user.dto").UserDto | null>;
