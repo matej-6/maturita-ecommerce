@@ -13,19 +13,20 @@ exports.VerifyEmailInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const graphql_2 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let VerifyEmailInput = class VerifyEmailInput {
     code;
     email;
 };
 exports.VerifyEmailInput = VerifyEmailInput;
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
     (0, graphql_2.Field)(() => String),
     __metadata("design:type", String)
 ], VerifyEmailInput.prototype, "code", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.IsEmail)(undefined, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     (0, graphql_2.Field)(() => String),
     __metadata("design:type", String)
 ], VerifyEmailInput.prototype, "email", void 0);

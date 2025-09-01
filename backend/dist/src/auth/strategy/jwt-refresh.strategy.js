@@ -24,9 +24,19 @@ let JwtRefreshStrategy = JwtRefreshStrategy_1 = class JwtRefreshStrategy extends
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
                 (req) => {
+                    const bearerToken = req.headers.authorization?.split(' ')[1];
+                    if (typeof bearerToken === 'string') {
+                        this.logger.debug(`Extracted refresh token from Authorization header: ${bearerToken}`);
+                        req.token = bearerToken;
+                        return bearerToken;
+                    }
+                    return null;
+                },
+                (req) => {
                     const refreshToken = req.cookies?.Refresh;
                     if (typeof refreshToken === 'string') {
-                        this.logger.debug(`Extracted refresh token: ${refreshToken}`);
+                        this.logger.debug(`Extracted refresh token from a cookie: ${refreshToken}`);
+                        req.token = refreshToken;
                         return refreshToken;
                     }
                     return null;
@@ -41,7 +51,7 @@ let JwtRefreshStrategy = JwtRefreshStrategy_1 = class JwtRefreshStrategy extends
     async validate(req, payload) {
         this.logger.log(`Validating JWT refresh token for user ${payload.userId}`);
         this.logger.debug(`Payload: ${JSON.stringify(payload)}`);
-        const refreshToken = req.cookies?.Refresh;
+        const refreshToken = req.token;
         const user = await this.authService.verifyUserRefreshToken(refreshToken, payload.userId);
         this.logger.debug(`User: ${JSON.stringify(user)}`);
         await this.authService.blacklistRefreshToken(refreshToken, user.id);

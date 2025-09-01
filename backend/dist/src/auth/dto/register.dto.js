@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterDto = void 0;
 const class_validator_1 = require("class-validator");
+const nestjs_i18n_1 = require("nestjs-i18n");
 class RegisterDto {
     firstName;
     lastName;
@@ -20,41 +21,42 @@ class RegisterDto {
 }
 exports.RegisterDto = RegisterDto;
 __decorate([
-    (0, class_validator_1.MinLength)(1, { message: 'Name is required' }),
-    (0, class_validator_1.MaxLength)(128, { message: 'Name must be less than 128 characters long' }),
+    (0, class_validator_1.MinLength)(1, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MaxLength)(128, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "firstName", void 0);
 __decorate([
-    (0, class_validator_1.MinLength)(1, { message: 'Last name is required' }),
+    (0, class_validator_1.IsString)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(1, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
     (0, class_validator_1.MaxLength)(128, {
         message: 'Last name must be less than 128 characters long',
     }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "lastName", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Email is required' }),
-    (0, class_validator_1.IsEmail)({}, { message: 'Invalid email address' }),
-    (0, class_validator_1.MaxLength)(256, { message: 'Email must be less than 256 characters long' }),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.IsEmail)(undefined, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
+    (0, class_validator_1.MaxLength)(256, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Password is required' }),
-    (0, class_validator_1.MinLength)(8, { message: 'Password must be at least 8 characters long' }),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(8, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
     (0, class_validator_1.MaxLength)(512, {
-        message: 'Password must be less than 512 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength'),
     }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Confirm password is required' }),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
     (0, class_validator_1.MinLength)(8, {
-        message: 'Confirm password must be at least 8 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength'),
     }),
     (0, class_validator_1.MaxLength)(512, {
-        message: 'Confirm password must be less than 512 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength'),
     }),
     (0, class_validator_1.ValidateIf)((o) => o.password === o.confirmPassword, {
-        message: 'Passwords do not match',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.field.confirmPassword.match'),
     }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "confirmPassword", void 0);

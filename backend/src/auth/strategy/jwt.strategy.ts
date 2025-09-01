@@ -18,14 +18,26 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        (request: Request) => {
-          let token = null;
-          if (request.cookies?.Authentication) {
-            token = request.cookies.Authentication as string;
-            this.logger.debug(`Extracted JWT from cookies: ${token}`);
+        (req: Request) => {
+          const bearerToken = req.headers.authorization?.split(' ')[1];
+          if (typeof bearerToken === 'string') {
+            this.logger.debug(
+              `Extracted Authentication token from Authorization header: ${bearerToken}`,
+            );
+            return bearerToken;
           }
-          return token;
+          return null;
+        },
+        (request: Request) => {
+          // eslint-disable-next-line
+          const token = request.cookies?.Authentication;
+          if (typeof token === 'string') {
+            this.logger.debug(
+              `Extracted Authentication token from cookies: ${token}`,
+            );
+            return token;
+          }
+          return null;
         },
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),

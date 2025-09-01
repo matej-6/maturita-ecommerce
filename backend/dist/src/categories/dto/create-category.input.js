@@ -14,6 +14,7 @@ const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
 const create_category_translation_input_1 = require("./create-category-translation.input");
 const contains_english_translation_constraint_1 = require("../validators/contains-english-translation.constraint");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let CreateCategoryInput = class CreateCategoryInput {
     slug;
     parentCategoryId;
@@ -22,10 +23,9 @@ let CreateCategoryInput = class CreateCategoryInput {
 exports.CreateCategoryInput = CreateCategoryInput;
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Slug of the category' }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(3),
-    (0, class_validator_1.MaxLength)(255),
+    (0, class_validator_1.IsString)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(3, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(255, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], CreateCategoryInput.prototype, "slug", void 0);
 __decorate([
@@ -34,7 +34,7 @@ __decorate([
         nullable: true,
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsUUID)(undefined, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     __metadata("design:type", String)
 ], CreateCategoryInput.prototype, "parentCategoryId", void 0);
 __decorate([
@@ -42,8 +42,12 @@ __decorate([
         description: 'Category translations',
     }),
     (0, class_validator_1.ValidateNested)({ each: true }),
-    (0, class_validator_1.ArrayMinSize)(1, { message: 'At least one translation is required' }),
-    (0, contains_english_translation_constraint_1.ContainsEnglishTranslation)(),
+    (0, class_validator_1.ArrayMinSize)(1, {
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.field.translation.minLength'),
+    }),
+    (0, contains_english_translation_constraint_1.ContainsEnglishTranslation)({
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.field.translation.englishRequired'),
+    }),
     __metadata("design:type", Array)
 ], CreateCategoryInput.prototype, "translations", void 0);
 exports.CreateCategoryInput = CreateCategoryInput = __decorate([

@@ -1,18 +1,20 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { Length } from 'class-validator';
+import { IsBoolean, MaxLength, MinLength } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 @InputType()
 export class CreateLocaleInput {
   @Field(() => String, { description: 'Locale code' })
-  @Length(2, 5, { message: 'Code must be between 2 and 5 characters long.' })
+  @MinLength(2, { message: i18nValidationMessage('validation.minLength') })
+  @MaxLength(5, { message: i18nValidationMessage('validation.maxLength') })
   code: string;
 
   @Field(() => String, { description: 'Native locale name' })
-  @Length(2, 100, {
-    message: 'Name must be between 2 and 100 characters long.',
-  })
+  @MinLength(2, { message: i18nValidationMessage('validation.minLength') })
+  @MaxLength(100, { message: i18nValidationMessage('validation.maxLength') })
   name: string;
 
+  @IsBoolean({ message: i18nValidationMessage('validation.invalid') })
   @Field(() => Boolean, { description: 'Is the locale active?' })
   isActive: boolean;
 }

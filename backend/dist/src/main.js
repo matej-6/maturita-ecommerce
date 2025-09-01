@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
-const common_1 = require("@nestjs/common");
 const cookieParser = require("cookie-parser");
+const nestjs_i18n_1 = require("nestjs-i18n");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
@@ -13,16 +13,13 @@ async function bootstrap() {
         ],
         credentials: true,
     });
-    app.useGlobalPipes(new common_1.ValidationPipe({
+    app.useGlobalPipes(new nestjs_i18n_1.I18nValidationPipe({
         transform: true,
         whitelist: true,
         forbidNonWhitelisted: true,
-        exceptionFactory(errors) {
-            return new common_1.BadRequestException(errors.map((e) => ({
-                property: e.property,
-                constraints: e.constraints,
-            })));
-        },
+    }));
+    app.useGlobalFilters(new nestjs_i18n_1.I18nValidationExceptionFilter({
+        detailedErrors: false,
     }));
     app.use(cookieParser());
     await app.listen(process.env.PORT ?? 3000);

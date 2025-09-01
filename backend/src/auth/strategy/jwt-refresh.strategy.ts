@@ -6,6 +6,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Env } from 'src/config/validate';
 import { AuthService } from '../auth.service';
 import { AuthenticatedUserDto } from '../dto/authenticated-user.dto';
+import { RequestWithToken } from './request-with-token.type';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -21,10 +22,25 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
+          const bearerToken = req.headers.authorization?.split(' ')[1];
+
+          if (typeof bearerToken === 'string') {
+            this.logger.debug(
+              `Extracted refresh token from Authorization header: ${bearerToken}`,
+            );
+            (req as RequestWithToken).token = bearerToken;
+            return bearerToken;
+          }
+          return null;
+        },
+        (req: Request) => {
           // eslint-disable-next-line
           const refreshToken = req.cookies?.Refresh;
           if (typeof refreshToken === 'string') {
-            this.logger.debug(`Extracted refresh token: ${refreshToken}`);
+            this.logger.debug(
+              `Extracted refresh token from a cookie: ${refreshToken}`,
+            );
+            (req as RequestWithToken).token = refreshToken;
             return refreshToken;
           }
           return null;
@@ -36,14 +52,14 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(
-    req: Request,
+    req: RequestWithToken,
     payload: { userId: string },
   ): Promise<AuthenticatedUserDto> {
     this.logger.log(`Validating JWT refresh token for user ${payload.userId}`);
 
     this.logger.debug(`Payload: ${JSON.stringify(payload)}`);
 
-    const refreshToken = req.cookies?.Refresh as string;
+    const refreshToken = req.token;
 
     const user = await this.authService.verifyUserRefreshToken(
       refreshToken,

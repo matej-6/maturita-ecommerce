@@ -15,7 +15,6 @@ const validate_1 = require("./config/validate");
 const prisma_service_1 = require("./prisma/prisma.service");
 const graphql_1 = require("@nestjs/graphql");
 const apollo_1 = require("@nestjs/apollo");
-const path_1 = require("path");
 const dataloader_service_1 = require("./dataloader/dataloader.service");
 const prisma_module_1 = require("./prisma/prisma.module");
 const categories_module_1 = require("./categories/categories.module");
@@ -25,19 +24,29 @@ const auth_module_1 = require("./auth/auth.module");
 const jwt_1 = require("@nestjs/jwt");
 const redis_module_1 = require("./redis/redis.module");
 const locales_module_1 = require("./locales/locales.module");
+const nestjs_i18n_1 = require("nestjs-i18n");
+const path = require("path");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            nestjs_i18n_1.I18nModule.forRoot({
+                fallbackLanguage: 'en',
+                loaderOptions: {
+                    path: path.join(__dirname, '/i18n/'),
+                    watch: true,
+                },
+                resolvers: [new nestjs_i18n_1.HeaderResolver(['x-custom-header'])],
+            }),
             graphql_1.GraphQLModule.forRootAsync({
                 driver: apollo_1.ApolloDriver,
                 imports: [prisma_module_1.PrismaModule],
                 inject: [prisma_service_1.PrismaService],
                 useFactory: (db) => ({
                     graphiql: true,
-                    autoSchemaFile: (0, path_1.join)(process.cwd(), 'src/schema.gql'),
+                    autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
                     sortSchema: true,
                     context: ({ req, res }) => {
                         return {

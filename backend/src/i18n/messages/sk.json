@@ -1,0 +1,27 @@
+{
+  "errors": {
+    "name": {
+      "required": "Meno je povinné",
+      "maxLength": "Meno musí mať menej ako 128 znakov"
+    },
+    "lastName": {
+      "required": "Priezvisko je povinné",
+      "maxLength": "Priezvisko musí mať menej ako 128 znakov"
+    },
+    "email": {
+      "invalid": "Neplatná e-mailová adresa",
+      "maxLength": "E-mail musí mať menej ako 256 znakov"
+    },
+    "password": {
+      "required": "Heslo je povinné",
+      "minLength": "Heslo musí mať aspoň 8 znakov",
+      "maxLength": "Heslo musí mať menej ako 512 znakov"
+    },
+    "confirmPassword": {
+      "required": "Potvrdenie hesla je povinné",
+      "minLength": "Potvrdenie hesla musí mať aspoň 8 znakov",
+      "maxLength": "Potvrdenie hesla musí mať menej ako 512 znakov",
+      "match": "Heslá sa nezhodujú"
+    }
+  }
+}

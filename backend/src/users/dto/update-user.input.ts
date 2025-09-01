@@ -8,30 +8,29 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 @InputType()
 export class UpdateUserInput implements Partial<User> {
-  @IsNotEmpty()
-  @IsUUID()
+  @IsNotEmpty({ message: i18nValidationMessage('validation.required') })
+  @IsUUID(undefined, { message: i18nValidationMessage('validation.invalid') })
   @Field(() => String)
   id: string;
 
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(3)
-  @MaxLength(128)
+  @IsString({ message: i18nValidationMessage('validation.required') })
+  @MinLength(3, { message: i18nValidationMessage('validation.minLength') })
+  @MaxLength(128, { message: i18nValidationMessage('validation.maxLength') })
   @Field(() => String)
   firstName: string;
 
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(3)
-  @MaxLength(128)
+  @IsString({ message: i18nValidationMessage('validation.required') })
+  @MinLength(3, { message: i18nValidationMessage('validation.minLength') })
+  @MaxLength(128, { message: i18nValidationMessage('validation.maxLength') })
   @Field(() => String)
   lastName: string;
 
-  @IsNotEmpty()
-  @IsEmail()
+  @IsNotEmpty({ message: i18nValidationMessage('validation.required') })
+  @IsEmail({}, { message: i18nValidationMessage('validation.invalid') })
   @Field(() => String)
   email: string;
 }

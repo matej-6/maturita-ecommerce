@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let AuthInput = class AuthInput {
     email;
     password;
@@ -19,13 +20,13 @@ let AuthInput = class AuthInput {
 exports.AuthInput = AuthInput;
 __decorate([
     (0, graphql_1.Field)(),
-    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsEmail)(undefined, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     __metadata("design:type", String)
 ], AuthInput.prototype, "email", void 0);
 __decorate([
     (0, graphql_1.Field)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsString)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(8, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
     __metadata("design:type", String)
 ], AuthInput.prototype, "password", void 0);
 exports.AuthInput = AuthInput = __decorate([

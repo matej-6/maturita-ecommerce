@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateUserInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let CreateUserInput = class CreateUserInput {
     name;
     lastName;
@@ -21,44 +22,44 @@ let CreateUserInput = class CreateUserInput {
 };
 exports.CreateUserInput = CreateUserInput;
 __decorate([
-    (0, class_validator_1.MinLength)(1, { message: 'Name is required' }),
-    (0, class_validator_1.MaxLength)(128, { message: 'Name must be less than 128 characters long' }),
+    (0, class_validator_1.MinLength)(1, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MaxLength)(128, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.MinLength)(1, { message: 'Last name is required' }),
+    (0, class_validator_1.MinLength)(1, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
     (0, class_validator_1.MaxLength)(128, {
-        message: 'Last name must be less than 128 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength'),
     }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "lastName", void 0);
 __decorate([
-    (0, class_validator_1.IsEmail)({}, { message: 'Invalid email address' }),
-    (0, class_validator_1.MaxLength)(256, { message: 'Email must be less than 256 characters long' }),
+    (0, class_validator_1.IsEmail)({}, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
+    (0, class_validator_1.MaxLength)(256, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Password is required' }),
-    (0, class_validator_1.MinLength)(8, { message: 'Password must be at least 8 characters long' }),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(8, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
     (0, class_validator_1.MaxLength)(512, {
-        message: 'Password must be less than 512 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength'),
     }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "password", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Confirm password is required' }),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
     (0, class_validator_1.MinLength)(8, {
-        message: 'Confirm password must be at least 8 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength'),
     }),
     (0, class_validator_1.MaxLength)(512, {
-        message: 'Confirm password must be less than 512 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength'),
     }),
     (0, class_validator_1.ValidateIf)((o) => o.password === o.confirmPassword, {
-        message: 'Passwords do not match',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.field.confirmPassword.match'),
     }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)

@@ -6,7 +6,6 @@ import { validateEnv } from './config/validate';
 import { PrismaService } from './prisma/prisma.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
 import { DataloaderService } from './dataloader/dataloader.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -18,16 +17,26 @@ import { JwtModule } from '@nestjs/jwt';
 import { GraphQlContext } from './types/graphql-context';
 import { RedisModule } from './redis/redis.module';
 import { LocalesModule } from './locales/locales.module';
+import { HeaderResolver, I18nModule } from 'nestjs-i18n';
+import * as path from 'path';
 
 @Module({
   imports: [
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [new HeaderResolver(['x-custom-header'])],
+    }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [PrismaModule],
       inject: [PrismaService],
       useFactory: (db: PrismaService) => ({
         graphiql: true,
-        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,
         context: ({ req, res }: { req: Request; res: Response }) => {
           return {

@@ -13,6 +13,7 @@ exports.UpdateCategoryInput = void 0;
 const class_validator_1 = require("class-validator");
 const create_category_input_1 = require("./create-category.input");
 const graphql_1 = require("@nestjs/graphql");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let UpdateCategoryInput = class UpdateCategoryInput extends (0, graphql_1.OmitType)(create_category_input_1.CreateCategoryInput, [
     'translations',
 ]) {
@@ -21,7 +22,7 @@ let UpdateCategoryInput = class UpdateCategoryInput extends (0, graphql_1.OmitTy
 exports.UpdateCategoryInput = UpdateCategoryInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsUUID)(undefined, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     __metadata("design:type", String)
 ], UpdateCategoryInput.prototype, "id", void 0);
 exports.UpdateCategoryInput = UpdateCategoryInput = __decorate([

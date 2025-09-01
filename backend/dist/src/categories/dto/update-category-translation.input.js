@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateCategoryTranslationInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let UpdateCategoryTranslationInput = class UpdateCategoryTranslationInput {
     name;
     description;
@@ -20,21 +21,23 @@ let UpdateCategoryTranslationInput = class UpdateCategoryTranslationInput {
 exports.UpdateCategoryTranslationInput = UpdateCategoryTranslationInput;
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Category name' }),
-    (0, class_validator_1.MinLength)(3, { message: 'Name must be at least 3 characters long' }),
-    (0, class_validator_1.MaxLength)(255, { message: 'Name must be at most 255 characters long' }),
+    (0, class_validator_1.MinLength)(3, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(255, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], UpdateCategoryTranslationInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Category description', nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.MaxLength)(4000, {
-        message: 'Description must be at most 4000 characters long',
+        message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength'),
     }),
     __metadata("design:type", Object)
 ], UpdateCategoryTranslationInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Locale code' }),
-    (0, class_validator_1.IsString)({ message: 'Locale code must be a string' }),
-    (0, class_validator_1.Length)(2, 5, { message: 'Locale code must be between 2 and 5 characters' }),
+    (0, class_validator_1.IsString)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(2, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(5, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], UpdateCategoryTranslationInput.prototype, "localeCode", void 0);
 exports.UpdateCategoryTranslationInput = UpdateCategoryTranslationInput = __decorate([

@@ -23,13 +23,21 @@ let JwtStrategy = JwtStrategy_1 = class JwtStrategy extends (0, passport_1.Passp
     constructor(configService, usersService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
-                (request) => {
-                    let token = null;
-                    if (request.cookies?.Authentication) {
-                        token = request.cookies.Authentication;
-                        this.logger.debug(`Extracted JWT from cookies: ${token}`);
+                (req) => {
+                    const bearerToken = req.headers.authorization?.split(' ')[1];
+                    if (typeof bearerToken === 'string') {
+                        this.logger.debug(`Extracted Authentication token from Authorization header: ${bearerToken}`);
+                        return bearerToken;
                     }
-                    return token;
+                    return null;
+                },
+                (request) => {
+                    const token = request.cookies?.Authentication;
+                    if (typeof token === 'string') {
+                        this.logger.debug(`Extracted Authentication token from cookies: ${token}`);
+                        return token;
+                    }
+                    return null;
                 },
                 passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ]),

@@ -13,6 +13,7 @@ exports.UpdateLocaleInput = void 0;
 const class_validator_1 = require("class-validator");
 const create_locale_input_1 = require("./create-locale.input");
 const graphql_1 = require("@nestjs/graphql");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let UpdateLocaleInput = class UpdateLocaleInput extends (0, graphql_1.PartialType)(create_locale_input_1.CreateLocaleInput) {
     id;
     code;
@@ -22,23 +23,24 @@ let UpdateLocaleInput = class UpdateLocaleInput extends (0, graphql_1.PartialTyp
 exports.UpdateLocaleInput = UpdateLocaleInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { description: 'Locale ID' }),
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsUUID)(undefined, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     __metadata("design:type", String)
 ], UpdateLocaleInput.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Locale code' }),
-    (0, class_validator_1.Length)(2, 5, { message: 'Code must be between 2 and 5 characters long.' }),
+    (0, class_validator_1.MinLength)(2, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(5, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], UpdateLocaleInput.prototype, "code", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Native locale name' }),
-    (0, class_validator_1.Length)(2, 100, {
-        message: 'Name must be between 2 and 100 characters long.',
-    }),
+    (0, class_validator_1.MinLength)(2, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(100, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], UpdateLocaleInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)(() => Boolean, { description: 'Is the locale active?' }),
+    (0, class_validator_1.IsBoolean)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     __metadata("design:type", Boolean)
 ], UpdateLocaleInput.prototype, "isActive", void 0);
 exports.UpdateLocaleInput = UpdateLocaleInput = __decorate([

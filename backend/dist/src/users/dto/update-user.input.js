@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateUserInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let UpdateUserInput = class UpdateUserInput {
     id;
     firstName;
@@ -20,30 +21,28 @@ let UpdateUserInput = class UpdateUserInput {
 };
 exports.UpdateUserInput = UpdateUserInput;
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.IsUUID)(undefined, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "id", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(3),
-    (0, class_validator_1.MaxLength)(128),
+    (0, class_validator_1.IsString)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(3, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(128, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "firstName", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(3),
-    (0, class_validator_1.MaxLength)(128),
+    (0, class_validator_1.IsString)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.MinLength)(3, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(128, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "lastName", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsNotEmpty)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.required') }),
+    (0, class_validator_1.IsEmail)({}, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], UpdateUserInput.prototype, "email", void 0);

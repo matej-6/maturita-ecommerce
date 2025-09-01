@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateLocaleInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let CreateLocaleInput = class CreateLocaleInput {
     code;
     name;
@@ -20,17 +21,18 @@ let CreateLocaleInput = class CreateLocaleInput {
 exports.CreateLocaleInput = CreateLocaleInput;
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Locale code' }),
-    (0, class_validator_1.Length)(2, 5, { message: 'Code must be between 2 and 5 characters long.' }),
+    (0, class_validator_1.MinLength)(2, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(5, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], CreateLocaleInput.prototype, "code", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Native locale name' }),
-    (0, class_validator_1.Length)(2, 100, {
-        message: 'Name must be between 2 and 100 characters long.',
-    }),
+    (0, class_validator_1.MinLength)(2, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.minLength') }),
+    (0, class_validator_1.MaxLength)(100, { message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength') }),
     __metadata("design:type", String)
 ], CreateLocaleInput.prototype, "name", void 0);
 __decorate([
+    (0, class_validator_1.IsBoolean)({ message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.invalid') }),
     (0, graphql_1.Field)(() => Boolean, { description: 'Is the locale active?' }),
     __metadata("design:type", Boolean)
 ], CreateLocaleInput.prototype, "isActive", void 0);
