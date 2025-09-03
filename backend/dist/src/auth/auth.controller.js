@@ -27,73 +27,58 @@ let AuthController = AuthController_1 = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    async login(loginDto, res) {
+    async login(loginDto) {
         const user = await this.authService.validateUserWithCredentials(loginDto.email, loginDto.password);
         if (!user) {
             throw new common_1.UnauthorizedException('Invalid email or password');
         }
-        const { accessToken, refreshToken, accessTokenExpirationDate, refreshTokenExpirationDate, } = await this.authService.login({
+        return await this.authService.login({
             id: user.id,
             role: user.role,
             email: user.email,
         });
-        this.authService.setAuthCookies(res, {
-            token: accessToken,
-            expires: accessTokenExpirationDate,
-        }, {
-            token: refreshToken,
-            expires: refreshTokenExpirationDate,
-        });
     }
-    async refreshToken(user, res) {
-        const { accessToken, accessTokenExpirationDate, refreshToken, refreshTokenExpirationDate, } = await this.authService.login({
+    async refreshToken(user) {
+        return await this.authService.login({
             id: user.id,
             role: user.role,
             email: user.email,
         });
-        this.authService.setAuthCookies(res, { token: accessToken, expires: accessTokenExpirationDate }, { token: refreshToken, expires: refreshTokenExpirationDate });
     }
-    async logout(user, req, res) {
-        const refreshToken = req.cookies
-            ?.Refresh;
-        if (refreshToken) {
-            res.clearCookie('Refresh');
-            res.clearCookie('Authentication');
+    async logout(user, req) {
+        const refreshToken = typeof req.cookies.Refresh === 'string'
+            ? req.cookies.Refresh
+            : req.headers['x-refresh-token'];
+        if (typeof refreshToken === 'string') {
             await this.authService.signOut(refreshToken, user.id);
         }
     }
-    async logoutAll(user, req, res) {
-        res.clearCookie('Refresh');
-        res.clearCookie('Authentication');
+    async logoutAll(user) {
         await this.authService.signOutAll(user.id);
-        res.status(common_1.HttpStatus.OK).send();
     }
-    async register(registerDto, res) {
+    async register(registerDto) {
         const user = await this.authService.register(registerDto);
-        const { accessToken, accessTokenExpirationDate, refreshToken, refreshTokenExpirationDate, } = await this.authService.login({
+        return await this.authService.login({
             id: user.id,
             role: user.role,
             email: user.email,
         });
-        this.authService.setAuthCookies(res, { token: accessToken, expires: accessTokenExpirationDate }, { token: refreshToken, expires: refreshTokenExpirationDate });
     }
 };
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [login_dto_1.LoginDto, Object]),
+    __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
     (0, common_1.Post)('refresh-token'),
     (0, common_1.UseGuards)(jwt_refresh_guard_1.JwtRefreshAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refreshToken", null);
 __decorate([
@@ -101,27 +86,23 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Req)()),
-    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 __decorate([
     (0, common_1.Post)('logout-all'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __param(1, (0, common_1.Req)()),
-    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logoutAll", null);
 __decorate([
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [register_dto_1.RegisterDto, Object]),
+    __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 exports.AuthController = AuthController = AuthController_1 = __decorate([

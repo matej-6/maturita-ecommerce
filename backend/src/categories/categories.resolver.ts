@@ -12,8 +12,9 @@ import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
-import { AppContext } from 'src/app.module';
+import { GraphqlAppContext } from 'src/app.module';
 import { CategoryTranslation } from './entities/category-translation.entity';
+import { I18n, I18nContext } from 'nestjs-i18n';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -28,7 +29,6 @@ export class CategoriesResolver {
 
   @Query(() => [Category], { name: 'categories' })
   findAll(
-    @Args('locale', { name: 'locale', nullable: true }) locale?: string,
     @Args('withParentId', { name: 'withParentId', nullable: true })
     withParentId?: string,
   ) {
@@ -58,7 +58,7 @@ export class CategoriesResolver {
   @ResolveField(() => [Category], { name: 'subcategories' })
   async subcategories(
     @Parent() category: Category,
-    @Context() ctx: AppContext,
+    @Context() ctx: GraphqlAppContext,
   ) {
     const { dataLoaderService } = ctx;
     const { id } = category;
@@ -68,14 +68,14 @@ export class CategoriesResolver {
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
-    @Context() ctx: AppContext,
-    @Args('locale', { type: () => String, nullable: true }) locale?: string,
+    @Context() ctx: GraphqlAppContext,
+    @I18n() i18n: I18nContext,
   ) {
     const { id } = category;
 
     const translations = await this.categoriesService.findTranslations(
       id,
-      locale,
+      i18n.lang,
     );
 
     return translations;

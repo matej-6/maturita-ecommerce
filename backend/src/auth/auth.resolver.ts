@@ -9,7 +9,7 @@ import {
 import { AuthResponse } from './dto/auth.response';
 import { AuthInput } from './dto/auth.input';
 import { UsersService } from 'src/users/users.service';
-import { AppContext } from 'src/app.module';
+import { GraphqlAppContext } from 'src/app.module';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
 import { VerifyEmailInput } from './dto/verifyEmail.input';
@@ -47,7 +47,7 @@ export class AuthResolver {
   @UseGuards(JwtRefreshAuthGuard)
   @Mutation(() => GraphQLVoid)
   async refreshToken(
-    @Context() { res }: AppContext,
+    @Context() { res }: GraphqlAppContext,
     @CurrentUser() user: UserDto,
   ) {
     const {
@@ -67,7 +67,7 @@ export class AuthResolver {
   @Mutation(() => AuthResponse)
   async login(
     @Args('authInput') authInput: AuthInput,
-    @Context() { res }: AppContext,
+    @Context() { res }: GraphqlAppContext,
   ): Promise<AuthResponse> {
     const user = await this.authService.validateUserWithCredentials(
       authInput.email,
@@ -123,7 +123,7 @@ export class AuthResolver {
   @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => GraphQLVoid)
   async logoutAll(
-    @Context() { res }: AppContext,
+    @Context() { res }: GraphqlAppContext,
     @CurrentUser() user: AuthenticatedUserDto,
   ) {
     await this.authService.signOutAll(user.id);
@@ -132,7 +132,7 @@ export class AuthResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
-  @Query(() => MeResponse)
+  @Query(() => MeResponse, { name: 'me' })
   async me(@CurrentUser() user: AuthenticatedUserDto): Promise<MeResponse> {
     const foundUser = await this.usersService.findOne(user.id);
     if (!foundUser) {

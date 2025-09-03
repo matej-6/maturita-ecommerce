@@ -20,6 +20,7 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const redis_service_1 = require("../redis/redis.service");
 const crypto = require("crypto");
 const client_1 = require("@prisma/client");
+const auth_response_dto_1 = require("./dto/auth.response.dto");
 const EMAIL_VERIFICATION_KEY = 'email-verification';
 const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
 let AuthService = AuthService_1 = class AuthService {
@@ -184,12 +185,7 @@ let AuthService = AuthService_1 = class AuthService {
                     blacklisted: false,
                 },
             });
-            return {
-                accessToken,
-                refreshToken,
-                accessTokenExpirationDate,
-                refreshTokenExpirationDate,
-            };
+            return new auth_response_dto_1.AuthResponseDto(accessToken, accessTokenExpirationDate, refreshToken, refreshTokenExpirationDate);
         }
         catch (error) {
             this.logger.error(error);

@@ -17,6 +17,7 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { Response } from 'express';
 import { Prisma, Role } from '@prisma/client';
 import { RegisterDto } from './dto/register.dto';
+import { AuthResponseDto } from './dto/auth.response.dto';
 
 const EMAIL_VERIFICATION_KEY = 'email-verification';
 const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
@@ -198,12 +199,11 @@ export class AuthService {
     });
   }
 
-  async login(user: { id: string; role: Role; email: string }): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpirationDate: Date;
-    refreshTokenExpirationDate: Date;
-  }> {
+  async login(user: {
+    id: string;
+    role: Role;
+    email: string;
+  }): Promise<AuthResponseDto> {
     try {
       const accessTokenExpirationDate = new Date(
         Date.now() + this.accessTokenExpirationInSeconds * 1000,
@@ -256,12 +256,12 @@ export class AuthService {
         },
       });
 
-      return {
+      return new AuthResponseDto(
         accessToken,
-        refreshToken,
         accessTokenExpirationDate,
+        refreshToken,
         refreshTokenExpirationDate,
-      };
+      );
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Failed to login');

@@ -24,11 +24,11 @@ let JwtRefreshStrategy = JwtRefreshStrategy_1 = class JwtRefreshStrategy extends
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
                 (req) => {
-                    const bearerToken = req.headers.authorization?.split(' ')[1];
-                    if (typeof bearerToken === 'string') {
-                        this.logger.debug(`Extracted refresh token from Authorization header: ${bearerToken}`);
-                        req.token = bearerToken;
-                        return bearerToken;
+                    const refreshToken = req.headers['x-refresh-token'];
+                    if (typeof refreshToken === 'string') {
+                        this.logger.debug(`Extracted refresh token from Authorization header: ${refreshToken}`);
+                        req.token = refreshToken;
+                        return refreshToken;
                     }
                     return null;
                 },

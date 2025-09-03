@@ -25,7 +25,7 @@ type Category {
   subcategories: [Category!]!
 
   """Category translations"""
-  translations(locale: String): [CategoryTranslation!]!
+  translations: [CategoryTranslation!]!
   updatedAt: DateTime!
 }
 
@@ -126,7 +126,7 @@ type Mutation {
 }
 
 type Query {
-  categories(locale: String, withParentId: String): [Category!]!
+  categories(withParentId: String): [Category!]!
   category(id: ID!): Category!
   locale(id: String!): Locale!
   locales: [Locale!]!

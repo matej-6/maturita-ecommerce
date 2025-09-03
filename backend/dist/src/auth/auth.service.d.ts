@@ -7,6 +7,7 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { Response } from 'express';
 import { Role } from '@prisma/client';
 import { RegisterDto } from './dto/register.dto';
+import { AuthResponseDto } from './dto/auth.response.dto';
 export declare class AuthService {
     private readonly configService;
     private readonly prismaService;
@@ -33,12 +34,7 @@ export declare class AuthService {
         id: string;
         role: Role;
         email: string;
-    }): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        accessTokenExpirationDate: Date;
-        refreshTokenExpirationDate: Date;
-    }>;
+    }): Promise<AuthResponseDto>;
     getEmailVerificationKey(email: string): string;
     validateEmail(email: string, code: string): Promise<void>;
     sendEmailVerification(email: string): Promise<void>;
@@ -47,14 +43,14 @@ export declare class AuthService {
     signOut(refreshToken: string, userId: string): Promise<void>;
     register(registerDto: RegisterDto): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        role: import("@prisma/client").$Enums.Role;
-        lastName: string | null;
         email: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
+        lastName: string | null;
         avatar: string | null;
+        role: import("@prisma/client").$Enums.Role;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }

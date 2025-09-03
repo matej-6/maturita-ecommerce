@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Category } from '@prisma/client';
 import { RedisService } from 'src/redis/redis.service';
 import { LocalesService } from 'src/locales/locales.service';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class CategoriesService {

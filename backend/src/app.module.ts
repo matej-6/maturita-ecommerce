@@ -43,7 +43,7 @@ import * as path from 'path';
             dataLoaderService: new DataloaderService(db),
             req,
             res,
-          } as AppContext;
+          } as GraphqlAppContext;
         },
       }),
     }),
@@ -65,6 +65,6 @@ import * as path from 'path';
 })
 export class AppModule {}
 
-export type AppContext = GraphQlContext & {
+export type GraphqlAppContext = GraphQlContext & {
   dataLoaderService: DataloaderService;
 };

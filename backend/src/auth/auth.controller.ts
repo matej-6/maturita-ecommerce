@@ -1,11 +1,9 @@
 import {
   Body,
   Controller,
-  HttpStatus,
   Logger,
   Post,
   Req,
-  Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +15,7 @@ import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { AuthResponseDto } from './dto/auth.response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,10 +24,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.authService.validateUserWithCredentials(
       loginDto.email,
       loginDto.password,
@@ -38,52 +34,23 @@ export class AuthController {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const {
-      accessToken,
-      refreshToken,
-      accessTokenExpirationDate,
-      refreshTokenExpirationDate,
-    } = await this.authService.login({
+    return await this.authService.login({
       id: user.id,
       role: user.role,
       email: user.email,
     });
-
-    this.authService.setAuthCookies(
-      res,
-      {
-        token: accessToken,
-        expires: accessTokenExpirationDate,
-      },
-      {
-        token: refreshToken,
-        expires: refreshTokenExpirationDate,
-      },
-    );
   }
 
   @Post('refresh-token')
   @UseGuards(JwtRefreshAuthGuard)
   async refreshToken(
     @CurrentUser() user: AuthenticatedUserDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const {
-      accessToken,
-      accessTokenExpirationDate,
-      refreshToken,
-      refreshTokenExpirationDate,
-    } = await this.authService.login({
+  ): Promise<AuthResponseDto> {
+    return await this.authService.login({
       id: user.id,
       role: user.role,
       email: user.email,
     });
-
-    this.authService.setAuthCookies(
-      res,
-      { token: accessToken, expires: accessTokenExpirationDate },
-      { token: refreshToken, expires: refreshTokenExpirationDate },
-    );
   }
 
   @Post('logout')
@@ -91,53 +58,30 @@ export class AuthController {
   async logout(
     @CurrentUser() user: AuthenticatedUserDto,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const refreshToken = (req.cookies as Record<string, string> | undefined)
-      ?.Refresh;
+  ): Promise<void> {
+    const refreshToken =
+      typeof req.cookies.Refresh === 'string'
+        ? req.cookies.Refresh
+        : req.headers['x-refresh-token'];
 
-    if (refreshToken) {
-      res.clearCookie('Refresh');
-      res.clearCookie('Authentication');
+    if (typeof refreshToken === 'string') {
       await this.authService.signOut(refreshToken, user.id);
     }
   }
 
   @Post('logout-all')
   @UseGuards(JwtAuthGuard)
-  async logoutAll(
-    @CurrentUser() user: AuthenticatedUserDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    res.clearCookie('Refresh');
-    res.clearCookie('Authentication');
+  async logoutAll(@CurrentUser() user: AuthenticatedUserDto): Promise<void> {
     await this.authService.signOutAll(user.id);
-
-    res.status(HttpStatus.OK).send();
   }
 
   @Post('register')
-  async register(
-    @Body() registerDto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
     const user = await this.authService.register(registerDto);
-    const {
-      accessToken,
-      accessTokenExpirationDate,
-      refreshToken,
-      refreshTokenExpirationDate,
-    } = await this.authService.login({
+    return await this.authService.login({
       id: user.id,
       role: user.role,
       email: user.email,
     });
-
-    this.authService.setAuthCookies(
-      res,
-      { token: accessToken, expires: accessTokenExpirationDate },
-      { token: refreshToken, expires: refreshTokenExpirationDate },
-    );
   }
 }

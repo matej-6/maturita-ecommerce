@@ -124,7 +124,7 @@ __decorate([
 ], AuthResolver.prototype, "logoutAll", null);
 __decorate([
     (0, common_1.UseGuards)(gql_jwt_auth_guard_1.GqlJwtAuthGuard),
-    (0, graphql_1.Query)(() => me_response_1.MeResponse),
+    (0, graphql_1.Query)(() => me_response_1.MeResponse, { name: 'me' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

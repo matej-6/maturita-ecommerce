@@ -2,7 +2,8 @@ import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
-import { AppContext } from 'src/app.module';
+import { GraphqlAppContext } from 'src/app.module';
+import { I18nContext } from 'nestjs-i18n';
 export declare class CategoriesResolver {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
@@ -13,7 +14,7 @@ export declare class CategoriesResolver {
         updatedAt: Date;
         parentCategoryId: string | null;
     }>;
-    findAll(locale?: string, withParentId?: string): Promise<{
+    findAll(withParentId?: string): Promise<{
         id: string;
         slug: string;
         createdAt: Date;
@@ -35,18 +36,18 @@ export declare class CategoriesResolver {
         parentCategoryId: string | null;
     }>;
     removeCategory(id: string): Promise<void>;
-    subcategories(category: Category, ctx: AppContext): Promise<{
+    subcategories(category: Category, ctx: GraphqlAppContext): Promise<{
         id: string;
         slug: string;
         createdAt: Date;
         updatedAt: Date;
         parentCategoryId: string | null;
     }[]>;
-    translations(category: Category, ctx: AppContext, locale?: string): Promise<{
-        name: string;
+    translations(category: Category, ctx: GraphqlAppContext, i18n: I18nContext): Promise<{
         id: string;
-        localeId: string;
+        name: string;
         description: string | null;
+        localeId: string;
         categoryId: string;
     }[]>;
 }

@@ -22,14 +22,14 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const bearerToken = req.headers.authorization?.split(' ')[1];
+          const refreshToken = req.headers['x-refresh-token'];
 
-          if (typeof bearerToken === 'string') {
+          if (typeof refreshToken === 'string') {
             this.logger.debug(
-              `Extracted refresh token from Authorization header: ${bearerToken}`,
+              `Extracted refresh token from Authorization header: ${refreshToken}`,
             );
-            (req as RequestWithToken).token = bearerToken;
-            return bearerToken;
+            (req as RequestWithToken).token = refreshToken;
+            return refreshToken;
           }
           return null;
         },
