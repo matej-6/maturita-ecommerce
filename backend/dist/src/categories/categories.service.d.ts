@@ -39,10 +39,10 @@ export declare class CategoriesService {
     findAllSubcategoriesByParentIds(parentIds: string[]): Promise<Category[]>;
     getCategorySubcategoriesByBatch(parentIds: string[]): Promise<(Category[] | null)[]>;
     findTranslations(id: string, locale?: string): Promise<{
-        id: string;
         name: string;
-        description: string | null;
+        id: string;
         localeId: string;
+        description: string | null;
         categoryId: string;
     }[]>;
 }

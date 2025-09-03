@@ -43,14 +43,14 @@ export declare class AuthService {
     signOut(refreshToken: string, userId: string): Promise<void>;
     register(registerDto: RegisterDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        role: import("@prisma/client").$Enums.Role;
+        lastName: string | null;
         email: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
-        lastName: string | null;
         avatar: string | null;
-        role: import("@prisma/client").$Enums.Role;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }
