@@ -2,16 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthResponseDto = void 0;
 class AuthResponseDto {
-    constructor(accessToken, accessTokenExpirationDate, refreshToken, refreshTokenExpirationDate) {
+    constructor(accessToken, accessTokenExpirationSeconds, refreshToken, refreshTokenExpirationSeconds) {
         this.accessToken = accessToken;
-        this.accessTokenExpirationDate = accessTokenExpirationDate;
+        this.accessTokenExpirationSeconds = accessTokenExpirationSeconds;
         this.refreshToken = refreshToken;
-        this.refreshTokenExpirationDate = refreshTokenExpirationDate;
+        this.refreshTokenExpirationSeconds = refreshTokenExpirationSeconds;
     }
     accessToken;
-    accessTokenExpirationDate;
+    accessTokenExpirationSeconds;
     refreshToken;
-    refreshTokenExpirationDate;
+    refreshTokenExpirationSeconds;
 }
 exports.AuthResponseDto = AuthResponseDto;
 //# sourceMappingURL=auth.response.dto.js.map

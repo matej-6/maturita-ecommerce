@@ -205,17 +205,21 @@ export class AuthService {
     email: string;
   }): Promise<AuthResponseDto> {
     try {
+      const accessTokenExpirationSeconds = this.accessTokenExpirationInSeconds;
+      const refreshTokenExpirationSeconds =
+        this.refreshTokenExpirationInSeconds;
+
       const accessTokenExpirationDate = new Date(
-        Date.now() + this.accessTokenExpirationInSeconds * 1000,
+        Date.now() + accessTokenExpirationSeconds * 1000,
       );
       const refreshTokenExpirationDate = new Date(
-        Date.now() + this.refreshTokenExpirationInSeconds * 1000,
+        Date.now() + refreshTokenExpirationSeconds * 1000,
       );
 
       this.logger.debug(`
         Generating tokens for user ID: ${user.id} with role: ${user.role}
-        Access Token Expires at ${accessTokenExpirationDate.toUTCString()} (in ${this.accessTokenExpirationInSeconds} seconds)
-        Refresh Token Expires at ${refreshTokenExpirationDate.toUTCString()} (in ${this.refreshTokenExpirationInSeconds} seconds)
+        Access Token Expires at ${accessTokenExpirationDate.toUTCString()} (in ${accessTokenExpirationSeconds} seconds)
+        Refresh Token Expires at ${refreshTokenExpirationDate.toUTCString()} (in ${refreshTokenExpirationSeconds} seconds)
       `);
 
       const accessTokenPayload = {
@@ -258,9 +262,9 @@ export class AuthService {
 
       return new AuthResponseDto(
         accessToken,
-        accessTokenExpirationDate,
+        accessTokenExpirationSeconds,
         refreshToken,
-        refreshTokenExpirationDate,
+        refreshTokenExpirationSeconds,
       );
     } catch (error) {
       this.logger.error(error);

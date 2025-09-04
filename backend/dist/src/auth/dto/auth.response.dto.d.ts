@@ -1,7 +1,7 @@
 export declare class AuthResponseDto {
-    constructor(accessToken: string, accessTokenExpirationDate: Date, refreshToken: string, refreshTokenExpirationDate: Date);
+    constructor(accessToken: string, accessTokenExpirationSeconds: number, refreshToken: string, refreshTokenExpirationSeconds: number);
     accessToken: string;
-    accessTokenExpirationDate: Date;
+    accessTokenExpirationSeconds: number;
     refreshToken: string;
-    refreshTokenExpirationDate: Date;
+    refreshTokenExpirationSeconds: number;
 }

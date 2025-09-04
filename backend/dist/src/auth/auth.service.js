@@ -149,12 +149,14 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async login(user) {
         try {
-            const accessTokenExpirationDate = new Date(Date.now() + this.accessTokenExpirationInSeconds * 1000);
-            const refreshTokenExpirationDate = new Date(Date.now() + this.refreshTokenExpirationInSeconds * 1000);
+            const accessTokenExpirationSeconds = this.accessTokenExpirationInSeconds;
+            const refreshTokenExpirationSeconds = this.refreshTokenExpirationInSeconds;
+            const accessTokenExpirationDate = new Date(Date.now() + accessTokenExpirationSeconds * 1000);
+            const refreshTokenExpirationDate = new Date(Date.now() + refreshTokenExpirationSeconds * 1000);
             this.logger.debug(`
         Generating tokens for user ID: ${user.id} with role: ${user.role}
-        Access Token Expires at ${accessTokenExpirationDate.toUTCString()} (in ${this.accessTokenExpirationInSeconds} seconds)
-        Refresh Token Expires at ${refreshTokenExpirationDate.toUTCString()} (in ${this.refreshTokenExpirationInSeconds} seconds)
+        Access Token Expires at ${accessTokenExpirationDate.toUTCString()} (in ${accessTokenExpirationSeconds} seconds)
+        Refresh Token Expires at ${refreshTokenExpirationDate.toUTCString()} (in ${refreshTokenExpirationSeconds} seconds)
       `);
             const accessTokenPayload = {
                 userId: user.id,
@@ -185,7 +187,7 @@ let AuthService = AuthService_1 = class AuthService {
                     blacklisted: false,
                 },
             });
-            return new auth_response_dto_1.AuthResponseDto(accessToken, accessTokenExpirationDate, refreshToken, refreshTokenExpirationDate);
+            return new auth_response_dto_1.AuthResponseDto(accessToken, accessTokenExpirationSeconds, refreshToken, refreshTokenExpirationSeconds);
         }
         catch (error) {
             this.logger.error(error);
