@@ -1,22 +1,12 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import {
-  BadRequestException,
-  Logger,
-  NotFoundException,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthResponse } from './dto/auth.response';
-import { AuthInput } from './dto/auth.input';
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { GraphqlAppContext } from 'src/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Env } from 'src/config/validate';
 import { VerifyEmailInput } from './dto/verifyEmail.input';
 import { GraphQLVoid } from 'graphql-scalars';
 import { CurrentUser } from './current-user.decorator';
-import { UserDto } from 'src/users/dto/user.dto';
-import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { MeResponse } from './dto/me.response';
 import { GqlJwtAuthGuard } from './guards/gql-jwt-auth.guard';
@@ -43,66 +33,6 @@ export class AuthResolver {
 
   //   return this.authService.login(user);
   // }
-
-  @UseGuards(JwtRefreshAuthGuard)
-  @Mutation(() => GraphQLVoid)
-  async refreshToken(
-    @Context() { res }: GraphqlAppContext,
-    @CurrentUser() user: UserDto,
-  ) {
-    const {
-      accessToken,
-      refreshToken,
-      accessTokenExpirationDate,
-      refreshTokenExpirationDate,
-    } = await this.authService.login(user);
-
-    this.authService.setAuthCookies(
-      res,
-      { token: accessToken, expires: accessTokenExpirationDate },
-      { token: refreshToken, expires: refreshTokenExpirationDate },
-    );
-  }
-
-  @Mutation(() => AuthResponse)
-  async login(
-    @Args('authInput') authInput: AuthInput,
-    @Context() { res }: GraphqlAppContext,
-  ): Promise<AuthResponse> {
-    const user = await this.authService.validateUserWithCredentials(
-      authInput.email,
-      authInput.password,
-    );
-
-    if (!user) {
-      throw new BadRequestException('Invalid email or password');
-    }
-
-    const {
-      accessToken,
-      refreshToken,
-      accessTokenExpirationDate,
-      refreshTokenExpirationDate,
-    } = await this.authService.login(user);
-
-    res.cookie('Authentication', accessToken, {
-      httpOnly: true,
-      secure:
-        this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
-        'production',
-      expires: accessTokenExpirationDate,
-    });
-
-    res.cookie('Refresh', refreshToken, {
-      httpOnly: true,
-      secure:
-        this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
-        'production',
-      expires: refreshTokenExpirationDate,
-    });
-
-    return user;
-  }
 
   @Mutation(() => GraphQLVoid)
   async verifyEmail(

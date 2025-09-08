@@ -4,6 +4,7 @@ export class JsonErrorResponse {
   error: string = "";
   message: unknown[] | string = "An unknown error occurred";
   statusCode: number = StatusCodes.INTERNAL_SERVER_ERROR;
+  private fieldErrors: Map<string, string[]> | undefined;
 
   static fromError(error: unknown): JsonErrorResponse {
     const res = new JsonErrorResponse();
@@ -22,6 +23,7 @@ export class JsonErrorResponse {
   }
 
   getFieldValidationErrors(): Map<string, string[]> {
+    if (this.fieldErrors) return this.fieldErrors;
     const fieldErrors: Map<string, string[]> = new Map();
     if (!Array.isArray(this.message)) {
       return fieldErrors;
@@ -42,6 +44,7 @@ export class JsonErrorResponse {
         }
       }
     });
+    this.fieldErrors = fieldErrors;
     return fieldErrors;
   }
 

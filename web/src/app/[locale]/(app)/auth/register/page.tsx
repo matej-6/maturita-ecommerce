@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { getQueryClient } from "@/providers/queryProvider";
 import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-options";
 import { useTranslations } from "next-intl";
+import { authRegisterAction } from "@/app/data-access-layer/auth/actions";
 
 export default function RegisterPage() {
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -45,22 +46,11 @@ export default function RegisterPage() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof registerSchema>) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`,
-        {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!res.ok) {
-        const errorResponse = JsonErrorResponse.fromError(await res.json());
-        setGlobalErrors(errorResponse.getMessages());
-        setFieldErrors(errorResponse.getFieldValidationErrors());
-        throw new Error();
+      const res = await authRegisterAction(data);
+      if (!res.success) {
+        setFieldErrors(res.fieldErrors);
+        setGlobalErrors(res.globalErrors);
+        throw Error();
       }
     },
 

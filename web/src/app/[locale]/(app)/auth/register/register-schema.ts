@@ -21,8 +21,12 @@ export const registerSchema = z
       .max(512, { message: "Password must be less than 512 characters long" }),
     confirmPassword: z
       .string()
-      .min(8, { message: "Password must be at least 8 characters long" })
-      .max(512, { message: "Password must be less than 512 characters long" }),
+      .min(8, {
+        message: "Confirm password must be at least 8 characters long",
+      })
+      .max(512, {
+        message: "Confirm password must be less than 512 characters long",
+      }),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {

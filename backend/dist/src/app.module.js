@@ -38,7 +38,7 @@ exports.AppModule = AppModule = __decorate([
                     path: path.join(__dirname, '/i18n/'),
                     watch: true,
                 },
-                resolvers: [new nestjs_i18n_1.HeaderResolver(['x-custom-header'])],
+                resolvers: [new nestjs_i18n_1.HeaderResolver(['x-custom-lang'])],
             }),
             graphql_1.GraphQLModule.forRootAsync({
                 driver: apollo_1.ApolloDriver,

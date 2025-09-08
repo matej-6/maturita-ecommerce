@@ -1,14 +1,15 @@
-import "server-only";
-
+"use server";
 import { cookies } from "next/headers";
 import {
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "@/app/lib/auth.constants";
-import z from "zod";
 import { loginSchema } from "@/app/[locale]/(app)/auth/login/login-schema";
 import { JsonErrorResponse } from "@/lib/json-error-response";
 import { registerSchema } from "@/app/[locale]/(app)/auth/register/register-schema";
+import z from "zod";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { fetchBackend } from "../fetch-backend";
 
 type AuthResponse = {
   accessToken: string;
@@ -21,8 +22,10 @@ type AuthResponse = {
  * Sets authentication cookies
  * @param data - if data is null, cookies are deleted
  */
-async function setAuthCookies(data: AuthResponse | null) {
-  const cookieStore = await cookies();
+async function setAuthCookies(
+  cookieStore: ReadonlyRequestCookies,
+  data: AuthResponse | null,
+) {
   cookieStore.set(REFRESH_COOKIE_NAME, data?.refreshToken ?? "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -38,21 +41,20 @@ async function setAuthCookies(data: AuthResponse | null) {
 }
 
 export async function authRefreshToken() {
-  "use server";
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
   if (!refreshTokenCookie) {
-    await setAuthCookies(null);
+    await setAuthCookies(cookieStore, null);
     throw new Error("Unauthenticated: please sign in.");
   }
 
   const refreshToken = refreshTokenCookie.value;
 
-  const res = await fetch(`${process.env.BACKEND_API}/auth/refresh-token`, {
+  const res = await fetchBackend(`/auth/refresh-token`, {
+    method: "POST",
     headers: {
       "x-refresh-token": refreshToken,
     },
-    method: "POST",
   });
 
   if (!res.ok) {
@@ -60,18 +62,17 @@ export async function authRefreshToken() {
   }
 
   const data: AuthResponse = await res.json();
-  await setAuthCookies(data);
+  await setAuthCookies(cookieStore, data);
 }
 
 export async function authLogout() {
-  "use server";
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
   if (refreshTokenCookie) {
     const refreshToken = refreshTokenCookie.value;
     if (refreshToken) {
       try {
-        await fetch(process.env.BACKEND_API + "/auth/logout", {
+        await fetchBackend("/auth/logout", {
           method: "POST",
           headers: {
             "x-refresh-token": refreshToken,
@@ -82,72 +83,83 @@ export async function authLogout() {
       }
     }
   }
-  cookieStore.set(REFRESH_COOKIE_NAME, "", {
-    httpOnly: true,
-    expires: 0,
-  });
-  cookieStore.set(AUTHENTICATION_COOKIE_NAME, "", {
-    httpOnly: true,
-    expires: 0,
-  });
+  setAuthCookies(cookieStore, null);
 }
 
-export async function authLogin(formData: FormData) {
-  "use server";
-
-  const parsedData = loginSchema.parse(Object.fromEntries(formData.entries()));
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
+export type LoginActionResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      fieldErrors: Map<string, string[]>;
+      globalErrors: string[];
+      message?: string;
+    };
+export async function authLoginAction(
+  formData: z.infer<typeof loginSchema>,
+): Promise<LoginActionResult> {
+  const res = await fetchBackend(`/auth/login`, {
     method: "POST",
-    body: JSON.stringify(parsedData),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    body: JSON.stringify(formData),
   });
 
   if (!res.ok) {
-    return JsonErrorResponse.fromError(await res.json());
+    const j = await res.json();
+    console.log(j);
+    const jsonErrorResponse = JsonErrorResponse.fromError(j);
+    return {
+      success: false,
+      fieldErrors: jsonErrorResponse.getFieldValidationErrors(),
+      globalErrors: jsonErrorResponse.getMessages(),
+      message: jsonErrorResponse.error,
+    };
   }
+
+  const cookieStore = await cookies();
 
   const authData: AuthResponse = await res.json();
-  const cookieStore = await cookies();
-  cookieStore.set(REFRESH_COOKIE_NAME, authData.refreshToken, {
-    expires: authData.refreshTokenExpirationDate,
-    sameSite: "lax",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  });
+  setAuthCookies(cookieStore, authData);
 
-  cookieStore.set(AUTHENTICATION_COOKIE_NAME, authData.accessToken, {
-    expires: authData.accessTokenExpirationDate,
-    sameSite: "lax",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  });
-
-  return "Login Successful";
+  return {
+    success: true,
+  };
 }
 
-export async function authRegister(formData: FormData) {
-  "use server";
+export type RegisterActionResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      fieldErrors: Map<string, string[]>;
+      globalErrors: string[];
+      message?: string;
+    };
 
-  const parsedData = registerSchema.parse(
-    Object.fromEntries(formData.entries()),
-  );
-
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
-    {
-      method: "POST",
-      body: JSON.stringify(parsedData),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    },
-  );
+export async function authRegisterAction(
+  data: z.infer<typeof registerSchema>,
+): Promise<RegisterActionResult> {
+  const res = await fetchBackend(`/auth/register`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
   if (!res.ok) {
-    return JsonErrorResponse.fromError(await res.json());
+    const j = await res.json();
+    console.log("response json: ", j);
+    const jsonErrorResponse = JsonErrorResponse.fromError(j);
+    return {
+      success: false,
+      fieldErrors: jsonErrorResponse.getFieldValidationErrors(),
+      globalErrors: jsonErrorResponse.getMessages(),
+      message: jsonErrorResponse.error,
+    };
   }
 
-  return "";
+  const cookieStore = await cookies();
+
+  const authData: AuthResponse = await res.json();
+  setAuthCookies(cookieStore, authData);
+
+  return { success: true };
 }

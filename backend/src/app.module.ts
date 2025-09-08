@@ -28,7 +28,8 @@ import * as path from 'path';
         path: path.join(__dirname, '/i18n/'),
         watch: true,
       },
-      resolvers: [new HeaderResolver(['x-custom-header'])],
+
+      resolvers: [new HeaderResolver(['x-custom-lang'])],
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,

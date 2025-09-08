@@ -2,21 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AuthInput {
-  email: String!
-  password: String!
-}
-
-type AuthResponse {
-  createdAt: DateTime!
-  email: String!
-  emailVerified: Boolean!
-  firstName: String
-  id: String!
-  lastName: String
-  updatedAt: DateTime!
-}
-
 type Category {
   createdAt: DateTime!
   id: ID!
@@ -112,9 +97,7 @@ type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createLocale(createLocaleInput: CreateLocaleInput!): Locale!
   createUser(createUserInput: CreateUserInput!): User!
-  login(authInput: AuthInput!): AuthResponse!
   logoutAll: Void!
-  refreshToken: Void!
   removeCategory(id: ID!): Category!
   removeLocale(id: String!): Locale!
   removeUser(id: String!): User!

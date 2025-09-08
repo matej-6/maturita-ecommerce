@@ -9,45 +9,45 @@ export declare class CategoriesResolver {
     constructor(categoriesService: CategoriesService);
     createCategory(createCategoryInput: CreateCategoryInput): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     }>;
     findAll(withParentId?: string): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     } | null>;
     updateCategory(updateCategoryInput: UpdateCategoryInput): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     }>;
     removeCategory(id: string): Promise<void>;
     subcategories(category: Category, ctx: GraphqlAppContext): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     }[]>;
     translations(category: Category, ctx: GraphqlAppContext, i18n: I18nContext): Promise<{
-        id: string;
         name: string;
-        description: string | null;
+        id: string;
         localeId: string;
+        description: string | null;
         categoryId: string;
     }[]>;
 }

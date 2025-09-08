@@ -17,13 +17,13 @@ import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { JsonErrorResponse } from "@/lib/json-error-response";
 import { toast } from "sonner";
 import { getQueryClient } from "@/providers/queryProvider";
 import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-options";
 import { loginSchema } from "./login-schema";
 import { ContinueWithGoogleLightButton } from "@/components/buttons/continue-with-google-light-button";
 import { useTranslations } from "next-intl";
+import { authLoginAction } from "@/app/data-access-layer/auth/actions";
 
 export default function RegisterPage() {
   const t = useTranslations("auth.sign-in");
@@ -45,21 +45,10 @@ export default function RegisterPage() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`,
-        {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!res.ok) {
-        const errorResponse = JsonErrorResponse.fromError(await res.json());
-        setGlobalErrors(errorResponse.getMessages());
-        setFieldErrors(errorResponse.getFieldValidationErrors());
+      const result = await authLoginAction(data);
+      if (!result.success) {
+        setGlobalErrors(result.globalErrors);
+        setFieldErrors(result.fieldErrors);
         throw new Error();
       }
     },
@@ -74,6 +63,22 @@ export default function RegisterPage() {
     },
   });
 
+  function FormFieldErrorMessage({
+    field,
+  }: {
+    field: keyof z.infer<typeof loginSchema>;
+  }) {
+    let message = "";
+    if (fieldErrors.has(field) && fieldErrors.get(field)!.length > 0) {
+      message = fieldErrors.get(field)!.join(",");
+    } else if (form.formState.errors[field]?.message) {
+      message = t(form.formState.errors[field]!.message);
+    }
+
+    if (!message) return null;
+    return <p className="text-red-500 text-sm">{message}</p>;
+  }
+
   return (
     <div className="w-full max-w-md mx-auto mt-10 flex flex-col gap-4">
       <Card className="w-full">
@@ -83,9 +88,7 @@ export default function RegisterPage() {
         <CardContent className="space-y-8">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(async (data) => {
-                await mutate(data);
-              })}
+              onSubmit={form.handleSubmit(async (data) => await mutate(data))}
               className="space-y-8 font-secondary"
             >
               <FormField
@@ -98,7 +101,7 @@ export default function RegisterPage() {
                       <Input {...field} />
                     </FormControl>
                     <FormMessage />
-                    <CustomFieldError errors={fieldErrors.get("email") || []} />
+                    <FormFieldErrorMessage field="email" />
                   </FormItem>
                 )}
               />

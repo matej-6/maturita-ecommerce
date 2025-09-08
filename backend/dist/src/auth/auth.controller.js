@@ -21,16 +21,20 @@ const jwt_refresh_guard_1 = require("./guards/jwt-refresh.guard");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
+const nestjs_i18n_1 = require("nestjs-i18n");
 let AuthController = AuthController_1 = class AuthController {
     authService;
     logger = new common_1.Logger(AuthController_1.name);
     constructor(authService) {
         this.authService = authService;
     }
-    async login(loginDto) {
+    async login(i18n, loginDto) {
         const user = await this.authService.validateUserWithCredentials(loginDto.email, loginDto.password);
         if (!user) {
-            throw new common_1.UnauthorizedException('Invalid email or password');
+            console.warn('Invalid email or password login attempt.');
+            throw new common_1.UnauthorizedException(i18n.translate('INVALID_EMAIL_OR_PASSWORD', {
+                lang: i18n.lang,
+            }));
         }
         return await this.authService.login({
             id: user.id,
@@ -68,9 +72,11 @@ let AuthController = AuthController_1 = class AuthController {
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('login'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, nestjs_i18n_1.I18n)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [login_dto_1.LoginDto]),
+    __metadata("design:paramtypes", [nestjs_i18n_1.I18nContext,
+        login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
