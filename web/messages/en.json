@@ -1,4 +1,7 @@
 {
+  "form": {
+    "invalidEmail": "Invalid email"
+  },
   "LocaleLayout": {
     "title": "GRABLY",
     "description": "Best online store for all your needs"

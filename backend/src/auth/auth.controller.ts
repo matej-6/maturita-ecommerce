@@ -36,11 +36,7 @@ export class AuthController {
 
     if (!user) {
       console.warn('Invalid email or password login attempt.');
-      throw new UnauthorizedException(
-        i18n.translate('INVALID_EMAIL_OR_PASSWORD', {
-          lang: i18n.lang,
-        }),
-      );
+      throw new UnauthorizedException('INVALID_EMAIL_OR_PASSWORD');
     }
 
     return await this.authService.login({

@@ -26,7 +26,9 @@ import { useTranslations } from "next-intl";
 import { authLoginAction } from "@/app/data-access-layer/auth/actions";
 
 export default function RegisterPage() {
-  const t = useTranslations("auth.sign-in");
+  const t = useTranslations("auth.sign-in"); // translations for this page
+  const pft = useTranslations("auth.sign-in.form"); // translations specifically for form in this page (pft = page form translations)
+  const ft = useTranslations("form"); // general form translations (napr. invalidEmail, invalidPassword ...)
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -72,7 +74,7 @@ export default function RegisterPage() {
     if (fieldErrors.has(field) && fieldErrors.get(field)!.length > 0) {
       message = fieldErrors.get(field)!.join(",");
     } else if (form.formState.errors[field]?.message) {
-      message = t(form.formState.errors[field]!.message);
+      message = ft(form.formState.errors[field]!.message);
     }
 
     if (!message) return null;
@@ -100,7 +102,7 @@ export default function RegisterPage() {
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormMessage />
+                    {/* <FormMessage /> */}
                     <FormFieldErrorMessage field="email" />
                   </FormItem>
                 )}

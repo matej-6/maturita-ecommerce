@@ -6,30 +6,32 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HttpExceptionFilter = void 0;
+exports.GeneralFilter = void 0;
 const common_1 = require("@nestjs/common");
 const nestjs_i18n_1 = require("nestjs-i18n");
-let HttpExceptionFilter = class HttpExceptionFilter {
+let GeneralFilter = class GeneralFilter {
     catch(exception, host) {
-        const response = host.switchToHttp().getResponse();
         const i18n = nestjs_i18n_1.I18nContext.current(host);
-        console.log('Http exception filter exception: ', exception);
-        let errorMessage = '';
-        if (i18n !== undefined) {
-            let message = i18n.t(`error.${exception.message}`);
-            if (message == `error.${exception.message}`) {
-                message = i18n.t(`error.unknownError`);
-            }
-            errorMessage = message;
+        const ctx = host.switchToHttp();
+        console.log(exception);
+        let message;
+        let errors = [];
+        if (exception instanceof nestjs_i18n_1.I18nValidationException) {
+            errors = exception.errors;
         }
-        response.status(exception.getStatus()).json({
-            errorMessage,
-            ...exception,
+        else {
+            message = i18n?.t(`error.${exception.message}`);
+        }
+        const response = ctx.getResponse();
+        response.json({
+            message,
+            status: exception.getResponse(),
+            errors,
         });
     }
 };
-exports.HttpExceptionFilter = HttpExceptionFilter;
-exports.HttpExceptionFilter = HttpExceptionFilter = __decorate([
+exports.GeneralFilter = GeneralFilter;
+exports.GeneralFilter = GeneralFilter = __decorate([
     (0, common_1.Catch)(common_1.HttpException)
-], HttpExceptionFilter);
-//# sourceMappingURL=http-exception.filter.js.map
+], GeneralFilter);
+//# sourceMappingURL=general.filter.js.map

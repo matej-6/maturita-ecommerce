@@ -4,7 +4,6 @@ const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const cookieParser = require("cookie-parser");
 const nestjs_i18n_1 = require("nestjs-i18n");
-const http_exception_filter_1 = require("./http-exception/http-exception.filter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
@@ -28,7 +27,7 @@ async function bootstrap() {
                 constraints: e.constraints,
             }));
         },
-    }), new http_exception_filter_1.HttpExceptionFilter());
+    }));
     app.use(cookieParser());
     await app.listen(process.env.PORT ?? 3000);
 }

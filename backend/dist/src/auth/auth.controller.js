@@ -32,9 +32,7 @@ let AuthController = AuthController_1 = class AuthController {
         const user = await this.authService.validateUserWithCredentials(loginDto.email, loginDto.password);
         if (!user) {
             console.warn('Invalid email or password login attempt.');
-            throw new common_1.UnauthorizedException(i18n.translate('INVALID_EMAIL_OR_PASSWORD', {
-                lang: i18n.lang,
-            }));
+            throw new common_1.UnauthorizedException('INVALID_EMAIL_OR_PASSWORD');
         }
         return await this.authService.login({
             id: user.id,

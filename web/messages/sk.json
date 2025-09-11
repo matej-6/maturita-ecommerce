@@ -1,4 +1,7 @@
 {
+  "form": {
+    "invalidEmail": "Nesprávny email"
+  },
   "LocaleLayout": {
     "title": "GRABLY",
     "description": "Najlepší online obchod pre všetky vaše potreby"

@@ -6,7 +6,6 @@ import {
   I18nValidationExceptionFilter,
   I18nValidationPipe,
 } from 'nestjs-i18n';
-import { HttpExceptionFilter } from './http-exception/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,7 +34,6 @@ async function bootstrap() {
         }));
       },
     }),
-    new HttpExceptionFilter(),
   );
   app.use(cookieParser());
   await app.listen(process.env.PORT ?? 3000);
