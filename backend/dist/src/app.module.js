@@ -38,6 +38,7 @@ exports.AppModule = AppModule = __decorate([
                     path: path.join(__dirname, '/i18n/'),
                     watch: true,
                 },
+                typesOutputPath: path.join(__dirname, '../src/generated/i18n.generated.ts'),
                 resolvers: [new nestjs_i18n_1.HeaderResolver(['x-custom-lang'])],
             }),
             graphql_1.GraphQLModule.forRootAsync({

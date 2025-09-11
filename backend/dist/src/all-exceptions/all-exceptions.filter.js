@@ -6,32 +6,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GeneralFilter = void 0;
+exports.AllExceptionsFilter = void 0;
 const common_1 = require("@nestjs/common");
 const nestjs_i18n_1 = require("nestjs-i18n");
-let GeneralFilter = class GeneralFilter {
+let AllExceptionsFilter = class AllExceptionsFilter {
     catch(exception, host) {
         const i18n = nestjs_i18n_1.I18nContext.current(host);
         const ctx = host.switchToHttp();
-        console.log(exception);
-        let message;
-        let errors = [];
-        if (exception instanceof nestjs_i18n_1.I18nValidationException) {
-            errors = exception.errors;
-        }
-        else {
-            message = i18n?.t(`error.${exception.message}`);
-        }
+        const defaultMessage = 'An unknown error occurred';
+        const message = i18n?.t(`error.${exception.message}`, {
+            defaultValue: defaultMessage,
+        }) ?? defaultMessage;
+        exception.message = message;
         const response = ctx.getResponse();
-        response.json({
+        response.status(exception.getStatus()).json({
             message,
-            status: exception.getResponse(),
-            errors,
+            status: exception.getStatus(),
         });
     }
 };
-exports.GeneralFilter = GeneralFilter;
-exports.GeneralFilter = GeneralFilter = __decorate([
+exports.AllExceptionsFilter = AllExceptionsFilter;
+exports.AllExceptionsFilter = AllExceptionsFilter = __decorate([
     (0, common_1.Catch)(common_1.HttpException)
-], GeneralFilter);
-//# sourceMappingURL=general.filter.js.map
+], AllExceptionsFilter);
+//# sourceMappingURL=all-exceptions.filter.js.map

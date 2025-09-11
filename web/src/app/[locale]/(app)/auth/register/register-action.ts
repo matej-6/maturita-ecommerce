@@ -7,7 +7,7 @@ import { registerSchema } from "./register-schema";
 import {
   getFieldErrors,
   getNonFieldErrors,
-  JsonErrorResponse,
+  ErrorResponse,
   parseJsonError,
 } from "@/lib/json-error-response";
 
@@ -54,7 +54,7 @@ export async function registerAction(
   );
   console.debug("res", res);
   if (!res.ok) {
-    const errorResponse: JsonErrorResponse = parseJsonError(await res.json());
+    const errorResponse: ErrorResponse = parseJsonError(await res.json());
     const globalErrors = getNonFieldErrors(errorResponse);
     const fieldErrors = getFieldErrors(errorResponse);
     return {

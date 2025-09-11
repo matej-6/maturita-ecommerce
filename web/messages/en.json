@@ -1,6 +1,8 @@
 {
   "form": {
-    "invalidEmail": "Invalid email"
+    "invalidEmail": "Invalid email",
+    "invalidPassword": "Invalid password",
+    "minLengthPassword": "Passwords must be at least {minLength, plural, =1 {# character} other {# characters}} long"
   },
   "LocaleLayout": {
     "title": "GRABLY",

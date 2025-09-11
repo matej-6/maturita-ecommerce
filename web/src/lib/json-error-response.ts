@@ -1,13 +1,23 @@
 import { StatusCodes } from "http-status-codes";
 
-export class JsonErrorResponse {
+
+type JsonErrorResponse = {
+  status: number;
+  message?: string;
+  
+}
+
+export class ErrorResponse {
   error: string = "";
-  message: unknown[] | string = "An unknown error occurred";
+  message: unknown[] | string | undefined;
   statusCode: number = StatusCodes.INTERNAL_SERVER_ERROR;
   private fieldErrors: Map<string, string[]> | undefined;
 
-  static fromError(error: unknown): JsonErrorResponse {
-    const res = new JsonErrorResponse();
+  static fromError(error: unknown): ErrorResponse {
+    console.log(
+      "JsonErrorResponse .fromError: error: " + JSON.stringify(error)
+    );
+    const res = new ErrorResponse();
     if (error instanceof Object) {
       if ("error" in error) {
         res.error = error.error as string;

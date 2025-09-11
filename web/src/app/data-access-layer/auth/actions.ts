@@ -5,7 +5,7 @@ import {
   REFRESH_COOKIE_NAME,
 } from "@/app/lib/auth.constants";
 import { loginSchema } from "@/app/[locale]/(app)/auth/login/login-schema";
-import { JsonErrorResponse } from "@/lib/json-error-response";
+import { ErrorResponse } from "@/lib/json-error-response";
 import { registerSchema } from "@/app/[locale]/(app)/auth/register/register-schema";
 import z from "zod";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
@@ -24,7 +24,7 @@ type AuthResponse = {
  */
 async function setAuthCookies(
   cookieStore: ReadonlyRequestCookies,
-  data: AuthResponse | null,
+  data: AuthResponse | null
 ) {
   cookieStore.set(REFRESH_COOKIE_NAME, data?.refreshToken ?? "", {
     httpOnly: true,
@@ -97,7 +97,7 @@ export type LoginActionResult =
       message?: string;
     };
 export async function authLoginAction(
-  formData: z.infer<typeof loginSchema>,
+  formData: z.infer<typeof loginSchema>
 ): Promise<LoginActionResult> {
   const res = await fetchBackend(`/auth/login`, {
     method: "POST",
@@ -107,7 +107,7 @@ export async function authLoginAction(
   if (!res.ok) {
     const j = await res.json();
     console.log(j);
-    const jsonErrorResponse = JsonErrorResponse.fromError(j);
+    const jsonErrorResponse = ErrorResponse.fromError(j);
     return {
       success: false,
       fieldErrors: jsonErrorResponse.getFieldValidationErrors(),
@@ -138,7 +138,7 @@ export type RegisterActionResult =
     };
 
 export async function authRegisterAction(
-  data: z.infer<typeof registerSchema>,
+  data: z.infer<typeof registerSchema>
 ): Promise<RegisterActionResult> {
   const res = await fetchBackend(`/auth/register`, {
     method: "POST",
@@ -147,7 +147,7 @@ export async function authRegisterAction(
   if (!res.ok) {
     const j = await res.json();
     console.log("response json: ", j);
-    const jsonErrorResponse = JsonErrorResponse.fromError(j);
+    const jsonErrorResponse = ErrorResponse.fromError(j);
     return {
       success: false,
       fieldErrors: jsonErrorResponse.getFieldValidationErrors(),

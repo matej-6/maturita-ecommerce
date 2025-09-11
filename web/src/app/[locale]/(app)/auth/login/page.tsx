@@ -20,15 +20,16 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getQueryClient } from "@/providers/queryProvider";
 import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-options";
-import { loginSchema } from "./login-schema";
 import { ContinueWithGoogleLightButton } from "@/components/buttons/continue-with-google-light-button";
 import { useTranslations } from "next-intl";
 import { authLoginAction } from "@/app/data-access-layer/auth/actions";
+import { createLoginSchema } from "./login-schema";
 
 export default function RegisterPage() {
   const t = useTranslations("auth.sign-in"); // translations for this page
-  const pft = useTranslations("auth.sign-in.form"); // translations specifically for form in this page (pft = page form translations)
   const ft = useTranslations("form"); // general form translations (napr. invalidEmail, invalidPassword ...)
+
+  const loginSchema = createLoginSchema(ft);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -73,11 +74,9 @@ export default function RegisterPage() {
     let message = "";
     if (fieldErrors.has(field) && fieldErrors.get(field)!.length > 0) {
       message = fieldErrors.get(field)!.join(",");
-    } else if (form.formState.errors[field]?.message) {
-      message = ft(form.formState.errors[field]!.message);
     }
 
-    if (!message) return null;
+    if (!message) return <FormMessage />;
     return <p className="text-red-500 text-sm">{message}</p>;
   }
 

@@ -18,7 +18,7 @@ import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { JsonErrorResponse } from "@/lib/json-error-response";
+import { ErrorResponse } from "@/lib/json-error-response";
 import { toast } from "sonner";
 import { getQueryClient } from "@/providers/queryProvider";
 import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-options";
