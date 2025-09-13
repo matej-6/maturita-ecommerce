@@ -4,11 +4,9 @@ import {
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "@/app/lib/auth.constants";
-import { registerSchema } from "@/app/[locale]/(app)/auth/register/register-schema";
-import z from "zod";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { fetchBackend } from "../fetch-backend";
-import { ErrorResponse, newJsonException } from "@/lib/error-response";
+import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getTranslations } from "next-intl/server";
 import { StatusCodes } from "http-status-codes";
 
@@ -94,6 +92,7 @@ export type LoginActionResult =
   | ({
       success: false;
     } & ErrorResponse);
+
 export async function authLoginAction(
   formData: unknown
 ): Promise<LoginActionResult> {
@@ -112,7 +111,7 @@ export async function authLoginAction(
     } catch (e) {
       console.error(e);
     }
-    const errorResponse = newJsonException(jsonError) ?? {
+    const errorResponse = newErrorResponse(jsonError) ?? {
       message: t("INTERNAL_SERVER_ERROR"),
       status: StatusCodes.INTERNAL_SERVER_ERROR,
     };
@@ -144,24 +143,26 @@ export async function authRegisterAction(
   data: unknown
 ): Promise<RegisterActionResult> {
   const t = await getTranslations("error");
+  try {
+  } catch (e) {}
   const res = await fetchBackend(`/auth/register`, {
     method: "POST",
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    let jsonError = {};
+    let body: unknown | undefined;
     try {
-      jsonError = await res.json();
+      body = await res.json();
     } catch (e) {
       console.error(e);
     }
-    const errorResponse = newJsonException(jsonError) ?? {
-      message: t("INTERNAL_SERVER_ERROR"),
-      status: StatusCodes.INTERNAL_SERVER_ERROR,
-    };
     return {
       success: false,
-      ...errorResponse,
+      ...newErrorResponse(
+        body,
+        t("INTERNAL_SERVER_ERROR"),
+        StatusCodes.INTERNAL_SERVER_ERROR
+      ),
     };
   }
 
