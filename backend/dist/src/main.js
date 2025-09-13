@@ -23,7 +23,7 @@ async function bootstrap() {
     }));
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter(), new nestjs_i18n_1.I18nValidationExceptionFilter({
         detailedErrors: false,
-        responseBodyFormatter(host, exc, formattedErrors) {
+        responseBodyFormatter(host, exc, _formattedErrors) {
             return (0, exception_body_formatter_1.exceptionBodyFormatter)(host, exc);
         },
     }));

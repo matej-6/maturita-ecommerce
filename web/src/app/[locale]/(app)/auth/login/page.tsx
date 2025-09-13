@@ -40,8 +40,12 @@ export default function RegisterPage() {
     },
   });
 
-  const [fieldErrors, setFieldErrors] = useState(new Map<string, string[]>());
-  const [globalErrors, setGlobalErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<
+    Map<string, string[]> | undefined
+  >(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
 
   const queryClient = getQueryClient();
   const router = useRouter();
@@ -50,8 +54,12 @@ export default function RegisterPage() {
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
       const result = await authLoginAction(data);
       if (!result.success) {
-        setGlobalErrors(result.globalErrors);
-        setFieldErrors(result.fieldErrors);
+        setFieldErrors(
+          result.fieldErrors
+            ? new Map(Object.entries(result.fieldErrors))
+            : undefined
+        );
+        setErrorMessage(result.message);
         throw new Error();
       }
     },
@@ -72,7 +80,11 @@ export default function RegisterPage() {
     field: keyof z.infer<typeof loginSchema>;
   }) {
     let message = "";
-    if (fieldErrors.has(field) && fieldErrors.get(field)!.length > 0) {
+    if (
+      fieldErrors !== undefined &&
+      fieldErrors.has(field) &&
+      fieldErrors.get(field)!.length > 0
+    ) {
       message = fieldErrors.get(field)!.join(",");
     }
 
@@ -117,17 +129,13 @@ export default function RegisterPage() {
                     </FormControl>
                     <FormMessage />
                     <CustomFieldError
-                      errors={fieldErrors.get("password") || []}
+                      errors={fieldErrors?.get("password") || []}
                     />
                   </FormItem>
                 )}
               />
-              {globalErrors.length > 0 && (
-                <div className="text-red-500 text-sm">
-                  {globalErrors.map((error) => (
-                    <p key={error}>{error}</p>
-                  ))}
-                </div>
+              {errorMessage && (
+                <div className="text-red-500 text-sm">{errorMessage}</div>
               )}
               <Button
                 type="submit"

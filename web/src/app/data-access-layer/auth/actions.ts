@@ -4,12 +4,13 @@ import {
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "@/app/lib/auth.constants";
-import { loginSchema } from "@/app/[locale]/(app)/auth/login/login-schema";
-import { ErrorResponse } from "@/lib/json-error-response";
 import { registerSchema } from "@/app/[locale]/(app)/auth/register/register-schema";
 import z from "zod";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { fetchBackend } from "../fetch-backend";
+import { ErrorResponse, newJsonException } from "@/lib/error-response";
+import { getTranslations } from "next-intl/server";
+import { StatusCodes } from "http-status-codes";
 
 type AuthResponse = {
   accessToken: string;
@@ -90,29 +91,34 @@ export type LoginActionResult =
   | {
       success: true;
     }
-  | {
+  | ({
       success: false;
-      fieldErrors: Map<string, string[]>;
-      globalErrors: string[];
-      message?: string;
-    };
+    } & ErrorResponse);
 export async function authLoginAction(
-  formData: z.infer<typeof loginSchema>
+  formData: unknown
 ): Promise<LoginActionResult> {
   const res = await fetchBackend(`/auth/login`, {
     method: "POST",
     body: JSON.stringify(formData),
   });
 
+  const t = await getTranslations("error");
+
   if (!res.ok) {
-    const j = await res.json();
-    console.log(j);
-    const jsonErrorResponse = ErrorResponse.fromError(j);
+    let jsonError = {};
+    try {
+      jsonError = await res.json();
+      console.log("jsonError", jsonError);
+    } catch (e) {
+      console.error(e);
+    }
+    const errorResponse = newJsonException(jsonError) ?? {
+      message: t("INTERNAL_SERVER_ERROR"),
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
+    };
     return {
       success: false,
-      fieldErrors: jsonErrorResponse.getFieldValidationErrors(),
-      globalErrors: jsonErrorResponse.getMessages(),
-      message: jsonErrorResponse.error,
+      ...errorResponse,
     };
   }
 
@@ -130,36 +136,48 @@ export type RegisterActionResult =
   | {
       success: true;
     }
-  | {
+  | ({
       success: false;
-      fieldErrors: Map<string, string[]>;
-      globalErrors: string[];
-      message?: string;
-    };
+    } & ErrorResponse);
 
 export async function authRegisterAction(
-  data: z.infer<typeof registerSchema>
+  data: unknown
 ): Promise<RegisterActionResult> {
+  const t = await getTranslations("error");
   const res = await fetchBackend(`/auth/register`, {
     method: "POST",
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const j = await res.json();
-    console.log("response json: ", j);
-    const jsonErrorResponse = ErrorResponse.fromError(j);
+    let jsonError = {};
+    try {
+      jsonError = await res.json();
+    } catch (e) {
+      console.error(e);
+    }
+    const errorResponse = newJsonException(jsonError) ?? {
+      message: t("INTERNAL_SERVER_ERROR"),
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
+    };
     return {
       success: false,
-      fieldErrors: jsonErrorResponse.getFieldValidationErrors(),
-      globalErrors: jsonErrorResponse.getMessages(),
-      message: jsonErrorResponse.error,
+      ...errorResponse,
     };
   }
 
   const cookieStore = await cookies();
 
-  const authData: AuthResponse = await res.json();
-  setAuthCookies(cookieStore, authData);
+  try {
+    const authData: AuthResponse = await res.json();
+    setAuthCookies(cookieStore, authData);
 
-  return { success: true };
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      message: t("INTERNAL_SERVER_ERROR"),
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
+    };
+  }
 }

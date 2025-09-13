@@ -8,21 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AllExceptionsFilter = void 0;
 const common_1 = require("@nestjs/common");
-const nestjs_i18n_1 = require("nestjs-i18n");
+const exception_body_formatter_1 = require("../lib/exception-body-formatter");
 let AllExceptionsFilter = class AllExceptionsFilter {
     catch(exception, host) {
-        const i18n = nestjs_i18n_1.I18nContext.current(host);
         const ctx = host.switchToHttp();
-        const defaultMessage = 'An unknown error occurred';
-        const message = i18n?.t(`error.${exception.message}`, {
-            defaultValue: defaultMessage,
-        }) ?? defaultMessage;
-        exception.message = message;
         const response = ctx.getResponse();
-        response.status(exception.getStatus()).json({
-            message,
-            status: exception.getStatus(),
-        });
+        response
+            .status(exception.getStatus())
+            .json((0, exception_body_formatter_1.exceptionBodyFormatter)(host, exception));
     }
 };
 exports.AllExceptionsFilter = AllExceptionsFilter;

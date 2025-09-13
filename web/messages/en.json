@@ -66,5 +66,9 @@
     "home-button": "Homepage",
     "back-button": "Go to previous page",
     "back-button-admin": "Go back to admin dashboard"
+  },
+  "error": {
+    "unknownError": "An unknown error ocurred",
+    "INTERNAL_SERVER_ERROR": "An unknown error ocurred"
   }
 }

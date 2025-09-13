@@ -8,6 +8,7 @@ export type I18nTranslations = {
     "error": {
         "INVALID_EMAIL_OR_PASSWORD": string;
         "unknownError": string;
+        "badRequest": string;
     };
     "validation": {
         "required": string;

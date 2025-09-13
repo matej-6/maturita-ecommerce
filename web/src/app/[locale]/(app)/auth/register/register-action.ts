@@ -9,7 +9,7 @@ import {
   getNonFieldErrors,
   ErrorResponse,
   parseJsonError,
-} from "@/lib/json-error-response";
+} from "@/lib/error-response";
 
 export type RegisterFormState = {
   success: boolean;

@@ -30,7 +30,7 @@ async function bootstrap() {
     new AllExceptionsFilter(),
     new I18nValidationExceptionFilter({
       detailedErrors: false,
-      responseBodyFormatter(host, exc, formattedErrors) {
+      responseBodyFormatter(host, exc, _formattedErrors) {
         return exceptionBodyFormatter(host, exc);
       },
     }),

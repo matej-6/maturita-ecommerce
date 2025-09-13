@@ -66,5 +66,9 @@
     "home-button": "Domovská stránka",
     "back-button": "Späť na predchádzajúcu stránku",
     "back-button-admin": "Späť na admin panel"
+  },
+  "error": {
+    "unknownError": "Nastala neočakávaná chyba",
+    "INTERNAL_SERVER_ERROR": "Nastala neočakávaná chyba"
   }
 }
