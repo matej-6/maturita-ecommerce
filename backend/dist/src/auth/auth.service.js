@@ -333,11 +333,11 @@ let AuthService = AuthService_1 = class AuthService {
         catch (error) {
             if (error instanceof client_1.Prisma.PrismaClientKnownRequestError) {
                 if (error.code === 'P2002') {
-                    throw new common_1.BadRequestException('This email is already in use.');
+                    throw new common_1.BadRequestException('emailAlreadyInUse');
                 }
             }
             this.logger.error('Failed to register user.', error);
-            throw new common_1.InternalServerErrorException('Something went wrong. Please try again.');
+            throw new common_1.InternalServerErrorException('unknownError');
         }
     }
 };

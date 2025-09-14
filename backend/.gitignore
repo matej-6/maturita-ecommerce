@@ -3,5 +3,12 @@
 .env
 .env.*
 !.env.example
-node_modules
+/node_modules
 /generated/prisma
+/dist
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

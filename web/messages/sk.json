@@ -1,8 +1,12 @@
 {
   "form": {
-    "invalidEmail": "Nesprávny email",
+    "invalidEmail": "Nesprávna emailová adresa",
     "invalidPassword": "Nesprávne heslo",
-    "minLengthPassword": "Heslo musí mať najmenej {minLength, plural, =1 {# znak} other {# znaky}}"
+    "minLengthPassword": "Heslo musí mať najmenej {minLength, plural, =1 {# znak} other {# znaky}}",
+    "required": "{fieldName} je povinné",
+    "maxLength": "{fieldName} môže mať dĺžku najviac {value, plural, =1 {# znak} other {# znakov}}",
+    "minLength": "{fieldName} musí mať dĺžku najmenej {value, plural, =1 {# znak} other {#znakov}}",
+    "passwordsMustMatch": "Heslá sa musia zhodovať"
   },
   "LocaleLayout": {
     "title": "GRABLY",

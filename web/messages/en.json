@@ -1,8 +1,12 @@
 {
   "form": {
-    "invalidEmail": "Invalid email",
+    "invalidEmail": "Invalid email address",
     "invalidPassword": "Invalid password",
-    "minLengthPassword": "Passwords must be at least {minLength, plural, =1 {# character} other {# characters}} long"
+    "minLengthPassword": "Password must be at least {minLength, plural, =1 {# character} other {# characters}} long",
+    "required": "{fieldName} is required",
+    "maxLength": "{fieldName} can be at most {value, plural, =1 {# character} other {# characters}} long",
+    "minLength": "{fieldName} must be at least {value, plural, =1 {# character} other {# characters}} long",
+    "passwordsMustMatch": "Password and Confirm Password must match"
   },
   "LocaleLayout": {
     "title": "GRABLY",

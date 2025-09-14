@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +22,8 @@ import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-optio
 import { ContinueWithGoogleLightButton } from "@/components/buttons/continue-with-google-light-button";
 import { useTranslations } from "next-intl";
 import { authLoginAction } from "@/app/data-access-layer/auth/actions";
-import { createLoginSchema } from "./login-schema";
+import { createLoginSchema, loginSchemaType } from "./login-schema";
+import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
 
 export default function RegisterPage() {
   const t = useTranslations("auth.sign-in"); // translations for this page
@@ -31,7 +31,7 @@ export default function RegisterPage() {
 
   const loginSchema = createLoginSchema(ft);
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const form = useForm<loginSchemaType>({
     resolver: zodResolver(loginSchema),
     mode: "all",
     defaultValues: {
@@ -44,20 +44,20 @@ export default function RegisterPage() {
     Map<string, string[]> | undefined
   >(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const queryClient = getQueryClient();
   const router = useRouter();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: z.infer<typeof loginSchema>) => {
+    mutationFn: async (data: loginSchemaType) => {
       const result = await authLoginAction(data);
       if (!result.success) {
         setFieldErrors(
           result.fieldErrors
             ? new Map(Object.entries(result.fieldErrors))
-            : undefined
+            : undefined,
         );
         setErrorMessage(result.message);
         throw new Error();
@@ -73,24 +73,6 @@ export default function RegisterPage() {
       router.replace("/");
     },
   });
-
-  function FormFieldErrorMessage({
-    field,
-  }: {
-    field: keyof z.infer<typeof loginSchema>;
-  }) {
-    let message = "";
-    if (
-      fieldErrors !== undefined &&
-      fieldErrors.has(field) &&
-      fieldErrors.get(field)!.length > 0
-    ) {
-      message = fieldErrors.get(field)!.join(",");
-    }
-
-    if (!message) return <FormMessage />;
-    return <p className="text-red-500 text-sm">{message}</p>;
-  }
 
   return (
     <div className="w-full max-w-md mx-auto mt-10 flex flex-col gap-4">
@@ -113,8 +95,7 @@ export default function RegisterPage() {
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    {/* <FormMessage /> */}
-                    <FormFieldErrorMessage field="email" />
+                    <FormFieldErrorMessage fieldErrors={fieldErrors} />
                   </FormItem>
                 )}
               />
@@ -128,14 +109,12 @@ export default function RegisterPage() {
                       <Input type="password" {...field} />
                     </FormControl>
                     <FormMessage />
-                    <CustomFieldError
-                      errors={fieldErrors?.get("password") || []}
-                    />
+                    <FormFieldErrorMessage fieldErrors={fieldErrors} />
                   </FormItem>
                 )}
               />
               {errorMessage && (
-                <div className="text-red-500 text-sm">{errorMessage}</div>
+                <p className="text-destructive text-sm">{errorMessage}</p>
               )}
               <Button
                 type="submit"
@@ -153,8 +132,4 @@ export default function RegisterPage() {
       </Card>
     </div>
   );
-}
-
-function CustomFieldError({ errors }: { errors: string[] }) {
-  return <p className="text-red-500 text-sm">{errors.join(", ")}</p>;
 }

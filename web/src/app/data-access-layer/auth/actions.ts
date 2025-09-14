@@ -8,7 +8,6 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 import { fetchBackend } from "../fetch-backend";
 import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getTranslations } from "next-intl/server";
-import { StatusCodes } from "http-status-codes";
 
 type AuthResponse = {
   accessToken: string;
@@ -23,7 +22,7 @@ type AuthResponse = {
  */
 async function setAuthCookies(
   cookieStore: ReadonlyRequestCookies,
-  data: AuthResponse | null
+  data: AuthResponse | null,
 ) {
   cookieStore.set(REFRESH_COOKIE_NAME, data?.refreshToken ?? "", {
     httpOnly: true,
@@ -94,41 +93,45 @@ export type LoginActionResult =
     } & ErrorResponse);
 
 export async function authLoginAction(
-  formData: unknown
+  formData: unknown,
 ): Promise<LoginActionResult> {
-  const res = await fetchBackend(`/auth/login`, {
-    method: "POST",
-    body: JSON.stringify(formData),
-  });
-
   const t = await getTranslations("error");
 
-  if (!res.ok) {
-    let jsonError = {};
-    try {
-      jsonError = await res.json();
-      console.log("jsonError", jsonError);
-    } catch (e) {
-      console.error(e);
+  const defaultErrorResponse: ErrorResponse = {
+    message: t("INTERNAL_SERVER_ERROR"),
+    status: 500,
+  };
+
+  try {
+    const res = await fetchBackend(`/auth/login`, {
+      method: "POST",
+      body: JSON.stringify(formData),
+    });
+    if (!res.ok) {
+      const e = await res.json();
+      console.log(newErrorResponse(e));
+      return {
+        success: false,
+        ...(newErrorResponse(e) || defaultErrorResponse),
+      };
     }
-    const errorResponse = newErrorResponse(jsonError) ?? {
-      message: t("INTERNAL_SERVER_ERROR"),
-      status: StatusCodes.INTERNAL_SERVER_ERROR,
+
+    const cookieStore = await cookies();
+
+    const authData: AuthResponse = await res.json();
+    setAuthCookies(cookieStore, authData);
+
+    return {
+      success: true,
     };
+  } catch (e) {
+    console.error(e);
+
     return {
       success: false,
-      ...errorResponse,
+      ...defaultErrorResponse,
     };
   }
-
-  const cookieStore = await cookies();
-
-  const authData: AuthResponse = await res.json();
-  setAuthCookies(cookieStore, authData);
-
-  return {
-    success: true,
-  };
 }
 
 export type RegisterActionResult =
@@ -140,35 +143,29 @@ export type RegisterActionResult =
     } & ErrorResponse);
 
 export async function authRegisterAction(
-  data: unknown
+  data: unknown,
 ): Promise<RegisterActionResult> {
   const t = await getTranslations("error");
+
+  const defaultErrorResponse: ErrorResponse = {
+    message: t("INTERNAL_SERVER_ERROR"),
+    status: 500,
+  };
+
   try {
-  } catch (e) {}
-  const res = await fetchBackend(`/auth/register`, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    let body: unknown | undefined;
-    try {
-      body = await res.json();
-    } catch (e) {
-      console.error(e);
+    const res = await fetchBackend(`/auth/register`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const body = await res.json();
+      return {
+        success: false,
+        ...(newErrorResponse(body) || defaultErrorResponse),
+      };
     }
-    return {
-      success: false,
-      ...newErrorResponse(
-        body,
-        t("INTERNAL_SERVER_ERROR"),
-        StatusCodes.INTERNAL_SERVER_ERROR
-      ),
-    };
-  }
+    const cookieStore = await cookies();
 
-  const cookieStore = await cookies();
-
-  try {
     const authData: AuthResponse = await res.json();
     setAuthCookies(cookieStore, authData);
 
@@ -177,8 +174,7 @@ export async function authRegisterAction(
     console.error(e);
     return {
       success: false,
-      message: t("INTERNAL_SERVER_ERROR"),
-      status: StatusCodes.INTERNAL_SERVER_ERROR,
+      ...defaultErrorResponse,
     };
   }
 }

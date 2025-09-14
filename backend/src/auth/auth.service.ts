@@ -439,13 +439,11 @@ export class AuthService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new BadRequestException('This email is already in use.');
+          throw new BadRequestException('emailAlreadyInUse');
         }
       }
       this.logger.error('Failed to register user.', error);
-      throw new InternalServerErrorException(
-        'Something went wrong. Please try again.',
-      );
+      throw new InternalServerErrorException('unknownError');
     }
   }
 }
