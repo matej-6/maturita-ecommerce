@@ -268,7 +268,7 @@ export class AuthService {
       );
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException('Failed to login');
+      throw new InternalServerErrorException('unknownError');
     }
   }
 
@@ -383,7 +383,7 @@ export class AuthService {
       });
     } catch (error) {
       this.logger.error('Failed to sign out all.', error);
-      throw new InternalServerErrorException('Something went wrong.');
+      throw new InternalServerErrorException('unknownError');
     }
   }
 
@@ -406,7 +406,8 @@ export class AuthService {
             `Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`,
           );
           await this.signOutAll(userId);
-          throw new BadRequestException('Invalid refresh token.');
+          this.logger.warn('Invalid refresh token used.');
+          throw new BadRequestException('badRequest');
         }
         await this.prismaService.refreshTokenSession.update({
           where: {
@@ -420,7 +421,7 @@ export class AuthService {
       }
     }
 
-    throw new BadRequestException('Invalid refresh token.');
+    throw new BadRequestException('badRequest');
   }
 
   async register(registerDto: RegisterDto) {
