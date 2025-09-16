@@ -2,5 +2,6 @@
   "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password.",
   "unknownError": "An unknown error ocurred",
   "badRequest": "Bad request",
-  "emailAlreadyInUse": "This email is already in use."
+  "emailAlreadyInUse": "This email is already in use.",
+  "unauthorizedException": "You are not authorized to perform this action."
 }

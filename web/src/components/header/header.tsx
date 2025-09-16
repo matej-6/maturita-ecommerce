@@ -1,39 +1,16 @@
 "use server";
-
-import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
 import Link from "next/link";
 import { HeaderRightNav } from "./header-right-nav";
 import { HeaderNav } from "./header-nav";
 import { getLocale } from "next-intl/server";
 import { Suspense } from "react";
+import { graphql } from "@/graphql";
 
-const CategoryFields = graphql(`
-  fragment CategoryFields on Category {
-    id
-    slug
-    parentCategoryId
-    translations(locale: $locale) {
+const categoriesQueryDocument = graphql(`
+  query AllCategories {
+    categories(withParentId: null) {
       id
-      name
-      description
-    }
-  }
-`);
-
-const CategoryWithChildrenFields = graphql(`
-  fragment CategoryWithChildrenFields on Category {
-    ...CategoryFields
-    subcategories {
-      ...CategoryFields
-    }
-  }
-`);
-
-const CategoriesQuery = graphql(`
-  query AllCategories($locale: String) {
-    categories(withParentId: null, locale: $locale) {
-      ...CategoryWithChildrenFields
     }
   }
 `);
@@ -41,7 +18,7 @@ const CategoriesQuery = graphql(`
 export async function Header() {
   const locale = await getLocale();
 
-  const res = await execute({}, CategoriesQuery, { locale: locale });
+  const res = await execute(categoriesQueryDocument);
 
   return (
     <header className="w-full border-b-2">

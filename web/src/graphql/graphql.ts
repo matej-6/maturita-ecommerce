@@ -20,22 +20,6 @@ export type Scalars = {
   Void: { input: any; output: any; }
 };
 
-export type AuthInput = {
-  email: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-};
-
-export type AuthResponse = {
-  __typename?: 'AuthResponse';
-  createdAt: Scalars['DateTime']['output'];
-  email: Scalars['String']['output'];
-  emailVerified: Scalars['Boolean']['output'];
-  firstName?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  lastName?: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
 export type Category = {
   __typename?: 'Category';
   createdAt: Scalars['DateTime']['output'];
@@ -46,11 +30,6 @@ export type Category = {
   /** Category translations */
   translations: Array<CategoryTranslation>;
   updatedAt: Scalars['DateTime']['output'];
-};
-
-
-export type CategoryTranslationsArgs = {
-  locale?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CategoryTranslation = {
@@ -127,9 +106,7 @@ export type Mutation = {
   createCategory: Category;
   createLocale: Locale;
   createUser: User;
-  login: AuthResponse;
   logoutAll: Scalars['Void']['output'];
-  refreshToken: Scalars['Void']['output'];
   removeCategory: Category;
   removeLocale: Locale;
   removeUser: User;
@@ -153,11 +130,6 @@ export type MutationCreateLocaleArgs = {
 
 export type MutationCreateUserArgs = {
   createUserInput: CreateUserInput;
-};
-
-
-export type MutationLoginArgs = {
-  authInput: AuthInput;
 };
 
 
@@ -208,7 +180,6 @@ export type Query = {
 
 
 export type QueryCategoriesArgs = {
-  locale?: InputMaybe<Scalars['String']['input']>;
   withParentId?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -271,25 +242,15 @@ export type VerifyEmailInput = {
   email: Scalars['String']['input'];
 };
 
-export type CategoryFieldsFragment = { __typename?: 'Category', id: string, slug: string, parentCategoryId?: string | null, translations: Array<{ __typename?: 'CategoryTranslation', id: string, name: string, description?: string | null }> } & { ' $fragmentName'?: 'CategoryFieldsFragment' };
-
-export type CategoryWithChildrenFieldsFragment = (
-  { __typename?: 'Category', subcategories: Array<(
-    { __typename?: 'Category' }
-    & { ' $fragmentRefs'?: { 'CategoryFieldsFragment': CategoryFieldsFragment } }
-  )> }
-  & { ' $fragmentRefs'?: { 'CategoryFieldsFragment': CategoryFieldsFragment } }
-) & { ' $fragmentName'?: 'CategoryWithChildrenFieldsFragment' };
-
-export type AllCategoriesQueryVariables = Exact<{
-  locale?: InputMaybe<Scalars['String']['input']>;
-}>;
+export type MeAdminFieldQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllCategoriesQuery = { __typename?: 'Query', categories: Array<(
-    { __typename?: 'Category' }
-    & { ' $fragmentRefs'?: { 'CategoryWithChildrenFieldsFragment': CategoryWithChildrenFieldsFragment } }
-  )> };
+export type MeAdminFieldQuery = { __typename?: 'Query', me: { __typename?: 'MeResponse', id: string } };
+
+export type AllCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllCategoriesQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string }> };
 
 export type MeQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -314,57 +275,21 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
-export const CategoryFieldsFragmentDoc = new TypedDocumentString(`
-    fragment CategoryFields on Category {
-  id
-  slug
-  parentCategoryId
-  translations(locale: $locale) {
+
+export const MeAdminFieldDocument = new TypedDocumentString(`
+    query MeAdminField {
+  me {
     id
-    name
-    description
   }
 }
-    `, {"fragmentName":"CategoryFields"}) as unknown as TypedDocumentString<CategoryFieldsFragment, unknown>;
-export const CategoryWithChildrenFieldsFragmentDoc = new TypedDocumentString(`
-    fragment CategoryWithChildrenFields on Category {
-  ...CategoryFields
-  subcategories {
-    ...CategoryFields
-  }
-}
-    fragment CategoryFields on Category {
-  id
-  slug
-  parentCategoryId
-  translations(locale: $locale) {
-    id
-    name
-    description
-  }
-}`, {"fragmentName":"CategoryWithChildrenFields"}) as unknown as TypedDocumentString<CategoryWithChildrenFieldsFragment, unknown>;
+    `) as unknown as TypedDocumentString<MeAdminFieldQuery, MeAdminFieldQueryVariables>;
 export const AllCategoriesDocument = new TypedDocumentString(`
-    query AllCategories($locale: String) {
-  categories(withParentId: null, locale: $locale) {
-    ...CategoryWithChildrenFields
-  }
-}
-    fragment CategoryFields on Category {
-  id
-  slug
-  parentCategoryId
-  translations(locale: $locale) {
+    query AllCategories {
+  categories(withParentId: null) {
     id
-    name
-    description
   }
 }
-fragment CategoryWithChildrenFields on Category {
-  ...CategoryFields
-  subcategories {
-    ...CategoryFields
-  }
-}`) as unknown as TypedDocumentString<AllCategoriesQuery, AllCategoriesQueryVariables>;
+    `) as unknown as TypedDocumentString<AllCategoriesQuery, AllCategoriesQueryVariables>;
 export const MeQueryDocument = new TypedDocumentString(`
     query MeQuery {
   me {

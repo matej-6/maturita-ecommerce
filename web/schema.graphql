@@ -3,21 +3,6 @@ schema {
   mutation: Mutation
 }
 
-input AuthInput {
-  email: String!
-  password: String!
-}
-
-type AuthResponse {
-  createdAt: DateTime!
-  email: String!
-  emailVerified: Boolean!
-  firstName: String
-  id: String!
-  lastName: String
-  updatedAt: DateTime!
-}
-
 type Category {
   createdAt: DateTime!
   id: ID!
@@ -25,7 +10,7 @@ type Category {
   slug: String!
   subcategories: [Category!]!
   """Category translations"""
-  translations(locale: String): [CategoryTranslation!]!
+  translations: [CategoryTranslation!]!
   updatedAt: DateTime!
 }
 
@@ -104,9 +89,7 @@ type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createLocale(createLocaleInput: CreateLocaleInput!): Locale!
   createUser(createUserInput: CreateUserInput!): User!
-  login(authInput: AuthInput!): AuthResponse!
   logoutAll: Void!
-  refreshToken: Void!
   removeCategory(id: ID!): Category!
   removeLocale(id: String!): Locale!
   removeUser(id: String!): User!
@@ -118,7 +101,7 @@ type Mutation {
 }
 
 type Query {
-  categories(locale: String, withParentId: String): [Category!]!
+  categories(withParentId: String): [Category!]!
   category(id: ID!): Category!
   locale(id: String!): Locale!
   locales: [Locale!]!

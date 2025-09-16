@@ -191,7 +191,7 @@ let AuthService = AuthService_1 = class AuthService {
         }
         catch (error) {
             this.logger.error(error);
-            throw new common_1.InternalServerErrorException('Failed to login');
+            throw new common_1.InternalServerErrorException('unknownError');
         }
     }
     getEmailVerificationKey(email) {
@@ -284,7 +284,7 @@ let AuthService = AuthService_1 = class AuthService {
         }
         catch (error) {
             this.logger.error('Failed to sign out all.', error);
-            throw new common_1.InternalServerErrorException('Something went wrong.');
+            throw new common_1.InternalServerErrorException('unknownError');
         }
     }
     async signOut(refreshToken, userId) {
@@ -302,7 +302,8 @@ let AuthService = AuthService_1 = class AuthService {
                 if (session.blacklisted) {
                     this.logger.warn(`Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`);
                     await this.signOutAll(userId);
-                    throw new common_1.BadRequestException('Invalid refresh token.');
+                    this.logger.warn('Invalid refresh token used.');
+                    throw new common_1.BadRequestException('badRequest');
                 }
                 await this.prismaService.refreshTokenSession.update({
                     where: {
@@ -315,7 +316,7 @@ let AuthService = AuthService_1 = class AuthService {
                 return;
             }
         }
-        throw new common_1.BadRequestException('Invalid refresh token.');
+        throw new common_1.BadRequestException('badRequest');
     }
     async register(registerDto) {
         try {

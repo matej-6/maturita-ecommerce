@@ -15,30 +15,24 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  fragment CategoryFields on Category {\n    id\n    slug\n    parentCategoryId\n    translations(locale: $locale) {\n      id\n      name\n      description\n    }\n  }\n": typeof types.CategoryFieldsFragmentDoc,
-    "\n  fragment CategoryWithChildrenFields on Category {\n    ...CategoryFields\n    subcategories {\n      ...CategoryFields\n    }\n  }\n": typeof types.CategoryWithChildrenFieldsFragmentDoc,
-    "\n  query AllCategories($locale: String) {\n    categories(withParentId: null, locale: $locale) {\n      ...CategoryWithChildrenFields\n    }\n  }\n": typeof types.AllCategoriesDocument,
+    "\n  query MeAdminField {\n    me {\n      id\n    }\n  }\n": typeof types.MeAdminFieldDocument,
+    "\n  query AllCategories {\n    categories(withParentId: null) {\n      id\n    }\n  }\n": typeof types.AllCategoriesDocument,
     "\n  query MeQuery {\n    me {\n      id\n      email\n      firstName\n      lastName\n      emailVerified\n      avatar\n      createdAt\n      updatedAt\n      role\n    }\n  }\n": typeof types.MeQueryDocument,
 };
 const documents: Documents = {
-    "\n  fragment CategoryFields on Category {\n    id\n    slug\n    parentCategoryId\n    translations(locale: $locale) {\n      id\n      name\n      description\n    }\n  }\n": types.CategoryFieldsFragmentDoc,
-    "\n  fragment CategoryWithChildrenFields on Category {\n    ...CategoryFields\n    subcategories {\n      ...CategoryFields\n    }\n  }\n": types.CategoryWithChildrenFieldsFragmentDoc,
-    "\n  query AllCategories($locale: String) {\n    categories(withParentId: null, locale: $locale) {\n      ...CategoryWithChildrenFields\n    }\n  }\n": types.AllCategoriesDocument,
+    "\n  query MeAdminField {\n    me {\n      id\n    }\n  }\n": types.MeAdminFieldDocument,
+    "\n  query AllCategories {\n    categories(withParentId: null) {\n      id\n    }\n  }\n": types.AllCategoriesDocument,
     "\n  query MeQuery {\n    me {\n      id\n      email\n      firstName\n      lastName\n      emailVerified\n      avatar\n      createdAt\n      updatedAt\n      role\n    }\n  }\n": types.MeQueryDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment CategoryFields on Category {\n    id\n    slug\n    parentCategoryId\n    translations(locale: $locale) {\n      id\n      name\n      description\n    }\n  }\n"): typeof import('./graphql').CategoryFieldsFragmentDoc;
+export function graphql(source: "\n  query MeAdminField {\n    me {\n      id\n    }\n  }\n"): typeof import('./graphql').MeAdminFieldDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment CategoryWithChildrenFields on Category {\n    ...CategoryFields\n    subcategories {\n      ...CategoryFields\n    }\n  }\n"): typeof import('./graphql').CategoryWithChildrenFieldsFragmentDoc;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query AllCategories($locale: String) {\n    categories(withParentId: null, locale: $locale) {\n      ...CategoryWithChildrenFields\n    }\n  }\n"): typeof import('./graphql').AllCategoriesDocument;
+export function graphql(source: "\n  query AllCategories {\n    categories(withParentId: null) {\n      id\n    }\n  }\n"): typeof import('./graphql').AllCategoriesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

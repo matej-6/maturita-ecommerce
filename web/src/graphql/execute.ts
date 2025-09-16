@@ -1,12 +1,13 @@
 import type { ExecutionResult } from "graphql";
 import type { TypedDocumentString } from "./graphql";
+import { fetchInternal } from "@/app/data-access-layer/fetch-internal";
 
 export async function executeWithHeaders<TResult, TVariables>(
   additionalHeaders: HeadersInit,
   query: TypedDocumentString<TResult, TVariables>,
   ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
 ) {
-  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL!, {
+  const response = await fetchInternal(process.env.NEXT_PUBLIC_GRAPHQL_URL!, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

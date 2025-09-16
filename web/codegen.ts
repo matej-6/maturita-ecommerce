@@ -4,9 +4,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const config: CodegenConfig = {
-  schema: process.env.GRAPHQL_ENDPOINT ?? "http://localhost:8080/graphql",
-  documents: ["src/**/*.tsx"],
-  ignoreNoDocuments: true,
+  schema: process.env.GRAPHQL_ENDPOINT!,
+  documents: ["src/**/*.ts?(x)"],
+  ignoreNoDocuments: false,
+  verbose: true,
   generates: {
     "./src/graphql/": {
       preset: "client",
