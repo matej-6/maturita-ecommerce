@@ -44,10 +44,10 @@ export declare class CategoriesResolver {
         parentCategoryId: string | null;
     }[]>;
     translations(category: Category, ctx: GraphqlAppContext, i18n: I18nContext): Promise<{
-        name: string;
         id: string;
-        localeId: string;
+        name: string;
         description: string | null;
+        localeId: string;
         categoryId: string;
     }[]>;
 }

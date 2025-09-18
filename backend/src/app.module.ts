@@ -19,6 +19,7 @@ import { RedisModule } from './redis/redis.module';
 import { LocalesModule } from './locales/locales.module';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import * as path from 'path';
+import { AuthenticatedUserDto } from './auth/dto/authenticated-user.dto';
 
 @Module({
   imports: [
@@ -70,5 +71,6 @@ import * as path from 'path';
 export class AppModule {}
 
 export type GraphqlAppContext = GraphQlContext & {
+  user?: AuthenticatedUserDto;
   dataLoaderService: DataloaderService;
 };
