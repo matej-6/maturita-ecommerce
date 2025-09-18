@@ -11,6 +11,7 @@ const categoriesQueryDocument = graphql(`
   query AllCategories {
     categories(withParentId: null) {
       id
+      slug
     }
   }
 `);

@@ -242,15 +242,20 @@ export type VerifyEmailInput = {
   email: Scalars['String']['input'];
 };
 
-export type MeAdminFieldQueryVariables = Exact<{ [key: string]: never; }>;
+export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
+
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeAdminFieldQuery = { __typename?: 'Query', me: { __typename?: 'MeResponse', id: string } };
+export type MeQuery = { __typename?: 'Query', me: (
+    { __typename?: 'MeResponse' }
+    & { ' $fragmentRefs'?: { 'MeFragmentFragment': MeFragmentFragment } }
+  ) };
 
 export type AllCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllCategoriesQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string }> };
+export type AllCategoriesQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string }> };
 
 export type MeQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -275,18 +280,37 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
-
-export const MeAdminFieldDocument = new TypedDocumentString(`
-    query MeAdminField {
+export const MeFragmentFragmentDoc = new TypedDocumentString(`
+    fragment MeFragment on MeResponse {
+  id
+  avatar
+  emailVerified
+  firstName
+  lastName
+  role
+  email
+}
+    `, {"fragmentName":"MeFragment"}) as unknown as TypedDocumentString<MeFragmentFragment, unknown>;
+export const MeDocument = new TypedDocumentString(`
+    query Me {
   me {
-    id
+    ...MeFragment
   }
 }
-    `) as unknown as TypedDocumentString<MeAdminFieldQuery, MeAdminFieldQueryVariables>;
+    fragment MeFragment on MeResponse {
+  id
+  avatar
+  emailVerified
+  firstName
+  lastName
+  role
+  email
+}`) as unknown as TypedDocumentString<MeQuery, MeQueryVariables>;
 export const AllCategoriesDocument = new TypedDocumentString(`
     query AllCategories {
   categories(withParentId: null) {
     id
+    slug
   }
 }
     `) as unknown as TypedDocumentString<AllCategoriesQuery, AllCategoriesQueryVariables>;

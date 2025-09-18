@@ -5,9 +5,11 @@ dotenv.config();
 
 const config: CodegenConfig = {
   schema: process.env.GRAPHQL_ENDPOINT!,
-  documents: ["src/**/*.ts?(x)"],
+  documents: ["src/**/*.tsx"],
   ignoreNoDocuments: false,
   verbose: true,
+  noSilentErrors: true,
+  debug: true,
   generates: {
     "./src/graphql/": {
       preset: "client",

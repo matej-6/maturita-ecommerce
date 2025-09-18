@@ -3,30 +3,32 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { AUTHENTICATION_COOKIE_NAME } from "@/app/lib/auth.constants";
-import { authRefreshToken } from "./actions";
-import { fetchBackend } from "../fetch-backend";
 import { fetchGraphql } from "../fetch-graphql";
-import { graphql } from "@/graphql";
+import { FragmentType, graphql } from "@/graphql";
 
 export const isAdmin = cache(() => {});
 
-
-const CurrentSessionQuery = graphql(`
-  query CurrentSession {
-      me {
-          id
-          email
-          emailVerified
-          avatar
-          createdAt
-          firstName
-          lastName
-          role
-          updatedAt
-      }
+const MeFragment = graphql(`
+  fragment MeFragment on MeResponse {
+    id
+    avatar
+    emailVerified
+    firstName
+    lastName
+    role
+    email
   }
-  `)
+`);
 
+export type CurrentSession = FragmentType<typeof MeFragment>;
+
+const meQueryDocument = graphql(`
+  query Me {
+    me {
+      ...MeFragment
+    }
+  }
+`);
 
 export const getCurrentSession = cache(async () => {
   const cookieStore = await cookies();
@@ -36,6 +38,8 @@ export const getCurrentSession = cache(async () => {
     throw new Error("unauthorized");
   }
   try {
-    const res = await fetchGraphql(meQueryDocument)
+    return await fetchGraphql(meQueryDocument);
+  } catch (e) {
+    console.log(e);
   }
 });
