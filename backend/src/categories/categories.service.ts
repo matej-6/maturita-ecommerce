@@ -5,7 +5,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Category } from '@prisma/client';
 import { RedisService } from 'src/redis/redis.service';
 import { LocalesService } from 'src/locales/locales.service';
-import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class CategoriesService {
@@ -67,20 +66,6 @@ export class CategoriesService {
 
   async findAll(parentId?: string): Promise<Category[]> {
     if (parentId && parentId.trim() !== '') {
-      const cachedCategories = await this.redisService.client.get(
-        this.getCategoryCacheKey(parentId),
-      );
-
-      if (cachedCategories) {
-        try {
-          return JSON.parse(cachedCategories) as Category[];
-        } catch (error) {
-          this.logger.error(
-            `Failed to parse cached categories for parentId ${parentId}: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        }
-      }
-
       const categories = await this.prisma.category.findMany({
         where: { parentCategoryId: parentId },
       });
@@ -219,6 +204,18 @@ export class CategoriesService {
           (category) => category.parentCategoryId === parentId,
         ) || null,
     );
+  }
+
+  async findTranslation(categoryId: string, locale: string) {
+    return this.prisma.categoryTranslation.findFirst({
+      where: {
+        categoryId: categoryId,
+        locale: {
+          code: locale,
+          isActive: true,
+        },
+      },
+    });
   }
 
   async findTranslations(id: string, locale?: string) {

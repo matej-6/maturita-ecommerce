@@ -15,6 +15,8 @@ import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
 import { CategoryTranslation } from './entities/category-translation.entity';
 import { I18n, I18nContext } from 'nestjs-i18n';
+import { NotFoundException, UseGuards } from '@nestjs/common';
+import { GqlAdminGuard } from 'src/auth/guards/gql-admin.guard';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -65,6 +67,7 @@ export class CategoriesResolver {
     return dataLoaderService.getLoader('subcategoriesLoader').load(id);
   }
 
+  @UseGuards(GqlAdminGuard)
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
@@ -79,5 +82,20 @@ export class CategoriesResolver {
     );
 
     return translations;
+  }
+
+  @ResolveField(() => String, { name: 'name' })
+  async categoryName(
+    @Parent() category: Category,
+    @Context() ctx: GraphqlAppContext,
+    @I18n() i18n: I18nContext,
+  ) {
+    const res = await this.categoriesService.findTranslation(
+      category.id,
+      i18n.lang,
+    );
+    if (!res.name) {
+      throw new NotFoundException();
+    }
   }
 }
