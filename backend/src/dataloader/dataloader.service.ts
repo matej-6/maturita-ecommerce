@@ -1,36 +1,31 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IDataLoaders } from './dataloader.interface';
 import * as DataLoader from 'dataloader';
-import { Category } from '@prisma/client';
+import { Category, CategoryTranslation } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CategoriesService } from 'src/categories/categories.service';
+import { I18nContext } from 'nestjs-i18n';
+import { DEFAULT_LANG } from 'src/config/variables';
 
-@Injectable({
-  scope: Scope.REQUEST,
-})
+@Injectable()
 export class DataloaderService {
-  constructor(private readonly db: PrismaService) {}
+  static DEFAULT_LANG = DEFAULT_LANG;
 
-  private readonly loaders: Record<
-    keyof IDataLoaders,
-    DataLoader<any, any> | undefined
-  > = {
-    subcategoriesLoader: undefined,
-  };
+  constructor(
+    private readonly db: PrismaService,
+    private readonly categoriesService: CategoriesService,
+  ) {}
 
-  getLoader<K extends keyof IDataLoaders>(loader: K): IDataLoaders[K] {
-    if (!this.loaders[loader]) {
-      this.loaders[loader] = this._createLoader(loader);
-    }
-    return this.loaders[loader] as IDataLoaders[K];
-  }
+  getLoaders(): IDataLoaders {
+    const subcategoriesLoader = this._createSubcategoriesLoader();
+    const categoryTranslationLoader = this._createCategoryTranslationLoader(
+      I18nContext.current()?.lang || DEFAULT_LANG,
+    );
 
-  private _createLoader(loader: keyof IDataLoaders) {
-    switch (loader) {
-      case 'subcategoriesLoader':
-        return this._createSubcategoriesLoader();
-      default:
-        throw new Error(`Loader ${loader as string} not found`);
-    }
+    return {
+      subcategoriesLoader,
+      categoryTranslationLoader,
+    };
   }
 
   private _createSubcategoriesLoader() {
@@ -47,5 +42,16 @@ export class DataloaderService {
         subcategories.filter((subc) => subc.parentCategoryId === id),
       );
     });
+  }
+
+  private _createCategoryTranslationLoader(lang: string) {
+    return new DataLoader<string, CategoryTranslation | null>(
+      async (categoryIds: string[]) => {
+        return await this.categoriesService.getAllTranslationsByBatch(
+          lang,
+          categoryIds,
+        );
+      },
+    );
   }
 }

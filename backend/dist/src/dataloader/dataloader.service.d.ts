@@ -1,10 +1,12 @@
 import { IDataLoaders } from './dataloader.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CategoriesService } from 'src/categories/categories.service';
 export declare class DataloaderService {
     private readonly db;
-    constructor(db: PrismaService);
-    private readonly loaders;
-    getLoader<K extends keyof IDataLoaders>(loader: K): IDataLoaders[K];
-    private _createLoader;
+    private readonly categoriesService;
+    static DEFAULT_LANG: string;
+    constructor(db: PrismaService, categoriesService: CategoriesService);
+    getLoaders(): IDataLoaders;
     private _createSubcategoriesLoader;
+    private _createCategoryTranslationLoader;
 }

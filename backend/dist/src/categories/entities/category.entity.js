@@ -15,6 +15,8 @@ const category_translation_entity_1 = require("./category-translation.entity");
 let Category = class Category {
     id;
     slug;
+    name;
+    description;
     parentCategoryId;
     translations;
     createdAt;
@@ -29,6 +31,14 @@ __decorate([
     (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], Category.prototype, "slug", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], Category.prototype, "name", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", Object)
+], Category.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { nullable: true }),
     __metadata("design:type", Object)

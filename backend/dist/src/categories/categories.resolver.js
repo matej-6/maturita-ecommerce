@@ -20,6 +20,8 @@ const create_category_input_1 = require("./dto/create-category.input");
 const update_category_input_1 = require("./dto/update-category.input");
 const category_translation_entity_1 = require("./entities/category-translation.entity");
 const nestjs_i18n_1 = require("nestjs-i18n");
+const common_1 = require("@nestjs/common");
+const gql_admin_guard_1 = require("../auth/guards/gql-admin.guard");
 let CategoriesResolver = class CategoriesResolver {
     categoriesService;
     constructor(categoriesService) {
@@ -40,15 +42,20 @@ let CategoriesResolver = class CategoriesResolver {
     removeCategory(id) {
         return this.categoriesService.remove(id);
     }
-    async subcategories(category, ctx) {
-        const { dataLoaderService } = ctx;
+    async subcategories(category, { loaders }) {
         const { id } = category;
-        return dataLoaderService.getLoader('subcategoriesLoader').load(id);
+        return loaders.subcategoriesLoader.load(id);
     }
     async translations(category, ctx, i18n) {
         const { id } = category;
         const translations = await this.categoriesService.findTranslations(id, i18n.lang);
         return translations;
+    }
+    async categoryName(category, ctx, i18n) {
+        const res = await this.categoriesService.findTranslation(category.id, i18n.lang);
+        if (!res?.name) {
+            throw new common_1.NotFoundException();
+        }
     }
 };
 exports.CategoriesResolver = CategoriesResolver;
@@ -96,6 +103,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CategoriesResolver.prototype, "subcategories", null);
 __decorate([
+    (0, common_1.UseGuards)(gql_admin_guard_1.GqlAdminGuard),
     (0, graphql_1.ResolveField)(() => [category_translation_entity_1.CategoryTranslation], { name: 'translations' }),
     __param(0, (0, graphql_1.Parent)()),
     __param(1, (0, graphql_1.Context)()),
@@ -104,6 +112,15 @@ __decorate([
     __metadata("design:paramtypes", [category_entity_1.Category, Object, nestjs_i18n_1.I18nContext]),
     __metadata("design:returntype", Promise)
 ], CategoriesResolver.prototype, "translations", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => String, { name: 'name' }),
+    __param(0, (0, graphql_1.Parent)()),
+    __param(1, (0, graphql_1.Context)()),
+    __param(2, (0, nestjs_i18n_1.I18n)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [category_entity_1.Category, Object, nestjs_i18n_1.I18nContext]),
+    __metadata("design:returntype", Promise)
+], CategoriesResolver.prototype, "categoryName", null);
 exports.CategoriesResolver = CategoriesResolver = __decorate([
     (0, graphql_1.Resolver)(() => category_entity_1.Category),
     __metadata("design:paramtypes", [categories_service_1.CategoriesService])

@@ -1,5 +1,5 @@
 .vscode/*
-.idea/*
+.idea
 .env
 .env.*
 !.env.example

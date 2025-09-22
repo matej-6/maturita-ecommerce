@@ -26,6 +26,8 @@ const redis_module_1 = require("./redis/redis.module");
 const locales_module_1 = require("./locales/locales.module");
 const nestjs_i18n_1 = require("nestjs-i18n");
 const path = require("path");
+const dataloader_module_1 = require("./dataloader/dataloader.module");
+const variables_1 = require("./config/variables");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,7 +35,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             nestjs_i18n_1.I18nModule.forRoot({
-                fallbackLanguage: 'en',
+                fallbackLanguage: variables_1.DEFAULT_LANG,
                 loaderOptions: {
                     path: path.join(__dirname, '/i18n/'),
                     watch: true,
@@ -43,15 +45,15 @@ exports.AppModule = AppModule = __decorate([
             }),
             graphql_1.GraphQLModule.forRootAsync({
                 driver: apollo_1.ApolloDriver,
-                imports: [prisma_module_1.PrismaModule],
-                inject: [prisma_service_1.PrismaService],
-                useFactory: (db) => ({
+                imports: [prisma_module_1.PrismaModule, dataloader_module_1.DataloaderModule],
+                inject: [prisma_service_1.PrismaService, dataloader_service_1.DataloaderService],
+                useFactory: (db, dataLoaderService) => ({
                     graphiql: true,
                     autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
                     sortSchema: true,
                     context: ({ req, res }) => {
                         return {
-                            dataLoaderService: new dataloader_service_1.DataloaderService(db),
+                            loaders: dataLoaderService.getLoaders(),
                             req,
                             res,
                         };

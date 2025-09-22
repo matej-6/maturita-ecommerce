@@ -20,11 +20,14 @@ import { LocalesModule } from './locales/locales.module';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import * as path from 'path';
 import { AuthenticatedUserDto } from './auth/dto/authenticated-user.dto';
+import { IDataLoaders } from './dataloader/dataloader.interface';
+import { DataloaderModule } from './dataloader/dataloader.module';
+import { DEFAULT_LANG } from './config/variables';
 
 @Module({
   imports: [
     I18nModule.forRoot({
-      fallbackLanguage: 'en',
+      fallbackLanguage: DEFAULT_LANG,
       loaderOptions: {
         path: path.join(__dirname, '/i18n/'),
         watch: true,
@@ -37,15 +40,18 @@ import { AuthenticatedUserDto } from './auth/dto/authenticated-user.dto';
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      imports: [PrismaModule],
-      inject: [PrismaService],
-      useFactory: (db: PrismaService) => ({
+      imports: [PrismaModule, DataloaderModule],
+      inject: [PrismaService, DataloaderService],
+      useFactory: (
+        db: PrismaService,
+        dataLoaderService: DataloaderService,
+      ) => ({
         graphiql: true,
         autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,
         context: ({ req, res }: { req: Request; res: Response }) => {
           return {
-            dataLoaderService: new DataloaderService(db),
+            loaders: dataLoaderService.getLoaders(),
             req,
             res,
           } as GraphqlAppContext;
@@ -72,5 +78,5 @@ export class AppModule {}
 
 export type GraphqlAppContext = GraphQlContext & {
   user?: AuthenticatedUserDto;
-  dataLoaderService: DataloaderService;
+  loaders: IDataLoaders;
 };

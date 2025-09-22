@@ -2,21 +2,16 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Category } from '@prisma/client';
-import { RedisService } from 'src/redis/redis.service';
-import { LocalesService } from 'src/locales/locales.service';
+import { Category, CategoryTranslation } from '@prisma/client';
+import { DEFAULT_LANG } from 'src/config/variables';
 
 @Injectable()
 export class CategoriesService {
   private readonly CATEGORIES_CACHE_KEY = 'app:categories';
-
+  private readonly DEFAULT_LANG = DEFAULT_LANG;
   private readonly logger = new Logger(CategoriesService.name);
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly redisService: RedisService,
-    private readonly localeService: LocalesService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
   async create(createCategoryInput: CreateCategoryInput) {
     const { translations, ...newCategory } = createCategoryInput;
 
@@ -53,93 +48,24 @@ export class CategoriesService {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
-  private async invalidateCategoriesCache(
-    id: string,
-    parentCategoryId: string | null,
-  ) {
-    const findAllCategoriesKey =
-      this.CATEGORIES_CACHE_KEY +
-      (parentCategoryId ? `:${parentCategoryId}` : '');
-    await this.redisService.client.del(findAllCategoriesKey);
-    await this.redisService.client.del(this.getCategoryCacheKey(id));
-  }
-
   async findAll(parentId?: string): Promise<Category[]> {
     if (parentId && parentId.trim() !== '') {
       const categories = await this.prisma.category.findMany({
         where: { parentCategoryId: parentId },
       });
-      await this.redisService.client.set(
-        this.getCategoryCacheKey(parentId),
-        JSON.stringify(categories),
-        {
-          expiration: {
-            type: 'EX',
-            value: 60 * 60 * 24,
-          },
-        },
-      );
+
       return categories;
     }
 
-    const cachedCategories = await this.redisService.client.get(
-      this.CATEGORIES_CACHE_KEY,
-    );
-    if (cachedCategories) {
-      try {
-        return JSON.parse(cachedCategories) as Category[];
-      } catch (error) {
-        this.logger.error(
-          `Failed to parse cached categories: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
-    }
-
     const categories = await this.prisma.category.findMany();
-    await this.redisService.client.set(
-      this.CATEGORIES_CACHE_KEY,
-      JSON.stringify(categories),
-      {
-        expiration: {
-          type: 'EX',
-          value: 60 * 60 * 24,
-        },
-      },
-    );
+
     return categories;
   }
 
   async findOne(id: string) {
-    const cachedCategory = await this.redisService.client.get(
-      this.getCategoryCacheKey(id),
-    );
-
-    if (cachedCategory) {
-      try {
-        return JSON.parse(cachedCategory) as Category;
-      } catch (error) {
-        this.logger.error(
-          `Failed to parse cached category for id ${id}: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
-    }
-
     const category = await this.prisma.category.findUnique({
       where: { id },
     });
-
-    if (category) {
-      await this.redisService.client.set(
-        this.getCategoryCacheKey(id),
-        JSON.stringify(category),
-        {
-          expiration: {
-            type: 'EX',
-            value: 60 * 60 * 24,
-          },
-        },
-      );
-    }
 
     return category;
   }
@@ -154,10 +80,8 @@ export class CategoriesService {
     });
 
     if (!currentCategory) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException();
     }
-
-    await this.invalidateCategoriesCache(id, currentCategory.parentCategoryId);
 
     return this.prisma.category.update({
       where: { id },
@@ -173,8 +97,6 @@ export class CategoriesService {
       const res = await this.prisma.category.delete({
         where: { id },
       });
-
-      await this.invalidateCategoriesCache(res.id, res.parentCategoryId);
     } catch (error) {
       this.logger.error(
         `Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`,
@@ -215,6 +137,46 @@ export class CategoriesService {
           isActive: true,
         },
       },
+    });
+  }
+
+  /**
+   * Metóda navrhnutá (najmä) pre data loader
+   * source: @link https://blog.logrocket.com/use-dataloader-nestjs/#setting-up-nestjs-graphql
+   * @param lang
+   * @param categoryIds
+   * @returns
+   */
+  async getAllTranslationsByBatch(
+    lang: string,
+    categoryIds: string[],
+  ): Promise<(CategoryTranslation | null)[]> {
+    const categoryTranslations = await this.prisma.categoryTranslation.findMany(
+      {
+        where: {
+          categoryId: {
+            in: categoryIds,
+          },
+          locale: {
+            code: {
+              in: [lang, DEFAULT_LANG],
+            },
+          },
+        },
+        include: {
+          locale: {
+            select: {
+              code: true,
+            },
+          },
+        },
+      },
+    );
+
+    return categoryIds.map((id) => {
+      const cts = categoryTranslations.filter((ct) => ct.categoryId === id);
+      if (cts.length === 0) return null;
+      return cts.find((ct) => ct.locale.code === lang) || cts[0];
     });
   }
 

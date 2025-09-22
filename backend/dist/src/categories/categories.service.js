@@ -13,18 +13,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoriesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const redis_service_1 = require("../redis/redis.service");
-const locales_service_1 = require("../locales/locales.service");
+const variables_1 = require("../config/variables");
 let CategoriesService = CategoriesService_1 = class CategoriesService {
     prisma;
-    redisService;
-    localeService;
     CATEGORIES_CACHE_KEY = 'app:categories';
+    DEFAULT_LANG = variables_1.DEFAULT_LANG;
     logger = new common_1.Logger(CategoriesService_1.name);
-    constructor(prisma, redisService, localeService) {
+    constructor(prisma) {
         this.prisma = prisma;
-        this.redisService = redisService;
-        this.localeService = localeService;
     }
     async create(createCategoryInput) {
         const { translations, ...newCategory } = createCategoryInput;
@@ -55,73 +51,20 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
     getCategoryCacheKey(id) {
         return `${this.CATEGORIES_CACHE_KEY}:${id}`;
     }
-    async invalidateCategoriesCache(id, parentCategoryId) {
-        const findAllCategoriesKey = this.CATEGORIES_CACHE_KEY +
-            (parentCategoryId ? `:${parentCategoryId}` : '');
-        await this.redisService.client.del(findAllCategoriesKey);
-        await this.redisService.client.del(this.getCategoryCacheKey(id));
-    }
     async findAll(parentId) {
         if (parentId && parentId.trim() !== '') {
-            const cachedCategories = await this.redisService.client.get(this.getCategoryCacheKey(parentId));
-            if (cachedCategories) {
-                try {
-                    return JSON.parse(cachedCategories);
-                }
-                catch (error) {
-                    this.logger.error(`Failed to parse cached categories for parentId ${parentId}: ${error instanceof Error ? error.message : String(error)}`);
-                }
-            }
             const categories = await this.prisma.category.findMany({
                 where: { parentCategoryId: parentId },
             });
-            await this.redisService.client.set(this.getCategoryCacheKey(parentId), JSON.stringify(categories), {
-                expiration: {
-                    type: 'EX',
-                    value: 60 * 60 * 24,
-                },
-            });
             return categories;
         }
-        const cachedCategories = await this.redisService.client.get(this.CATEGORIES_CACHE_KEY);
-        if (cachedCategories) {
-            try {
-                return JSON.parse(cachedCategories);
-            }
-            catch (error) {
-                this.logger.error(`Failed to parse cached categories: ${error instanceof Error ? error.message : String(error)}`);
-            }
-        }
         const categories = await this.prisma.category.findMany();
-        await this.redisService.client.set(this.CATEGORIES_CACHE_KEY, JSON.stringify(categories), {
-            expiration: {
-                type: 'EX',
-                value: 60 * 60 * 24,
-            },
-        });
         return categories;
     }
     async findOne(id) {
-        const cachedCategory = await this.redisService.client.get(this.getCategoryCacheKey(id));
-        if (cachedCategory) {
-            try {
-                return JSON.parse(cachedCategory);
-            }
-            catch (error) {
-                this.logger.error(`Failed to parse cached category for id ${id}: ${error instanceof Error ? error.message : String(error)}`);
-            }
-        }
         const category = await this.prisma.category.findUnique({
             where: { id },
         });
-        if (category) {
-            await this.redisService.client.set(this.getCategoryCacheKey(id), JSON.stringify(category), {
-                expiration: {
-                    type: 'EX',
-                    value: 60 * 60 * 24,
-                },
-            });
-        }
         return category;
     }
     async update(id, updateCategoryInput) {
@@ -133,9 +76,8 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
             },
         });
         if (!currentCategory) {
-            throw new common_1.NotFoundException('Category not found');
+            throw new common_1.NotFoundException();
         }
-        await this.invalidateCategoriesCache(id, currentCategory.parentCategoryId);
         return this.prisma.category.update({
             where: { id },
             data: {
@@ -149,7 +91,6 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
             const res = await this.prisma.category.delete({
                 where: { id },
             });
-            await this.invalidateCategoriesCache(res.id, res.parentCategoryId);
         }
         catch (error) {
             this.logger.error(`Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`);
@@ -167,6 +108,44 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
     async getCategorySubcategoriesByBatch(parentIds) {
         const categories = await this.findAllSubcategoriesByParentIds(parentIds);
         return parentIds.map((parentId) => categories.filter((category) => category.parentCategoryId === parentId) || null);
+    }
+    async findTranslation(categoryId, locale) {
+        return this.prisma.categoryTranslation.findFirst({
+            where: {
+                categoryId: categoryId,
+                locale: {
+                    code: locale,
+                    isActive: true,
+                },
+            },
+        });
+    }
+    async getAllTranslationsByBatch(lang, categoryIds) {
+        const categoryTranslations = await this.prisma.categoryTranslation.findMany({
+            where: {
+                categoryId: {
+                    in: categoryIds,
+                },
+                locale: {
+                    code: {
+                        in: [lang, variables_1.DEFAULT_LANG],
+                    },
+                },
+            },
+            include: {
+                locale: {
+                    select: {
+                        code: true,
+                    },
+                },
+            },
+        });
+        return categoryIds.map((id) => {
+            const cts = categoryTranslations.filter((ct) => ct.categoryId === id);
+            if (cts.length === 0)
+                return null;
+            return cts.find((ct) => ct.locale.code === lang) || cts[0];
+        });
     }
     async findTranslations(id, locale) {
         if (!locale) {
@@ -199,8 +178,6 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
 exports.CategoriesService = CategoriesService;
 exports.CategoriesService = CategoriesService = CategoriesService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        redis_service_1.RedisService,
-        locales_service_1.LocalesService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], CategoriesService);
 //# sourceMappingURL=categories.service.js.map

@@ -13,27 +13,24 @@ exports.DataloaderService = void 0;
 const common_1 = require("@nestjs/common");
 const DataLoader = require("dataloader");
 const prisma_service_1 = require("../prisma/prisma.service");
+const categories_service_1 = require("../categories/categories.service");
+const nestjs_i18n_1 = require("nestjs-i18n");
+const variables_1 = require("../config/variables");
 let DataloaderService = class DataloaderService {
     db;
-    constructor(db) {
+    categoriesService;
+    static DEFAULT_LANG = variables_1.DEFAULT_LANG;
+    constructor(db, categoriesService) {
         this.db = db;
+        this.categoriesService = categoriesService;
     }
-    loaders = {
-        subcategoriesLoader: undefined,
-    };
-    getLoader(loader) {
-        if (!this.loaders[loader]) {
-            this.loaders[loader] = this._createLoader(loader);
-        }
-        return this.loaders[loader];
-    }
-    _createLoader(loader) {
-        switch (loader) {
-            case 'subcategoriesLoader':
-                return this._createSubcategoriesLoader();
-            default:
-                throw new Error(`Loader ${loader} not found`);
-        }
+    getLoaders() {
+        const subcategoriesLoader = this._createSubcategoriesLoader();
+        const categoryTranslationLoader = this._createCategoryTranslationLoader(nestjs_i18n_1.I18nContext.current()?.lang || variables_1.DEFAULT_LANG);
+        return {
+            subcategoriesLoader,
+            categoryTranslationLoader,
+        };
     }
     _createSubcategoriesLoader() {
         return new DataLoader(async (categoryIds) => {
@@ -47,12 +44,16 @@ let DataloaderService = class DataloaderService {
             return categoryIds.map((id) => subcategories.filter((subc) => subc.parentCategoryId === id));
         });
     }
+    _createCategoryTranslationLoader(lang) {
+        return new DataLoader(async (categoryIds) => {
+            return await this.categoriesService.getAllTranslationsByBatch(lang, categoryIds);
+        });
+    }
 };
 exports.DataloaderService = DataloaderService;
 exports.DataloaderService = DataloaderService = __decorate([
-    (0, common_1.Injectable)({
-        scope: common_1.Scope.REQUEST,
-    }),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        categories_service_1.CategoriesService])
 ], DataloaderService);
 //# sourceMappingURL=dataloader.service.js.map

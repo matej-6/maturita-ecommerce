@@ -36,7 +36,7 @@ export declare class CategoriesResolver {
         parentCategoryId: string | null;
     }>;
     removeCategory(id: string): Promise<void>;
-    subcategories(category: Category, ctx: GraphqlAppContext): Promise<{
+    subcategories(category: Category, { loaders }: GraphqlAppContext): Promise<{
         id: string;
         slug: string;
         createdAt: Date;
@@ -50,4 +50,5 @@ export declare class CategoriesResolver {
         localeId: string;
         categoryId: string;
     }[]>;
+    categoryName(category: Category, ctx: GraphqlAppContext, i18n: I18nContext): Promise<void>;
 }

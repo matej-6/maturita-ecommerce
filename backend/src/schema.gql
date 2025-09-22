@@ -4,7 +4,9 @@
 
 type Category {
   createdAt: DateTime!
+  description: String
   id: ID!
+  name: String!
   parentCategoryId: String
   slug: String!
   subcategories: [Category!]!
