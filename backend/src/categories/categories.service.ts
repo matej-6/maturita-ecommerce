@@ -48,7 +48,7 @@ export class CategoriesService {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
-  async findAll(parentId?: string): Promise<Category[]> {
+  async findAll(parentId?: string | null): Promise<Category[]> {
     if (parentId && parentId.trim() !== '') {
       const categories = await this.prisma.category.findMany({
         where: { parentCategoryId: parentId },
@@ -57,7 +57,11 @@ export class CategoriesService {
       return categories;
     }
 
-    const categories = await this.prisma.category.findMany();
+    const categories = await this.prisma.category.findMany({
+      where: {
+        parentCategoryId: null,
+      },
+    });
 
     return categories;
   }
@@ -134,7 +138,6 @@ export class CategoriesService {
         categoryId: categoryId,
         locale: {
           code: locale,
-          isActive: true,
         },
       },
     });

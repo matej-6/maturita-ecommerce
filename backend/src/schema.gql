@@ -4,7 +4,7 @@
 
 type Category {
   createdAt: DateTime!
-  description: String
+  description: String!
   id: ID!
   name: String!
   parentCategoryId: String
@@ -12,7 +12,7 @@ type Category {
   subcategories: [Category!]!
 
   """Category translations"""
-  translations: [CategoryTranslation!]!
+  translations(langs: [String!]!): [CategoryTranslation!]!
   updatedAt: DateTime!
 }
 
@@ -111,7 +111,12 @@ type Mutation {
 }
 
 type Query {
-  categories(withParentId: String): [Category!]!
+  categories(
+    """
+    gets subcategories of a category with provided parentId, to fetch all categories with no parent id, set the value to an emtpy string: ""
+    """
+    parentId: String!
+  ): [Category!]!
   category(id: ID!): Category!
   locale(id: String!): Locale!
   locales: [Locale!]!

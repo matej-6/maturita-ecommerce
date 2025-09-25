@@ -16,7 +16,7 @@ export declare class CategoriesService {
         parentCategoryId: string | null;
     }>;
     private getCategoryCacheKey;
-    findAll(parentId?: string): Promise<Category[]>;
+    findAll(parentId?: string | null): Promise<Category[]>;
     findOne(id: string): Promise<{
         id: string;
         slug: string;

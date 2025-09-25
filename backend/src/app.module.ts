@@ -46,6 +46,7 @@ import { DEFAULT_LANG } from './config/variables';
         db: PrismaService,
         dataLoaderService: DataloaderService,
       ) => ({
+        fieldResolverEnhancers: ['guards'], // aby som mohol pouzivat @UseGuards() aj nad fieldResolvers
         graphiql: true,
         autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,

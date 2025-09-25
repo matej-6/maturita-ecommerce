@@ -4,7 +4,7 @@ import { Env } from 'src/config/validate';
 import { AuthService } from '../auth.service';
 import { AuthenticatedUserDto } from '../dto/authenticated-user.dto';
 import { RequestWithToken } from './request-with-token.type';
-declare const JwtRefreshStrategy_base: new (...args: [opt: import("passport-jwt").StrategyOptionsWithoutRequest] | [opt: import("passport-jwt").StrategyOptionsWithRequest]) => Strategy & {
+declare const JwtRefreshStrategy_base: new (...args: [opt: import("passport-jwt").StrategyOptionsWithRequest] | [opt: import("passport-jwt").StrategyOptionsWithoutRequest]) => Strategy & {
     validate(...args: any[]): unknown;
 };
 export declare class JwtRefreshStrategy extends JwtRefreshStrategy_base {

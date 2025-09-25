@@ -32,10 +32,14 @@ export class CategoriesResolver {
 
   @Query(() => [Category], { name: 'categories' })
   findAll(
-    @Args('withParentId', { name: 'withParentId', nullable: true })
-    withParentId?: string,
+    @Args('parentId', {
+      name: 'parentId',
+      description:
+        'gets subcategories of a category with provided parentId, to fetch all categories with no parent id, set the value to an emtpy string: ""',
+    })
+    parentId: string,
   ) {
-    return this.categoriesService.findAll(withParentId);
+    return this.categoriesService.findAll(parentId);
   }
 
   @Query(() => Category, { name: 'category' })
@@ -71,7 +75,9 @@ export class CategoriesResolver {
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
-    @Context() ctx: GraphqlAppContext,
+    @Args('langs', { type: () => [String] }) langs: string[],
+    @Context()
+    ctx: GraphqlAppContext,
     @I18n() i18n: I18nContext,
   ) {
     const { id } = category;
@@ -88,14 +94,21 @@ export class CategoriesResolver {
   async categoryName(
     @Parent() category: Category,
     @Context() ctx: GraphqlAppContext,
-    @I18n() i18n: I18nContext,
   ) {
-    const res = await this.categoriesService.findTranslation(
-      category.id,
-      i18n.lang,
-    );
+    const res = await ctx.loaders.categoryTranslationLoader.load(category.id);
     if (!res?.name) {
       throw new NotFoundException();
     }
+
+    return res.name;
+  }
+
+  @ResolveField(() => String, { name: 'description' })
+  async resolveCategoryDescription(
+    @Parent() category: Category,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    const res = await ctx.loaders.categoryTranslationLoader.load(category.id);
+    return res?.description ?? null;
   }
 }

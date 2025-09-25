@@ -58,7 +58,11 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
             });
             return categories;
         }
-        const categories = await this.prisma.category.findMany();
+        const categories = await this.prisma.category.findMany({
+            where: {
+                parentCategoryId: null,
+            },
+        });
         return categories;
     }
     async findOne(id) {
@@ -115,7 +119,6 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
                 categoryId: categoryId,
                 locale: {
                     code: locale,
-                    isActive: true,
                 },
             },
         });

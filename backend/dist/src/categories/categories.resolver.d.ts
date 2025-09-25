@@ -14,7 +14,7 @@ export declare class CategoriesResolver {
         updatedAt: Date;
         parentCategoryId: string | null;
     }>;
-    findAll(withParentId?: string): Promise<{
+    findAll(parentId: string): Promise<{
         id: string;
         slug: string;
         createdAt: Date;
@@ -43,12 +43,13 @@ export declare class CategoriesResolver {
         updatedAt: Date;
         parentCategoryId: string | null;
     }[]>;
-    translations(category: Category, ctx: GraphqlAppContext, i18n: I18nContext): Promise<{
+    translations(category: Category, langs: string[], ctx: GraphqlAppContext, i18n: I18nContext): Promise<{
         id: string;
         name: string;
         description: string | null;
         localeId: string;
         categoryId: string;
     }[]>;
-    categoryName(category: Category, ctx: GraphqlAppContext, i18n: I18nContext): Promise<void>;
+    categoryName(category: Category, ctx: GraphqlAppContext): Promise<string>;
+    resolveCategoryDescription(category: Category, ctx: GraphqlAppContext): Promise<string | null>;
 }
