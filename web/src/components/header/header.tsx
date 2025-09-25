@@ -29,7 +29,7 @@ export async function Header() {
             href="/"
             className="font-primary font-light text-3xl md:text-3xl"
           >
-            GRABLY
+            GoFitShop
           </Link>
         </div>
         <div className="col-span-3 flex justify-center">
