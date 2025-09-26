@@ -10,8 +10,6 @@ exports.ContainsEnglishTranslation = ContainsEnglishTranslation;
 const class_validator_1 = require("class-validator");
 let ContainsEnglishTranslationConstraint = class ContainsEnglishTranslationConstraint {
     validate(translations, validationArguments) {
-        if (!Array.isArray(translations))
-            return false;
         return translations.some((t) => t.localeCode === 'en');
     }
     defaultMessage(validationArguments) {

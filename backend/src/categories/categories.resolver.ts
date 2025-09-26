@@ -14,10 +14,9 @@ import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
 import { CategoryTranslation } from './entities/category-translation.entity';
-import { I18n, I18N_LANGUAGES, I18nContext } from 'nestjs-i18n';
+import { I18n, I18nContext } from 'nestjs-i18n';
 import { NotFoundException, UseGuards } from '@nestjs/common';
 import { GqlAdminGuard } from 'src/auth/guards/gql-admin.guard';
-import { DEFAULT_LANG } from 'src/config/variables';
 
 @Resolver(() => Category)
 export class CategoriesResolver {

@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -15,14 +20,9 @@ export class CategoriesService {
   async create(createCategoryInput: CreateCategoryInput) {
     const { translations, ...newCategory } = createCategoryInput;
 
-    // check if translations are valid and there are no duplicates
+    // ensure no duplicate translations are created
     const uniqueTranslations = new Map<string, (typeof translations)[number]>();
     for (const translation of translations) {
-      if (uniqueTranslations.has(translation.localeCode)) {
-        throw new Error(
-          `Duplicate translation found for locale: ${translation.localeCode}`,
-        );
-      }
       uniqueTranslations.set(translation.localeCode, translation);
     }
 
@@ -98,13 +98,24 @@ export class CategoriesService {
 
   async remove(id: string) {
     try {
-      const res = await this.prisma.category.delete({
-        where: { id },
+      await this.prisma.$transaction(async (tx) => {
+        // 1. odstranit vsetky translations
+        await tx.categoryTranslation.deleteMany({
+          where: {
+            categoryId: id,
+          },
+        });
+
+        // 2. odstranit categry
+        await tx.category.delete({
+          where: { id },
+        });
       });
     } catch (error) {
       this.logger.error(
         `Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`,
       );
+      throw new Error(error);
     }
   }
 

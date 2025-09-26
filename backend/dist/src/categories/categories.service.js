@@ -26,9 +26,6 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
         const { translations, ...newCategory } = createCategoryInput;
         const uniqueTranslations = new Map();
         for (const translation of translations) {
-            if (uniqueTranslations.has(translation.localeCode)) {
-                throw new Error(`Duplicate translation found for locale: ${translation.localeCode}`);
-            }
             uniqueTranslations.set(translation.localeCode, translation);
         }
         return this.prisma.category.create({
@@ -92,12 +89,20 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
     }
     async remove(id) {
         try {
-            const res = await this.prisma.category.delete({
-                where: { id },
+            await this.prisma.$transaction(async (tx) => {
+                await tx.categoryTranslation.deleteMany({
+                    where: {
+                        categoryId: id,
+                    },
+                });
+                await tx.category.delete({
+                    where: { id },
+                });
             });
         }
         catch (error) {
             this.logger.error(`Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`);
+            throw new Error(error);
         }
     }
     async findAllSubcategoriesByParentIds(parentIds) {

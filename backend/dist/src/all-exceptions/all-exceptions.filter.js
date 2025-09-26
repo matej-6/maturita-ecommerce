@@ -11,11 +11,16 @@ const common_1 = require("@nestjs/common");
 const exception_body_formatter_1 = require("../lib/exception-body-formatter");
 let AllExceptionsFilter = class AllExceptionsFilter {
     catch(exception, host) {
-        const ctx = host.switchToHttp();
-        const response = ctx.getResponse();
-        response
-            .status(exception.getStatus())
-            .json((0, exception_body_formatter_1.exceptionBodyFormatter)(host, exception));
+        try {
+            const ctx = host.switchToHttp();
+            const response = ctx.getResponse();
+            response
+                .status(exception.getStatus())
+                .json((0, exception_body_formatter_1.exceptionBodyFormatter)(host, exception));
+        }
+        catch (e) {
+            return exception;
+        }
     }
 };
 exports.AllExceptionsFilter = AllExceptionsFilter;

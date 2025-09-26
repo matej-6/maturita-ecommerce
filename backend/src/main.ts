@@ -22,8 +22,9 @@ async function bootstrap() {
   app.use(I18nMiddleware);
   app.useGlobalPipes(
     new I18nValidationPipe({
-      whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
+      validateCustomDecorators: true,
     }),
   );
   app.useGlobalFilters(

@@ -18,8 +18,9 @@ async function bootstrap() {
     app.use(cookieParser());
     app.use(nestjs_i18n_1.I18nMiddleware);
     app.useGlobalPipes(new nestjs_i18n_1.I18nValidationPipe({
-        whitelist: true,
+        forbidNonWhitelisted: true,
         transform: true,
+        validateCustomDecorators: true,
     }));
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter(), new nestjs_i18n_1.I18nValidationExceptionFilter({
         detailedErrors: false,

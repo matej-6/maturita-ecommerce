@@ -10,11 +10,15 @@ import { exceptionBodyFormatter } from 'src/lib/exception-body-formatter';
 @Catch(HttpException)
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
+    try {
+      const ctx = host.switchToHttp();
 
-    const response: Response = ctx.getResponse();
-    response
-      .status(exception.getStatus())
-      .json(exceptionBodyFormatter(host, exception));
+      const response: Response = ctx.getResponse();
+      response
+        .status(exception.getStatus())
+        .json(exceptionBodyFormatter(host, exception));
+    } catch (e) {
+      return exception;
+    }
   }
 }

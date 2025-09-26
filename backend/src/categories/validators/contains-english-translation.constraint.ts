@@ -14,7 +14,6 @@ class ContainsEnglishTranslationConstraint
     translations: { localeCode: string }[],
     validationArguments?: ValidationArguments,
   ): boolean {
-    if (!Array.isArray(translations)) return false;
     return translations.some((t) => t.localeCode === 'en');
   }
 

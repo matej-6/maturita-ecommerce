@@ -48,6 +48,12 @@ exports.AppModule = AppModule = __decorate([
                 imports: [prisma_module_1.PrismaModule, dataloader_module_1.DataloaderModule],
                 inject: [prisma_service_1.PrismaService, dataloader_service_1.DataloaderService],
                 useFactory: (db, dataLoaderService) => ({
+                    formatError: (error) => {
+                        return {
+                            message: error.message,
+                            code: error.extensions?.code,
+                        };
+                    },
                     fieldResolverEnhancers: ['guards'],
                     graphiql: true,
                     autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
