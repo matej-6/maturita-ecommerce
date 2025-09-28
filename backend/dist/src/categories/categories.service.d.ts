@@ -1,13 +1,14 @@
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Category, CategoryTranslation } from '@prisma/client';
+import { Category, CategoryTranslation } from 'generated/prisma/client';
+import { LocalesService } from 'src/locales/locales.service';
 export declare class CategoriesService {
     private readonly prisma;
+    private readonly localesService;
     private readonly CATEGORIES_CACHE_KEY;
-    private readonly DEFAULT_LANG;
     private readonly logger;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, localesService: LocalesService);
     create(createCategoryInput: CreateCategoryInput): Promise<{
         id: string;
         slug: string;
@@ -36,17 +37,19 @@ export declare class CategoriesService {
     getCategorySubcategoriesByBatch(parentIds: string[]): Promise<(Category[] | null)[]>;
     findTranslation(categoryId: string, locale: string): Promise<{
         id: string;
+        locale: string;
         name: string;
         description: string | null;
-        localeId: string;
+        isActive: boolean;
         categoryId: string;
     } | null>;
     getAllTranslationsByBatch(lang: string, categoryIds: string[]): Promise<(CategoryTranslation | null)[]>;
-    findTranslations(id: string, locale?: string): Promise<{
+    findTranslations(id: string, locales?: string[]): Promise<{
         id: string;
+        locale: string;
         name: string;
         description: string | null;
-        localeId: string;
+        isActive: boolean;
         categoryId: string;
     }[]>;
 }

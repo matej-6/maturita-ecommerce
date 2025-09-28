@@ -1,7 +1,5 @@
-import { type Locale as DbLocale } from '@prisma/client';
-export declare class Locale implements Partial<DbLocale> {
-    id: string;
+import type { Locale as LocaleType } from 'src/locales';
+export declare class Locale implements LocaleType {
     code: string;
     name: string;
-    isActive: boolean;
 }

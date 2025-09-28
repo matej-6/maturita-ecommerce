@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { IDataLoaders } from './dataloader.interface';
 import * as DataLoader from 'dataloader';
-import { Category, CategoryTranslation } from '@prisma/client';
+import { Category, CategoryTranslation } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoriesService } from 'src/categories/categories.service';
 import { I18nContext } from 'nestjs-i18n';
-import { DEFAULT_LANG } from 'src/config/variables';
+import { DEFAULT_LOCALE } from 'src/locales';
 
 @Injectable()
 export class DataloaderService {
-  static DEFAULT_LANG = DEFAULT_LANG;
-
   constructor(
     private readonly db: PrismaService,
     private readonly categoriesService: CategoriesService,
@@ -19,7 +17,7 @@ export class DataloaderService {
   getLoaders(): IDataLoaders {
     const subcategoriesLoader = this._createSubcategoriesLoader();
     const categoryTranslationLoader = this._createCategoryTranslationLoader(
-      I18nContext.current()?.lang || DEFAULT_LANG,
+      I18nContext.current()?.lang || DEFAULT_LOCALE.code,
     );
 
     return {

@@ -1,5 +1,5 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { Category } from '@prisma/client';
+import { Category } from 'generated/prisma/client';
 import DataLoader from 'dataloader';
 import { PrismaService } from 'src/prisma/prisma.service';
 

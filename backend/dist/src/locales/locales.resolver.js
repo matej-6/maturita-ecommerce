@@ -16,15 +16,10 @@ exports.LocalesResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const locales_service_1 = require("./locales.service");
 const locale_entity_1 = require("./entities/locale.entity");
-const create_locale_input_1 = require("./dto/create-locale.input");
-const update_locale_input_1 = require("./dto/update-locale.input");
 let LocalesResolver = class LocalesResolver {
     localesService;
     constructor(localesService) {
         this.localesService = localesService;
-    }
-    createLocale(createLocaleInput) {
-        return this.localesService.create(createLocaleInput);
     }
     findAll() {
         return this.localesService.findAll();
@@ -32,21 +27,8 @@ let LocalesResolver = class LocalesResolver {
     findOne(id) {
         return this.localesService.findOne(id);
     }
-    updateLocale(updateLocaleInput) {
-        return this.localesService.update(updateLocaleInput.id, updateLocaleInput);
-    }
-    removeLocale(id) {
-        return this.localesService.remove(id);
-    }
 };
 exports.LocalesResolver = LocalesResolver;
-__decorate([
-    (0, graphql_1.Mutation)(() => locale_entity_1.Locale),
-    __param(0, (0, graphql_1.Args)('createLocaleInput')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_locale_input_1.CreateLocaleInput]),
-    __metadata("design:returntype", void 0)
-], LocalesResolver.prototype, "createLocale", null);
 __decorate([
     (0, graphql_1.Query)(() => [locale_entity_1.Locale], { name: 'locales' }),
     __metadata("design:type", Function),
@@ -60,20 +42,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], LocalesResolver.prototype, "findOne", null);
-__decorate([
-    (0, graphql_1.Mutation)(() => locale_entity_1.Locale),
-    __param(0, (0, graphql_1.Args)('updateLocaleInput')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_locale_input_1.UpdateLocaleInput]),
-    __metadata("design:returntype", void 0)
-], LocalesResolver.prototype, "updateLocale", null);
-__decorate([
-    (0, graphql_1.Mutation)(() => locale_entity_1.Locale),
-    __param(0, (0, graphql_1.Args)('id', { type: () => String })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], LocalesResolver.prototype, "removeLocale", null);
 exports.LocalesResolver = LocalesResolver = __decorate([
     (0, graphql_1.Resolver)(() => locale_entity_1.Locale),
     __metadata("design:paramtypes", [locales_service_1.LocalesService])

@@ -12,16 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Locale = void 0;
 const graphql_1 = require("@nestjs/graphql");
 let Locale = class Locale {
-    id;
     code;
     name;
-    isActive;
 };
 exports.Locale = Locale;
-__decorate([
-    (0, graphql_1.Field)(() => graphql_1.ID),
-    __metadata("design:type", String)
-], Locale.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Locale code' }),
     __metadata("design:type", String)
@@ -30,10 +24,6 @@ __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Native locale name' }),
     __metadata("design:type", String)
 ], Locale.prototype, "name", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => Boolean, { description: 'Is the locale active?' }),
-    __metadata("design:type", Boolean)
-], Locale.prototype, "isActive", void 0);
 exports.Locale = Locale = __decorate([
     (0, graphql_1.ObjectType)()
 ], Locale);

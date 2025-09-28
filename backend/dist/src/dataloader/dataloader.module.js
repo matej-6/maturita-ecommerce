@@ -12,14 +12,16 @@ const dataloader_service_1 = require("./dataloader.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const categories_module_1 = require("../categories/categories.module");
 const categories_service_1 = require("../categories/categories.service");
+const locales_module_1 = require("../locales/locales.module");
+const locales_service_1 = require("../locales/locales.service");
 let DataloaderModule = class DataloaderModule {
 };
 exports.DataloaderModule = DataloaderModule;
 exports.DataloaderModule = DataloaderModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, categories_module_1.CategoriesModule],
-        providers: [dataloader_service_1.DataloaderService, categories_service_1.CategoriesService],
+        imports: [prisma_module_1.PrismaModule, categories_module_1.CategoriesModule, locales_module_1.LocalesModule],
+        providers: [dataloader_service_1.DataloaderService, categories_service_1.CategoriesService, locales_service_1.LocalesService],
         exports: [dataloader_service_1.DataloaderService],
     })
 ], DataloaderModule);

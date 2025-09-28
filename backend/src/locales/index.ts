@@ -1,0 +1,17 @@
+export const Locales = {
+  english: {
+    code: 'en',
+    name: 'English',
+  },
+  slovak: {
+    code: 'sk',
+    name: 'Slovensky',
+  },
+} as const satisfies Record<string, Locale>;
+
+export const DEFAULT_LOCALE = Locales.english;
+
+export type Locale = {
+  code: string;
+  name: string;
+};

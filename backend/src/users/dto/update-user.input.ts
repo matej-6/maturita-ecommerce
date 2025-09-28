@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import type { User } from '@prisma/client';
+import type { User } from 'generated/prisma/client';
 import {
   IsEmail,
   IsNotEmpty,

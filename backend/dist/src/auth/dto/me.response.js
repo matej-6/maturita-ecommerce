@@ -12,7 +12,7 @@ var MeResponse_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MeResponse = void 0;
 const graphql_1 = require("@nestjs/graphql");
-const client_1 = require("@prisma/client");
+const client_1 = require("../../../generated/prisma/client");
 let MeResponse = MeResponse_1 = class MeResponse {
     static fromUser(user) {
         const meResponse = new MeResponse_1();

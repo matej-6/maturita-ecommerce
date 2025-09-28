@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Response } from 'express';
-import { Role } from '@prisma/client';
+import { Role } from 'generated/prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 export declare class AuthService {
@@ -43,14 +43,14 @@ export declare class AuthService {
     signOut(refreshToken: string, userId: string): Promise<void>;
     register(registerDto: RegisterDto): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        role: import("@prisma/client").$Enums.Role;
-        lastName: string | null;
         email: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
+        lastName: string | null;
         avatar: string | null;
+        role: Role;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }

@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-import { type CategoryTranslation as DbCategoryTranslation } from '@prisma/client';
+import { type CategoryTranslation as DbCategoryTranslation } from 'generated/prisma/client';
 import { Locale } from 'src/locales/entities/locale.entity';
 
 @ObjectType()
@@ -20,6 +20,9 @@ export class CategoryTranslation implements Partial<DbCategoryTranslation> {
   @Field(() => ID)
   categoryId: string;
 
-  @Field(() => Locale)
-  locale: Locale;
+  @Field(() => String)
+  locale: string;
+
+  @Field(() => Boolean)
+  isActive: boolean;
 }

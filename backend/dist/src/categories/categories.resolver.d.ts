@@ -3,7 +3,6 @@ import { Category } from './entities/category.entity';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
-import { I18nContext } from 'nestjs-i18n';
 export declare class CategoriesResolver {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
@@ -43,11 +42,12 @@ export declare class CategoriesResolver {
         updatedAt: Date;
         parentCategoryId: string | null;
     }[]>;
-    translations(category: Category, langs: string[], ctx: GraphqlAppContext, i18n: I18nContext): Promise<{
+    translations(category: Category, langs?: string[]): Promise<{
         id: string;
+        locale: string;
         name: string;
         description: string | null;
-        localeId: string;
+        isActive: boolean;
         categoryId: string;
     }[]>;
     categoryName(category: Category, ctx: GraphqlAppContext): Promise<string>;

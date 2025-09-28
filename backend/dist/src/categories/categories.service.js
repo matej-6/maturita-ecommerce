@@ -13,20 +13,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoriesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const variables_1 = require("../config/variables");
+const locales_service_1 = require("../locales/locales.service");
+const locales_1 = require("../locales");
 let CategoriesService = CategoriesService_1 = class CategoriesService {
     prisma;
+    localesService;
     CATEGORIES_CACHE_KEY = 'app:categories';
-    DEFAULT_LANG = variables_1.DEFAULT_LANG;
     logger = new common_1.Logger(CategoriesService_1.name);
-    constructor(prisma) {
+    constructor(prisma, localesService) {
         this.prisma = prisma;
+        this.localesService = localesService;
     }
     async create(createCategoryInput) {
         const { translations, ...newCategory } = createCategoryInput;
+        const existingCategory = await this.prisma.category.findUnique({
+            where: {
+                slug: newCategory.slug,
+            },
+        });
+        if (existingCategory) {
+            this.logger.error('A category with this slug already exists: ', newCategory.slug);
+            throw new common_1.BadRequestException();
+        }
+        const validLocales = this.localesService.findAll();
         const uniqueTranslations = new Map();
         for (const translation of translations) {
-            uniqueTranslations.set(translation.localeCode, translation);
+            if (validLocales.some((c) => c.code === translation.localeCode)) {
+                uniqueTranslations.set(translation.localeCode, translation);
+            }
         }
         return this.prisma.category.create({
             data: {
@@ -35,11 +49,7 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
                     create: Array.from(uniqueTranslations.values()).map((t) => ({
                         name: t.name,
                         description: t.description,
-                        locale: {
-                            connect: {
-                                code: t.localeCode,
-                            },
-                        },
+                        locale: t.localeCode,
                     })),
                 },
             },
@@ -122,9 +132,7 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
         return this.prisma.categoryTranslation.findFirst({
             where: {
                 categoryId: categoryId,
-                locale: {
-                    code: locale,
-                },
+                locale: locale,
             },
         });
     }
@@ -135,16 +143,7 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
                     in: categoryIds,
                 },
                 locale: {
-                    code: {
-                        in: [lang, variables_1.DEFAULT_LANG],
-                    },
-                },
-            },
-            include: {
-                locale: {
-                    select: {
-                        code: true,
-                    },
+                    in: [lang, locales_1.DEFAULT_LOCALE.code],
                 },
             },
         });
@@ -152,11 +151,11 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
             const cts = categoryTranslations.filter((ct) => ct.categoryId === id);
             if (cts.length === 0)
                 return null;
-            return cts.find((ct) => ct.locale.code === lang) || cts[0];
+            return cts.find((ct) => ct.locale === lang) || cts[0];
         });
     }
-    async findTranslations(id, locale) {
-        if (!locale) {
+    async findTranslations(id, locales) {
+        if (!locales || locales.length === 0) {
             return await this.prisma.categoryTranslation.findMany({
                 where: {
                     categoryId: id,
@@ -167,25 +166,20 @@ let CategoriesService = CategoriesService_1 = class CategoriesService {
             where: {
                 categoryId: id,
                 locale: {
-                    code: {
-                        in: [locale, 'en'],
-                    },
+                    in: locales,
                 },
-            },
-            include: {
-                locale: true,
             },
         });
         if (translations.length === 0) {
             throw new common_1.NotFoundException(`Translations not found for category with id ${id}`);
         }
-        return (translations.filter((translation) => translation.locale.code === locale) ||
-            translations.filter((translation) => translation.locale.code === 'en'));
+        return translations;
     }
 };
 exports.CategoriesService = CategoriesService;
 exports.CategoriesService = CategoriesService = CategoriesService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        locales_service_1.LocalesService])
 ], CategoriesService);
 //# sourceMappingURL=categories.service.js.map

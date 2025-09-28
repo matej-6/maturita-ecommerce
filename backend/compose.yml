@@ -3,11 +3,11 @@ services:
     image: redis:7.4.1-alpine
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "6379:6379"
     # volumes:
     # - redis_data:/data
     # command: redis-server --appendonly yes # only for prod
-    command: ['redis-server', '--loglevel', 'debug']
+    command: ["redis-server", "--loglevel", "debug"]
     environment:
       - REDIS_PASSWORD=password
       - REDIS_HOST=localhost
@@ -16,16 +16,12 @@ services:
       - REDIS_DB=0
       - REDIS_TLS_ENABLED=false
   database:
-    image: postgres:16
+    image: mariadb:12.0.2
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: app
+      - MYSQL_USER=user
+      - MYSQL_DATABASE=app
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=password
     ports:
-      - '5432:5432'
-#     volumes:
-#       - pgdata:/var/lib/postgresql/data
-
-# volumes:
-#   pgdata:
+      - "3306:3306"

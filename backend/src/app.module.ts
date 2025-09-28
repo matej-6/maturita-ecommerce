@@ -22,12 +22,12 @@ import * as path from 'path';
 import { AuthenticatedUserDto } from './auth/dto/authenticated-user.dto';
 import { IDataLoaders } from './dataloader/dataloader.interface';
 import { DataloaderModule } from './dataloader/dataloader.module';
-import { DEFAULT_LANG } from './config/variables';
+import { DEFAULT_LOCALE } from './locales';
 
 @Module({
   imports: [
     I18nModule.forRoot({
-      fallbackLanguage: DEFAULT_LANG,
+      fallbackLanguage: DEFAULT_LOCALE.code,
       loaderOptions: {
         path: path.join(__dirname, '/i18n/'),
         watch: true,

@@ -74,19 +74,16 @@ export class CategoriesResolver {
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
-    @Args('langs', { type: () => [String] }) langs: string[],
-    @Context()
-    ctx: GraphqlAppContext,
-    @I18n() i18n: I18nContext,
+    @Args('langs', {
+      type: () => [String],
+      nullable: true,
+      description:
+        'Filter translations by languages. Leave empty or provide an empty array to get all translations.',
+    })
+    langs?: string[],
   ) {
     const { id } = category;
-
-    const translations = await this.categoriesService.findTranslations(
-      id,
-      i18n.lang,
-    );
-
-    return translations;
+    return this.categoriesService.findTranslations(id, langs);
   }
 
   @ResolveField(() => String, { name: 'name' })

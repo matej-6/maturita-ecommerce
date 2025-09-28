@@ -8,7 +8,7 @@ export declare class UsersResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        role: import("@prisma/client").$Enums.Role;
+        role: import("../../generated/prisma/enums").Role;
         lastName: string | null;
         email: string;
         emailVerified: boolean;

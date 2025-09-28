@@ -10,6 +10,8 @@ export type I18nTranslations = {
         "unknownError": string;
         "badRequest": string;
         "emailAlreadyInUse": string;
+        "emailAlreadyVerified": string;
+        "emailInvalidVerificationCode": string;
         "unauthorizedException": string;
     };
     "validation": {

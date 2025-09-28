@@ -19,7 +19,6 @@ const category_entity_1 = require("./entities/category.entity");
 const create_category_input_1 = require("./dto/create-category.input");
 const update_category_input_1 = require("./dto/update-category.input");
 const category_translation_entity_1 = require("./entities/category-translation.entity");
-const nestjs_i18n_1 = require("nestjs-i18n");
 const common_1 = require("@nestjs/common");
 const gql_admin_guard_1 = require("../auth/guards/gql-admin.guard");
 let CategoriesResolver = class CategoriesResolver {
@@ -46,10 +45,9 @@ let CategoriesResolver = class CategoriesResolver {
         const { id } = category;
         return loaders.subcategoriesLoader.load(id);
     }
-    async translations(category, langs, ctx, i18n) {
+    async translations(category, langs) {
         const { id } = category;
-        const translations = await this.categoriesService.findTranslations(id, i18n.lang);
-        return translations;
+        return this.categoriesService.findTranslations(id, langs);
     }
     async categoryName(category, ctx) {
         const res = await ctx.loaders.categoryTranslationLoader.load(category.id);
@@ -114,11 +112,13 @@ __decorate([
     (0, common_1.UseGuards)(gql_admin_guard_1.GqlAdminGuard),
     (0, graphql_1.ResolveField)(() => [category_translation_entity_1.CategoryTranslation], { name: 'translations' }),
     __param(0, (0, graphql_1.Parent)()),
-    __param(1, (0, graphql_1.Args)('langs', { type: () => [String] })),
-    __param(2, (0, graphql_1.Context)()),
-    __param(3, (0, nestjs_i18n_1.I18n)()),
+    __param(1, (0, graphql_1.Args)('langs', {
+        type: () => [String],
+        nullable: true,
+        description: 'Filter translations by languages. Leave empty or provide an empty array to get all translations.',
+    })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [category_entity_1.Category, Array, Object, nestjs_i18n_1.I18nContext]),
+    __metadata("design:paramtypes", [category_entity_1.Category, Array]),
     __metadata("design:returntype", Promise)
 ], CategoriesResolver.prototype, "translations", null);
 __decorate([

@@ -1,4 +1,4 @@
-import { Category, CategoryTranslation } from '@prisma/client';
+import { Category, CategoryTranslation } from 'generated/prisma/client';
 import DataLoader from 'dataloader';
 
 export interface IDataLoaders {

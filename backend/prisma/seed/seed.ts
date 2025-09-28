@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from 'generated/prisma/client';
+import { Locales } from 'src/locales';
 
 const db = new PrismaClient();
 
@@ -6,23 +7,9 @@ async function main() {
   // delete old data
   await db.categoryTranslation.deleteMany();
   await db.category.deleteMany();
-  await db.locale.deleteMany();
 
-  // setup locales
-  await db.locale.createMany({
-    data: [
-      {
-        code: 'en',
-        name: 'English',
-      },
-      {
-        code: 'sk',
-        name: 'Slovenský',
-      },
-    ],
-  });
-
-  const [en, sk] = (await db.locale.findMany()).sort();
+  // get locales
+  const { english, slovak } = Locales;
 
   const regenerationCategory = await db.category.create({
     data: {
@@ -33,12 +20,12 @@ async function main() {
             {
               name: 'Regeneration',
               description: 'Supplements that help with regeneration.',
-              localeId: en.id,
+              locale: english.code,
             },
             {
               name: 'Regenerácia',
               description: 'Doplnky zlepšujúce regeneráciu.',
-              localeId: sk.id,
+              locale: slovak.code,
             },
           ],
         },
@@ -63,13 +50,13 @@ async function main() {
                 name: 'Creatine',
                 description:
                   "Creatine is one of the world's most researched supplements",
-                localeId: en.id,
+                locale: english.code,
               },
               {
                 name: 'Kreatín',
                 description:
                   'Kreatín je jeden z najviac študovaných suplementov na svete.',
-                localeId: sk.id,
+                locale: slovak.code,
               },
             ],
           },
@@ -91,13 +78,13 @@ async function main() {
                 name: 'Protein',
                 description:
                   'Protein plays a key role in regeneration because it is the building block of new muscle tissue, therefore eating more protein throughout the day can significantly help with regeneration.',
-                localeId: en.id,
+                locale: english.code,
               },
               {
                 name: 'Proteíny',
                 description:
                   'Dostatok bielkovín za deň môže výrazne zlepšiť vašu regeneráciu.',
-                localeId: sk.id,
+                locale: slovak.code,
               },
             ],
           },

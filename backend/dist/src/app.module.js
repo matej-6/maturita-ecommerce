@@ -27,7 +27,7 @@ const locales_module_1 = require("./locales/locales.module");
 const nestjs_i18n_1 = require("nestjs-i18n");
 const path = require("path");
 const dataloader_module_1 = require("./dataloader/dataloader.module");
-const variables_1 = require("./config/variables");
+const locales_1 = require("./locales");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,7 +35,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             nestjs_i18n_1.I18nModule.forRoot({
-                fallbackLanguage: variables_1.DEFAULT_LANG,
+                fallbackLanguage: locales_1.DEFAULT_LOCALE.code,
                 loaderOptions: {
                     path: path.join(__dirname, '/i18n/'),
                     watch: true,

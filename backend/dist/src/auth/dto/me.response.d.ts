@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role } from 'generated/prisma/client';
 import { UserDto } from 'src/users/dto/user.dto';
 export declare class MeResponse implements UserDto {
     static fromUser(user: UserDto): MeResponse;

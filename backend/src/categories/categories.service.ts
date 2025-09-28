@@ -1,29 +1,51 @@
 import {
+  BadRequestException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Category, CategoryTranslation } from '@prisma/client';
-import { DEFAULT_LANG } from 'src/config/variables';
+import { Category, CategoryTranslation } from 'generated/prisma/client';
+import { LocalesService } from 'src/locales/locales.service';
+import { DEFAULT_LOCALE } from 'src/locales';
 
 @Injectable()
 export class CategoriesService {
   private readonly CATEGORIES_CACHE_KEY = 'app:categories';
-  private readonly DEFAULT_LANG = DEFAULT_LANG;
   private readonly logger = new Logger(CategoriesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly localesService: LocalesService,
+  ) {}
   async create(createCategoryInput: CreateCategoryInput) {
     const { translations, ...newCategory } = createCategoryInput;
+
+    // ak uz existuje takato kategoria => error
+    const existingCategory = await this.prisma.category.findUnique({
+      where: {
+        slug: newCategory.slug,
+      },
+    });
+
+    if (existingCategory) {
+      this.logger.error(
+        'A category with this slug already exists: ',
+        newCategory.slug,
+      );
+      throw new BadRequestException();
+    }
+
+    const validLocales = this.localesService.findAll();
 
     // ensure no duplicate translations are created
     const uniqueTranslations = new Map<string, (typeof translations)[number]>();
     for (const translation of translations) {
-      uniqueTranslations.set(translation.localeCode, translation);
+      if (validLocales.some((c) => c.code === translation.localeCode)) {
+        uniqueTranslations.set(translation.localeCode, translation);
+      }
     }
 
     return this.prisma.category.create({
@@ -33,11 +55,7 @@ export class CategoriesService {
           create: Array.from(uniqueTranslations.values()).map((t) => ({
             name: t.name,
             description: t.description,
-            locale: {
-              connect: {
-                code: t.localeCode,
-              },
-            },
+            locale: t.localeCode,
           })),
         },
       },
@@ -147,9 +165,7 @@ export class CategoriesService {
     return this.prisma.categoryTranslation.findFirst({
       where: {
         categoryId: categoryId,
-        locale: {
-          code: locale,
-        },
+        locale: locale,
       },
     });
   }
@@ -172,16 +188,7 @@ export class CategoriesService {
             in: categoryIds,
           },
           locale: {
-            code: {
-              in: [lang, DEFAULT_LANG],
-            },
-          },
-        },
-        include: {
-          locale: {
-            select: {
-              code: true,
-            },
+            in: [lang, DEFAULT_LOCALE.code],
           },
         },
       },
@@ -190,12 +197,12 @@ export class CategoriesService {
     return categoryIds.map((id) => {
       const cts = categoryTranslations.filter((ct) => ct.categoryId === id);
       if (cts.length === 0) return null;
-      return cts.find((ct) => ct.locale.code === lang) || cts[0];
+      return cts.find((ct) => ct.locale === lang) || cts[0];
     });
   }
 
-  async findTranslations(id: string, locale?: string) {
-    if (!locale) {
+  async findTranslations(id: string, locales?: string[]) {
+    if (!locales || locales.length === 0) {
       return await this.prisma.categoryTranslation.findMany({
         where: {
           categoryId: id,
@@ -207,13 +214,8 @@ export class CategoriesService {
       where: {
         categoryId: id,
         locale: {
-          code: {
-            in: [locale, 'en'],
-          },
+          in: locales,
         },
-      },
-      include: {
-        locale: true,
       },
     });
 
@@ -223,11 +225,6 @@ export class CategoriesService {
       );
     }
 
-    return (
-      translations.filter(
-        (translation) => translation.locale.code === locale,
-      ) ||
-      translations.filter((translation) => translation.locale.code === 'en')
-    );
+    return translations;
   }
 }

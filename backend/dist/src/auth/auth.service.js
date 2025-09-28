@@ -19,8 +19,10 @@ const config_1 = require("@nestjs/config");
 const prisma_service_1 = require("../prisma/prisma.service");
 const redis_service_1 = require("../redis/redis.service");
 const crypto = require("crypto");
-const client_1 = require("@prisma/client");
+const client_1 = require("../../generated/prisma/client");
 const auth_response_dto_1 = require("./dto/auth.response.dto");
+const prismaNamespace_1 = require("../../generated/prisma/internal/prismaNamespace");
+const errors_1 = require("../errors");
 const EMAIL_VERIFICATION_KEY = 'email-verification';
 const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
 let AuthService = AuthService_1 = class AuthService {
@@ -191,7 +193,7 @@ let AuthService = AuthService_1 = class AuthService {
         }
         catch (error) {
             this.logger.error(error);
-            throw new common_1.InternalServerErrorException('unknownError');
+            throw new common_1.InternalServerErrorException(errors_1.ERROR.unknownError);
         }
     }
     getEmailVerificationKey(email) {
@@ -202,7 +204,7 @@ let AuthService = AuthService_1 = class AuthService {
         const redisClient = this.redisService.client;
         const value = await redisClient.get(key);
         if (!value || value !== code) {
-            throw new common_1.BadRequestException('Invalid verification code.');
+            throw new common_1.BadRequestException(errors_1.ERROR.emailInvalidVerificationCode);
         }
         redisClient.del(key).catch((error) => {
             this.logger.error('Failed to delete email verification code.', error);
@@ -219,7 +221,7 @@ let AuthService = AuthService_1 = class AuthService {
         }
         catch (error) {
             this.logger.error('Failed to update user email verification status.', error);
-            throw new common_1.InternalServerErrorException('Something went wrong.');
+            throw new common_1.InternalServerErrorException(errors_1.ERROR.unknownError);
         }
     }
     async sendEmailVerification(email) {
@@ -233,11 +235,11 @@ let AuthService = AuthService_1 = class AuthService {
         });
         if (!user) {
             this.logger.warn(`Nonexistent user tried to verify email: ${email}`);
-            throw new common_1.BadRequestException('Something went wrong.');
+            throw new common_1.BadRequestException(errors_1.ERROR.badRequest);
         }
         if (user.emailVerified) {
             this.logger.warn(`User with already verified email tried to verify email: ${email}`);
-            throw new common_1.BadRequestException('Email already verified.');
+            throw new common_1.BadRequestException(errors_1.ERROR.emailAlreadyVerified);
         }
         let code;
         try {
@@ -245,7 +247,7 @@ let AuthService = AuthService_1 = class AuthService {
         }
         catch (error) {
             this.logger.error('Failed to generate email verification code.', error);
-            throw new common_1.InternalServerErrorException('Something went wrong.');
+            throw new common_1.InternalServerErrorException(errors_1.ERROR.unknownError);
         }
         const key = this.getEmailVerificationKey(email);
         const redisClient = this.redisService.client;
@@ -260,7 +262,7 @@ let AuthService = AuthService_1 = class AuthService {
         }
         catch (error) {
             this.logger.error('Failed to set email verification code.', error);
-            throw new common_1.InternalServerErrorException('Something went wrong.');
+            throw new common_1.InternalServerErrorException(errors_1.ERROR.unknownError);
         }
     }
     generateEmailVerificationCode(length = 6) {
@@ -284,7 +286,7 @@ let AuthService = AuthService_1 = class AuthService {
         }
         catch (error) {
             this.logger.error('Failed to sign out all.', error);
-            throw new common_1.InternalServerErrorException('unknownError');
+            throw new common_1.InternalServerErrorException(errors_1.ERROR.unknownError);
         }
     }
     async signOut(refreshToken, userId) {
@@ -303,7 +305,7 @@ let AuthService = AuthService_1 = class AuthService {
                     this.logger.warn(`Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`);
                     await this.signOutAll(userId);
                     this.logger.warn('Invalid refresh token used.');
-                    throw new common_1.BadRequestException('badRequest');
+                    throw new common_1.BadRequestException(errors_1.ERROR.badRequest);
                 }
                 await this.prismaService.refreshTokenSession.update({
                     where: {
@@ -316,7 +318,7 @@ let AuthService = AuthService_1 = class AuthService {
                 return;
             }
         }
-        throw new common_1.BadRequestException('badRequest');
+        throw new common_1.BadRequestException(errors_1.ERROR.badRequest);
     }
     async register(registerDto) {
         try {
@@ -332,13 +334,13 @@ let AuthService = AuthService_1 = class AuthService {
             return user;
         }
         catch (error) {
-            if (error instanceof client_1.Prisma.PrismaClientKnownRequestError) {
+            if (error instanceof prismaNamespace_1.PrismaClientKnownRequestError) {
                 if (error.code === 'P2002') {
-                    throw new common_1.BadRequestException('emailAlreadyInUse');
+                    throw new common_1.BadRequestException(errors_1.ERROR.emailAlreadyInUse);
                 }
             }
             this.logger.error('Failed to register user.', error);
-            throw new common_1.InternalServerErrorException('unknownError');
+            throw new common_1.InternalServerErrorException(errors_1.ERROR.unknownError);
         }
     }
 };

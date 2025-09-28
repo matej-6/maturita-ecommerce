@@ -15,18 +15,17 @@ const DataLoader = require("dataloader");
 const prisma_service_1 = require("../prisma/prisma.service");
 const categories_service_1 = require("../categories/categories.service");
 const nestjs_i18n_1 = require("nestjs-i18n");
-const variables_1 = require("../config/variables");
+const locales_1 = require("../locales");
 let DataloaderService = class DataloaderService {
     db;
     categoriesService;
-    static DEFAULT_LANG = variables_1.DEFAULT_LANG;
     constructor(db, categoriesService) {
         this.db = db;
         this.categoriesService = categoriesService;
     }
     getLoaders() {
         const subcategoriesLoader = this._createSubcategoriesLoader();
-        const categoryTranslationLoader = this._createCategoryTranslationLoader(nestjs_i18n_1.I18nContext.current()?.lang || variables_1.DEFAULT_LANG);
+        const categoryTranslationLoader = this._createCategoryTranslationLoader(nestjs_i18n_1.I18nContext.current()?.lang || locales_1.DEFAULT_LOCALE.code);
         return {
             subcategoriesLoader,
             categoryTranslationLoader,

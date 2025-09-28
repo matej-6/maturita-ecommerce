@@ -1,8 +1,8 @@
 import { CreateUserInput } from './dto/create-user.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserDto } from './dto/user.dto';
+import { User } from 'generated/prisma/client';
 export declare class UsersService {
     private prisma;
     private readonly logger;
@@ -11,7 +11,7 @@ export declare class UsersService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        role: import("@prisma/client").$Enums.Role;
+        role: import("generated/prisma/client").Role;
         lastName: string | null;
         email: string;
         emailVerified: boolean;

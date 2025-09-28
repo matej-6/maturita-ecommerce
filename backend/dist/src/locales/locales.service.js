@@ -11,56 +11,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LocalesService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const _1 = require(".");
 let LocalesService = class LocalesService {
-    prisma;
-    constructor(prisma) {
-        this.prisma = prisma;
+    constructor() { }
+    findAll() {
+        return Array.from(Object.values(_1.Locales));
     }
-    create(createLocaleInput) {
-        return this.prisma.locale.create({
-            data: createLocaleInput,
-        });
-    }
-    findAll(page = 1, take = 10) {
-        if (take < 10)
-            take = 10;
-        if (take > 100)
-            take = 100;
-        if (page < 1)
-            page = 1;
-        return this.prisma.locale.findMany({
-            take: 10,
-            skip: (page - 1) * 10,
-        });
-    }
-    findOne(id) {
-        return this.prisma.locale.findUnique({
-            where: { id },
-        });
-    }
-    findByLocaleCode(localeCode) {
-        return this.prisma.locale.findUnique({
-            where: { code: localeCode },
-        });
-    }
-    update(id, updateLocaleInput) {
-        return this.prisma.locale.update({
-            where: {
-                id,
-            },
-            data: updateLocaleInput,
-        });
-    }
-    remove(id) {
-        return this.prisma.locale.delete({
-            where: { id },
-        });
+    findOne(code) {
+        return code in _1.Locales ? _1.Locales[code] : undefined;
     }
 };
 exports.LocalesService = LocalesService;
 exports.LocalesService = LocalesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [])
 ], LocalesService);
 //# sourceMappingURL=locales.service.js.map

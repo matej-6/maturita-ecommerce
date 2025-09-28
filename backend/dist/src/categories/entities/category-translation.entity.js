@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryTranslation = void 0;
 const graphql_1 = require("@nestjs/graphql");
-const locale_entity_1 = require("../../locales/entities/locale.entity");
 let CategoryTranslation = class CategoryTranslation {
     id;
     name;
@@ -19,6 +18,7 @@ let CategoryTranslation = class CategoryTranslation {
     localeId;
     categoryId;
     locale;
+    isActive;
 };
 exports.CategoryTranslation = CategoryTranslation;
 __decorate([
@@ -42,9 +42,13 @@ __decorate([
     __metadata("design:type", String)
 ], CategoryTranslation.prototype, "categoryId", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => locale_entity_1.Locale),
-    __metadata("design:type", locale_entity_1.Locale)
+    (0, graphql_1.Field)(() => String),
+    __metadata("design:type", String)
 ], CategoryTranslation.prototype, "locale", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Boolean),
+    __metadata("design:type", Boolean)
+], CategoryTranslation.prototype, "isActive", void 0);
 exports.CategoryTranslation = CategoryTranslation = __decorate([
     (0, graphql_1.ObjectType)()
 ], CategoryTranslation);

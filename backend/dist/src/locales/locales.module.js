@@ -16,6 +16,7 @@ exports.LocalesModule = LocalesModule;
 exports.LocalesModule = LocalesModule = __decorate([
     (0, common_1.Module)({
         providers: [locales_resolver_1.LocalesResolver, locales_service_1.LocalesService],
+        exports: [locales_service_1.LocalesService],
     })
 ], LocalesModule);
 //# sourceMappingURL=locales.module.js.map

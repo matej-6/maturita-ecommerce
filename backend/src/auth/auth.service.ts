@@ -15,9 +15,11 @@ import { RedisService } from 'src/redis/redis.service';
 import * as crypto from 'crypto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Response } from 'express';
-import { Prisma, Role } from '@prisma/client';
+import { Role } from 'generated/prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
+import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
+import { ERROR } from 'src/errors';
 
 const EMAIL_VERIFICATION_KEY = 'email-verification';
 const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
@@ -268,7 +270,7 @@ export class AuthService {
       );
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException('unknownError');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -283,7 +285,7 @@ export class AuthService {
     const value = await redisClient.get(key);
 
     if (!value || value !== code) {
-      throw new BadRequestException('Invalid verification code.');
+      throw new BadRequestException(ERROR.emailInvalidVerificationCode);
     }
 
     redisClient.del(key).catch((error: any) => {
@@ -304,7 +306,7 @@ export class AuthService {
         'Failed to update user email verification status.',
         error,
       );
-      throw new InternalServerErrorException('Something went wrong.');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -320,14 +322,14 @@ export class AuthService {
 
     if (!user) {
       this.logger.warn(`Nonexistent user tried to verify email: ${email}`);
-      throw new BadRequestException('Something went wrong.');
+      throw new BadRequestException(ERROR.badRequest);
     }
 
     if (user.emailVerified) {
       this.logger.warn(
         `User with already verified email tried to verify email: ${email}`,
       );
-      throw new BadRequestException('Email already verified.');
+      throw new BadRequestException(ERROR.emailAlreadyVerified);
     }
 
     let code: string;
@@ -336,7 +338,7 @@ export class AuthService {
       code = this.generateEmailVerificationCode(6);
     } catch (error) {
       this.logger.error('Failed to generate email verification code.', error);
-      throw new InternalServerErrorException('Something went wrong.');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
 
     const key = this.getEmailVerificationKey(email);
@@ -353,7 +355,7 @@ export class AuthService {
       this.logger.debug(`Verification code for email ${email} is ${code}.`);
     } catch (error) {
       this.logger.error('Failed to set email verification code.', error);
-      throw new InternalServerErrorException('Something went wrong.');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
 
     // TODO: Send email with code
@@ -383,7 +385,7 @@ export class AuthService {
       });
     } catch (error) {
       this.logger.error('Failed to sign out all.', error);
-      throw new InternalServerErrorException('unknownError');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -407,7 +409,7 @@ export class AuthService {
           );
           await this.signOutAll(userId);
           this.logger.warn('Invalid refresh token used.');
-          throw new BadRequestException('badRequest');
+          throw new BadRequestException(ERROR.badRequest);
         }
         await this.prismaService.refreshTokenSession.update({
           where: {
@@ -421,7 +423,7 @@ export class AuthService {
       }
     }
 
-    throw new BadRequestException('badRequest');
+    throw new BadRequestException(ERROR.badRequest);
   }
 
   async register(registerDto: RegisterDto) {
@@ -438,13 +440,13 @@ export class AuthService {
 
       return user;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new BadRequestException('emailAlreadyInUse');
+          throw new BadRequestException(ERROR.emailAlreadyInUse);
         }
       }
       this.logger.error('Failed to register user.', error);
-      throw new InternalServerErrorException('unknownError');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 }

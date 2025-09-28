@@ -4,5 +4,6 @@ import { LocalesResolver } from './locales.resolver';
 
 @Module({
   providers: [LocalesResolver, LocalesService],
+  exports: [LocalesService],
 })
 export class LocalesModule {}

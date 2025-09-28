@@ -3,5 +3,7 @@
   "unknownError": "Vyskytla sa neočakávaná chyba.",
   "badRequest": "Nesprávna požiadavka",
   "emailAlreadyInUse": "Tento email je už použitý.",
+  "emailAlreadyVerified": "Email už bol overený.",
+  "emailInvalidVerificationCode": "Neplatný overovací kód.",
   "unauthorizedException": "Nemáte oprávnenie na vykonanie tejto činnosti."
 }
