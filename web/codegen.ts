@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// DOLEZITE: codegen command nefunguje dobre s bun. pouzivat len npm run codegen!!!!!!!
+
 const config: CodegenConfig = {
-  schema: process.env.GRAPHQL_ENDPOINT!,
-  documents: ["src/**/*.tsx"],
+  schema: process.env.GRAPHQL_URL!,
+  documents: ["src/app/data-access-layer/**/*.graphql.ts"],
   ignoreNoDocuments: false,
   verbose: true,
   noSilentErrors: true,

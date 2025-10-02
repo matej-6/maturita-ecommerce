@@ -5,12 +5,19 @@ schema {
 
 type Category {
   createdAt: DateTime!
+  description: String!
   id: ID!
+  name: String!
   parentCategoryId: String
   slug: String!
   subcategories: [Category!]!
   """Category translations"""
-  translations: [CategoryTranslation!]!
+  translations(
+    """
+    Filter translations by languages. Leave empty or provide an empty array to get all translations.
+    """
+    langs: [String!]
+  ): [CategoryTranslation!]!
   updatedAt: DateTime!
 }
 
@@ -18,7 +25,8 @@ type CategoryTranslation {
   categoryId: ID!
   description: String
   id: ID!
-  locale: Locale!
+  isActive: Boolean!
+  locale: String!
   localeId: ID!
   name: String!
 }
@@ -41,15 +49,6 @@ input CreateCategoryTranslationInput {
   name: String!
 }
 
-input CreateLocaleInput {
-  """Locale code"""
-  code: String!
-  """Is the locale active?"""
-  isActive: Boolean!
-  """Native locale name"""
-  name: String!
-}
-
 input CreateUserInput {
   confirmPassword: String!
   email: String!
@@ -66,9 +65,6 @@ scalar DateTime
 type Locale {
   """Locale code"""
   code: String!
-  id: ID!
-  """Is the locale active?"""
-  isActive: Boolean!
   """Native locale name"""
   name: String!
 }
@@ -87,21 +83,23 @@ type MeResponse {
 
 type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
-  createLocale(createLocaleInput: CreateLocaleInput!): Locale!
   createUser(createUserInput: CreateUserInput!): User!
   logoutAll: Void!
   removeCategory(id: ID!): Category!
-  removeLocale(id: String!): Locale!
   removeUser(id: String!): User!
   requestEmailVerification: Void!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
-  updateLocale(updateLocaleInput: UpdateLocaleInput!): Locale!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
 }
 
 type Query {
-  categories(withParentId: String): [Category!]!
+  categories(
+    """
+    gets subcategories of a category with provided parentId, to fetch all categories with no parent id, set the value to an emtpy string: ""
+    """
+    parentId: String!
+  ): [Category!]!
   category(id: ID!): Category!
   locale(id: String!): Locale!
   locales: [Locale!]!
@@ -123,17 +121,6 @@ input UpdateCategoryInput {
   parentCategoryId: String
   """Slug of the category"""
   slug: String!
-}
-
-input UpdateLocaleInput {
-  """Locale code"""
-  code: String!
-  """Locale ID"""
-  id: ID!
-  """Is the locale active?"""
-  isActive: Boolean!
-  """Native locale name"""
-  name: String!
 }
 
 input UpdateUserInput {

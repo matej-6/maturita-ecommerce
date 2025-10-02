@@ -37,8 +37,8 @@ export declare class CategoriesService {
     getCategorySubcategoriesByBatch(parentIds: string[]): Promise<(Category[] | null)[]>;
     findTranslation(categoryId: string, locale: string): Promise<{
         id: string;
-        locale: string;
         name: string;
+        locale: string;
         description: string | null;
         isActive: boolean;
         categoryId: string;
@@ -46,8 +46,8 @@ export declare class CategoriesService {
     getAllTranslationsByBatch(lang: string, categoryIds: string[]): Promise<(CategoryTranslation | null)[]>;
     findTranslations(id: string, locales?: string[]): Promise<{
         id: string;
-        locale: string;
         name: string;
+        locale: string;
         description: string | null;
         isActive: boolean;
         categoryId: string;

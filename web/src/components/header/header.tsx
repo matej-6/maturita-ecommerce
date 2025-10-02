@@ -5,21 +5,12 @@ import { HeaderRightNav } from "./header-right-nav";
 import { HeaderNav } from "./header-nav";
 import { getLocale } from "next-intl/server";
 import { Suspense } from "react";
-import { graphql } from "@/graphql";
-
-const categoriesQueryDocument = graphql(`
-  query AllCategories {
-    categories(withParentId: null) {
-      id
-      slug
-    }
-  }
-`);
+import { HeaderCategoriesDocument } from "@/app/data-access-layer/category/queries.graphql";
 
 export async function Header() {
   const locale = await getLocale();
 
-  const res = await execute(categoriesQueryDocument);
+  const res = await execute(HeaderCategoriesDocument);
 
   return (
     <header className="w-full border-b-2">
@@ -38,7 +29,7 @@ export async function Header() {
               <HeaderNav
                 categories={
                   res.data?.categories.map((c) => ({
-                    id: c.id,
+                    id: c.name,
                     name: c.name,
                     subcategories: c.subcategories.map((s) => ({
                       id: s.id,

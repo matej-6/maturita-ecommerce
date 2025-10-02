@@ -44,8 +44,8 @@ export declare class CategoriesResolver {
     }[]>;
     translations(category: Category, langs?: string[]): Promise<{
         id: string;
-        locale: string;
         name: string;
+        locale: string;
         description: string | null;
         isActive: boolean;
         categoryId: string;
