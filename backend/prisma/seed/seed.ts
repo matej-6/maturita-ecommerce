@@ -1,12 +1,36 @@
 import { PrismaClient } from 'generated/prisma/client';
 import { Locales } from 'src/locales';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UsersService } from 'src/users/users.service';
 
 const db = new PrismaClient();
+const prismaService = new PrismaService();
+const userService = new UsersService(prismaService);
 
 async function main() {
   // delete old data
   await db.categoryTranslation.deleteMany();
   await db.category.deleteMany();
+  await db.refreshTokenSession.deleteMany();
+  await db.user.deleteMany();
+
+  // create new users
+  const createdUser = await userService.create({
+    email: 'email@admin.com',
+    name: 'Admin',
+    lastName: 'Admin',
+    password: '123',
+    confirmPassword: '123',
+  });
+
+  await prismaService.user.update({
+    where: {
+      id: createdUser.id,
+    },
+    data: {
+      role: 'ADMIN',
+    },
+  });
 
   // get locales
   const { english, slovak } = Locales;
