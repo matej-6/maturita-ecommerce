@@ -1,12 +1,12 @@
-import "server-only";
-
+import "server-only"
 import { cache } from "react";
-import { cookies } from "next/headers";
-import { AUTHENTICATION_COOKIE_NAME } from "@/app/lib/auth.constants";
 import { fetchGraphql } from "../fetch-graphql";
-import { FragmentType, graphql } from "@/graphql";
+import { getFragmentData, graphql } from "@/graphql";
+import { MeFragmentFragment, Role } from "@/graphql/graphql";
 
-export const isAdmin = cache(() => {});
+export const isAdmin = cache(async () => {
+  return (await getCurrentSession())?.role === Role.Admin;
+});
 
 const MeFragment = graphql(`
   fragment MeFragment on MeResponse {
@@ -20,8 +20,6 @@ const MeFragment = graphql(`
   }
 `);
 
-export type CurrentSession = FragmentType<typeof MeFragment>;
-
 const meQueryDocument = graphql(`
   query Me {
     me {
@@ -31,15 +29,12 @@ const meQueryDocument = graphql(`
 `);
 
 export const getCurrentSession = cache(async () => {
-  const cookieStore = await cookies();
+  const res = await fetchGraphql(meQueryDocument);
+  if (res.data) {
+    return getFragmentData(MeFragment, res.data.me);
+  }
 
-  const authToken = cookieStore.get(AUTHENTICATION_COOKIE_NAME)?.value;
-  if (!authToken) {
-    throw new Error("unauthorized");
-  }
-  try {
-    return await fetchGraphql(meQueryDocument);
-  } catch (e) {
-    console.log(e);
-  }
+  return null;
 });
+
+export type CurrentSession = MeFragmentFragment;

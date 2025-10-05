@@ -7,7 +7,7 @@ dotenv.config();
 
 const config: CodegenConfig = {
   schema: process.env.GRAPHQL_URL!,
-  documents: ["src/app/data-access-layer/**/*.graphql.ts"],
+  documents: ["src/**/*.tsx", "src/**/*queries.ts", "!src/gql/**/*"],
   ignoreNoDocuments: false,
   verbose: true,
   noSilentErrors: true,
@@ -17,6 +17,11 @@ const config: CodegenConfig = {
       preset: "client",
       config: {
         documentMode: "string",
+      },
+      presetConfig: {
+        fragmentMasking: {
+          unmaskFunctionName: "getFragmentData",
+        },
       },
     },
     "./schema.graphql": {

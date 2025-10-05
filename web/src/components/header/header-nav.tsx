@@ -1,8 +1,6 @@
 "use client";
 
-import { SearchIcon } from "lucide-react";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 import {
   NavigationMenuItem,
   NavigationMenuTrigger,
@@ -11,22 +9,38 @@ import {
   NavigationMenu,
   NavigationMenuLink,
 } from "../ui/navigation-menu";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { FragmentType, getFragmentData, graphql } from "@/graphql";
+import { getCategoryLink } from "@/app/lib/navigation";
+import { use } from "react";
+import { ExecutionResult } from "graphql";
+import { Link } from "@/i18n/navigation";
 
-type NavCategory = {
-  id: string;
-  name: string;
-  description?: string;
-  link: string;
-  subcategories: NavCategory[];
-};
+const HeaderNav_QueryFragment = graphql(`
+  fragment HeaderNav_QueryFragment on Query {
+    categories(parentId: "") {
+      id
+      name
+      description
+      slug
+      subcategories {
+        id
+        name
+        slug
+      }
+    }
+  }
+`);
 
 type HeaderNavProps = {
-  categories: NavCategory[];
+  queryPromise: Promise<
+    ExecutionResult<FragmentType<typeof HeaderNav_QueryFragment>>
+  >;
 };
 
-export function HeaderNav({ categories }: HeaderNavProps) {
+export function HeaderNav({ queryPromise }: HeaderNavProps) {
+  const query = use(queryPromise);
+  const data = getFragmentData(HeaderNav_QueryFragment, query.data);
   const t = useTranslations("header");
 
   return (
@@ -36,17 +50,46 @@ export function HeaderNav({ categories }: HeaderNavProps) {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-sm font-secondary">
+                <NavigationMenuTrigger
+                  disabled={!data}
+                  className="text-sm font-secondary"
+                >
                   {t("browse-categories")}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="grid grid-cols-3 gap-4">
-                    {categories.map((category) => (
-                      <NavigationMenuLink asChild key={category.id}>
-                        <Link href={category.link}>{category.name}</Link>
+                  <ul className="grid gap-2 w-[800px] grid-cols-3">
+                    {data?.categories.map((category) => (
+                      <NavigationMenuLink key={category.id} asChild>
+                        <div className="flex flex-col gap-4">
+                          <Link
+                            className="flex flex-col gap-2 group"
+                            href={getCategoryLink(category.slug)}
+                          >
+                            <h3 className="text-lg font-secondary group-hover:underline leading-none font-medium">
+                              {category.name}
+                            </h3>
+                            <p className="text-muted-foreground text-sm leading-snug line-clamp-4">
+                              {category.description}
+                            </p>
+                          </Link>
+                          <span className="sr-only">Subcategories:</span>
+                          <div className="flex flex-col gap-2 justify-start items-start">
+                            {category.subcategories
+                              .slice(0, 5)
+                              .map((subcategory) => (
+                                <Link
+                                  className="text-base leading-snug hover:underline"
+                                  key={subcategory.id}
+                                  href={getCategoryLink(subcategory.slug)}
+                                >
+                                  {subcategory.name}
+                                </Link>
+                              ))}
+                          </div>
+                        </div>
                       </NavigationMenuLink>
                     ))}
-                  </div>
+                  </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>

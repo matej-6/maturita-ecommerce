@@ -19,8 +19,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getQueryClient } from "@/providers/queryProvider";
-import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-options";
 import { useTranslations } from "next-intl";
 import { authRegisterAction } from "@/app/data-access-layer/auth/actions";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
@@ -51,7 +49,6 @@ export default function RegisterPage() {
     undefined
   );
 
-  const queryClient = getQueryClient();
   const router = useRouter();
 
   const { mutate, isPending } = useMutation({
@@ -68,10 +65,6 @@ export default function RegisterPage() {
 
     onSuccess: async () => {
       toast.success("Account created successfully.");
-      await queryClient.invalidateQueries({
-        queryKey: CURRENT_SESSION_QUERY_KEY,
-      });
-
       router.replace("/");
     },
   });

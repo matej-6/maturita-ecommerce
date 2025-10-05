@@ -1,13 +1,8 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "../ui/button";
 import { MenuIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
-import {
-  CURRENT_SESSION_QUERY_KEY,
-  currentSessionQueryOptions,
-} from "@/queries/current-session-query-options";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,49 +12,19 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { Role } from "@/graphql/graphql";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
-import { getQueryClient } from "@/providers/queryProvider";
-import { toast } from "sonner";
+// import { getCurrentSessionOrAuthenticate } from "@/app/data-access-layer/auth/queries";
+import { getTranslations } from "next-intl/server";
+import { CurrentSession } from "@/app/data-access-layer/auth/queries";
+import { use } from "react";
 import { useTranslations } from "next-intl";
 
-export function HeaderRightNav() {
+type HeaderRightNavProps = {
+  currentSessionPromise: Promise<CurrentSession | null>;
+};
+
+export function HeaderRightNav({ currentSessionPromise }: HeaderRightNavProps) {
+  const currentSession = use(currentSessionPromise);
   const t = useTranslations("header");
-
-  const queryClient = getQueryClient();
-
-  const { data: currentSession, isPending } = useQuery(
-    currentSessionQueryOptions
-  );
-
-  const { mutate: logout, isPending: isLoggingOut } = useMutation({
-    mutationFn: async () => {
-      const res = await fetchWithRetry(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Error logging out");
-      }
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-    // onSettled: () => {
-    //   queryClient.resetQueries({ queryKey: CURRENT_SESSION_QUERY_KEY });
-    // },
-
-    onSuccess: () => {
-      queryClient.resetQueries({ queryKey: CURRENT_SESSION_QUERY_KEY });
-      toast.success("Logged out successfully");
-    },
-  });
 
   return (
     <>
@@ -91,7 +56,7 @@ export function HeaderRightNav() {
                           <Link href="/profile">{t("profile")}</Link>
                         </NavigationMenuLink>
                         <NavigationMenuLink asChild>
-                          <Button
+                          {/* <Button
                             disabled={isLoggingOut}
                             onClick={() => logout()}
                             variant={"ghost"}
@@ -101,7 +66,7 @@ export function HeaderRightNav() {
                             <span>
                               {isLoggingOut ? t("logging-out") : t("logout")}
                             </span>
-                          </Button>
+                          </Button> */}
                         </NavigationMenuLink>
                       </li>
                     </ul>

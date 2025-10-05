@@ -209,18 +209,37 @@ export type VerifyEmailInput = {
   email: Scalars['String']['input'];
 };
 
-export type HeaderCategoryFragmentFragment = { __typename?: 'Category', id: string, slug: string, name: string } & { ' $fragmentName'?: 'HeaderCategoryFragmentFragment' };
+export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, translations: Array<{ __typename?: 'CategoryTranslation', id: string }> }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
 
-export type HeaderCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
+export type LocalesQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HeaderCategoriesQuery = { __typename?: 'Query', categories: Array<(
-    { __typename?: 'Category', subcategories: Array<(
-      { __typename?: 'Category' }
-      & { ' $fragmentRefs'?: { 'HeaderCategoryFragmentFragment': HeaderCategoryFragmentFragment } }
-    )> }
-    & { ' $fragmentRefs'?: { 'HeaderCategoryFragmentFragment': HeaderCategoryFragmentFragment } }
-  )> };
+export type LocalesQueryQuery = { __typename?: 'Query', locales: Array<{ __typename?: 'Locale', code: string, name: string }> };
+
+export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
+
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { __typename?: 'Query', me: (
+    { __typename?: 'MeResponse' }
+    & { ' $fragmentRefs'?: { 'MeFragmentFragment': MeFragmentFragment } }
+  ) };
+
+export type HeaderQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HeaderQueryQuery = (
+  { __typename?: 'Query' }
+  & { ' $fragmentRefs'?: { 'HeaderNav_QueryFragmentFragment': HeaderNav_QueryFragmentFragment } }
+);
+
+export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, name: string, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: string, name: string, slug: string }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
+
+export type MeQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQueryQuery = { __typename?: 'Query', me: { __typename?: 'MeResponse', id: string, email: string, firstName?: string | null, lastName?: string | null, emailVerified: boolean, avatar?: string | null, createdAt: any, updatedAt: any, role: Role } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -240,24 +259,95 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
-export const HeaderCategoryFragmentFragmentDoc = new TypedDocumentString(`
-    fragment HeaderCategoryFragment on Category {
-  id
-  slug
-  name
-}
-    `, {"fragmentName":"HeaderCategoryFragment"}) as unknown as TypedDocumentString<HeaderCategoryFragmentFragment, unknown>;
-export const HeaderCategoriesDocument = new TypedDocumentString(`
-    query headerCategories {
-  categories(parentId: "") {
-    ...HeaderCategoryFragment
-    subcategories {
-      ...HeaderCategoryFragment
+export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
+    fragment CategoryTable_QueryFragment on Query {
+  categories(parentId: $parentId) {
+    id
+    slug
+    translations(langs: $langs) {
+      id
     }
   }
 }
-    fragment HeaderCategoryFragment on Category {
+    `, {"fragmentName":"CategoryTable_QueryFragment"}) as unknown as TypedDocumentString<CategoryTable_QueryFragmentFragment, unknown>;
+export const MeFragmentFragmentDoc = new TypedDocumentString(`
+    fragment MeFragment on MeResponse {
   id
-  slug
-  name
-}`) as unknown as TypedDocumentString<HeaderCategoriesQuery, HeaderCategoriesQueryVariables>;
+  avatar
+  emailVerified
+  firstName
+  lastName
+  role
+  email
+}
+    `, {"fragmentName":"MeFragment"}) as unknown as TypedDocumentString<MeFragmentFragment, unknown>;
+export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
+    fragment HeaderNav_QueryFragment on Query {
+  categories(parentId: "") {
+    id
+    name
+    description
+    slug
+    subcategories {
+      id
+      name
+      slug
+    }
+  }
+}
+    `, {"fragmentName":"HeaderNav_QueryFragment"}) as unknown as TypedDocumentString<HeaderNav_QueryFragmentFragment, unknown>;
+export const LocalesQueryDocument = new TypedDocumentString(`
+    query localesQuery {
+  locales {
+    code
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<LocalesQueryQuery, LocalesQueryQueryVariables>;
+export const MeDocument = new TypedDocumentString(`
+    query Me {
+  me {
+    ...MeFragment
+  }
+}
+    fragment MeFragment on MeResponse {
+  id
+  avatar
+  emailVerified
+  firstName
+  lastName
+  role
+  email
+}`) as unknown as TypedDocumentString<MeQuery, MeQueryVariables>;
+export const HeaderQueryDocument = new TypedDocumentString(`
+    query HeaderQuery {
+  ...HeaderNav_QueryFragment
+}
+    fragment HeaderNav_QueryFragment on Query {
+  categories(parentId: "") {
+    id
+    name
+    description
+    slug
+    subcategories {
+      id
+      name
+      slug
+    }
+  }
+}`) as unknown as TypedDocumentString<HeaderQueryQuery, HeaderQueryQueryVariables>;
+export const MeQueryDocument = new TypedDocumentString(`
+    query MeQuery {
+  me {
+    id
+    email
+    firstName
+    lastName
+    emailVerified
+    avatar
+    createdAt
+    updatedAt
+    role
+  }
+}
+    `) as unknown as TypedDocumentString<MeQueryQuery, MeQueryQueryVariables>;

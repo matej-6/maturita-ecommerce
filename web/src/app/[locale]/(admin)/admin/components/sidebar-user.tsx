@@ -1,5 +1,6 @@
 "use client";
 
+import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 // https://ui.shadcn.com/blocks/sidebar#sidebar-08
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,7 +19,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSession } from "@/hooks/use-session";
 import { Link } from "@/i18n/navigation";
 import {
   BadgeCheckIcon,
@@ -28,12 +28,16 @@ import {
   HomeIcon,
   LogOutIcon,
 } from "lucide-react";
+import { use } from "react";
 
-export function SidebarUser() {
+type SidebarUserProps = {
+  currentSessionPromise: Promise<CurrentSession | null>;
+};
+
+export function SidebarUser({ currentSessionPromise }: SidebarUserProps) {
   const isMobile = useIsMobile();
-
-  const session = useSession();
-  if (!session.data) return null;
+  const session = use(currentSessionPromise);
+  if (!session) return null;
 
   return (
     <SidebarMenu>
@@ -46,20 +50,20 @@ export function SidebarUser() {
             >
               <Avatar className="size-8 rounded-lg">
                 <AvatarImage
-                  src={session.data.avatar ?? ""}
-                  alt={session.data.firstName ?? "User image"}
+                  src={session.avatar ?? ""}
+                  alt={session.firstName ?? "User image"}
                 />
                 <AvatarFallback className="rounded-lg">
-                  {session.data.firstName
-                    ? session.data.firstName[0]
-                    : session.data.email.slice(0, 2)}
+                  {session.firstName
+                    ? session.firstName[0]
+                    : session.email.slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  {session.data.firstName} {session.data.lastName}
+                  {session.firstName} {session.lastName}
                 </span>
-                <span className="truncate text-xs">{session.data.email}</span>
+                <span className="truncate text-xs">{session.email}</span>
               </div>
               <ChevronsUpDownIcon className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -74,20 +78,20 @@ export function SidebarUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="size-8 rounded-lg">
                   <AvatarImage
-                    src={session.data.avatar ?? ""}
-                    alt={session.data.firstName ?? "User image"}
+                    src={session.avatar ?? ""}
+                    alt={session.firstName ?? "User image"}
                   />
                   <AvatarFallback className="rounded-lg">
-                    {session.data.firstName
-                      ? session.data.firstName[0]
-                      : session.data.email.slice(0, 2)}
+                    {session.firstName
+                      ? session.firstName[0]
+                      : session.email.slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {session.data.firstName} {session.data.lastName}
+                    {session.firstName} {session.lastName}
                   </span>
-                  <span className="truncate text-xs">{session.data.email}</span>
+                  <span className="truncate text-xs">{session.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

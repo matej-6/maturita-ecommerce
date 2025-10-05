@@ -42,15 +42,15 @@ export declare class AuthService {
     signOutAll(userId: string): Promise<void>;
     signOut(refreshToken: string, userId: string): Promise<void>;
     register(registerDto: RegisterDto): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        role: Role;
         lastName: string | null;
         email: string;
+        id: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
         avatar: string | null;
+        role: Role;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }

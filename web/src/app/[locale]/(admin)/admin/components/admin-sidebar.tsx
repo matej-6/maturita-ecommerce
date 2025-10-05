@@ -1,3 +1,5 @@
+"use server";
+
 import {
   Sidebar,
   SidebarContent,
@@ -17,10 +19,18 @@ import {
   Layers2Icon,
   ShoppingBagIcon,
 } from "lucide-react";
+import { getCurrentSession } from "@/app/data-access-layer/auth/queries";
+import { ElementType } from "react";
 
 // https://ui.shadcn.com/blocks/sidebar#sidebar-08
 
-const generalNavItems = [
+type NavItem = {
+  label: string;
+  href: string;
+  icon: ElementType;
+};
+
+const generalNavItems: NavItem[] = [
   {
     label: "Categories",
     href: "/admin/categories",
@@ -34,7 +44,7 @@ const generalNavItems = [
   },
 ];
 
-const storeNavItems = [
+const storeNavItems: NavItem[] = [
   {
     label: "Products",
     href: "/admin/products",
@@ -47,7 +57,9 @@ const storeNavItems = [
   },
 ];
 
-export function AdminSidebar() {
+export async function AdminSidebar() {
+  const currentSessionPromise = getCurrentSession();
+
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
@@ -72,11 +84,11 @@ export function AdminSidebar() {
           <SidebarMenu>
             {generalNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild tooltip={item.label}>
-                  <Link href={item.href}>
+                <Link href={item.href}>
+                  <SidebarMenuButton tooltip={item.label}>
                     <item.icon /> <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -86,18 +98,18 @@ export function AdminSidebar() {
           <SidebarMenu>
             {storeNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild tooltip={item.label}>
-                  <Link href={item.href}>
+                <Link href={item.href}>
+                  <SidebarMenuButton tooltip={item.label}>
                     <item.icon /> <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarUser />
+        <SidebarUser currentSessionPromise={currentSessionPromise} />
       </SidebarFooter>
     </Sidebar>
   );

@@ -8,16 +8,16 @@ export declare class UsersService {
     private readonly logger;
     constructor(prisma: PrismaService);
     create(createUserInput: CreateUserInput): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        role: import("generated/prisma/client").Role;
         lastName: string | null;
         email: string;
+        id: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
         avatar: string | null;
+        role: import("generated/prisma/client").Role;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     findOneByEmail(email: string): Promise<User | null>;
     update(id: string, updateUserInput: UpdateUserInput): Promise<UserDto>;

@@ -1,20 +1,20 @@
 "use client";
 
-import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+// https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr#server-components--nextjs-app-router
+
 import {
   defaultShouldDehydrateQuery,
   isServer,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
 function getNewQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1000 * 15 * 60,
-        gcTime: 1000 * 15 * 60,
+        staleTime: 60 * 1000 * 10,
+        gcTime: 60 * 1000 * 10,
       },
       dehydrate: {
         shouldDehydrateQuery: (query) =>
@@ -38,20 +38,7 @@ export function getQueryClient() {
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
-  // const persister = createAsyncStoragePersister({
-  //   storage: typeof window !== "undefined" ? window.localStorage : undefined,
-  // });
-
   return (
-    // <PersistQueryClientProvider
-    //   client={queryClient}
-    //   persistOptions={{
-    //     persister: persister,
-    //     maxAge: 1000 * 60 * 5, // 5 minutes
-    //   }}
-    // >
-    //   {children}
-    // </PersistQueryClientProvider>
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 }

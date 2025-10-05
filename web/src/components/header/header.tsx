@@ -1,16 +1,14 @@
 "use server";
-import { execute } from "@/graphql/execute";
+
 import Link from "next/link";
 import { HeaderRightNav } from "./header-right-nav";
 import { HeaderNav } from "./header-nav";
-import { getLocale } from "next-intl/server";
 import { Suspense } from "react";
-import { HeaderCategoriesDocument } from "@/app/data-access-layer/category/queries.graphql";
-
+import { getHeaderQueryData } from "@/app/data-access-layer/category.queries";
+import { getCurrentSessionAction } from "@/app/data-access-layer/auth/actions";
 export async function Header() {
-  const locale = await getLocale();
-
-  const res = await execute(HeaderCategoriesDocument);
+  const headerQueryDataPromise = getHeaderQueryData();
+  const currentSessionPromise = getCurrentSessionAction();
 
   return (
     <header className="w-full border-b-2">
@@ -25,28 +23,13 @@ export async function Header() {
         </div>
         <div className="col-span-3 flex justify-center">
           <div className="hidden sm:block">
-            <Suspense>
-              <HeaderNav
-                categories={
-                  res.data?.categories.map((c) => ({
-                    id: c.name,
-                    name: c.name,
-                    subcategories: c.subcategories.map((s) => ({
-                      id: s.id,
-                      name: s.name,
-                      link: `/categories/${c.slug}/${s.slug}`,
-                      subcategories: [],
-                    })),
-                    description: c.description ?? undefined,
-                    link: `/categories/${c.slug}`,
-                  })) ?? []
-                }
-              />
+            <Suspense fallback={null}>
+              <HeaderNav queryPromise={headerQueryDataPromise} />
             </Suspense>
           </div>
         </div>
         <div className="col-span-1 flex justify-end items-center">
-          <HeaderRightNav />
+          <HeaderRightNav currentSessionPromise={currentSessionPromise} />
         </div>
       </div>
     </header>

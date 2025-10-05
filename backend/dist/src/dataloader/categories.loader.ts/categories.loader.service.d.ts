@@ -5,9 +5,9 @@ export declare class CategoriesLoaderService {
     constructor(db: PrismaService);
     readonly batchSubcategoriesByParentId: DataLoader<string, {
         id: string;
-        slug: string;
         createdAt: Date;
         updatedAt: Date;
+        slug: string;
         parentCategoryId: string | null;
     }[], string>;
 }

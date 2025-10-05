@@ -14,13 +14,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { use, useState } from "react";
 
 type NewCategoryFormProps = {
-  locales: { code: string; title: string }[];
+  localesPromise: Promise<{ code: string; title: string }[]>;
 };
 
-export const NewCategoryForm = ({ locales }: NewCategoryFormProps) => {
+export const NewCategoryForm = ({ localesPromise }: NewCategoryFormProps) => {
+  const locales = use(localesPromise);
+
   const form = useForm<z.infer<typeof newCategoryFormSchema>>({
     resolver: zodResolver(newCategoryFormSchema),
     mode: "all",

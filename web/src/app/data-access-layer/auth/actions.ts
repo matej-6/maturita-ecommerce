@@ -1,67 +1,21 @@
 "use server";
-import { cookies } from "next/headers";
-import {
-  AUTHENTICATION_COOKIE_NAME,
-  REFRESH_COOKIE_NAME,
-} from "@/app/lib/auth.constants";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+
+import "server-only";
+import { REFRESH_COOKIE_NAME } from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
 import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
+import { setAuthCookies } from "./utils";
+import { cache } from "react";
+import { getCurrentSession } from "./queries";
 
-type AuthResponse = {
+export type AuthResponse = {
   accessToken: string;
   accessTokenExpirationSeconds: number;
   refreshToken: string;
   refreshTokenExpirationSeconds: number;
 };
-
-/**
- * Sets authentication cookies
- * @param data - if data is null, cookies are deleted
- */
-async function setAuthCookies(
-  cookieStore: ReadonlyRequestCookies,
-  data: AuthResponse | null,
-) {
-  cookieStore.set(REFRESH_COOKIE_NAME, data?.refreshToken ?? "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: data?.refreshTokenExpirationSeconds ?? 0,
-  });
-  cookieStore.set(AUTHENTICATION_COOKIE_NAME, data?.accessToken ?? "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: data?.accessTokenExpirationSeconds ?? 0,
-  });
-}
-
-export async function authRefreshToken() {
-  const cookieStore = await cookies();
-  const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
-  if (!refreshTokenCookie) {
-    await setAuthCookies(cookieStore, null);
-    throw new Error("Unauthenticated: please sign in.");
-  }
-
-  const refreshToken = refreshTokenCookie.value;
-
-  const res = await fetchBackend(`/auth/refresh-token`, {
-    method: "POST",
-    headers: {
-      "x-refresh-token": refreshToken,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Authentication failed. Please try again.");
-  }
-
-  const data: AuthResponse = await res.json();
-  await setAuthCookies(cookieStore, data);
-}
 
 export async function authLogout() {
   const cookieStore = await cookies();
@@ -93,8 +47,9 @@ export type LoginActionResult =
     } & ErrorResponse);
 
 export async function authLoginAction(
-  formData: unknown,
+  formData: unknown
 ): Promise<LoginActionResult> {
+  const cookieStore = await cookies();
   const t = await getTranslations("error");
 
   const defaultErrorResponse: ErrorResponse = {
@@ -115,8 +70,6 @@ export async function authLoginAction(
         ...(newErrorResponse(e) || defaultErrorResponse),
       };
     }
-
-    const cookieStore = await cookies();
 
     const authData: AuthResponse = await res.json();
     setAuthCookies(cookieStore, authData);
@@ -143,8 +96,9 @@ export type RegisterActionResult =
     } & ErrorResponse);
 
 export async function authRegisterAction(
-  data: unknown,
+  data: unknown
 ): Promise<RegisterActionResult> {
+  const cookieStore = await cookies();
   const t = await getTranslations("error");
 
   const defaultErrorResponse: ErrorResponse = {
@@ -164,8 +118,6 @@ export async function authRegisterAction(
         ...(newErrorResponse(body) || defaultErrorResponse),
       };
     }
-    const cookieStore = await cookies();
-
     const authData: AuthResponse = await res.json();
     setAuthCookies(cookieStore, authData);
 
@@ -178,3 +130,39 @@ export async function authRegisterAction(
     };
   }
 }
+
+export async function authRefreshToken() {
+  const cookieStore = await cookies();
+  const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
+  if (!refreshTokenCookie) {
+    return false;
+  }
+
+  const refreshToken = refreshTokenCookie.value;
+
+  let tries = 0;
+
+  while (tries < 3) {
+    const res = await fetchBackend(`/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        "x-refresh-token": refreshToken,
+      },
+    });
+    if (res.status === 401) break;
+
+    if (res.ok) {
+      const data: AuthResponse = await res.json();
+      setAuthCookies(cookieStore, data);
+      return true;
+    }
+    tries++;
+  }
+
+  setAuthCookies(cookieStore, null);
+  return false;
+}
+
+export const getCurrentSessionAction = cache(async () => {
+  return await getCurrentSession();
+});

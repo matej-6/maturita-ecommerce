@@ -5,16 +5,16 @@ export declare class UsersResolver {
     private readonly usersService;
     constructor(usersService: UsersService);
     createUser(createUserInput: CreateUserInput): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        role: import("../../generated/prisma/enums").Role;
         lastName: string | null;
         email: string;
+        id: string;
         emailVerified: boolean;
         hashedPassword: string | null;
         firstName: string | null;
         avatar: string | null;
+        role: import("../../generated/prisma/enums").Role;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     findAll(): Promise<import("./dto/user.dto").UserDto[]>;
     findOne(id: string): Promise<import("./dto/user.dto").UserDto | null>;
