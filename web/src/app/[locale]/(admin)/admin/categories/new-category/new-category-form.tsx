@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { use, useState } from "react";
+import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
 
 type NewCategoryFormProps = {
   localesPromise: Promise<{ code: string; title: string }[]>;
@@ -34,8 +35,12 @@ export const NewCategoryForm = ({ localesPromise }: NewCategoryFormProps) => {
     },
   });
 
-  const [fieldErrors, setFieldErrors] = useState(new Map<string, string[]>());
-  const [globalErrors, setGlobalErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<
+    Map<string, string[]> | undefined
+  >(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
   return (
     <Form {...form}>
       <form
@@ -53,12 +58,20 @@ export const NewCategoryForm = ({ localesPromise }: NewCategoryFormProps) => {
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormMessage />
-              {(fieldErrors.get("slug") || []).map((error, index) => (
-                <p key={index} className="text-red-500">
-                  {error}
-                </p>
-              ))}
+              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="parentCategoryId" //toto dokoncit
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Slug</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
