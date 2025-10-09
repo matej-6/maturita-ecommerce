@@ -15,6 +15,7 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": typeof types.CategoryParentSelectDataFragmentFragmentDoc,
     "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(parentId: $parentId) {\n      id\n      slug\n      translations(langs: $langs) {\n        id\n      }\n    }\n  }\n": typeof types.CategoryTable_QueryFragmentFragmentDoc,
     "\n  query localesQuery {\n    locales {\n      code\n      name\n    }\n  }\n": typeof types.LocalesQueryDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": typeof types.MeFragmentFragmentDoc,
@@ -24,6 +25,7 @@ type Documents = {
     "\n  query MeQuery {\n    me {\n      id\n      email\n      firstName\n      lastName\n      emailVerified\n      avatar\n      createdAt\n      updatedAt\n      role\n    }\n  }\n": typeof types.MeQueryDocument,
 };
 const documents: Documents = {
+    "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": types.CategoryParentSelectDataFragmentFragmentDoc,
     "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(parentId: $parentId) {\n      id\n      slug\n      translations(langs: $langs) {\n        id\n      }\n    }\n  }\n": types.CategoryTable_QueryFragmentFragmentDoc,
     "\n  query localesQuery {\n    locales {\n      code\n      name\n    }\n  }\n": types.LocalesQueryDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": types.MeFragmentFragmentDoc,
@@ -33,6 +35,10 @@ const documents: Documents = {
     "\n  query MeQuery {\n    me {\n      id\n      email\n      firstName\n      lastName\n      emailVerified\n      avatar\n      createdAt\n      updatedAt\n      role\n    }\n  }\n": types.MeQueryDocument,
 };
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n"): typeof import('./graphql').CategoryParentSelectDataFragmentFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

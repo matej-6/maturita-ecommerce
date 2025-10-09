@@ -209,6 +209,8 @@ export type VerifyEmailInput = {
   email: Scalars['String']['input'];
 };
 
+export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category', id: string, slug: string } & { ' $fragmentName'?: 'CategoryParentSelectDataFragmentFragment' };
+
 export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, translations: Array<{ __typename?: 'CategoryTranslation', id: string }> }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
 
 export type LocalesQueryQueryVariables = Exact<{ [key: string]: never; }>;
@@ -259,6 +261,12 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
+export const CategoryParentSelectDataFragmentFragmentDoc = new TypedDocumentString(`
+    fragment CategoryParentSelectDataFragment on Category {
+  id
+  slug
+}
+    `, {"fragmentName":"CategoryParentSelectDataFragment"}) as unknown as TypedDocumentString<CategoryParentSelectDataFragmentFragment, unknown>;
 export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment CategoryTable_QueryFragment on Query {
   categories(parentId: $parentId) {
