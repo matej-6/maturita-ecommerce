@@ -8,19 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AllExceptionsFilter = void 0;
 const common_1 = require("@nestjs/common");
+const graphql_1 = require("@nestjs/graphql");
+const errors_1 = require("../errors");
 const exception_body_formatter_1 = require("../lib/exception-body-formatter");
 let AllExceptionsFilter = class AllExceptionsFilter {
-    catch(exception, host) {
-        try {
-            const ctx = host.switchToHttp();
-            const response = ctx.getResponse();
-            response
-                .status(exception.getStatus())
-                .json((0, exception_body_formatter_1.exceptionBodyFormatter)(host, exception));
-        }
-        catch (e) {
-            return exception;
-        }
+    catch(exc, host) {
+        console.log('exc', exc);
+        const exception = exc instanceof common_1.HttpException
+            ? exc
+            : new common_1.HttpException(errors_1.ERROR.unknownError, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        const res = (0, exception_body_formatter_1.exceptionBodyFormatter)(host, exception);
+        const gqlHost = graphql_1.GqlArgumentsHost.create(host);
+        if (gqlHost.getContext() != null)
+            return res;
+        const ctx = host.switchToHttp();
+        const response = ctx.getResponse();
+        response.status(exception.getStatus()).json(res);
     }
 };
 exports.AllExceptionsFilter = AllExceptionsFilter;

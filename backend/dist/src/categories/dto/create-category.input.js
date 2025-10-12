@@ -13,7 +13,7 @@ exports.CreateCategoryInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
 const create_category_translation_input_1 = require("./create-category-translation.input");
-const contains_english_translation_constraint_1 = require("../validators/contains-english-translation.constraint");
+const contains_translation_constraint_1 = require("../validators/contains-translation-constraint");
 const nestjs_i18n_1 = require("nestjs-i18n");
 let CreateCategoryInput = class CreateCategoryInput {
     slug;
@@ -41,11 +41,11 @@ __decorate([
     (0, graphql_1.Field)(() => [create_category_translation_input_1.CreateCategoryTranslationInput], {
         description: 'Category translations',
     }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
     (0, class_validator_1.ArrayMinSize)(1, {
         message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.field.translation.minLength'),
     }),
-    (0, contains_english_translation_constraint_1.ContainsEnglishTranslation)({
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, contains_translation_constraint_1.ContainsTranslation)('en', {
         message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.field.translation.englishRequired'),
     }),
     __metadata("design:type", Array)

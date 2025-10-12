@@ -32,9 +32,12 @@ export function exceptionBodyFormatter(
       defaultMessage;
   }
 
-  return {
+  const res = {
     message: exception.message,
     status: exception.getStatus(),
     fieldErrors: fieldErrors && Object.fromEntries(fieldErrors),
   };
+
+  console.log(res.message);
+  return res;
 }

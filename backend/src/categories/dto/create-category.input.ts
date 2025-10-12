@@ -9,8 +9,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateCategoryTranslationInput } from './create-category-translation.input';
-import { ContainsEnglishTranslation } from '../validators/contains-english-translation.constraint';
+import { ContainsTranslation } from '../validators/contains-translation-constraint';
 import { i18nValidationMessage } from 'nestjs-i18n';
+import { Type } from 'class-transformer';
 
 @InputType()
 export class CreateCategoryInput {
@@ -31,11 +32,11 @@ export class CreateCategoryInput {
   @Field(() => [CreateCategoryTranslationInput], {
     description: 'Category translations',
   })
-  @ValidateNested({ each: true })
   @ArrayMinSize(1, {
     message: i18nValidationMessage('validation.field.translation.minLength'),
   })
-  @ContainsEnglishTranslation({
+  @ValidateNested({ each: true })
+  @ContainsTranslation('en', {
     message: i18nValidationMessage(
       'validation.field.translation.englishRequired',
     ),

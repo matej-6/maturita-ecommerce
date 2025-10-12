@@ -31,7 +31,7 @@ __decorate([
     (0, class_validator_1.MaxLength)(4000, {
         message: (0, nestjs_i18n_1.i18nValidationMessage)('validation.maxLength'),
     }),
-    __metadata("design:type", Object)
+    __metadata("design:type", String)
 ], CreateCategoryTranslationInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { description: 'Locale code' }),

@@ -17,7 +17,7 @@ export class CreateCategoryTranslationInput
   @MaxLength(4000, {
     message: i18nValidationMessage('validation.maxLength'),
   })
-  description?: string | null;
+  description?: string;
 
   @Field(() => String, { description: 'Locale code' })
   @IsString({ message: i18nValidationMessage('validation.required') })

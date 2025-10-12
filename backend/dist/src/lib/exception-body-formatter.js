@@ -26,10 +26,12 @@ function exceptionBodyFormatter(host, exception) {
                 i18n?.t('error.unknownError', { defaultValue: '' }) ||
                 defaultMessage;
     }
-    return {
+    const res = {
         message: exception.message,
         status: exception.getStatus(),
         fieldErrors: fieldErrors && Object.fromEntries(fieldErrors),
     };
+    console.log(res.message);
+    return res;
 }
 //# sourceMappingURL=exception-body-formatter.js.map

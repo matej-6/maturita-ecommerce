@@ -1,7 +1,10 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { newCategoryFormSchema } from "./new-category-form-schema";
+import {
+  newCategoryFormSchema,
+  newCategoryFormShemaType,
+} from "./new-category-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -15,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { use, useState } from "react";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { useTranslations } from "next-intl";
 
 type NewCategoryFormProps = {
   localesPromise: Promise<{ code: string; title: string }[]>;
@@ -22,14 +26,22 @@ type NewCategoryFormProps = {
 
 export const NewCategoryForm = ({ localesPromise }: NewCategoryFormProps) => {
   const locales = use(localesPromise);
+  const ft = useTranslations("form"); // form translations
 
-  const form = useForm<z.infer<typeof newCategoryFormSchema>>({
-    resolver: zodResolver(newCategoryFormSchema),
+  const formSchema = newCategoryFormSchema(ft);
+
+  const form = useForm<newCategoryFormShemaType>({
+    resolver: zodResolver(formSchema),
     mode: "all",
+    defaultValues: {
+      slug: "",
+      parentCategoryId: "",
+      translations: [],
+    },
   });
 
   const { mutate } = useMutation({
-    mutationFn: async (data: z.infer<typeof newCategoryFormSchema>) => {
+    mutationFn: async (data: newCategoryFormShemaType) => {
       console.log(data);
     },
   });
