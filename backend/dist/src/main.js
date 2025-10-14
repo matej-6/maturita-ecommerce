@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const nestjs_i18n_1 = require("nestjs-i18n");
 const all_exceptions_filter_1 = require("./all-exceptions/all-exceptions.filter");
 const validation_filter_1 = require("./validation/validation.filter");
+const exception_body_formatter_1 = require("./lib/exception-body-formatter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
@@ -24,6 +25,9 @@ async function bootstrap() {
     }));
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter(), new validation_filter_1.ValidationFilter(), new nestjs_i18n_1.I18nValidationExceptionFilter({
         detailedErrors: false,
+        responseBodyFormatter(host, exc, formattedErrors) {
+            return (0, exception_body_formatter_1.exceptionBodyFormatter)(host, exc);
+        },
     }));
     await app.listen(process.env.PORT ?? 3000);
 }

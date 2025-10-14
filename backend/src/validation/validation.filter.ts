@@ -1,29 +1,11 @@
-import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
-import { GqlArgumentsHost } from '@nestjs/graphql';
-import { Response } from 'express';
-import { GraphQLError } from 'graphql';
-import { I18nValidationException } from 'nestjs-i18n';
-import { exceptionBodyFormatter } from 'src/lib/exception-body-formatter';
+import { ArgumentsHost, Catch, HttpException } from '@nestjs/common';
+import { GqlArgumentsHost, GqlExceptionFilter } from '@nestjs/graphql';
 
-@Catch(I18nValidationException)
-export class ValidationFilter implements ExceptionFilter {
-  catch(exception: I18nValidationException, host: ArgumentsHost) {
-    const res = exceptionBodyFormatter(host, exception);
-
-    console.log('here 1');
-
+@Catch(HttpException)
+export class ValidationFilter implements GqlExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
     const gqlHost = GqlArgumentsHost.create(host);
-    if (gqlHost.getContext() != null) {
-      return new GraphQLError(exception.message, {
-        extensions: {
-          ...res,
-        },
-      });
-    }
-
-    const ctx = host.switchToHttp();
-    const response: Response = ctx.getResponse();
-
-    response.status(exception.getStatus()).json(res);
+    console.log('validation filter');
+    return exception;
   }
 }

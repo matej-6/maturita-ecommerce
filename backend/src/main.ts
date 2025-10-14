@@ -7,9 +7,9 @@ import {
   I18nValidationPipe,
 } from 'nestjs-i18n';
 import { AllExceptionsFilter } from './all-exceptions/all-exceptions.filter';
-import { exceptionBodyFormatter } from './lib/exception-body-formatter';
 import { ValidationFilter } from './validation/validation.filter';
-import { NextFunction, Request, Response } from 'express';
+import { ValidationError } from 'class-validator';
+import { exceptionBodyFormatter } from './lib/exception-body-formatter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,7 +23,6 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.use(I18nMiddleware);
-
   app.useGlobalPipes(
     new I18nValidationPipe({
       transform: true,
@@ -36,8 +35,12 @@ async function bootstrap() {
     new ValidationFilter(),
     new I18nValidationExceptionFilter({
       detailedErrors: false,
+      responseBodyFormatter(host, exc, formattedErrors) {
+        return exceptionBodyFormatter(host, exc);
+      },
     }),
   );
+
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();

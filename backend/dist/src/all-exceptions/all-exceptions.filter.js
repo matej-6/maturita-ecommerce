@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AllExceptionsFilter = void 0;
 const common_1 = require("@nestjs/common");
 const graphql_1 = require("@nestjs/graphql");
+const graphql_2 = require("graphql");
 const errors_1 = require("../errors");
 const exception_body_formatter_1 = require("../lib/exception-body-formatter");
 let AllExceptionsFilter = class AllExceptionsFilter {
@@ -20,7 +21,7 @@ let AllExceptionsFilter = class AllExceptionsFilter {
         const res = (0, exception_body_formatter_1.exceptionBodyFormatter)(host, exception);
         const gqlHost = graphql_1.GqlArgumentsHost.create(host);
         if (gqlHost.getContext() != null)
-            return res;
+            return new graphql_2.GraphQLError(res.message, { extensions: { ...res } });
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
         response.status(exception.getStatus()).json(res);
@@ -28,6 +29,6 @@ let AllExceptionsFilter = class AllExceptionsFilter {
 };
 exports.AllExceptionsFilter = AllExceptionsFilter;
 exports.AllExceptionsFilter = AllExceptionsFilter = __decorate([
-    (0, common_1.Catch)(common_1.HttpException)
+    (0, common_1.Catch)()
 ], AllExceptionsFilter);
 //# sourceMappingURL=all-exceptions.filter.js.map

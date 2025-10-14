@@ -49,7 +49,15 @@ exports.AppModule = AppModule = __decorate([
                 inject: [prisma_service_1.PrismaService, dataloader_service_1.DataloaderService],
                 useFactory: (db, dataLoaderService) => ({
                     hideSchemaDetailsFromClientErrors: true,
-                    fieldResolverEnhancers: ['guards'],
+                    formatError: (error) => {
+                        console.log('HEREEEE');
+                        console.log(error);
+                        return {
+                            message: error.message,
+                            code: error.extensions?.code,
+                        };
+                    },
+                    fieldResolverEnhancers: ['interceptors', 'guards'],
                     graphiql: true,
                     autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
                     sortSchema: true,

@@ -51,17 +51,15 @@ import { DEFAULT_LOCALE } from './locales';
         dataLoaderService: DataloaderService,
       ) => ({
         hideSchemaDetailsFromClientErrors: true,
-        // formatError: (error) => {
-        //   if (error instanceof I18nValidationException) {
-        //     console.log('here');
-        //   }
-        //   console.log(error);
-        //   return {
-        //     message: error.message,
-        //     code: error.extensions?.code,
-        //   };
-        // },
-        fieldResolverEnhancers: ['guards'], // aby som mohol pouzivat @UseGuards() aj nad fieldResolvers
+        formatError: (error) => {
+          console.log('HEREEEE');
+          console.log(error);
+          return {
+            message: error.message,
+            code: error.extensions?.code,
+          };
+        },
+        fieldResolverEnhancers: ['interceptors', 'guards'], // aby som mohol pouzivat @UseGuards() aj nad fieldResolvers
         graphiql: true,
         autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,

@@ -7,12 +7,13 @@ import {
 } from '@nestjs/common';
 import { GqlArgumentsHost } from '@nestjs/graphql';
 import { Response } from 'express';
+import { GraphQLError } from 'graphql';
 import { ERROR } from 'src/errors';
 import { exceptionBodyFormatter } from 'src/lib/exception-body-formatter';
 
-@Catch(HttpException)
+@Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  catch(exc: HttpException, host: ArgumentsHost) {
+  catch(exc: unknown, host: ArgumentsHost) {
     console.log('exc', exc);
 
     const exception =
@@ -25,7 +26,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const res = exceptionBodyFormatter(host, exception);
     const gqlHost = GqlArgumentsHost.create(host);
-    if (gqlHost.getContext() != null) return res;
+    if (gqlHost.getContext() != null)
+      return new GraphQLError(res.message, { extensions: { ...res } });
 
     const ctx = host.switchToHttp();
 
