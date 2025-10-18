@@ -53,6 +53,7 @@ exports.AppModule = AppModule = __decorate([
                         return {
                             message: error.message,
                             extensions: {
+                                statusCode: error.extensions?.statusCode,
                                 errors: error.extensions?.errors,
                             },
                         };

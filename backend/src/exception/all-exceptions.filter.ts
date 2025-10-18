@@ -34,7 +34,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         break;
       }
       case 'graphql':
-        throw new GraphQLError(message);
+        throw new GraphQLError(message, {
+          extensions: {
+            statusCode: exc.getStatus(),
+          },
+        });
     }
   }
 }

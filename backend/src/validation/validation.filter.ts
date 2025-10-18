@@ -48,6 +48,7 @@ export class ValidationFilter implements ExceptionFilter {
       case 'graphql':
         throw new GraphQLError(exception.message, {
           extensions: {
+            statusCode: HttpStatus.BAD_REQUEST,
             errors: formattedErrors,
           },
         });
