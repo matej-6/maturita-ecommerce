@@ -13,7 +13,6 @@ export function ContainsTranslation(
       options: validationOptions,
       validator: {
         validate(value, args) {
-          console.log(value, args);
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const [locale] = args ? args.constraints : ['en'];
           return (

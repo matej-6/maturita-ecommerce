@@ -17,11 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { GraphQlContext } from './types/graphql-context';
 import { RedisModule } from './redis/redis.module';
 import { LocalesModule } from './locales/locales.module';
-import {
-  HeaderResolver,
-  I18nModule,
-  I18nValidationException,
-} from 'nestjs-i18n';
+import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import * as path from 'path';
 import { AuthenticatedUserDto } from './auth/dto/authenticated-user.dto';
 import { IDataLoaders } from './dataloader/dataloader.interface';
@@ -52,11 +48,11 @@ import { DEFAULT_LOCALE } from './locales';
       ) => ({
         hideSchemaDetailsFromClientErrors: true,
         formatError: (error) => {
-          console.log('HEREEEE');
-          console.log(error);
           return {
             message: error.message,
-            code: error.extensions?.code,
+            extensions: {
+              errors: error.extensions?.errors,
+            },
           };
         },
         fieldResolverEnhancers: ['interceptors', 'guards'], // aby som mohol pouzivat @UseGuards() aj nad fieldResolvers

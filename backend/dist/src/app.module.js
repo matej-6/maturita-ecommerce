@@ -50,11 +50,11 @@ exports.AppModule = AppModule = __decorate([
                 useFactory: (db, dataLoaderService) => ({
                     hideSchemaDetailsFromClientErrors: true,
                     formatError: (error) => {
-                        console.log('HEREEEE');
-                        console.log(error);
                         return {
                             message: error.message,
-                            code: error.extensions?.code,
+                            extensions: {
+                                errors: error.extensions?.errors,
+                            },
                         };
                     },
                     fieldResolverEnhancers: ['interceptors', 'guards'],

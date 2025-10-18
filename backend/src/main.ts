@@ -1,15 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
-import {
-  I18nMiddleware,
-  I18nValidationExceptionFilter,
-  I18nValidationPipe,
-} from 'nestjs-i18n';
-import { AllExceptionsFilter } from './all-exceptions/all-exceptions.filter';
+import { I18nMiddleware, I18nValidationPipe } from 'nestjs-i18n';
+import { AllExceptionsFilter } from './exception/all-exceptions.filter';
 import { ValidationFilter } from './validation/validation.filter';
-import { ValidationError } from 'class-validator';
-import { exceptionBodyFormatter } from './lib/exception-body-formatter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,21 +17,14 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.use(I18nMiddleware);
+
+  app.useGlobalFilters(new AllExceptionsFilter(), new ValidationFilter());
+
   app.useGlobalPipes(
     new I18nValidationPipe({
       transform: true,
       validateCustomDecorators: true,
-      enableDebugMessages: true,
-    }),
-  );
-  app.useGlobalFilters(
-    new AllExceptionsFilter(),
-    new ValidationFilter(),
-    new I18nValidationExceptionFilter({
-      detailedErrors: false,
-      responseBodyFormatter(host, exc, formattedErrors) {
-        return exceptionBodyFormatter(host, exc);
-      },
+      enableDebugMessages: false,
     }),
   );
 

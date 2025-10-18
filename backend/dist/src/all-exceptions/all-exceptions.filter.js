@@ -29,6 +29,6 @@ let AllExceptionsFilter = class AllExceptionsFilter {
 };
 exports.AllExceptionsFilter = AllExceptionsFilter;
 exports.AllExceptionsFilter = AllExceptionsFilter = __decorate([
-    (0, common_1.Catch)()
+    (0, common_1.Catch)(common_1.HttpException, graphql_2.GraphQLError)
 ], AllExceptionsFilter);
 //# sourceMappingURL=all-exceptions.filter.js.map

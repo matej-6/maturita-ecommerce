@@ -11,43 +11,43 @@ export declare class CategoriesService {
     constructor(prisma: PrismaService, localesService: LocalesService);
     create(createCategoryInput: CreateCategoryInput): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     }>;
     private getCategoryCacheKey;
     findAll(parentId?: string | null): Promise<Category[]>;
     findOne(id: string): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     } | null>;
     update(id: string, updateCategoryInput: UpdateCategoryInput): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
-        slug: string;
         parentCategoryId: string | null;
     }>;
     remove(id: string): Promise<void>;
     findAllSubcategoriesByParentIds(parentIds: string[]): Promise<Category[]>;
     getCategorySubcategoriesByBatch(parentIds: string[]): Promise<(Category[] | null)[]>;
     findTranslation(categoryId: string, locale: string): Promise<{
-        name: string;
         id: string;
         locale: string;
+        name: string;
         description: string | null;
         isActive: boolean;
         categoryId: string;
     } | null>;
     getAllTranslationsByBatch(lang: string, categoryIds: string[]): Promise<(CategoryTranslation | null)[]>;
     findTranslations(id: string, locales?: string[]): Promise<{
-        name: string;
         id: string;
         locale: string;
+        name: string;
         description: string | null;
         isActive: boolean;
         categoryId: string;
