@@ -2,4 +2,6 @@ web/.idea/modules.xml
 web/.idea/vcs.xml
 web/.idea/web.iml
 web/.idea/inspectionProfiles/Project_Default.xml
-backend/dist/*
+web/node_modules
+backend/dist
+backend/node_modules
