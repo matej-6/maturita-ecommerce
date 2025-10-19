@@ -36,6 +36,7 @@ export class CreateCategoryInput {
     message: i18nValidationMessage('validation.field.translation.minLength'),
   })
   @ValidateNested({ each: true })
+  @Type(() => CreateCategoryTranslationInput)
   @ContainsTranslation('en', {
     message: i18nValidationMessage(
       'validation.field.translation.englishRequired',
