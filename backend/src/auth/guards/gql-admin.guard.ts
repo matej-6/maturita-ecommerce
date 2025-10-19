@@ -1,11 +1,11 @@
 import {
   ExecutionContext,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import { GraphqlAppContext } from 'src/app.module';
+import { UnauthorizedException } from 'src/exception/unauthorized.exception';
 
 @Injectable()
 export class GqlAdminGuard extends AuthGuard('jwt') {
