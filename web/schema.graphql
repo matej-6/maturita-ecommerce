@@ -98,7 +98,7 @@ type Query {
     """
     gets subcategories of a category with provided parentId, to fetch all categories with no parent id, set the value to an emtpy string: ""
     """
-    parentId: String!
+    parentId: String
   ): [Category!]!
   category(id: ID!): Category!
   locale(id: String!): Locale!

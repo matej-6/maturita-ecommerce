@@ -1,14 +1,11 @@
 import "server-only";
 import { graphql } from "@/graphql";
 import { cache } from "react";
-import { fetchGraphql } from "../fetch-graphql";
+import { fetchGraphql } from "../../fetch-graphql";
 
-export const localesQueryDocument = graphql(`
-  query localesQuery {
-    locales {
-      code
-      name
-    }
+const localesQueryDocument = graphql(`
+  query LocalesQueryDocument {
+    ...Locales_QueryFragment
   }
 `);
 

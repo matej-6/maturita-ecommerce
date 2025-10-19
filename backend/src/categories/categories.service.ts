@@ -66,10 +66,13 @@ export class CategoriesService {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
-  async findAll(parentId?: string | null): Promise<Category[]> {
-    if (parentId && parentId.trim() !== '') {
+  async findAll(parentId?: string): Promise<Category[]> {
+    if (!parentId && parentId !== '') {
+      return await this.prisma.category.findMany({});
+    }
+    if (parentId === '') {
       const categories = await this.prisma.category.findMany({
-        where: { parentCategoryId: parentId },
+        where: { parentCategoryId: null },
       });
 
       return categories;
@@ -77,7 +80,7 @@ export class CategoriesService {
 
     const categories = await this.prisma.category.findMany({
       where: {
-        parentCategoryId: null,
+        parentCategoryId: parentId,
       },
     });
 
@@ -171,7 +174,7 @@ export class CategoriesService {
   }
 
   /**
-   * Metóda navrhnutá (najmä) pre data loader
+   * Metóda navrhnutá pre data loader
    * source: @link https://blog.logrocket.com/use-dataloader-nestjs/#setting-up-nestjs-graphql
    * @param lang
    * @param categoryIds

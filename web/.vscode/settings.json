@@ -1,4 +1,10 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "i18n-ally.localesPaths": [
+    "messages",
+    "src/i18n",
+    "src/app/data-access-layer/admin/locale"
+  ],
+  "i18n-ally.keystyle": "nested"
 }

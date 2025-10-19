@@ -32,10 +32,11 @@ export class CategoriesResolver {
   findAll(
     @Args('parentId', {
       name: 'parentId',
+      nullable: true,
       description:
         'gets subcategories of a category with provided parentId, to fetch all categories with no parent id, set the value to an emtpy string: ""',
     })
-    parentId: string,
+    parentId?: string,
   ) {
     return this.categoriesService.findAll(parentId);
   }

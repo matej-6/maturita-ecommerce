@@ -3,9 +3,9 @@
     "invalidEmail": "Nesprávna emailová adresa",
     "invalidPassword": "Nesprávne heslo",
     "minLengthPassword": "Heslo musí mať najmenej {minLength, plural, =1 {# znak} other {# znaky}}",
-    "required": "{sk_fieldName} je povinné",
-    "maxLength": "{sk_fieldName} môže mať dĺžku najviac {value, plural, =1 {# znak} other {# znakov}}",
-    "minLength": "{sk_fieldName} musí mať dĺžku najmenej {value, plural, =1 {# znak} other {#znakov}}",
+    "required": "{fieldName} je povinné",
+    "maxLength": "{fieldName} môže mať dĺžku najviac {value, plural, =1 {# znak} other {# znakov}}",
+    "minLength": "{fieldName} musí mať dĺžku najmenej {value, plural, =1 {# znak} other {#znakov}}",
     "passwordsMustMatch": "Heslá sa musia zhodovať",
     "uuid": "Nesprávny formát UUID",
     "newCategoryFormSchema": {
@@ -80,5 +80,32 @@
   "error": {
     "unknownError": "Nastala neočakávaná chyba",
     "INTERNAL_SERVER_ERROR": "Nastala neočakávaná chyba"
+  },
+  "admin": {
+    "categories": {
+      "newCategory": {
+        "page": {
+          "title": "Vytvoriť novú kategóriu"
+        },
+        "form": {
+          "submitButton": "Vytvoriť kategóriu",
+          "parentCategoryId": {
+            "combobox": {
+              "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
+              "filterPlaceholderText": "Filtrovať kategórie",
+              "emptyValueLabel": "Vybrať kategóriu"
+            }
+          }
+        }
+      }
+    }
+  },
+  "category": {
+    "fields": {
+      "slug": "Slug",
+      "parentCategoryId": "ID nadkategórie",
+      "name": "Meno",
+      "description": "Popis"
+    }
   }
 }

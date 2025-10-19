@@ -4,26 +4,30 @@ import { useTranslations } from "next-intl";
 
 /**
  * Function that returns a new newCategoryFormSchema, with error messages translated to match user preference
- * @param t - next-intl on 'form'
+ * @param t - next-intl translations on 'form'
+ * @param c - next-intl translations on 'category'
  * @returns newCategoryFormSchema
  */
-export const newCategoryFormSchema = (t: ReturnType<typeof useTranslations>) =>
+export const newCategoryFormSchema = (
+  t: ReturnType<typeof useTranslations<"form">>,
+  c: ReturnType<typeof useTranslations<"category">>
+) =>
   z.object({
     slug: z
       .string({
-        error: t("required", { fieldName: "Slug", sk_fieldName: "Slug" }),
+        error: t("required", {
+          fieldName: c("fields.slug"),
+        }),
       })
       .min(3, {
         error: t("minLength", {
-          fieldName: "Slug",
-          sk_fieldName: "Slug",
+          fieldName: c("fields.slug"),
           value: 3,
         }),
       })
       .max(255, {
         error: t("maxLength", {
-          fieldName: "Slug",
-          sk_fieldName: "Slug",
+          fieldName: c("fields.slug"),
           value: 128,
         }),
       }),

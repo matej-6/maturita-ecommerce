@@ -80,5 +80,32 @@
   "error": {
     "unknownError": "An unknown error ocurred",
     "INTERNAL_SERVER_ERROR": "An unknown error ocurred"
+  },
+  "admin": {
+    "categories": {
+      "newCategory": {
+        "page": {
+          "title": "Add a New Category"
+        },
+        "form": {
+          "submitButton": "Create category",
+          "parentCategoryId": {
+            "combobox": {
+              "noResultsFoundText": "No results found.",
+              "filterPlaceholderText": "Filter categories",
+              "emptyValueLabel": "Select category"
+            }
+          }
+        }
+      }
+    }
+  },
+  "category": {
+    "fields": {
+      "slug": "Slug",
+      "parentCategoryId": "Parent Category Id",
+      "name": "Name",
+      "description": "Description"
+    }
   }
 }

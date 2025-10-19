@@ -17,7 +17,10 @@ import * as types from './graphql';
 type Documents = {
     "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": typeof types.CategoryParentSelectDataFragmentFragmentDoc,
     "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(parentId: $parentId) {\n      id\n      slug\n      translations(langs: $langs) {\n        id\n      }\n    }\n  }\n": typeof types.CategoryTable_QueryFragmentFragmentDoc,
-    "\n  query localesQuery {\n    locales {\n      code\n      name\n    }\n  }\n": typeof types.LocalesQueryDocument,
+    "\n  fragment AllCategories_QueryFragment on Query {\n    categories(parentId: null) {\n      id\n      slug\n    }\n  }\n": typeof types.AllCategories_QueryFragmentFragmentDoc,
+    "\n  query newCategory_QueryDocument {\n    ...AllCategories_QueryFragment\n    ...Locales_QueryFragment\n  }\n": typeof types.NewCategory_QueryDocumentDocument,
+    "\n  fragment Locales_QueryFragment on Query {\n    locales {\n      code\n      name\n    }\n  }\n": typeof types.Locales_QueryFragmentFragmentDoc,
+    "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n": typeof types.LocalesQueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": typeof types.MeFragmentFragmentDoc,
     "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n": typeof types.MeDocument,
     "\n  query HeaderQuery {\n    ...HeaderNav_QueryFragment\n  }\n": typeof types.HeaderQueryDocument,
@@ -27,7 +30,10 @@ type Documents = {
 const documents: Documents = {
     "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": types.CategoryParentSelectDataFragmentFragmentDoc,
     "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(parentId: $parentId) {\n      id\n      slug\n      translations(langs: $langs) {\n        id\n      }\n    }\n  }\n": types.CategoryTable_QueryFragmentFragmentDoc,
-    "\n  query localesQuery {\n    locales {\n      code\n      name\n    }\n  }\n": types.LocalesQueryDocument,
+    "\n  fragment AllCategories_QueryFragment on Query {\n    categories(parentId: null) {\n      id\n      slug\n    }\n  }\n": types.AllCategories_QueryFragmentFragmentDoc,
+    "\n  query newCategory_QueryDocument {\n    ...AllCategories_QueryFragment\n    ...Locales_QueryFragment\n  }\n": types.NewCategory_QueryDocumentDocument,
+    "\n  fragment Locales_QueryFragment on Query {\n    locales {\n      code\n      name\n    }\n  }\n": types.Locales_QueryFragmentFragmentDoc,
+    "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n": types.LocalesQueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": types.MeFragmentFragmentDoc,
     "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n": types.MeDocument,
     "\n  query HeaderQuery {\n    ...HeaderNav_QueryFragment\n  }\n": types.HeaderQueryDocument,
@@ -46,7 +52,19 @@ export function graphql(source: "\n  fragment CategoryTable_QueryFragment on Que
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query localesQuery {\n    locales {\n      code\n      name\n    }\n  }\n"): typeof import('./graphql').LocalesQueryDocument;
+export function graphql(source: "\n  fragment AllCategories_QueryFragment on Query {\n    categories(parentId: null) {\n      id\n      slug\n    }\n  }\n"): typeof import('./graphql').AllCategories_QueryFragmentFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query newCategory_QueryDocument {\n    ...AllCategories_QueryFragment\n    ...Locales_QueryFragment\n  }\n"): typeof import('./graphql').NewCategory_QueryDocumentDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment Locales_QueryFragment on Query {\n    locales {\n      code\n      name\n    }\n  }\n"): typeof import('./graphql').Locales_QueryFragmentFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n"): typeof import('./graphql').LocalesQueryDocumentDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

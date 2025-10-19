@@ -14,10 +14,10 @@ export class Category implements CategoryEntity {
   name: string;
 
   @Field(() => String, { nullable: true })
-  description?: string | null;
+  description?: string;
 
   @Field(() => String, { nullable: true })
-  parentCategoryId: string | null;
+  parentCategoryId: string;
 
   @Field(() => [CategoryTranslation], { description: 'Category translations' })
   translations: Array<CategoryTranslation>;

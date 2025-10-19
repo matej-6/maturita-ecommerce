@@ -7,7 +7,14 @@ dotenv.config();
 
 const config: CodegenConfig = {
   schema: process.env.GRAPHQL_URL!,
-  documents: ["src/**/*.tsx", "src/**/*queries.ts", "!src/gql/**/*"],
+  documents: [
+    "src/**/*.tsx",
+    "src/**/*queries.ts",
+    "src/**/*fragments.ts",
+    "src/**/queries.ts",
+    "src/**/fragments.ts",
+    "!src/gql/**/*",
+  ],
   ignoreNoDocuments: false,
   verbose: true,
   noSilentErrors: true,

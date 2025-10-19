@@ -158,7 +158,7 @@ export type Query = {
 
 
 export type QueryCategoriesArgs = {
-  parentId: Scalars['String']['input'];
+  parentId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -213,10 +213,25 @@ export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category'
 
 export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, translations: Array<{ __typename?: 'CategoryTranslation', id: string }> }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
 
-export type LocalesQueryQueryVariables = Exact<{ [key: string]: never; }>;
+export type AllCategories_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string }> } & { ' $fragmentName'?: 'AllCategories_QueryFragmentFragment' };
+
+export type NewCategory_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LocalesQueryQuery = { __typename?: 'Query', locales: Array<{ __typename?: 'Locale', code: string, name: string }> };
+export type NewCategory_QueryDocumentQuery = (
+  { __typename?: 'Query' }
+  & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment;'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
+);
+
+export type Locales_QueryFragmentFragment = { __typename?: 'Query', locales: Array<{ __typename?: 'Locale', code: string, name: string }> } & { ' $fragmentName'?: 'Locales_QueryFragmentFragment' };
+
+export type LocalesQueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LocalesQueryDocumentQuery = (
+  { __typename?: 'Query' }
+  & { ' $fragmentRefs'?: { 'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
+);
 
 export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
@@ -278,6 +293,22 @@ export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"CategoryTable_QueryFragment"}) as unknown as TypedDocumentString<CategoryTable_QueryFragmentFragment, unknown>;
+export const AllCategories_QueryFragmentFragmentDoc = new TypedDocumentString(`
+    fragment AllCategories_QueryFragment on Query {
+  categories(parentId: null) {
+    id
+    slug
+  }
+}
+    `, {"fragmentName":"AllCategories_QueryFragment"}) as unknown as TypedDocumentString<AllCategories_QueryFragmentFragment, unknown>;
+export const Locales_QueryFragmentFragmentDoc = new TypedDocumentString(`
+    fragment Locales_QueryFragment on Query {
+  locales {
+    code
+    name
+  }
+}
+    `, {"fragmentName":"Locales_QueryFragment"}) as unknown as TypedDocumentString<Locales_QueryFragmentFragment, unknown>;
 export const MeFragmentFragmentDoc = new TypedDocumentString(`
     fragment MeFragment on MeResponse {
   id
@@ -304,14 +335,33 @@ export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"HeaderNav_QueryFragment"}) as unknown as TypedDocumentString<HeaderNav_QueryFragmentFragment, unknown>;
-export const LocalesQueryDocument = new TypedDocumentString(`
-    query localesQuery {
+export const NewCategory_QueryDocumentDocument = new TypedDocumentString(`
+    query newCategory_QueryDocument {
+  ...AllCategories_QueryFragment
+  ...Locales_QueryFragment
+}
+    fragment AllCategories_QueryFragment on Query {
+  categories(parentId: null) {
+    id
+    slug
+  }
+}
+fragment Locales_QueryFragment on Query {
   locales {
     code
     name
   }
+}`) as unknown as TypedDocumentString<NewCategory_QueryDocumentQuery, NewCategory_QueryDocumentQueryVariables>;
+export const LocalesQueryDocumentDocument = new TypedDocumentString(`
+    query LocalesQueryDocument {
+  ...Locales_QueryFragment
 }
-    `) as unknown as TypedDocumentString<LocalesQueryQuery, LocalesQueryQueryVariables>;
+    fragment Locales_QueryFragment on Query {
+  locales {
+    code
+    name
+  }
+}`) as unknown as TypedDocumentString<LocalesQueryDocumentQuery, LocalesQueryDocumentQueryVariables>;
 export const MeDocument = new TypedDocumentString(`
     query Me {
   me {
