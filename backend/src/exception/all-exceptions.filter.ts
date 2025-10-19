@@ -1,6 +1,7 @@
 import {
   ArgumentsHost,
   Catch,
+  ContextType,
   ExceptionFilter,
   HttpException,
   Logger,
@@ -8,7 +9,6 @@ import {
 import { Response } from 'express';
 import { GraphQLError } from 'graphql';
 import { I18nContext } from 'nestjs-i18n';
-import { ERROR } from 'src/errors';
 
 @Catch(HttpException)
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -20,11 +20,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const i18n = I18nContext.current();
 
     const message: string =
-      i18n?.t(exc.message, { defaultValue: undefined }) ||
-      i18n?.t(ERROR.unknownError) ||
-      ERROR.unknownError;
+      i18n?.t(exc.message, { defaultValue: undefined }) || exc.message;
 
-    switch (host.getType() as string) {
+    this.logger.debug(`
+      response: {
+        message: ${message},
+        statusCode: ${exc.getStatus()}
+      }
+      `);
+
+    switch (host.getType<ContextType | 'graphql'>()) {
       case 'http': {
         const response = host.switchToHttp().getResponse<Response>();
         response.status(exc.getStatus()).send({
