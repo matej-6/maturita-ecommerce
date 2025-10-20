@@ -21,43 +21,24 @@ export class CategoriesService {
     private readonly localesService: LocalesService,
   ) {}
   async create(createCategoryInput: CreateCategoryInput) {
-    const { translations, ...newCategory } = createCategoryInput;
-
     // ak uz existuje takato kategoria => error
     const existingCategory = await this.prisma.category.findUnique({
       where: {
-        slug: newCategory.slug,
+        slug: createCategoryInput.slug,
       },
     });
 
     if (existingCategory) {
       this.logger.error(
         'A category with this slug already exists: ',
-        newCategory.slug,
+        createCategoryInput.slug,
       );
       throw new BadRequestException();
     }
 
-    const validLocales = this.localesService.findAll();
-
-    // ensure no duplicate translations are created
-    const uniqueTranslations = new Map<string, (typeof translations)[number]>();
-    for (const translation of translations) {
-      if (validLocales.some((c) => c.code === translation.localeCode)) {
-        uniqueTranslations.set(translation.localeCode, translation);
-      }
-    }
-
     return this.prisma.category.create({
       data: {
-        ...newCategory,
-        CategoryTranslation: {
-          create: Array.from(uniqueTranslations.values()).map((t) => ({
-            name: t.name,
-            description: t.description,
-            locale: t.localeCode,
-          })),
-        },
+        ...createCategoryInput,
       },
     });
   }

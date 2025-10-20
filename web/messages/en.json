@@ -100,12 +100,15 @@
       }
     }
   },
-  "category": {
-    "fields": {
+  "fields": {
+    "category": {
       "slug": "Slug",
       "parentCategoryId": "Parent Category Id",
       "name": "Name",
       "description": "Description"
+    },
+    "locale": {
+      "code": "Locale code"
     }
   }
 }

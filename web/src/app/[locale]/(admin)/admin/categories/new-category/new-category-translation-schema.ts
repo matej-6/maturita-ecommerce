@@ -7,67 +7,60 @@ import z from "zod";
  * @returns newCategoryTranslationSchema
  */
 export const newCategoryTranslationSchema = (
-  t: ReturnType<typeof useTranslations>
+  t: ReturnType<typeof useTranslations<"form">>,
+  c: ReturnType<typeof useTranslations<"fields">>
 ) =>
   z.object({
     name: z
       .string({
-        error: t("required", { fieldName: "Name", sk_fieldName: "Meno" }),
+        error: t("required", { fieldName: c("category.name") }),
       })
       .min(3, {
         error: t("minLength", {
-          fieldName: "Name",
-          sk_fieldName: "Meno",
+          fieldName: c("category.name"),
           value: 3,
         }),
       })
       .max(255, {
         error: t("maxLength", {
-          fieldName: "Name",
-          sk_fieldName: "Meno",
+          fieldName: c("category.name"),
           value: 255,
         }),
       }),
     description: z
       .string({
         error: t("required", {
-          fieldName: "Description",
-          sk_fieldName: "Popis",
+          fieldName: c("category.description"),
         }),
       })
       .min(3, {
         error: t("minLength", {
-          fieldName: "Description",
-          sk_fieldName: "Popis",
+          fieldName: c("category.description"),
           value: 3,
         }),
       })
       .max(255, {
         error: t("maxLength", {
-          fieldName: "Description",
-          sk_fieldName: "Popis",
+          fieldName: c("category.description"),
           value: 255,
         }),
       }),
     localeCode: z
       .string({
         error: t("required", {
-          fieldName: "Locale code",
-          sk_fieldName: "Kód lokality",
+          fieldName: c("locale.code"),
         }),
       })
       .min(2, {
         error: t("minLength", {
           value: 3,
-          fieldName: "Locale code",
-          sk_fieldName: "Kód lokality",
+          fieldName: c("locale.code"),
         }),
       })
       .max(5, {
         error: t("minLength", {
           value: 3,
-          fieldName: "Locale code",
-          sk_fieldName: "Kód lokality",
+          fieldName: c("locale.code"),
         }),
       }),
   });

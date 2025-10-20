@@ -100,12 +100,15 @@
       }
     }
   },
-  "category": {
-    "fields": {
+  "fields": {
+    "category": {
       "slug": "Slug",
       "parentCategoryId": "ID nadkategórie",
       "name": "Meno",
       "description": "Popis"
+    },
+    "locale": {
+      "code": "Kód lokality"
     }
   }
 }

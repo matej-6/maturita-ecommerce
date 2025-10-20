@@ -1,17 +1,12 @@
 import { InputType, Field } from '@nestjs/graphql';
 import {
-  ArrayMinSize,
-  IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   MinLength,
-  ValidateNested,
+  ValidateIf,
 } from 'class-validator';
-import { CreateCategoryTranslationInput } from './create-category-translation.input';
-import { ContainsTranslation } from '../validators/contains-translation-constraint';
 import { i18nValidationMessage } from 'nestjs-i18n';
-import { Type } from 'class-transformer';
 
 @InputType()
 export class CreateCategoryInput {
@@ -25,22 +20,7 @@ export class CreateCategoryInput {
     description: 'Parent category id',
     nullable: true,
   })
-  @IsOptional()
+  @ValidateIf((obj, value) => !['', undefined].includes(value))
   @IsUUID(undefined, { message: i18nValidationMessage('validation.invalid') })
   parentCategoryId?: string;
-
-  @Field(() => [CreateCategoryTranslationInput], {
-    description: 'Category translations',
-  })
-  @ArrayMinSize(1, {
-    message: i18nValidationMessage('validation.field.translation.minLength'),
-  })
-  @ValidateNested({ each: true })
-  @Type(() => CreateCategoryTranslationInput)
-  @ContainsTranslation('en', {
-    message: i18nValidationMessage(
-      'validation.field.translation.englishRequired',
-    ),
-  })
-  translations: CreateCategoryTranslationInput[];
 }

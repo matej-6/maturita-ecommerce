@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { z } from "zod";
 
 /**
@@ -6,7 +7,7 @@ import { z } from "zod";
  * @returns registerSchema
  */
 export const createRegisterSchema = (
-  t: (arg: string, args?: Record<string, string | number | Date>) => string
+  t: ReturnType<typeof useTranslations<"form">>
 ) =>
   z
     .object({
@@ -24,7 +25,7 @@ export const createRegisterSchema = (
       password: z
         .string()
         .min(8, {
-          error: t("minLength", { fieldName: "Password", value: "8" }),
+          error: t("minLength", { fieldName: "Password", value: 8 }),
         })
         .max(512, {
           error: t("maxLength", { fieldName: "Password", value: 512 }),

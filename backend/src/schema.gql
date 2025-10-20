@@ -37,20 +37,6 @@ input CreateCategoryInput {
 
   """Slug of the category"""
   slug: String!
-
-  """Category translations"""
-  translations: [CreateCategoryTranslationInput!]!
-}
-
-input CreateCategoryTranslationInput {
-  """Category description"""
-  description: String
-
-  """Locale code"""
-  localeCode: String!
-
-  """Category name"""
-  name: String!
 }
 
 input CreateUserInput {
