@@ -6,7 +6,6 @@ import {
   newCategoryFormShemaType,
 } from "./new-category-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import {
   Form,
@@ -40,6 +39,8 @@ import { ExecutionResult } from "graphql";
 import { FragmentType, getFragmentData } from "@/graphql";
 import { Locales_QueryFragment } from "@/app/data-access-layer/admin/locale/fragments";
 import { AllCategories_QueryFragment } from "@/app/data-access-layer/admin/category/fragments";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { newCategoryTranslationSchema } from "./new-category-translation-schema";
 
 type NewCategoryFormProps = {
   localesQueryPromise: Promise<
@@ -142,6 +143,32 @@ export const NewCategoryForm = ({
             </FormItem>
           )}
         />
+
+        <h2>Translations</h2>
+
+        <FormField
+          control={form.control}
+          name="translations"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Translation</FormLabel>
+              {localesData?.locales.map((locale) => {
+
+                return null;
+              })}
+              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+            </FormItem>
+          )}
+        />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>English</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div></div>
+          </CardContent>
+        </Card>
 
         <Button
           type="submit"
