@@ -39,8 +39,6 @@ import { ExecutionResult } from "graphql";
 import { FragmentType, getFragmentData } from "@/graphql";
 import { Locales_QueryFragment } from "@/app/data-access-layer/admin/locale/fragments";
 import { AllCategories_QueryFragment } from "@/app/data-access-layer/admin/category/fragments";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { newCategoryTranslationSchema } from "./new-category-translation-schema";
 
 type NewCategoryFormProps = {
   localesQueryPromise: Promise<
@@ -67,8 +65,8 @@ export const NewCategoryForm = ({
     categoriesQueryResult.data
   );
 
-  const ft = useTranslations("form"); // general form translations
-  const ct = useTranslations("category"); // category translations
+  const formt = useTranslations("form"); // general form translations
+  const ft = useTranslations("fields"); // fields translations
   const cft = useTranslations("admin.categories.newCategory.form"); // specific form translations
 
   const comboboxCategories = [
@@ -79,7 +77,7 @@ export const NewCategoryForm = ({
     })) ?? []),
   ];
 
-  const formSchema = newCategoryFormSchema(ft, ct);
+  const formSchema = newCategoryFormSchema(formt, ft);
 
   const form = useForm<newCategoryFormShemaType>({
     resolver: zodResolver(formSchema),
@@ -87,7 +85,6 @@ export const NewCategoryForm = ({
     defaultValues: {
       slug: "",
       parentCategoryId: "",
-      translations: [],
     },
   });
 
@@ -116,7 +113,7 @@ export const NewCategoryForm = ({
           name="slug"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{ct("fields.slug")}</FormLabel>
+              <FormLabel>{ft("category.slug")}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -129,13 +126,19 @@ export const NewCategoryForm = ({
           name="parentCategoryId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{ct("fields.parentCategoryId")}</FormLabel>
+              <FormLabel>{ft("category.parentCategoryId")}</FormLabel>
               <FormComboBox
                 data={comboboxCategories}
                 selectedStatus={
                   comboboxCategories.find((c) => c.value === field.value)!
                 }
-                setSelectedValue={(v) => form.setValue("parentCategoryId", v)}
+                setSelectedValue={(v) =>
+                  form.setValue("parentCategoryId", v, {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                    shouldValidate: true,
+                  })
+                }
                 noResultsFoundText="No categories found"
                 filterPlaceholderText="Filter categories"
               />
@@ -144,36 +147,11 @@ export const NewCategoryForm = ({
           )}
         />
 
-        <h2>Translations</h2>
-
-        <FormField
-          control={form.control}
-          name="translations"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Translation</FormLabel>
-              {localesData?.locales.map((locale) => {
-
-                return null;
-              })}
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
-            </FormItem>
-          )}
-        />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>English</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div></div>
-          </CardContent>
-        </Card>
-
         <Button
           type="submit"
           variant={"default"}
-          disabled={form.formState.isReady}
+          className="w-fit"
+          disabled={!form.formState.isValid}
         >
           {cft("submitButton")}
         </Button>
