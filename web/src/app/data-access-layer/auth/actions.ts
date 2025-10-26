@@ -4,11 +4,12 @@ import "server-only";
 import { REFRESH_COOKIE_NAME } from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
 import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 import { setAuthCookies } from "./utils";
 import { cache } from "react";
 import { getCurrentSession } from "./queries";
+import { redirect } from "@/i18n/navigation";
 
 export type AuthResponse = {
   accessToken: string;
@@ -17,7 +18,7 @@ export type AuthResponse = {
   refreshTokenExpirationSeconds: number;
 };
 
-export async function authLogout() {
+export async function authLogoutAction() {
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
   if (refreshTokenCookie) {
@@ -35,12 +36,15 @@ export async function authLogout() {
       }
     }
   }
+  const locale = await getLocale();
   setAuthCookies(cookieStore, null);
+  return redirect({ href: "/auth/login", locale: locale });
 }
 
 export type LoginActionResult =
   | {
       success: true;
+      authToken: string;
     }
   | ({
       success: false;
@@ -54,7 +58,7 @@ export async function authLoginAction(
 
   const defaultErrorResponse: ErrorResponse = {
     message: t("INTERNAL_SERVER_ERROR"),
-    status: 500,
+    statusCode: 500,
   };
 
   try {
@@ -76,6 +80,7 @@ export async function authLoginAction(
 
     return {
       success: true,
+      authToken: authData.accessToken,
     };
   } catch (e) {
     console.error(e);
@@ -90,6 +95,7 @@ export async function authLoginAction(
 export type RegisterActionResult =
   | {
       success: true;
+      authToken: string;
     }
   | ({
       success: false;
@@ -103,7 +109,7 @@ export async function authRegisterAction(
 
   const defaultErrorResponse: ErrorResponse = {
     message: t("INTERNAL_SERVER_ERROR"),
-    status: 500,
+    statusCode: 500,
   };
 
   try {
@@ -121,7 +127,7 @@ export async function authRegisterAction(
     const authData: AuthResponse = await res.json();
     setAuthCookies(cookieStore, authData);
 
-    return { success: true };
+    return { success: true, authToken: authData.accessToken };
   } catch (e) {
     console.error(e);
     return {
@@ -131,36 +137,40 @@ export async function authRegisterAction(
   }
 }
 
-export async function authRefreshToken() {
+type RefreshTokenActionResult =
+  | {
+      success: true;
+      authToken: string;
+    }
+  | {
+      success: false;
+    };
+
+export async function authRefreshToken(): Promise<RefreshTokenActionResult> {
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
   if (!refreshTokenCookie) {
-    return false;
+    return { success: false };
   }
 
   const refreshToken = refreshTokenCookie.value;
 
-  let tries = 0;
-
-  while (tries < 3) {
-    const res = await fetchBackend(`/auth/refresh-token`, {
-      method: "POST",
-      headers: {
-        "x-refresh-token": refreshToken,
-      },
-    });
-    if (res.status === 401) break;
-
-    if (res.ok) {
-      const data: AuthResponse = await res.json();
-      setAuthCookies(cookieStore, data);
-      return true;
-    }
-    tries++;
+  const res = await fetchBackend(`/auth/refresh-token`, {
+    method: "POST",
+    headers: {
+      "x-refresh-token": refreshToken,
+    },
+  });
+  if (res.ok) {
+    const data: AuthResponse = await res.json();
+    setAuthCookies(cookieStore, data);
+    return {
+      success: true,
+      authToken: data.accessToken,
+    };
   }
-
   setAuthCookies(cookieStore, null);
-  return false;
+  return { success: false };
 }
 
 export const getCurrentSessionAction = cache(async () => {

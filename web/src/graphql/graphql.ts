@@ -25,12 +25,12 @@ export type Category = {
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
   parentCategoryId?: Maybe<Scalars['String']['output']>;
   slug: Scalars['String']['output'];
   subcategories: Array<Category>;
   /** Category translations */
-  translations: Array<CategoryTranslation>;
+  translations?: Maybe<Array<CategoryTranslation>>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -46,7 +46,6 @@ export type CategoryTranslation = {
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
   locale: Scalars['String']['output'];
-  localeId: Scalars['ID']['output'];
   name: Scalars['String']['output'];
 };
 
@@ -55,17 +54,6 @@ export type CreateCategoryInput = {
   parentCategoryId?: InputMaybe<Scalars['String']['input']>;
   /** Slug of the category */
   slug: Scalars['String']['input'];
-  /** Category translations */
-  translations: Array<CreateCategoryTranslationInput>;
-};
-
-export type CreateCategoryTranslationInput = {
-  /** Category description */
-  description?: InputMaybe<Scalars['String']['input']>;
-  /** Locale code */
-  localeCode: Scalars['String']['input'];
-  /** Category name */
-  name: Scalars['String']['input'];
 };
 
 export type CreateUserInput = {
@@ -211,9 +199,17 @@ export type VerifyEmailInput = {
 
 export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category', id: string, slug: string } & { ' $fragmentName'?: 'CategoryParentSelectDataFragmentFragment' };
 
-export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, translations: Array<{ __typename?: 'CategoryTranslation', id: string }> }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
+export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, translations?: Array<{ __typename?: 'CategoryTranslation', id: string }> | null }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
 
 export type AllCategories_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string }> } & { ' $fragmentName'?: 'AllCategories_QueryFragmentFragment' };
+
+export type NewCategoryMutationMutationVariables = Exact<{
+  parentCategoryId?: InputMaybe<Scalars['String']['input']>;
+  slug: Scalars['String']['input'];
+}>;
+
+
+export type NewCategoryMutationMutation = { __typename?: 'Mutation', createCategory: { __typename?: 'Category', id: string } };
 
 export type NewCategory_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -251,12 +247,7 @@ export type HeaderQueryQuery = (
   & { ' $fragmentRefs'?: { 'HeaderNav_QueryFragmentFragment': HeaderNav_QueryFragmentFragment } }
 );
 
-export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, name: string, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: string, name: string, slug: string }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
-
-export type MeQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MeQueryQuery = { __typename?: 'Query', me: { __typename?: 'MeResponse', id: string, email: string, firstName?: string | null, lastName?: string | null, emailVerified: boolean, avatar?: string | null, createdAt: any, updatedAt: any, role: Role } };
+export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: string, name?: string | null, slug: string }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -335,6 +326,15 @@ export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"HeaderNav_QueryFragment"}) as unknown as TypedDocumentString<HeaderNav_QueryFragmentFragment, unknown>;
+export const NewCategoryMutationDocument = new TypedDocumentString(`
+    mutation NewCategoryMutation($parentCategoryId: String, $slug: String!) {
+  createCategory(
+    createCategoryInput: {parentCategoryId: $parentCategoryId, slug: $slug}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<NewCategoryMutationMutation, NewCategoryMutationMutationVariables>;
 export const NewCategory_QueryDocumentDocument = new TypedDocumentString(`
     query newCategory_QueryDocument {
   ...AllCategories_QueryFragment
@@ -394,18 +394,3 @@ export const HeaderQueryDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<HeaderQueryQuery, HeaderQueryQueryVariables>;
-export const MeQueryDocument = new TypedDocumentString(`
-    query MeQuery {
-  me {
-    id
-    email
-    firstName
-    lastName
-    emailVerified
-    avatar
-    createdAt
-    updatedAt
-    role
-  }
-}
-    `) as unknown as TypedDocumentString<MeQueryQuery, MeQueryQueryVariables>;

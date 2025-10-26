@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { use, useState } from "react";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,9 +36,15 @@ import {
 } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ExecutionResult } from "graphql";
-import { FragmentType, getFragmentData } from "@/graphql";
+import { FragmentType, getFragmentData, graphql } from "@/graphql";
 import { Locales_QueryFragment } from "@/app/data-access-layer/admin/locale/fragments";
 import { AllCategories_QueryFragment } from "@/app/data-access-layer/admin/category/fragments";
+import { executeClient } from "@/graphql/executeClient";
+import { NewCategoryMutation } from "@/app/data-access-layer/admin/category/mutations";
+import { useAuthTokenQuery } from "@/lib/queries";
+import { createCategoryAction } from "@/app/data-access-layer/admin/category/actions";
+import FormError from "@/error/FormError";
+import { useRouter } from "@/i18n/navigation";
 
 type NewCategoryFormProps = {
   localesQueryPromise: Promise<
@@ -65,6 +71,7 @@ export const NewCategoryForm = ({
     categoriesQueryResult.data
   );
 
+  // translations
   const formt = useTranslations("form"); // general form translations
   const ft = useTranslations("fields"); // fields translations
   const cft = useTranslations("admin.categories.newCategory.form"); // specific form translations
@@ -88,9 +95,22 @@ export const NewCategoryForm = ({
     },
   });
 
+  const locale = useLocale();
+  const router = useRouter();
+
   const { mutate } = useMutation({
     mutationFn: async (data: newCategoryFormShemaType) => {
-      console.log(data);
+      const res = await createCategoryAction(data);
+      if (res.success) {
+        router.push(`/admin/categories/${res.data.id}`);
+        return;
+      }
+      const fieldErrorsMap = new Map();
+      res.fieldErrors?.forEach((e) =>
+        fieldErrorsMap.set(e.property, e.constraints)
+      );
+      setFieldErrors(fieldErrorsMap);
+      setErrorMessage(res.message);
     },
   });
 
@@ -146,7 +166,9 @@ export const NewCategoryForm = ({
             </FormItem>
           )}
         />
-
+        {errorMessage && (
+          <p className="text-destructive text-sm">{errorMessage}</p>
+        )}
         <Button
           type="submit"
           variant={"default"}

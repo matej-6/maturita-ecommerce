@@ -14,8 +14,13 @@ import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
 import { CategoryTranslation } from './entities/category-translation.entity';
-import { NotFoundException, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { GqlAdminGuard } from 'src/auth/guards/gql-admin.guard';
+import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
+import {
+  OptionalCurrentUser,
+  OptionalCurrentUserDto,
+} from 'src/auth/optional-current-user.decorator';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -29,7 +34,10 @@ export class CategoriesResolver {
   }
 
   @Query(() => [Category], { name: 'categories' })
+  @UseGuards(new OptionalJwtAuthGuard())
   findAll(
+    @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
+
     @Args('parentId', {
       name: 'parentId',
       nullable: true,
@@ -38,6 +46,8 @@ export class CategoriesResolver {
     })
     parentId?: string,
   ) {
+    console.log(currentUser);
+
     return this.categoriesService.findAll(parentId);
   }
 
@@ -86,17 +96,14 @@ export class CategoriesResolver {
     return this.categoriesService.findTranslations(id, langs);
   }
 
-  @ResolveField(() => String, { name: 'name' })
+  @ResolveField(() => String, { name: 'name', nullable: true })
   async categoryName(
     @Parent() category: Category,
     @Context() ctx: GraphqlAppContext,
   ) {
     const res = await ctx.loaders.categoryTranslationLoader.load(category.id);
-    if (!res?.name) {
-      throw new NotFoundException();
-    }
 
-    return res.name;
+    return res?.name || null;
   }
 
   @ResolveField(() => String, { name: 'description' })

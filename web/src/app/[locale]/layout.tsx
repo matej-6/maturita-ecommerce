@@ -1,3 +1,5 @@
+"use server";
+
 import {
   Bricolage_Grotesque,
   Geist,
@@ -11,6 +13,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import "../globals.css";
+import { Metadata } from "next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +35,7 @@ const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
 });
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
@@ -42,8 +45,8 @@ type LocaleLayoutProps = Readonly<{
 }>;
 
 export async function generateMetadata(
-  props: Omit<LocaleLayoutProps, "children">,
-) {
+  props: Omit<LocaleLayoutProps, "children">
+): Promise<Metadata> {
   const { locale } = await props.params;
 
   const t = await getTranslations({
@@ -75,7 +78,7 @@ export default async function LocaleLayout({
           geistMono.variable,
           inter.variable,
           bricolage.variable,
-          "antialiased font-primary",
+          "antialiased font-primary"
         )}
       >
         <Providers>

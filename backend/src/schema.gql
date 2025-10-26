@@ -6,7 +6,7 @@ type Category {
   createdAt: DateTime!
   description: String!
   id: ID!
-  name: String!
+  name: String
   parentCategoryId: String
   slug: String!
   subcategories: [Category!]!
@@ -17,7 +17,7 @@ type Category {
     Filter translations by languages. Leave empty or provide an empty array to get all translations.
     """
     langs: [String!]
-  ): [CategoryTranslation!]!
+  ): [CategoryTranslation!]
   updatedAt: DateTime!
 }
 
@@ -27,7 +27,6 @@ type CategoryTranslation {
   id: ID!
   isActive: Boolean!
   locale: String!
-  localeId: ID!
   name: String!
 }
 

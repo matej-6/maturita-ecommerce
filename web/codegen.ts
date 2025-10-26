@@ -13,6 +13,8 @@ const config: CodegenConfig = {
     "src/**/*fragments.ts",
     "src/**/queries.ts",
     "src/**/fragments.ts",
+    "src/**/mutations.ts",
+    "src/**/*mutations.ts",
     "!src/gql/**/*",
   ],
   ignoreNoDocuments: false,

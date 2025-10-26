@@ -10,8 +10,8 @@ export class Category implements CategoryEntity {
   @Field(() => String)
   slug: string;
 
-  @Field(() => String)
-  name: string;
+  @Field(() => String, { nullable: true })
+  name?: string;
 
   @Field(() => String, { nullable: true })
   description?: string;
@@ -19,7 +19,10 @@ export class Category implements CategoryEntity {
   @Field(() => String, { nullable: true })
   parentCategoryId: string;
 
-  @Field(() => [CategoryTranslation], { description: 'Category translations' })
+  @Field(() => [CategoryTranslation], {
+    description: 'Category translations',
+    nullable: true,
+  })
   translations: Array<CategoryTranslation>;
 
   @Field(() => Date)

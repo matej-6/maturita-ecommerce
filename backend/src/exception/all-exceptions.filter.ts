@@ -15,8 +15,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exc: HttpException, host: ArgumentsHost) {
-    this.logger.debug('exception: ', exc);
-
     const i18n = I18nContext.current();
 
     const message: string =

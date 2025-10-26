@@ -2,13 +2,14 @@ import {
   ReadonlyRequestCookies,
   ResponseCookies,
 } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { AuthResponse } from "./actions";
+import { authRefreshToken, AuthResponse } from "./actions";
 import {
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
 import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
+import { cookies } from "next/headers";
 
 /**
  * Sets authentication cookies
@@ -30,4 +31,15 @@ export function setAuthCookies(
     sameSite: "lax",
     maxAge: data?.accessTokenExpirationSeconds ?? 0,
   });
+}
+
+export async function getAuthKey(): Promise<string | null> {
+  const cookieStore = await cookies();
+  const authCookie = cookieStore.get(AUTHENTICATION_COOKIE_NAME);
+
+  if (!authCookie?.value) {
+    const res = await authRefreshToken();
+    return res.success ? res.authToken : null;
+  }
+  return authCookie.value;
 }

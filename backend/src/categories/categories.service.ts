@@ -33,7 +33,7 @@ export class CategoriesService {
         'A category with this slug already exists: ',
         createCategoryInput.slug,
       );
-      throw new BadRequestException();
+      throw new BadRequestException('categories.service.slugAlreadyInUse');
     }
 
     return this.prisma.category.create({
