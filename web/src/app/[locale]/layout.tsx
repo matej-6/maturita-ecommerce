@@ -14,6 +14,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import "../globals.css";
 import { Metadata } from "next";
+import { getQueryClient } from "@/lib/get-query-client";
+import { getCurrentSessionAction } from "../data-access-layer/auth/actions";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -69,6 +72,12 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
+  const queryClient = getQueryClient();
+  queryClient.prefetchQuery({
+    queryKey: ["session"],
+    queryFn: async () => await getCurrentSessionAction(),
+  });
+
   return (
     <html className="h-full" lang={locale}>
       <body
@@ -82,7 +91,11 @@ export default async function LocaleLayout({
         )}
       >
         <Providers>
-          <div className="h-screen">{children}</div>
+          <div className="h-screen">
+            <HydrationBoundary state={dehydrate(queryClient)}>
+              {children}
+            </HydrationBoundary>
+          </div>
         </Providers>
       </body>
     </html>

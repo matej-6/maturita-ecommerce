@@ -1,7 +1,10 @@
 "use server";
 
 import "server-only";
-import { REFRESH_COOKIE_NAME } from "@/app/lib/auth.constants";
+import {
+  AUTHENTICATION_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+} from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
 import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -147,6 +150,7 @@ type RefreshTokenActionResult =
     };
 
 export async function authRefreshToken(): Promise<RefreshTokenActionResult> {
+  const locale = await getLocale();
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
   if (!refreshTokenCookie) {
@@ -170,9 +174,28 @@ export async function authRefreshToken(): Promise<RefreshTokenActionResult> {
     };
   }
   setAuthCookies(cookieStore, null);
-  return { success: false };
+  return redirect({
+    href: "/auth/fail",
+    locale: locale,
+  });
 }
 
 export const getCurrentSessionAction = cache(async () => {
   return await getCurrentSession();
 });
+
+export async function ensureAuthOrRedirectAction(): Promise<void> {
+  const locale = await getLocale();
+  const cookieStore = await cookies();
+  const authCookie = cookieStore.get(AUTHENTICATION_COOKIE_NAME);
+
+  if (!authCookie?.value) {
+    const res = await authRefreshToken();
+    if (!res.success) {
+      return redirect({
+        href: "/auth/fail",
+        locale: locale,
+      });
+    }
+  }
+}

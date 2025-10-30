@@ -9,6 +9,24 @@ const newCategoryQueryDocument = graphql(`
   }
 `);
 
+const editCategoryQueryDocument = graphql(`
+  query editCategory_QueryDocument($id: ID!) {
+    category(id: $id) {
+      slug
+      parentCategoryId
+      translations(langs: []) {
+        locale
+        name
+        description
+      }
+    }
+  }
+`);
+
 export async function getDataForNewCategory() {
   return await fetchGraphql(newCategoryQueryDocument);
+}
+
+export async function getEditCategoryQueryDocumentData(id: string) {
+  return await fetchGraphql(editCategoryQueryDocument, { id: id });
 }

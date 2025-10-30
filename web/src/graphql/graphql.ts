@@ -219,6 +219,13 @@ export type NewCategory_QueryDocumentQuery = (
   & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment;'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
 );
 
+export type EditCategory_QueryDocumentQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type EditCategory_QueryDocumentQuery = { __typename?: 'Query', category: { __typename?: 'Category', slug: string, parentCategoryId?: string | null, translations?: Array<{ __typename?: 'CategoryTranslation', locale: string, name: string, description?: string | null }> | null } };
+
 export type Locales_QueryFragmentFragment = { __typename?: 'Query', locales: Array<{ __typename?: 'Locale', code: string, name: string }> } & { ' $fragmentName'?: 'Locales_QueryFragmentFragment' };
 
 export type LocalesQueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
@@ -352,6 +359,19 @@ fragment Locales_QueryFragment on Query {
     name
   }
 }`) as unknown as TypedDocumentString<NewCategory_QueryDocumentQuery, NewCategory_QueryDocumentQueryVariables>;
+export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
+    query editCategory_QueryDocument($id: ID!) {
+  category(id: $id) {
+    slug
+    parentCategoryId
+    translations(langs: []) {
+      locale
+      name
+      description
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<EditCategory_QueryDocumentQuery, EditCategory_QueryDocumentQueryVariables>;
 export const LocalesQueryDocumentDocument = new TypedDocumentString(`
     query LocalesQueryDocument {
   ...Locales_QueryFragment

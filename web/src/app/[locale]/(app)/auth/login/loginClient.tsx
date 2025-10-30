@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ContinueWithGoogleLightButton } from "@/components/buttons/continue-with-google-light-button";
@@ -21,19 +22,8 @@ import { useTranslations } from "next-intl";
 import { authLoginAction } from "@/app/data-access-layer/auth/actions";
 import { createLoginSchema, loginSchemaType } from "./login-schema";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
-import { useSession } from "@/providers/queryProvider";
-import { useRouter } from "@/i18n/navigation";
 
-export default function LoginPage() {
-  const { data: session } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (session !== null) {
-      router.replace("/");
-    }
-  }, [session, router]);
-
+export default function LoginClient() {
   const t = useTranslations("auth.sign-in"); // translations for this page
   const ft = useTranslations("form"); // general form translations (napr. invalidEmail, invalidPassword ...)
 
@@ -54,6 +44,8 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   );
+
+  const router = useRouter();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: loginSchemaType) => {

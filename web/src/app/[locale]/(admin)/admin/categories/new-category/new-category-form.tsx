@@ -36,14 +36,10 @@ import {
 } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ExecutionResult } from "graphql";
-import { FragmentType, getFragmentData, graphql } from "@/graphql";
+import { FragmentType, getFragmentData } from "@/graphql";
 import { Locales_QueryFragment } from "@/app/data-access-layer/admin/locale/fragments";
 import { AllCategories_QueryFragment } from "@/app/data-access-layer/admin/category/fragments";
-import { executeClient } from "@/graphql/executeClient";
-import { NewCategoryMutation } from "@/app/data-access-layer/admin/category/mutations";
-import { useAuthTokenQuery } from "@/lib/queries";
 import { createCategoryAction } from "@/app/data-access-layer/admin/category/actions";
-import FormError from "@/error/FormError";
 import { useRouter } from "@/i18n/navigation";
 
 type NewCategoryFormProps = {
@@ -95,14 +91,13 @@ export const NewCategoryForm = ({
     },
   });
 
-  const locale = useLocale();
   const router = useRouter();
 
   const { mutate } = useMutation({
     mutationFn: async (data: newCategoryFormShemaType) => {
       const res = await createCategoryAction(data);
       if (res.success) {
-        router.push(`/admin/categories/${res.data.id}`);
+        router.push(`/admin/categories/edit-category/${res.data.id}`);
         return;
       }
       const fieldErrorsMap = new Map();

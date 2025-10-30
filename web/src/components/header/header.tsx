@@ -5,10 +5,8 @@ import { HeaderRightNav } from "./header-right-nav";
 import { HeaderNav } from "./header-nav";
 import { Suspense } from "react";
 import { getHeaderQueryData } from "@/app/data-access-layer/category.queries";
-import { getCurrentSessionAction } from "@/app/data-access-layer/auth/actions";
 export async function Header() {
   const headerQueryDataPromise = getHeaderQueryData();
-  const currentSessionPromise = getCurrentSessionAction();
 
   return (
     <header className="w-full border-b-2">
@@ -29,7 +27,7 @@ export async function Header() {
           </div>
         </div>
         <div className="col-span-1 flex justify-end items-center">
-          <HeaderRightNav currentSessionPromise={currentSessionPromise} />
+          <HeaderRightNav />
         </div>
       </div>
     </header>

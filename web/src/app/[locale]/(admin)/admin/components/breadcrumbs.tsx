@@ -11,19 +11,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import z from "zod";
 
 type BreadcrumbsProps = {
   defaultBreadcrumb: { label: string; href: string };
 };
 
-export function Breadcrumbs({defaultBreadcrumb}: BreadcrumbsProps) {
+export function Breadcrumbs({ defaultBreadcrumb }: BreadcrumbsProps) {
   const pathname = usePathname();
 
   const [breadcrumbs, setBreadcrumbs] = useState<
     { label: string; href: string }[]
-  >([
-    defaultBreadcrumb
-  ]);
+  >([defaultBreadcrumb]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -34,6 +33,10 @@ export function Breadcrumbs({defaultBreadcrumb}: BreadcrumbsProps) {
       ...pathname
         .split("/")
         .slice(2) // ak je pathname: '/admin', tak pathname.split('/') je ['', 'admin'], preto slice(2) a nie slice(1)
+        .filter((b) => {
+          const res = z.safeParse(z.uuid(), b); //aby sa nezobrazoval uuid v breadcrumbs
+          return !res.success;
+        })
         .map((b, index) => ({
           label: b
             .split("-") // napriklad new-category -> New Category

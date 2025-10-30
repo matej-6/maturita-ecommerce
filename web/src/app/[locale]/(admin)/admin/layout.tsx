@@ -1,29 +1,17 @@
-"use server";
-
-import { Role } from "@/graphql/graphql";
-import { notFound } from "next/navigation";
-import { AdminSidebar } from "./components/admin-sidebar";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-
+import { AdminSidebar } from "./components/admin-sidebar";
 import { Breadcrumbs } from "./components/breadcrumbs";
-import { getCurrentSession } from "@/app/data-access-layer/auth/queries";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getCurrentSession();
-
-  if (session?.role !== Role.Admin) {
-    return notFound();
-  }
-
   return (
     <SidebarProvider className="bg-secondary">
       <AdminSidebar />

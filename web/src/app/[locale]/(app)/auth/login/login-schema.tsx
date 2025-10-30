@@ -1,7 +1,8 @@
+import { useTranslations } from "next-intl";
 import z from "zod";
 
 export const createLoginSchema = (
-  t: (arg: string, args?: Record<string, string | number | Date>) => string
+  t: ReturnType<typeof useTranslations<"form">>
 ) =>
   z.object({
     email: z.email({ error: t("invalidEmail") }),

@@ -13,18 +13,21 @@ import {
 } from "../ui/navigation-menu";
 import { Role } from "@/graphql/graphql";
 // import { getCurrentSessionOrAuthenticate } from "@/app/data-access-layer/auth/queries";
-import { getTranslations } from "next-intl/server";
-import { CurrentSession } from "@/app/data-access-layer/auth/queries";
-import { use } from "react";
 import { useTranslations } from "next-intl";
+import { useMutation } from "@tanstack/react-query";
+import { authLogoutAction } from "@/app/data-access-layer/auth/actions";
+import { useSession } from "@/providers/queryProvider";
 
-type HeaderRightNavProps = {
-  currentSessionPromise: Promise<CurrentSession | null>;
-};
+export function HeaderRightNav() {
+  const { data: currentSession } = useSession();
 
-export function HeaderRightNav({ currentSessionPromise }: HeaderRightNavProps) {
-  const currentSession = use(currentSessionPromise);
   const t = useTranslations("header");
+
+  const { mutate: logout, isPending: isLoggingOut } = useMutation({
+    mutationFn: async () => {
+      await authLogoutAction();
+    },
+  });
 
   return (
     <>
@@ -56,7 +59,7 @@ export function HeaderRightNav({ currentSessionPromise }: HeaderRightNavProps) {
                           <Link href="/profile">{t("profile")}</Link>
                         </NavigationMenuLink>
                         <NavigationMenuLink asChild>
-                          {/* <Button
+                          <Button
                             disabled={isLoggingOut}
                             onClick={() => logout()}
                             variant={"ghost"}
@@ -66,7 +69,7 @@ export function HeaderRightNav({ currentSessionPromise }: HeaderRightNavProps) {
                             <span>
                               {isLoggingOut ? t("logging-out") : t("logout")}
                             </span>
-                          </Button> */}
+                          </Button>
                         </NavigationMenuLink>
                       </li>
                     </ul>

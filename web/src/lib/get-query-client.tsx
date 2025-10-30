@@ -8,7 +8,7 @@ import { cache } from "react";
 // https://tanstack.com/query/v5/docs/framework/react/guides/advanced-ssr#streaming-with-server-components
 
 function makeQueryClient() {
-  const res = new QueryClient({
+  return new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
@@ -29,12 +29,6 @@ function makeQueryClient() {
       },
     },
   });
-
-  res.setQueryDefaults(["authToken"], {
-    staleTime: 14 * 60 * 1000,
-  });
-
-  return res;
 }
 
 let browserQueryClient: QueryClient | undefined = undefined;

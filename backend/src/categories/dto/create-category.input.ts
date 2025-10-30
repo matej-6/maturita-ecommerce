@@ -12,7 +12,7 @@ import { i18nValidationMessage } from 'nestjs-i18n';
 export class CreateCategoryInput {
   @Field(() => String, { description: 'Slug of the category' })
   @IsString({ message: i18nValidationMessage('validation.required') })
-  @MinLength(5, { message: i18nValidationMessage('validation.minLength') })
+  @MinLength(3, { message: i18nValidationMessage('validation.minLength') })
   @MaxLength(255, { message: i18nValidationMessage('validation.maxLength') })
   slug: string;
 

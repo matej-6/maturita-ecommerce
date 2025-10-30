@@ -1,6 +1,6 @@
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
-import { MiddlewareConfig, NextRequest } from "next/server";
+import { MiddlewareConfig, NextRequest, NextResponse } from "next/server";
 import {
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
@@ -12,8 +12,18 @@ import { fetchBackend } from "./app/data-access-layer/fetch-backend";
 // const protectedRoutes = ["/admin"];
 
 export default async function middleware(req: NextRequest) {
+  console.log("RUNNING MIDDLEWARE");
+
   const handleI18nRouting = createMiddleware(routing);
   const response = handleI18nRouting(req);
+
+  // if (req.cookies.has(REFRESH_COOKIE_NAME)) {
+  //   const redirect = NextResponse.redirect(
+  //     new URL(process.env.NEXT_PUBLIC_SITE_URL + "/auth/failed")
+  //   );
+  //   setAuthCookies(redirect.cookies, null);
+  //   return redirect;
+  // }
 
   if (
     req.cookies.has(REFRESH_COOKIE_NAME) &&
@@ -33,7 +43,11 @@ export default async function middleware(req: NextRequest) {
       //setAuthCookies(req.cookies, data); // lebo mozno volame isAdmin, ktory potom vola getCurrentSession, ktory pozera na request cookies, nie na response cookies
       setAuthCookies(response.cookies, data);
     } else {
-      setAuthCookies(response.cookies, null);
+      const redirect = NextResponse.redirect(
+        new URL(process.env.NEXT_PUBLIC_SITE_URL + "/auth/failed")
+      );
+      setAuthCookies(redirect.cookies, null);
+      return redirect;
     }
   }
 
