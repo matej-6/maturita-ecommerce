@@ -2,9 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import {
-  newCategoryFormSchema,
-  newCategoryFormShemaType,
-} from "./new-category-form-schema";
+  categoryFormSchema,
+  categoryFormSchemaType,
+} from "../../schemas/category-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -80,9 +80,9 @@ export const NewCategoryForm = ({
     })) ?? []),
   ];
 
-  const formSchema = newCategoryFormSchema(formt, ft);
+  const formSchema = categoryFormSchema(formt, ft);
 
-  const form = useForm<newCategoryFormShemaType>({
+  const form = useForm<categoryFormSchemaType>({
     resolver: zodResolver(formSchema),
     mode: "all",
     defaultValues: {
@@ -94,7 +94,7 @@ export const NewCategoryForm = ({
   const router = useRouter();
 
   const { mutate } = useMutation({
-    mutationFn: async (data: newCategoryFormShemaType) => {
+    mutationFn: async (data: categoryFormSchemaType) => {
       const res = await createCategoryAction(data);
       if (res.success) {
         router.push(`/admin/categories/edit-category/${res.data.id}`);

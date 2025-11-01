@@ -1,5 +1,6 @@
 {
   "service": {
-    "slugAlreadyInUse": "This slug is already in use"
+    "slugAlreadyInUse": "This slug is already in use",
+    "categories.service.invalidLocaleCode": "Invalid locale code."
   }
 }

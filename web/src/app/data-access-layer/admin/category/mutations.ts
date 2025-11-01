@@ -9,3 +9,22 @@ export const NewCategoryMutation = graphql(`
     }
   }
 `);
+
+export const EditCategoryMutation = graphql(`
+  mutation EditCategoryMutation(
+    $id: ID!
+    $parentCategoryId: String
+    $slug: String!
+  ) {
+    updateCategory(
+      updateCategoryInput: {
+        id: $id
+        parentCategoryId: $parentCategoryId
+        slug: $slug
+      }
+    ) {
+      slug
+      parentCategoryId
+    }
+  }
+`);

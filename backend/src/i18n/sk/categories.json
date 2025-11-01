@@ -1,5 +1,6 @@
 {
   "service": {
-    "slugAlreadyInUse": "Tento slug už používa iná kategória"
+    "slugAlreadyInUse": "Tento slug už používa iná kategória",
+    "categories.service.invalidLocaleCode": "Neplatný kód lokality"
   }
 }

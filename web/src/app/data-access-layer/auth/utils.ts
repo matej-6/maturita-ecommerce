@@ -2,7 +2,7 @@ import {
   ReadonlyRequestCookies,
   ResponseCookies,
 } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { authRefreshToken, AuthResponse } from "./actions";
+import { authRefreshTokenAction, AuthResponse } from "./actions";
 import {
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,

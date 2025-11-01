@@ -38,6 +38,7 @@ async function main() {
   const regenerationCategory = await db.category.create({
     data: {
       slug: 'regeneration',
+      isSetup: true,
       CategoryTranslation: {
         createMany: {
           data: [
@@ -62,6 +63,7 @@ async function main() {
     db.category.create({
       data: {
         slug: 'creatine',
+        isSetup: true,
         parentCategory: {
           connect: {
             id: regenerationCategory.id,
@@ -90,6 +92,7 @@ async function main() {
     db.category.create({
       data: {
         slug: 'protein',
+        isSetup: true,
         parentCategory: {
           connect: {
             id: regenerationCategory.id,

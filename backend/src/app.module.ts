@@ -51,7 +51,10 @@ import { DEFAULT_LOCALE } from './locales';
           return {
             message: error.message,
             extensions: {
-              statusCode: error.extensions?.statusCode,
+              statusCode:
+                error.extensions?.statusCode ||
+                (error.extensions?.originalError as { statusCode?: number })
+                  .statusCode,
               errors: error.extensions?.errors,
             },
           };

@@ -38,6 +38,20 @@ input CreateCategoryInput {
   slug: String!
 }
 
+input CreateCategoryTranslationInput {
+  """Category description"""
+  description: String
+
+  """category id"""
+  id: ID!
+
+  """Locale code"""
+  localeCode: String!
+
+  """Category name"""
+  name: String!
+}
+
 input CreateUserInput {
   confirmPassword: String!
   email: String!
@@ -73,6 +87,7 @@ type MeResponse {
 
 type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
   createUser(createUserInput: CreateUserInput!): User!
   logoutAll: Void!
   removeCategory(id: ID!): Category!

@@ -20,6 +20,7 @@ const editCategoryQueryDocument = graphql(`
         description
       }
     }
+    ...AllCategories_QueryFragment
   }
 `);
 

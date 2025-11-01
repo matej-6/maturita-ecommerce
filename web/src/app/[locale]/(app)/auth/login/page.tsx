@@ -18,11 +18,16 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ContinueWithGoogleLightButton } from "@/components/buttons/continue-with-google-light-button";
 import { useTranslations } from "next-intl";
-import { authLoginAction } from "@/app/data-access-layer/auth/actions";
+import {
+  authLoginAction,
+  getCurrentSessionAction,
+} from "@/app/data-access-layer/auth/actions";
 import { createLoginSchema, loginSchemaType } from "./login-schema";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
-import { useSession } from "@/providers/queryProvider";
 import { useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/tanstack-query/queries";
+import { getQueryClient } from "@/lib/get-query-client";
+import { SESSION_QUERY_KEY } from "@/lib/tanstack-query/query-keys";
 
 export default function LoginPage() {
   const { data: session } = useSession();
@@ -38,6 +43,8 @@ export default function LoginPage() {
   const ft = useTranslations("form"); // general form translations (napr. invalidEmail, invalidPassword ...)
 
   const loginSchema = createLoginSchema(ft);
+
+  const queryClient = getQueryClient();
 
   const form = useForm<loginSchemaType>({
     resolver: zodResolver(loginSchema),
@@ -70,6 +77,16 @@ export default function LoginPage() {
     },
 
     onSuccess: async () => {
+      const session = await getCurrentSessionAction();
+      queryClient.setQueryData(
+        SESSION_QUERY_KEY,
+        session === null
+          ? null
+          : {
+              ...session,
+              __fromServer: false,
+            }
+      );
       toast.success(t("messages.success"));
       router.replace("/");
     },

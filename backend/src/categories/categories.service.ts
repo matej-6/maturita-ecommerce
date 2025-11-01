@@ -10,6 +10,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, CategoryTranslation } from 'generated/prisma/client';
 import { LocalesService } from 'src/locales/locales.service';
 import { DEFAULT_LOCALE } from 'src/locales';
+import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
 
 @Injectable()
 export class CategoriesService {
@@ -43,17 +44,84 @@ export class CategoriesService {
     });
   }
 
+  async createTranslation(
+    categoryId: string,
+    input: CreateCategoryTranslationInput,
+  ) {
+    const localeCode = this.localesService.findOne(input.localeCode);
+    if (!localeCode) {
+      throw new BadRequestException('categories.service.invalidLocaleCode');
+    }
+
+    const res = await this.prisma.categoryTranslation.create({
+      data: {
+        locale: localeCode.code,
+        name: input.name,
+        description: input.description,
+        isActive: true,
+        category: {
+          connect: {
+            id: categoryId,
+          },
+        },
+      },
+    });
+    await this.updateIsSetup(res.id);
+
+    return res;
+  }
+
+  private async updateIsSetup(id: string) {
+    const c = await this.prisma.category.findFirst({
+      where: {
+        id: id,
+      },
+      select: {
+        CategoryTranslation: {
+          select: {
+            locale: true,
+          },
+        },
+      },
+    });
+
+    if (c !== null) {
+      const isSetup = c.CategoryTranslation.some(
+        (t) => t.locale === this.localesService.locales().english.code,
+      );
+      await this.prisma.category.update({
+        where: {
+          id: id,
+        },
+        data: {
+          isSetup: isSetup,
+        },
+      });
+
+      return isSetup;
+    }
+
+    return null;
+  }
+
   private getCategoryCacheKey(id: string): string {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
   async findAll(parentId?: string): Promise<Category[]> {
     if (!parentId && parentId !== '') {
-      return await this.prisma.category.findMany({});
+      return await this.prisma.category.findMany({
+        where: {
+          isSetup: true,
+        },
+      });
     }
     if (parentId === '') {
       const categories = await this.prisma.category.findMany({
-        where: { parentCategoryId: null },
+        where: {
+          parentCategoryId: null,
+          isSetup: true,
+        },
       });
 
       return categories;
@@ -62,6 +130,7 @@ export class CategoriesService {
     const categories = await this.prisma.category.findMany({
       where: {
         parentCategoryId: parentId,
+        isSetup: true,
       },
     });
 

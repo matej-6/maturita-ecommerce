@@ -1,4 +1,4 @@
-import "server-only"
+import "server-only";
 import { cache } from "react";
 import { fetchGraphql } from "../fetch-graphql";
 import { getFragmentData, graphql } from "@/graphql";
@@ -28,13 +28,13 @@ const meQueryDocument = graphql(`
   }
 `);
 
-export const getCurrentSession = cache(async () => {
+export const getCurrentSession = async () => {
   const res = await fetchGraphql(meQueryDocument);
   if (res.data) {
     return getFragmentData(MeFragment, res.data.me);
   }
 
   return null;
-});
+};
 
 export type CurrentSession = MeFragmentFragment;

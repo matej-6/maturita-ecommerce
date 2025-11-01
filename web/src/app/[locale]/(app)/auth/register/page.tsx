@@ -16,12 +16,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { authRegisterAction } from "@/app/data-access-layer/auth/actions";
+import {
+  authRegisterAction,
+  getCurrentSessionAction,
+} from "@/app/data-access-layer/auth/actions";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { useRouter } from "@/i18n/navigation";
+import { getQueryClient } from "@/lib/get-query-client";
+import { SESSION_QUERY_KEY } from "@/lib/tanstack-query/query-keys";
 
 export default function RegisterPage() {
   const t = useTranslations("auth.register");
@@ -50,6 +55,7 @@ export default function RegisterPage() {
   );
 
   const router = useRouter();
+  const queryClient = getQueryClient();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof registerSchema>) => {
@@ -65,6 +71,16 @@ export default function RegisterPage() {
 
     onSuccess: async () => {
       toast.success("Account created successfully.");
+      const session = await getCurrentSessionAction();
+      queryClient.setQueryData(
+        SESSION_QUERY_KEY,
+        session === null
+          ? null
+          : {
+              ...session,
+              __fromServer: false,
+            }
+      );
       router.replace("/");
     },
   });

@@ -3,7 +3,7 @@ import { Category as CategoryEntity } from 'generated/prisma/client';
 import { CategoryTranslation } from './category-translation.entity';
 
 @ObjectType()
-export class Category implements CategoryEntity {
+export class Category implements Partial<CategoryEntity> {
   @Field(() => ID)
   id: string;
 

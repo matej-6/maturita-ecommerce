@@ -2,12 +2,12 @@ import z from "zod";
 import { useTranslations } from "next-intl";
 
 /**
- * Function that returns a new newCategoryFormSchema, with error messages translated to match user preference
+ * Function that returns a new categoryFormSchema, with error messages translated to match user preference
  * @param t - next-intl translations on 'form'
  * @param c - next-intl translations on 'fields'
  * @returns newCategoryFormSchema
  */
-export const newCategoryFormSchema = (
+export const categoryFormSchema = (
   t: ReturnType<typeof useTranslations<"form">>,
   c: ReturnType<typeof useTranslations<"fields">>
 ) =>
@@ -35,6 +35,6 @@ export const newCategoryFormSchema = (
       .or(z.string({ error: t("uuid") }).length(0, { error: t("uuid") })),
   });
 
-export type newCategoryFormShemaType = z.infer<
-  ReturnType<typeof newCategoryFormSchema>
+export type categoryFormSchemaType = z.infer<
+  ReturnType<typeof categoryFormSchema>
 >;

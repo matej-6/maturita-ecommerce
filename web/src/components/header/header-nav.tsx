@@ -25,8 +25,8 @@ const HeaderNav_QueryFragment = graphql(`
       slug
       subcategories {
         id
-        name
         slug
+        name
       }
     }
   }

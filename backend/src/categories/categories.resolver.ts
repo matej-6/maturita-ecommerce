@@ -21,12 +21,16 @@ import {
   OptionalCurrentUser,
   OptionalCurrentUserDto,
 } from 'src/auth/optional-current-user.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Mutation(() => Category)
+  @UseGuards(AdminGuard)
   createCategory(
     @Args('createCategoryInput') createCategoryInput: CreateCategoryInput,
   ) {
@@ -46,8 +50,6 @@ export class CategoriesResolver {
     })
     parentId?: string,
   ) {
-    console.log(currentUser);
-
     return this.categoriesService.findAll(parentId);
   }
 
@@ -57,6 +59,7 @@ export class CategoriesResolver {
   }
 
   @Mutation(() => Category)
+  @UseGuards(AdminGuard)
   updateCategory(
     @Args('updateCategoryInput') updateCategoryInput: UpdateCategoryInput,
   ) {
@@ -80,7 +83,7 @@ export class CategoriesResolver {
     return loaders.subcategoriesLoader.load(id);
   }
 
-  @UseGuards(GqlAdminGuard)
+  @UseGuards(AdminGuard)
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
@@ -94,6 +97,15 @@ export class CategoriesResolver {
   ) {
     const { id } = category;
     return this.categoriesService.findTranslations(id, langs);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => CategoryTranslation)
+  createCategoryTranslation(
+    @Args('newTranslationinput')
+    input: CreateCategoryTranslationInput,
+  ) {
+    return this.categoriesService.createTranslation(input.id, input);
   }
 
   @ResolveField(() => String, { name: 'name', nullable: true })

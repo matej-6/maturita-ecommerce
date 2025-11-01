@@ -61,6 +61,7 @@ model Category {
   parentCategory      Category?             @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
   parentCategoryId    String?
   CategoryTranslation CategoryTranslation[]
+  isSetup             Boolean               @default(false)
 
   @@index([slug])
   @@map("categories")

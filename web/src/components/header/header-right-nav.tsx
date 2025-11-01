@@ -16,7 +16,7 @@ import { Role } from "@/graphql/graphql";
 import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { authLogoutAction } from "@/app/data-access-layer/auth/actions";
-import { useSession } from "@/providers/queryProvider";
+import { useSession } from "@/lib/tanstack-query/queries";
 
 export function HeaderRightNav() {
   const { data: currentSession } = useSession();

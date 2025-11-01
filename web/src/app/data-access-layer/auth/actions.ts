@@ -47,7 +47,6 @@ export async function authLogoutAction() {
 export type LoginActionResult =
   | {
       success: true;
-      authToken: string;
     }
   | ({
       success: false;
@@ -71,7 +70,6 @@ export async function authLoginAction(
     });
     if (!res.ok) {
       const e = await res.json();
-      console.log(newErrorResponse(e));
       return {
         success: false,
         ...(newErrorResponse(e) || defaultErrorResponse),
@@ -83,7 +81,6 @@ export async function authLoginAction(
 
     return {
       success: true,
-      authToken: authData.accessToken,
     };
   } catch (e) {
     console.error(e);
@@ -98,7 +95,6 @@ export async function authLoginAction(
 export type RegisterActionResult =
   | {
       success: true;
-      authToken: string;
     }
   | ({
       success: false;
@@ -130,7 +126,7 @@ export async function authRegisterAction(
     const authData: AuthResponse = await res.json();
     setAuthCookies(cookieStore, authData);
 
-    return { success: true, authToken: authData.accessToken };
+    return { success: true };
   } catch (e) {
     console.error(e);
     return {
@@ -140,17 +136,11 @@ export async function authRegisterAction(
   }
 }
 
-type RefreshTokenActionResult =
-  | {
-      success: true;
-      authToken: string;
-    }
-  | {
-      success: false;
-    };
+type RefreshTokenActionResult = {
+  success: boolean;
+};
 
-export async function authRefreshToken(): Promise<RefreshTokenActionResult> {
-  const locale = await getLocale();
+export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult> {
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
   if (!refreshTokenCookie) {
@@ -170,14 +160,12 @@ export async function authRefreshToken(): Promise<RefreshTokenActionResult> {
     setAuthCookies(cookieStore, data);
     return {
       success: true,
-      authToken: data.accessToken,
     };
   }
   setAuthCookies(cookieStore, null);
-  return redirect({
-    href: "/auth/fail",
-    locale: locale,
-  });
+  return {
+    success: false,
+  };
 }
 
 export const getCurrentSessionAction = cache(async () => {
@@ -190,7 +178,7 @@ export async function ensureAuthOrRedirectAction(): Promise<void> {
   const authCookie = cookieStore.get(AUTHENTICATION_COOKIE_NAME);
 
   if (!authCookie?.value) {
-    const res = await authRefreshToken();
+    const res = await authRefreshTokenAction();
     if (!res.success) {
       return redirect({
         href: "/auth/fail",

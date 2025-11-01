@@ -12,4 +12,8 @@ export class LocalesService {
   findOne(code: string) {
     return code in Locales ? Locales[code as keyof typeof Locales] : undefined;
   }
+
+  locales() {
+    return Locales;
+  }
 }

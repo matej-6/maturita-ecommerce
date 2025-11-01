@@ -15,7 +15,7 @@
     }
   },
   "LocaleLayout": {
-    "title": "GRABLY",
+    "title": "GoFitShop",
     "description": "Best online store for all your needs"
   },
   "header": {
@@ -34,7 +34,7 @@
     "locale": "{locale, select, en {🇺🇸 English} sk {🇸🇰 Slovenský} other {Unknown}}"
   },
   "footer": {
-    "copyright": "© 2025 GRABLY. All rights reserved.",
+    "copyright": "© 2025 GoFitShop. All rights reserved.",
     "dark-mode": {
       "light": "Light",
       "dark": "Dark",
@@ -97,6 +97,19 @@
             }
           }
         }
+      },
+      "editCategory": {
+        "form": {
+          "submitButton": "Save changes",
+          "parentCategoryId": {
+            "combobox": {
+              "noResultsFoundText": "No results found.",
+              "filterPlaceholderText": "Filter categories",
+              "emptyValueLabel": "Select category"
+            }
+          },
+          "toastSuccess": "Saved changes"
+        }
       }
     }
   },
@@ -109,6 +122,10 @@
     },
     "locale": {
       "code": "Locale code"
+    },
+    "categoryTranslation": {
+      "name": "Name",
+      "description": "Description"
     }
   }
 }

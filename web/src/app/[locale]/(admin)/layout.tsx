@@ -2,8 +2,8 @@
 
 import { Role } from "@/graphql/graphql";
 import { useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/tanstack-query/queries";
 
-import { useSession } from "@/providers/queryProvider";
 import { useLocale } from "next-intl";
 import { useEffect } from "react";
 

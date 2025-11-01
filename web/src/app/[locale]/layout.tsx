@@ -17,6 +17,7 @@ import { Metadata } from "next";
 import { getQueryClient } from "@/lib/get-query-client";
 import { getCurrentSessionAction } from "../data-access-layer/auth/actions";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { SESSION_QUERY_KEY } from "@/lib/tanstack-query/query-keys";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -74,8 +75,16 @@ export default async function LocaleLayout({
 
   const queryClient = getQueryClient();
   queryClient.prefetchQuery({
-    queryKey: ["session"],
-    queryFn: async () => await getCurrentSessionAction(),
+    queryKey: SESSION_QUERY_KEY,
+    queryFn: async () => {
+      const session = await getCurrentSessionAction();
+      return session === null
+        ? null
+        : {
+            ...session,
+            __fromServer: true,
+          };
+    },
   });
 
   return (
