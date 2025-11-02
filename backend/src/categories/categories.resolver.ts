@@ -15,22 +15,21 @@ import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
 import { CategoryTranslation } from './entities/category-translation.entity';
 import { UseGuards } from '@nestjs/common';
-import { GqlAdminGuard } from 'src/auth/guards/gql-admin.guard';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
 import {
   OptionalCurrentUser,
   OptionalCurrentUserDto,
 } from 'src/auth/optional-current-user.decorator';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Mutation(() => Category)
   @UseGuards(AdminGuard)
+  @Mutation(() => Category)
   createCategory(
     @Args('createCategoryInput') createCategoryInput: CreateCategoryInput,
   ) {
@@ -58,8 +57,8 @@ export class CategoriesResolver {
     return this.categoriesService.findOne(id);
   }
 
+  @UseGuards(new JwtAuthGuard(), new AdminGuard())
   @Mutation(() => Category)
-  @UseGuards(AdminGuard)
   updateCategory(
     @Args('updateCategoryInput') updateCategoryInput: UpdateCategoryInput,
   ) {
@@ -105,7 +104,7 @@ export class CategoriesResolver {
     @Args('newTranslationinput')
     input: CreateCategoryTranslationInput,
   ) {
-    return this.categoriesService.createTranslation(input.id, input);
+    return this.categoriesService.createTranslation(input.categoryId, input);
   }
 
   @ResolveField(() => String, { name: 'name', nullable: true })
@@ -116,6 +115,12 @@ export class CategoriesResolver {
     const res = await ctx.loaders.categoryTranslationLoader.load(category.id);
 
     return res?.name || null;
+  }
+
+  @UseGuards(AdminGuard)
+  @ResolveField(() => Boolean, { name: 'isSetup' })
+  async categoryIsSetup(@Parent() category: Category) {
+    return category.isSetup;
   }
 
   @ResolveField(() => String, { name: 'description' })

@@ -7,6 +7,7 @@ type Category {
   createdAt: DateTime!
   description: String!
   id: ID!
+  isSetup: Boolean!
   name: String
   parentCategoryId: String
   slug: String!
@@ -38,10 +39,10 @@ input CreateCategoryInput {
 }
 
 input CreateCategoryTranslationInput {
+  """category id"""
+  categoryId: ID!
   """Category description"""
   description: String
-  """category id"""
-  id: ID!
   """Locale code"""
   localeCode: String!
   """Category name"""

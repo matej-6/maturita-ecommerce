@@ -91,10 +91,8 @@ export const EditCategoryForm = ({
       const res = await editCategoryAction(categoryId, data);
       if (res.success) {
         toast.success(cft("toastSuccess"));
-        form.reset({
-          parentCategoryId: res.data.parentCategoryId || "",
-          slug: res.data.slug,
-        });
+        form.clearErrors();
+        setErrorMessage(undefined);
         return;
       }
       const fieldErrorsMap = new Map();
@@ -118,7 +116,7 @@ export const EditCategoryForm = ({
         onSubmit={form.handleSubmit(async (data) => {
           await mutate(data);
         })}
-        className="flex flex-col gap-y-8 font-secondary"
+        className="flex flex-col gap-y-8"
       >
         <FormField
           control={form.control}

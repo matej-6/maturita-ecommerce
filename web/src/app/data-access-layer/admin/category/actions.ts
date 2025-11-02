@@ -8,6 +8,8 @@ import { FormActionResponse } from "../../formActionResponse";
 import { ExecutionResult } from "graphql";
 import { EditCategoryMutationMutation } from "@/graphql/graphql";
 import { handleGraphqlError } from "../handleGraphqlFormError";
+import { revalidatePath } from "next/cache";
+import { getLocale } from "next-intl/server";
 
 export async function createCategoryAction(
   data: categoryFormSchemaType
@@ -51,6 +53,8 @@ export async function editCategoryAction(
     parentCategoryId: data.parentCategoryId || undefined,
     slug: data.slug,
   });
+
+  console.log(res);
 
   if (res.errors) {
     return await handleGraphqlError(res.errors);

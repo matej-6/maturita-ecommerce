@@ -109,6 +109,14 @@
             }
           },
           "toastSuccess": "Zmeny boli uložené"
+        },
+        "page": {
+          "setupWarning": {
+            "title": "Táto kategória nie je úplne nastavená",
+            "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavená a vidiťeľná pre zákazníkov",
+            "englishTranslation": "Musí mať anglický preklad",
+            "atLeastOneVisibleProduct": "Musí sa obsahovať aspoň jeden viditeľný produkt na predaj"
+          }
         }
       }
     }

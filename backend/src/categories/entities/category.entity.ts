@@ -19,6 +19,11 @@ export class Category implements Partial<CategoryEntity> {
   @Field(() => String, { nullable: true })
   parentCategoryId: string;
 
+  @Field(() => Boolean, {
+    description: 'If true, the category has a valid setup.',
+  })
+  isSetup: boolean;
+
   @Field(() => [CategoryTranslation], {
     description: 'Category translations',
     nullable: true,

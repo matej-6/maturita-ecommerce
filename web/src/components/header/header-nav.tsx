@@ -50,10 +50,7 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger
-                  disabled={!data}
-                  className="text-sm font-secondary"
-                >
+                <NavigationMenuTrigger disabled={!data} className="text-sm">
                   {t("browse-categories")}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -65,7 +62,7 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
                             className="flex flex-col gap-2 group"
                             href={getCategoryLink(category.slug)}
                           >
-                            <h3 className="text-lg font-secondary group-hover:underline leading-none font-medium">
+                            <h3 className="text-lg group-hover:underline leading-none font-medium">
                               {category.name}
                             </h3>
                             <p className="text-muted-foreground text-sm leading-snug line-clamp-4">

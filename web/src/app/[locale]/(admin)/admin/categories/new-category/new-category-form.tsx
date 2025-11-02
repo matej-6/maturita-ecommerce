@@ -121,7 +121,7 @@ export const NewCategoryForm = ({
         onSubmit={form.handleSubmit(async (data) => {
           await mutate(data);
         })}
-        className="flex flex-col gap-y-8 font-secondary"
+        className="flex flex-col gap-y-8 "
       >
         <FormField
           control={form.control}

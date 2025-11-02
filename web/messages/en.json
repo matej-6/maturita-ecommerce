@@ -109,6 +109,14 @@
             }
           },
           "toastSuccess": "Saved changes"
+        },
+        "page": {
+          "setupWarning": {
+            "title": "This category has not been setup completely",
+            "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
+            "englishTranslation": "Ensure an english translation exists",
+            "atLeastOneVisibleProduct": "Make sure at least one visible product is sold in this category"
+          }
         }
       }
     }

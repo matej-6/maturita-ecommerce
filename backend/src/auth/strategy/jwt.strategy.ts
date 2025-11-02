@@ -51,6 +51,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     email: string;
   }): AuthenticatedUserDto {
     this.logger.debug(`Validating JWT payload for user ID: ${payload.userId}`);
+    this.logger.debug({
+      id: payload.userId,
+      role: payload.role,
+      email: payload.email,
+    });
     return {
       id: payload.userId,
       role: payload.role,

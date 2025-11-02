@@ -10,6 +10,8 @@ export class AdminGuard extends JwtAuthGuard {
     const req = super.getRequest(context);
     const user = req?.user;
 
+    console.log(req.user);
+
     return user.role === 'ADMIN';
   }
 }

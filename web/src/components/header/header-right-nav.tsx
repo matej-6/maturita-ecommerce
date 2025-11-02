@@ -47,7 +47,7 @@ export function HeaderRightNav() {
                       <UserIcon className="size-6 text-secondary-foreground" />
                     </NavigationMenuTrigger>
                   </Button>
-                  <NavigationMenuContent className="font-secondary">
+                  <NavigationMenuContent>
                     <ul className="grid w-44 gap-4">
                       <li>
                         {currentSession.role === Role.Admin && (
@@ -64,7 +64,7 @@ export function HeaderRightNav() {
                             onClick={() => logout()}
                             variant={"ghost"}
                             size={"sm"}
-                            className="text-sm w-full items-start font-normal"
+                            className="text-sm w-full items-start font-normal hover:cursor-pointer"
                           >
                             <span>
                               {isLoggingOut ? t("logging-out") : t("logout")}

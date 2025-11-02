@@ -14,7 +14,7 @@ export async function Header() {
         <div className="col-span-1 flex justify-start">
           <Link
             href="/"
-            className="font-primary font-light text-3xl md:text-3xl"
+            className="font-secondary font-light text-3xl md:text-3xl"
           >
             GoFitShop
           </Link>

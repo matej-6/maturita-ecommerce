@@ -31,8 +31,14 @@ export const categoryTranslationSchema = (
         }),
       }),
     description: z
-      .uuid({ error: t("uuid") })
-      .or(z.string({ error: t("uuid") }).length(0, { error: t("uuid") })),
+      .string()
+      .max(4000, {
+        error: t("maxLength", {
+          fieldName: c("categoryTranslation.description"),
+          value: 4000,
+        }),
+      })
+      .optional(),
   });
 
 export type categoryTranslationSchemaType = z.infer<

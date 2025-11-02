@@ -1,4 +1,5 @@
-import "server-only";
+"use server";
+
 import { graphql } from "@/graphql";
 import { fetchGraphql } from "../../fetch-graphql";
 
@@ -14,6 +15,7 @@ const editCategoryQueryDocument = graphql(`
     category(id: $id) {
       slug
       parentCategoryId
+      isSetup
       translations(langs: []) {
         locale
         name

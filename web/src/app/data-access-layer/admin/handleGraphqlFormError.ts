@@ -1,7 +1,6 @@
-import "server-only";
+"use server";
 
 import { GraphQLError } from "graphql";
-import { authLogoutAction } from "../auth/actions";
 import { notFound } from "next/navigation";
 
 export async function handleGraphqlError(

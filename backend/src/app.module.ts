@@ -48,13 +48,15 @@ import { DEFAULT_LOCALE } from './locales';
       ) => ({
         hideSchemaDetailsFromClientErrors: true,
         formatError: (error) => {
+          console.log(error);
           return {
             message: error.message,
             extensions: {
               statusCode:
                 error.extensions?.statusCode ||
                 (error.extensions?.originalError as { statusCode?: number })
-                  .statusCode,
+                  .statusCode ||
+                500,
               errors: error.extensions?.errors,
             },
           };

@@ -25,6 +25,7 @@ export type Category = {
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  isSetup: Scalars['Boolean']['output'];
   name?: Maybe<Scalars['String']['output']>;
   parentCategoryId?: Maybe<Scalars['String']['output']>;
   slug: Scalars['String']['output'];
@@ -57,10 +58,10 @@ export type CreateCategoryInput = {
 };
 
 export type CreateCategoryTranslationInput = {
+  /** category id */
+  categoryId: Scalars['ID']['input'];
   /** Category description */
   description?: InputMaybe<Scalars['String']['input']>;
-  /** category id */
-  id: Scalars['ID']['input'];
   /** Locale code */
   localeCode: Scalars['String']['input'];
   /** Category name */
@@ -251,7 +252,7 @@ export type EditCategory_QueryDocumentQueryVariables = Exact<{
 
 
 export type EditCategory_QueryDocumentQuery = (
-  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, parentCategoryId?: string | null, translations?: Array<{ __typename?: 'CategoryTranslation', locale: string, name: string, description?: string | null }> | null } }
+  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, parentCategoryId?: string | null, isSetup: boolean, translations?: Array<{ __typename?: 'CategoryTranslation', locale: string, name: string, description?: string | null }> | null } }
   & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment } }
 );
 
@@ -403,6 +404,7 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
   category(id: $id) {
     slug
     parentCategoryId
+    isSetup
     translations(langs: []) {
       locale
       name
