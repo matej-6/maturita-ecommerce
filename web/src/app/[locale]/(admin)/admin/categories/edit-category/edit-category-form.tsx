@@ -41,6 +41,7 @@ import { AllCategories_QueryFragment } from "@/app/data-access-layer/admin/categ
 import { editCategoryAction } from "@/app/data-access-layer/admin/category/actions";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import { getQueryClient } from "@/lib/get-query-client";
 
 type EditCategoryFormProps = {
   categoryId: string;
@@ -48,17 +49,21 @@ type EditCategoryFormProps = {
   categoriesQuery: ExecutionResult<
     FragmentType<typeof AllCategories_QueryFragment>
   >;
+  refetchQueryKey?: string[];
 };
 
 export const EditCategoryForm = ({
   categoryId,
   data,
   categoriesQuery,
+  refetchQueryKey,
 }: EditCategoryFormProps) => {
   const categoriesData = getFragmentData(
     AllCategories_QueryFragment,
     categoriesQuery.data
   );
+
+  const queryClient = getQueryClient();
 
   // translations
   const formt = useTranslations("form"); // general form translations
@@ -92,7 +97,17 @@ export const EditCategoryForm = ({
       if (res.success) {
         toast.success(cft("toastSuccess"));
         form.clearErrors();
+        form.reset({
+          parentCategoryId: res.data.parentCategoryId || "",
+          slug: res.data.slug,
+        });
         setErrorMessage(undefined);
+        if (refetchQueryKey) {
+          queryClient.refetchQueries({
+            queryKey: refetchQueryKey,
+            exact: true,
+          });
+        }
         return;
       }
       const fieldErrorsMap = new Map();

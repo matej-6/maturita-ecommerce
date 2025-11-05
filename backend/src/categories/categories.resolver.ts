@@ -28,7 +28,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Mutation(() => Category)
   createCategory(
     @Args('createCategoryInput') createCategoryInput: CreateCategoryInput,
@@ -57,20 +57,20 @@ export class CategoriesResolver {
     return this.categoriesService.findOne(id);
   }
 
-  @UseGuards(new JwtAuthGuard(), new AdminGuard())
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Mutation(() => Category)
-  updateCategory(
+  async updateCategory(
     @Args('updateCategoryInput') updateCategoryInput: UpdateCategoryInput,
   ) {
-    return this.categoriesService.update(
+    return await this.categoriesService.update(
       updateCategoryInput.id,
       updateCategoryInput,
     );
   }
 
   @Mutation(() => Category)
-  removeCategory(@Args('id', { type: () => ID }) id: string) {
-    return this.categoriesService.remove(id);
+  async removeCategory(@Args('id', { type: () => ID }) id: string) {
+    return await this.categoriesService.remove(id);
   }
 
   @ResolveField(() => [Category], { name: 'subcategories' })
@@ -82,7 +82,7 @@ export class CategoriesResolver {
     return loaders.subcategoriesLoader.load(id);
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
@@ -95,16 +95,19 @@ export class CategoriesResolver {
     langs?: string[],
   ) {
     const { id } = category;
-    return this.categoriesService.findTranslations(id, langs);
+    return await this.categoriesService.findTranslations(id, langs);
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Mutation(() => CategoryTranslation)
-  createCategoryTranslation(
+  async createCategoryTranslation(
     @Args('newTranslationinput')
     input: CreateCategoryTranslationInput,
   ) {
-    return this.categoriesService.createTranslation(input.categoryId, input);
+    return await this.categoriesService.createTranslation(
+      input.categoryId,
+      input,
+    );
   }
 
   @ResolveField(() => String, { name: 'name', nullable: true })
@@ -117,7 +120,7 @@ export class CategoriesResolver {
     return res?.name || null;
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ResolveField(() => Boolean, { name: 'isSetup' })
   async categoryIsSetup(@Parent() category: Category) {
     return category.isSetup;
