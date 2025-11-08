@@ -4,6 +4,7 @@ import * as cookieParser from 'cookie-parser';
 import { I18nMiddleware, I18nValidationPipe } from 'nestjs-i18n';
 import { AllExceptionsFilter } from './exception/all-exceptions.filter';
 import { ValidationFilter } from './validation/validation.filter';
+import { ErrorFilter } from './exception/error.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,7 +19,11 @@ async function bootstrap() {
 
   app.use(I18nMiddleware);
 
-  app.useGlobalFilters(new AllExceptionsFilter(), new ValidationFilter());
+  app.useGlobalFilters(
+    new ErrorFilter(),
+    new AllExceptionsFilter(),
+    new ValidationFilter(),
+  );
 
   app.useGlobalPipes(
     new I18nValidationPipe({

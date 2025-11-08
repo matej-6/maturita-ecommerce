@@ -18,7 +18,7 @@ export default function NotFound() {
         <h2 className="text-2xl font-semibold">{t("title")}</h2>
         <p className="text-sm text-muted-foreground">{t("message")}</p>
       </div>
-      <div className="flex items-center gap-x-4 font-secondary">
+      <div className="flex items-center gap-x-4">
         <Button
           className="hover:cursor-pointer flex justify-center items-center"
           onClick={() => router.back()}

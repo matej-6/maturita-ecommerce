@@ -22,7 +22,6 @@ import {
 } from 'src/auth/optional-current-user.decorator';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   CategoryFindAllQueryFilterInput,
   CategoryFindOneQueryFilterInput,
@@ -38,7 +37,7 @@ import {
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   @Mutation(() => Category)
   createCategory(
     @Args('createCategoryInput') createCategoryInput: CreateCategoryInput,
@@ -46,20 +45,20 @@ export class CategoriesResolver {
     return this.categoriesService.create(createCategoryInput);
   }
 
-  // filters:
-  // isPublic: guest => true; user => true; admin => true, false
-  // parentId: guest => *; user => *; admin => *
   @Query(() => [Category], { name: 'categories' })
-  @UseGuards(new OptionalJwtAuthGuard())
+  @UseGuards(OptionalJwtAuthGuard)
   findAll(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
-
-    @Args('filters', { nullable: true })
+    @Args('filtersInput', {
+      type: () => CategoryFindAllQueryFilterInput,
+      nullable: true,
+    })
     filterInput: CategoryFindAllQueryFilterInput,
   ) {
     const serviceFilter =
       CategoriesServiceFindAllFilter.fromCategoryFindAllQueryFilterInput(
         filterInput,
+        currentUser?.role,
       );
     return this.categoriesService.findAll(serviceFilter);
   }
@@ -69,7 +68,10 @@ export class CategoriesResolver {
   findOne(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
     @Args('id', { type: () => ID }) id: string,
-    @Args('filters', { nullable: true })
+    @Args('filters', {
+      type: () => CategoryFindOneQueryFilterInput,
+      nullable: true,
+    })
     filterInput: CategoryFindOneQueryFilterInput | null,
   ) {
     const serviceFilter =
@@ -80,7 +82,7 @@ export class CategoriesResolver {
     return this.categoriesService.findOne(id, serviceFilter);
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   @Mutation(() => Category)
   async updateCategory(
     @Args('updateCategoryInput') updateCategoryInput: UpdateCategoryInput,
@@ -96,8 +98,6 @@ export class CategoriesResolver {
     return await this.categoriesService.remove(id);
   }
 
-  // filters:
-  // isPublic: guest => true; user => true; admin => true, false
   @ResolveField(() => [Category], { name: 'subcategories' })
   async subcategories(
     @Parent() category: Category,
@@ -107,9 +107,7 @@ export class CategoriesResolver {
     return loaders.subcategoriesLoader.load(id);
   }
 
-  // filters:
-  // langs: guest => [x, backup_x?]; user => [x, backup_x?]; admin => [x, backup_x], [...x], [*]
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
@@ -123,7 +121,7 @@ export class CategoriesResolver {
     return await this.categoriesService.findTranslations(id, serviceFilters);
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   @Mutation(() => CategoryTranslation)
   async createCategoryTranslation(
     @Args('newTranslationinput')
@@ -145,7 +143,7 @@ export class CategoriesResolver {
     return res?.name || null;
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   @ResolveField(() => Boolean, { name: 'isSetup' })
   async categoryIsSetup(@Parent() category: Category) {
     return category.isSetup;

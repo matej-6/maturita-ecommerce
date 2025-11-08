@@ -150,6 +150,50 @@ export class CategoriesService {
       throw new NotFoundException();
     }
 
+    if (updateCategoryInput.parentCategoryId != null) {
+      const categorySubcategoriesMap = new Map<string, Set<string>>();
+      (
+        await this.prisma.category.findMany({
+          select: {
+            parentCategoryId: true,
+            id: true,
+          },
+        })
+      )
+        .filter((c) => c.parentCategoryId != null)
+        .map((category) => {
+          if (categorySubcategoriesMap.has(category.parentCategoryId!)) {
+            categorySubcategoriesMap
+              .get(category.parentCategoryId!)!
+              .add(category.id);
+          } else {
+            categorySubcategoriesMap.set(
+              category.parentCategoryId!,
+              new Set([category.id]),
+            );
+          }
+        });
+
+      const seen = new Set();
+      const queue = [currentCategory.id];
+
+      while (queue.length > 0) {
+        const cid = queue.pop()!;
+        if (seen.has(cid)) {
+          this.logger.warn(`Category ${cid} is part of a circular chain`);
+          continue;
+        }
+        seen.add(cid);
+        const subcategories = categorySubcategoriesMap.get(cid);
+        for (const sub of subcategories ?? []) {
+          if (sub === updateCategoryInput.parentCategoryId) {
+            throw new BadRequestException();
+          }
+          queue.push(sub);
+        }
+      }
+    }
+
     return this.prisma.category.update({
       where: { id },
       data: {

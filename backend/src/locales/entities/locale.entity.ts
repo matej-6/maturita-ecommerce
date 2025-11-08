@@ -8,4 +8,7 @@ export class Locale implements LocaleType {
 
   @Field(() => String, { description: 'Native locale name' })
   name: string;
+
+  @Field(() => String)
+  flag: string;
 }

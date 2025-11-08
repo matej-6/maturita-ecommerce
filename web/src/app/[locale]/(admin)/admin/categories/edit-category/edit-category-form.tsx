@@ -131,7 +131,7 @@ export const EditCategoryForm = ({
         onSubmit={form.handleSubmit(async (data) => {
           await mutate(data);
         })}
-        className="flex flex-col gap-y-8"
+        className="flex flex-col gap-y-8 h-full"
       >
         <FormField
           control={form.control}
@@ -177,8 +177,8 @@ export const EditCategoryForm = ({
         <Button
           type="submit"
           variant={"default"}
-          className="w-fit"
           disabled={!form.formState.isValid || !form.formState.isDirty}
+          className="mt-auto"
         >
           {cft("submitButton")}
         </Button>
@@ -236,7 +236,7 @@ export const EditCategoryForm = ({
       return (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant={"outline"} className="w-[196px] justify-start">
+            <Button variant={"outline"} className="justify-start">
               {selectedStatus.label}
             </Button>
           </PopoverTrigger>

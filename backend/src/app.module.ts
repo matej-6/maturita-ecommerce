@@ -55,7 +55,7 @@ import { DEFAULT_LOCALE } from './locales';
               statusCode:
                 error.extensions?.statusCode ||
                 (error.extensions?.originalError as { statusCode?: number })
-                  .statusCode ||
+                  ?.statusCode ||
                 500,
               errors: error.extensions?.errors,
             },

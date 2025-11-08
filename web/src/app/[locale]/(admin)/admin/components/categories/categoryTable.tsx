@@ -7,10 +7,10 @@ import { use } from "react";
 
 const CategoryTable_QueryFragment = graphql(`
   fragment CategoryTable_QueryFragment on Query {
-    categories(parentId: $parentId) {
+    categories(filtersInput: { parentCategoryId: $parentId }) {
       id
       slug
-      translations(langs: $langs) {
+      translations(filtersInput: { locales: $langs }) {
         id
       }
     }
@@ -29,6 +29,4 @@ const fallbackData: TCategory[] = [];
 
 export function CategoryTable({ queryPromise }: CategoryTableProps) {
   const query = use(queryPromise);
-
-  
 }

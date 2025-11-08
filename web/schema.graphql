@@ -7,19 +7,29 @@ type Category {
   createdAt: DateTime!
   description: String!
   id: ID!
+  isPublic: Boolean!
   isSetup: Boolean!
   name: String
   parentCategoryId: String
   slug: String!
   subcategories: [Category!]!
   """Category translations"""
-  translations(
-    """
-    Filter translations by languages. Leave empty or provide an empty array to get all translations.
-    """
-    langs: [String!]
-  ): [CategoryTranslation!]
+  translations(filtersInput: CategoryTranslationsQueryFilter!): [CategoryTranslation!]
   updatedAt: DateTime!
+}
+
+input CategoryFindAllQueryFilterInput {
+  isPublic: Boolean
+  isSetup: Boolean
+  """
+  null - only categories with no parent category will be returned, '*' - all categories will be returned, 'uuid' - only the children of category with given uuid will be returned
+  """
+  parentCategoryId: String
+}
+
+input CategoryFindOneQueryFilterInput {
+  isPublic: Boolean
+  isSetup: Boolean
 }
 
 type CategoryTranslation {
@@ -29,6 +39,13 @@ type CategoryTranslation {
   isActive: Boolean!
   locale: String!
   name: String!
+}
+
+input CategoryTranslationsQueryFilter {
+  """
+  empty array - all translations will be returned, [...string] - only the translation matching the locales in array will be returned
+  """
+  locales: [String!]!
 }
 
 input CreateCategoryInput {
@@ -65,6 +82,7 @@ scalar DateTime
 type Locale {
   """Locale code"""
   code: String!
+  flag: String!
   """Native locale name"""
   name: String!
 }
@@ -95,13 +113,8 @@ type Mutation {
 }
 
 type Query {
-  categories(
-    """
-    gets subcategories of a category with provided parentId, to fetch all categories with no parent id, set the value to an emtpy string: ""
-    """
-    parentId: String
-  ): [Category!]!
-  category(id: ID!): Category!
+  categories(filtersInput: CategoryFindAllQueryFilterInput): [Category!]!
+  category(filters: CategoryFindOneQueryFilterInput, id: ID!): Category!
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: MeResponse!

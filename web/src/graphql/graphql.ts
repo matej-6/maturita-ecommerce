@@ -25,6 +25,7 @@ export type Category = {
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  isPublic: Scalars['Boolean']['output'];
   isSetup: Scalars['Boolean']['output'];
   name?: Maybe<Scalars['String']['output']>;
   parentCategoryId?: Maybe<Scalars['String']['output']>;
@@ -37,7 +38,19 @@ export type Category = {
 
 
 export type CategoryTranslationsArgs = {
-  langs?: InputMaybe<Array<Scalars['String']['input']>>;
+  filtersInput: CategoryTranslationsQueryFilter;
+};
+
+export type CategoryFindAllQueryFilterInput = {
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  /** null - only categories with no parent category will be returned, '*' - all categories will be returned, 'uuid' - only the children of category with given uuid will be returned */
+  parentCategoryId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CategoryFindOneQueryFilterInput = {
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type CategoryTranslation = {
@@ -48,6 +61,11 @@ export type CategoryTranslation = {
   isActive: Scalars['Boolean']['output'];
   locale: Scalars['String']['output'];
   name: Scalars['String']['output'];
+};
+
+export type CategoryTranslationsQueryFilter = {
+  /** empty array - all translations will be returned, [...string] - only the translation matching the locales in array will be returned */
+  locales: Array<Scalars['String']['input']>;
 };
 
 export type CreateCategoryInput = {
@@ -80,6 +98,7 @@ export type Locale = {
   __typename?: 'Locale';
   /** Locale code */
   code: Scalars['String']['output'];
+  flag: Scalars['String']['output'];
   /** Native locale name */
   name: Scalars['String']['output'];
 };
@@ -164,11 +183,12 @@ export type Query = {
 
 
 export type QueryCategoriesArgs = {
-  parentId?: InputMaybe<Scalars['String']['input']>;
+  filtersInput?: InputMaybe<CategoryFindAllQueryFilterInput>;
 };
 
 
 export type QueryCategoryArgs = {
+  filters?: InputMaybe<CategoryFindOneQueryFilterInput>;
   id: Scalars['ID']['input'];
 };
 
@@ -252,7 +272,7 @@ export type EditCategory_QueryDocumentQueryVariables = Exact<{
 
 
 export type EditCategory_QueryDocumentQuery = (
-  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, parentCategoryId?: string | null, isSetup: boolean, translations?: Array<{ __typename?: 'CategoryTranslation', locale: string, name: string, description?: string | null }> | null } }
+  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: string | null, isSetup: boolean, isPublic: boolean, translations?: Array<{ __typename?: 'CategoryTranslation', locale: string, name: string, description?: string | null }> | null, subcategories: Array<{ __typename?: 'Category', slug: string, id: string }> }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> }
   & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment } }
 );
 
@@ -312,10 +332,10 @@ export const CategoryParentSelectDataFragmentFragmentDoc = new TypedDocumentStri
     `, {"fragmentName":"CategoryParentSelectDataFragment"}) as unknown as TypedDocumentString<CategoryParentSelectDataFragmentFragment, unknown>;
 export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment CategoryTable_QueryFragment on Query {
-  categories(parentId: $parentId) {
+  categories(filtersInput: {parentCategoryId: $parentId}) {
     id
     slug
-    translations(langs: $langs) {
+    translations(filtersInput: {locales: $langs}) {
       id
     }
   }
@@ -323,7 +343,7 @@ export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
     `, {"fragmentName":"CategoryTable_QueryFragment"}) as unknown as TypedDocumentString<CategoryTable_QueryFragmentFragment, unknown>;
 export const AllCategories_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment AllCategories_QueryFragment on Query {
-  categories(parentId: null) {
+  categories(filtersInput: {parentCategoryId: "*"}) {
     id
     slug
   }
@@ -350,7 +370,7 @@ export const MeFragmentFragmentDoc = new TypedDocumentString(`
     `, {"fragmentName":"MeFragment"}) as unknown as TypedDocumentString<MeFragmentFragment, unknown>;
 export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment HeaderNav_QueryFragment on Query {
-  categories(parentId: "") {
+  categories(filtersInput: {parentCategoryId: null}) {
     id
     name
     description
@@ -388,7 +408,7 @@ export const NewCategory_QueryDocumentDocument = new TypedDocumentString(`
   ...Locales_QueryFragment
 }
     fragment AllCategories_QueryFragment on Query {
-  categories(parentId: null) {
+  categories(filtersInput: {parentCategoryId: "*"}) {
     id
     slug
   }
@@ -403,18 +423,29 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
     query editCategory_QueryDocument($id: ID!) {
   category(id: $id) {
     slug
+    name
     parentCategoryId
     isSetup
-    translations(langs: []) {
+    isPublic
+    translations(filtersInput: {locales: []}) {
       locale
       name
       description
     }
+    subcategories {
+      slug
+      id
+    }
+  }
+  locales {
+    code
+    name
+    flag
   }
   ...AllCategories_QueryFragment
 }
     fragment AllCategories_QueryFragment on Query {
-  categories(parentId: null) {
+  categories(filtersInput: {parentCategoryId: "*"}) {
     id
     slug
   }
@@ -449,7 +480,7 @@ export const HeaderQueryDocument = new TypedDocumentString(`
   ...HeaderNav_QueryFragment
 }
     fragment HeaderNav_QueryFragment on Query {
-  categories(parentId: "") {
+  categories(filtersInput: {parentCategoryId: null}) {
     id
     name
     description

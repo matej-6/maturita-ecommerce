@@ -102,7 +102,7 @@ export default function LoginPage() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(async (data) => await mutate(data))}
-              className="space-y-8 font-secondary"
+              className="space-y-8"
             >
               <FormField
                 control={form.control}
@@ -135,6 +135,7 @@ export default function LoginPage() {
                 <p className="text-destructive text-sm">{errorMessage}</p>
               )}
               <Button
+                className="w-full"
                 type="submit"
                 disabled={isPending || !form.formState.isValid}
               >
@@ -142,10 +143,6 @@ export default function LoginPage() {
               </Button>
             </form>
           </Form>
-          <div className="h-px bg-muted-foreground rounded-full w-full" />
-          <div className="flex justify-center w-full flex-col px-8">
-            <ContinueWithGoogleLightButton />
-          </div>
         </CardContent>
       </Card>
     </div>

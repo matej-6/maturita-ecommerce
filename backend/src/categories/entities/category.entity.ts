@@ -24,6 +24,9 @@ export class Category implements Partial<CategoryEntity> {
   })
   isSetup: boolean;
 
+  @Field(() => Boolean)
+  isPublic: boolean;
+
   @Field(() => [CategoryTranslation], {
     description: 'Category translations',
     nullable: true,

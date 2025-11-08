@@ -18,7 +18,7 @@ import { Link } from "@/i18n/navigation";
 
 const HeaderNav_QueryFragment = graphql(`
   fragment HeaderNav_QueryFragment on Query {
-    categories(parentId: "") {
+    categories(filtersInput: { parentCategoryId: null }) {
       id
       name
       description
