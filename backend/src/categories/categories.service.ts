@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,6 +12,11 @@ import { Category, CategoryTranslation } from 'generated/prisma/client';
 import { LocalesService } from 'src/locales/locales.service';
 import { DEFAULT_LOCALE } from 'src/locales';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
+import {
+  CategoriesServiceFindAllFilter,
+  CategoriesServiceFindOneFilter,
+  CategoriesServiceTranslationFilter,
+} from './categories.service.filters';
 
 @Injectable()
 export class CategoriesService {
@@ -108,38 +114,24 @@ export class CategoriesService {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
-  async findAll(parentId?: string): Promise<Category[]> {
-    if (!parentId && parentId !== '') {
-      return await this.prisma.category.findMany({
-        where: {
-          isSetup: true,
-        },
-      });
-    }
-    if (parentId === '') {
-      const categories = await this.prisma.category.findMany({
-        where: {
-          parentCategoryId: null,
-          isSetup: true,
-        },
-      });
-
-      return categories;
-    }
-
-    const categories = await this.prisma.category.findMany({
+  async findAll(filter: CategoriesServiceFindAllFilter): Promise<Category[]> {
+    return await this.prisma.category.findMany({
       where: {
-        parentCategoryId: parentId,
-        isSetup: true,
+        parentCategoryId:
+          filter.parentCategoryId === '*' ? undefined : filter.parentCategoryId,
+        isSetup: filter.isSetup,
+        isPublic: filter.isPublic,
       },
     });
-
-    return categories;
   }
 
-  async findOne(id: string) {
-    const category = await this.prisma.category.findUnique({
-      where: { id },
+  async findOne(id: string, filter: CategoriesServiceFindOneFilter) {
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id: id,
+        isSetup: filter.isSetup,
+        isPublic: filter.isPublic,
+      },
     });
 
     return category;
@@ -186,7 +178,7 @@ export class CategoriesService {
       this.logger.error(
         `Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`,
       );
-      throw new Error(error);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -254,8 +246,11 @@ export class CategoriesService {
     });
   }
 
-  async findTranslations(id: string, locales?: string[]) {
-    if (!locales || locales.length === 0) {
+  async findTranslations(
+    id: string,
+    filters: CategoriesServiceTranslationFilter,
+  ) {
+    if (filters.locales.length === 0) {
       return await this.prisma.categoryTranslation.findMany({
         where: {
           categoryId: id,
@@ -267,16 +262,10 @@ export class CategoriesService {
       where: {
         categoryId: id,
         locale: {
-          in: locales,
+          in: filters.locales,
         },
       },
     });
-
-    if (translations.length === 0) {
-      throw new NotFoundException(
-        `Translations not found for category with id ${id}`,
-      );
-    }
 
     return translations;
   }

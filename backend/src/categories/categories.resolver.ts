@@ -23,6 +23,16 @@ import {
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+  CategoryFindAllQueryFilterInput,
+  CategoryFindOneQueryFilterInput,
+  CategoryTranslationsQueryFilter,
+} from './categories.resolver.filters';
+import {
+  CategoriesServiceFindAllFilter,
+  CategoriesServiceFindOneFilter,
+  CategoriesServiceTranslationFilter,
+} from './categories.service.filters';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -36,25 +46,38 @@ export class CategoriesResolver {
     return this.categoriesService.create(createCategoryInput);
   }
 
+  // filters:
+  // isPublic: guest => true; user => true; admin => true, false
+  // parentId: guest => *; user => *; admin => *
   @Query(() => [Category], { name: 'categories' })
   @UseGuards(new OptionalJwtAuthGuard())
   findAll(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
 
-    @Args('parentId', {
-      name: 'parentId',
-      nullable: true,
-      description:
-        'gets subcategories of a category with provided parentId, to fetch all categories with no parent id, set the value to an emtpy string: ""',
-    })
-    parentId?: string,
+    @Args('filters', { nullable: true })
+    filterInput: CategoryFindAllQueryFilterInput,
   ) {
-    return this.categoriesService.findAll(parentId);
+    const serviceFilter =
+      CategoriesServiceFindAllFilter.fromCategoryFindAllQueryFilterInput(
+        filterInput,
+      );
+    return this.categoriesService.findAll(serviceFilter);
   }
 
   @Query(() => Category, { name: 'category' })
-  findOne(@Args('id', { type: () => ID }) id: string) {
-    return this.categoriesService.findOne(id);
+  @UseGuards(OptionalJwtAuthGuard)
+  findOne(
+    @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
+    @Args('id', { type: () => ID }) id: string,
+    @Args('filters', { nullable: true })
+    filterInput: CategoryFindOneQueryFilterInput | null,
+  ) {
+    const serviceFilter =
+      CategoriesServiceFindOneFilter.fromCategoryFindOneQueryFilterInput(
+        filterInput,
+        currentUser?.role,
+      );
+    return this.categoriesService.findOne(id, serviceFilter);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
@@ -73,6 +96,8 @@ export class CategoriesResolver {
     return await this.categoriesService.remove(id);
   }
 
+  // filters:
+  // isPublic: guest => true; user => true; admin => true, false
   @ResolveField(() => [Category], { name: 'subcategories' })
   async subcategories(
     @Parent() category: Category,
@@ -82,20 +107,20 @@ export class CategoriesResolver {
     return loaders.subcategoriesLoader.load(id);
   }
 
+  // filters:
+  // langs: guest => [x, backup_x?]; user => [x, backup_x?]; admin => [x, backup_x], [...x], [*]
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
-    @Args('langs', {
-      type: () => [String],
-      nullable: true,
-      description:
-        'Filter translations by languages. Leave empty or provide an empty array to get all translations.',
-    })
-    langs?: string[],
+    @Args('filtersInput') filtersInput: CategoryTranslationsQueryFilter,
   ) {
     const { id } = category;
-    return await this.categoriesService.findTranslations(id, langs);
+    const serviceFilters =
+      CategoriesServiceTranslationFilter.fromCategoryTranslationsQueryFilter(
+        filtersInput,
+      );
+    return await this.categoriesService.findTranslations(id, serviceFilters);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)

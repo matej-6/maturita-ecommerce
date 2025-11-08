@@ -62,6 +62,7 @@ model Category {
   parentCategoryId    String?
   CategoryTranslation CategoryTranslation[]
   isSetup             Boolean               @default(false)
+  isPublic            Boolean               @default(true)
 
   @@index([slug])
   @@map("categories")

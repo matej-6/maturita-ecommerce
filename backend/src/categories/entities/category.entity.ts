@@ -28,7 +28,7 @@ export class Category implements Partial<CategoryEntity> {
     description: 'Category translations',
     nullable: true,
   })
-  translations: Array<CategoryTranslation>;
+  translations: CategoryTranslation[];
 
   @Field(() => Date)
   createdAt: Date;
