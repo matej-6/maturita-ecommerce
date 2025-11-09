@@ -17,11 +17,14 @@ import * as types from './graphql';
 type Documents = {
     "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": typeof types.CategoryParentSelectDataFragmentFragmentDoc,
     "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: $parentId }) {\n      id\n      slug\n      translations(filtersInput: { locales: $langs }) {\n        id\n      }\n    }\n  }\n": typeof types.CategoryTable_QueryFragmentFragmentDoc,
-    "\n  fragment AllCategories_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: \"*\" }) {\n      id\n      slug\n    }\n  }\n": typeof types.AllCategories_QueryFragmentFragmentDoc,
+    "\n    mutation DeleteCategoryTranslationMutation($id: ID!) {\n      deleteCategoryTranslation(categoryTranslationId: $id)\n    }\n  ": typeof types.DeleteCategoryTranslationMutationDocument,
+    "\n  mutation NewCategoryTranslationMutation(\n    $categoryId: ID!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    createCategoryTranslation(\n      newTranslationinput: {\n        categoryId: $categoryId\n        localeCode: $localeCode\n        name: $name\n        description: $description\n      }\n    ) {\n      name\n      locale\n      description\n    }\n  }\n": typeof types.NewCategoryTranslationMutationDocument,
+    "\n  mutation EditCategoryTranslationMutation(\n    $translationId: ID!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    updateCategoryTranslation(\n      editTranslationInput: {\n        categoryTranslationId: $translationId\n        name: $name\n        description: $description\n        localeCode: $localeCode\n      }\n    ) {\n      name\n      description\n      locale\n    }\n  }\n": typeof types.EditCategoryTranslationMutationDocument,
+    "\n  fragment AllCategories_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: \"*\" }) {\n      id\n      slug\n      parentCategoryId\n    }\n  }\n": typeof types.AllCategories_QueryFragmentFragmentDoc,
     "\n  mutation NewCategoryMutation($parentCategoryId: String, $slug: String!) {\n    createCategory(\n      createCategoryInput: { parentCategoryId: $parentCategoryId, slug: $slug }\n    ) {\n      id\n    }\n  }\n": typeof types.NewCategoryMutationDocument,
     "\n  mutation EditCategoryMutation(\n    $id: ID!\n    $parentCategoryId: String\n    $slug: String!\n  ) {\n    updateCategory(\n      updateCategoryInput: {\n        id: $id\n        parentCategoryId: $parentCategoryId\n        slug: $slug\n      }\n    ) {\n      slug\n      parentCategoryId\n    }\n  }\n": typeof types.EditCategoryMutationDocument,
     "\n  query newCategory_QueryDocument {\n    ...AllCategories_QueryFragment\n    ...Locales_QueryFragment\n  }\n": typeof types.NewCategory_QueryDocumentDocument,
-    "\n  query editCategory_QueryDocument($id: ID!) {\n    category(id: $id) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      translations(filtersInput: { locales: [] }) {\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n": typeof types.EditCategory_QueryDocumentDocument,
+    "\n  query editCategory_QueryDocument($id: ID!) {\n    category(id: $id, filters: { isPublic: null, isSetup: null }) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      translations(filtersInput: { locales: [] }) {\n        id\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n": typeof types.EditCategory_QueryDocumentDocument,
     "\n  fragment Locales_QueryFragment on Query {\n    locales {\n      code\n      name\n    }\n  }\n": typeof types.Locales_QueryFragmentFragmentDoc,
     "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n": typeof types.LocalesQueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": typeof types.MeFragmentFragmentDoc,
@@ -32,11 +35,14 @@ type Documents = {
 const documents: Documents = {
     "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": types.CategoryParentSelectDataFragmentFragmentDoc,
     "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: $parentId }) {\n      id\n      slug\n      translations(filtersInput: { locales: $langs }) {\n        id\n      }\n    }\n  }\n": types.CategoryTable_QueryFragmentFragmentDoc,
-    "\n  fragment AllCategories_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: \"*\" }) {\n      id\n      slug\n    }\n  }\n": types.AllCategories_QueryFragmentFragmentDoc,
+    "\n    mutation DeleteCategoryTranslationMutation($id: ID!) {\n      deleteCategoryTranslation(categoryTranslationId: $id)\n    }\n  ": types.DeleteCategoryTranslationMutationDocument,
+    "\n  mutation NewCategoryTranslationMutation(\n    $categoryId: ID!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    createCategoryTranslation(\n      newTranslationinput: {\n        categoryId: $categoryId\n        localeCode: $localeCode\n        name: $name\n        description: $description\n      }\n    ) {\n      name\n      locale\n      description\n    }\n  }\n": types.NewCategoryTranslationMutationDocument,
+    "\n  mutation EditCategoryTranslationMutation(\n    $translationId: ID!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    updateCategoryTranslation(\n      editTranslationInput: {\n        categoryTranslationId: $translationId\n        name: $name\n        description: $description\n        localeCode: $localeCode\n      }\n    ) {\n      name\n      description\n      locale\n    }\n  }\n": types.EditCategoryTranslationMutationDocument,
+    "\n  fragment AllCategories_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: \"*\" }) {\n      id\n      slug\n      parentCategoryId\n    }\n  }\n": types.AllCategories_QueryFragmentFragmentDoc,
     "\n  mutation NewCategoryMutation($parentCategoryId: String, $slug: String!) {\n    createCategory(\n      createCategoryInput: { parentCategoryId: $parentCategoryId, slug: $slug }\n    ) {\n      id\n    }\n  }\n": types.NewCategoryMutationDocument,
     "\n  mutation EditCategoryMutation(\n    $id: ID!\n    $parentCategoryId: String\n    $slug: String!\n  ) {\n    updateCategory(\n      updateCategoryInput: {\n        id: $id\n        parentCategoryId: $parentCategoryId\n        slug: $slug\n      }\n    ) {\n      slug\n      parentCategoryId\n    }\n  }\n": types.EditCategoryMutationDocument,
     "\n  query newCategory_QueryDocument {\n    ...AllCategories_QueryFragment\n    ...Locales_QueryFragment\n  }\n": types.NewCategory_QueryDocumentDocument,
-    "\n  query editCategory_QueryDocument($id: ID!) {\n    category(id: $id) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      translations(filtersInput: { locales: [] }) {\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n": types.EditCategory_QueryDocumentDocument,
+    "\n  query editCategory_QueryDocument($id: ID!) {\n    category(id: $id, filters: { isPublic: null, isSetup: null }) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      translations(filtersInput: { locales: [] }) {\n        id\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n": types.EditCategory_QueryDocumentDocument,
     "\n  fragment Locales_QueryFragment on Query {\n    locales {\n      code\n      name\n    }\n  }\n": types.Locales_QueryFragmentFragmentDoc,
     "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n": types.LocalesQueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": types.MeFragmentFragmentDoc,
@@ -56,7 +62,19 @@ export function graphql(source: "\n  fragment CategoryTable_QueryFragment on Que
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment AllCategories_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: \"*\" }) {\n      id\n      slug\n    }\n  }\n"): typeof import('./graphql').AllCategories_QueryFragmentFragmentDoc;
+export function graphql(source: "\n    mutation DeleteCategoryTranslationMutation($id: ID!) {\n      deleteCategoryTranslation(categoryTranslationId: $id)\n    }\n  "): typeof import('./graphql').DeleteCategoryTranslationMutationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation NewCategoryTranslationMutation(\n    $categoryId: ID!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    createCategoryTranslation(\n      newTranslationinput: {\n        categoryId: $categoryId\n        localeCode: $localeCode\n        name: $name\n        description: $description\n      }\n    ) {\n      name\n      locale\n      description\n    }\n  }\n"): typeof import('./graphql').NewCategoryTranslationMutationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation EditCategoryTranslationMutation(\n    $translationId: ID!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    updateCategoryTranslation(\n      editTranslationInput: {\n        categoryTranslationId: $translationId\n        name: $name\n        description: $description\n        localeCode: $localeCode\n      }\n    ) {\n      name\n      description\n      locale\n    }\n  }\n"): typeof import('./graphql').EditCategoryTranslationMutationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment AllCategories_QueryFragment on Query {\n    categories(filtersInput: { parentCategoryId: \"*\" }) {\n      id\n      slug\n      parentCategoryId\n    }\n  }\n"): typeof import('./graphql').AllCategories_QueryFragmentFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -72,7 +90,7 @@ export function graphql(source: "\n  query newCategory_QueryDocument {\n    ...A
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query editCategory_QueryDocument($id: ID!) {\n    category(id: $id) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      translations(filtersInput: { locales: [] }) {\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n"): typeof import('./graphql').EditCategory_QueryDocumentDocument;
+export function graphql(source: "\n  query editCategory_QueryDocument($id: ID!) {\n    category(id: $id, filters: { isPublic: null, isSetup: null }) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      translations(filtersInput: { locales: [] }) {\n        id\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n"): typeof import('./graphql').EditCategory_QueryDocumentDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -4,7 +4,7 @@ import { getEditCategoryQueryDocumentData } from "@/app/data-access-layer/admin/
 import { handleGraphqlError } from "@/app/data-access-layer/admin/handleGraphqlFormError";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { notFound } from "next/navigation";
@@ -28,13 +28,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { CategoryTranslationForm } from "../category-translation-form";
+import { deleteCategoryTranslationAction } from "@/app/data-access-layer/admin/category-translation/actions";
+import { CategoryTranslation } from "../../../components/categories/category-translation";
+import { useState } from "react";
 
 export default function EditCategoryPageClient({ id }: { id: string }) {
   const router = useRouter();
   const t = useTranslations("admin.categories.editCategory.page");
 
+  const queryKey = ["category", id];
+
   const { data } = useSuspenseQuery({
-    queryKey: ["category", id],
+    queryKey: queryKey,
     queryFn: async () => {
       const res = await getEditCategoryQueryDocumentData(id);
       if (res.errors) {
@@ -47,6 +53,8 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
     },
   });
 
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   if (!data.data) {
     return notFound();
   }
@@ -58,59 +66,77 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
   return (
     <div className="bg-muted/50 dark:bg-muted/50 flex flex-col flex-1 rounded-xl p-6 gap-y-10">
       <div className="flex flex-col gap-y-8">
-        <h1 className="text-4xl">Overview</h1>
-        {!data.data.category.isSetup && (
-          <Alert variant="destructive">
-            <AlertCircleIcon />
-            <AlertTitle>{t("setupWarning.title")}</AlertTitle>
-            <AlertDescription>
-              <p>{t("setupWarning.description")}</p>
-              <ul className="list-inside list-disc text-sm">
-                <li>{t("setupWarning.englishTranslation")}</li>
-                <li>{t("setupWarning.atLeastOneVisibleProduct")}</li>
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-        <div className="grid grid-cols-3 gap-6 w-4xl">
-          <div className="flex flex-col gap-y-0">
-            <span className="text-muted-foreground text-sm">Slug</span>
-            <p className="text-lg">{data.data.category.slug}</p>
+        <div className="space-y-8">
+          <h1 className="font-medium font-secondary">Overview</h1>
+          {!data.data.category.isSetup && (
+            <Alert className="w-fit" variant="destructive">
+              <AlertCircleIcon />
+              <AlertTitle>{t("setupWarning.title")}</AlertTitle>
+              <AlertDescription>
+                <p>{t("setupWarning.description")}</p>
+                <ul className="list-inside list-disc text-sm">
+                  <li>{t("setupWarning.englishTranslation")}</li>
+                  <li>{t("setupWarning.atLeastOneVisibleProduct")}</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-3 gap-6 w-3xl">
+            <div className="flex flex-col gap-y-0">
+              <span className="text-muted-foreground text-xs">Slug</span>
+              <p className="">{data.data.category.slug}</p>
+            </div>
+            <div className="flex flex-col gap-y-0">
+              <span className="text-muted-foreground text-xs">
+                Parent Category
+              </span>
+              <p className="">
+                {data.data.category.parentCategoryId ? (
+                  <Link
+                    className="hover:underline"
+                    href={`/admin/categories/edit-category/${data.data.category.parentCategoryId}`}
+                  >
+                    {data.data.category.parentCategoryId}
+                  </Link>
+                ) : (
+                  "None"
+                )}
+              </p>
+            </div>
+            <div className="flex flex-col gap-y-0">
+              <span className="text-muted-foreground text-xs">
+                Nu. of products
+              </span>
+              <p>{0}</p>
+            </div>
+            <div className="flex flex-col gap-y-0">
+              <span className="text-muted-foreground text-xs">Is Public</span>
+              <p>{data.data.category.isPublic ? "Yes" : "No"}</p>
+            </div>
           </div>
-          <div className="flex flex-col gap-y-0">
-            <span className="text-muted-foreground text-sm">
-              Parent Category
+          <div className="space-y-0">
+            <span className="text-muted-foreground text-xs">
+              Subcategories ({data.data.category.subcategories.length})
             </span>
-            <p className="text-lg">
-              {data.data.category.parentCategoryId ? (
-                <Link
-                  className="hover:underline"
-                  href={`/admin/categories/edit-category/${data.data.category.parentCategoryId}`}
-                >
-                  {data.data.category.parentCategoryId}
-                </Link>
+            <div className="flex flex-wrap gap-2">
+              {data.data.category.subcategories ? (
+                data.data.category.subcategories.map((s) => (
+                  <Link
+                    key={s.id}
+                    href={`/admin/categories/edit-category/${s.id}`}
+                  >
+                    <Button variant={"outline"} className="gap-x-1">
+                      <span>{s.slug}</span>
+                      <ArrowUpRight className="size-4" />
+                    </Button>
+                  </Link>
+                ))
               ) : (
-                "None"
+                <p>No subcategories</p>
               )}
-            </p>
-          </div>
-          <div className="flex flex-col gap-y-0">
-            <span className="text-muted-foreground text-sm">
-              Nu. of subcategories
-            </span>
-            <p className="text-lg">{data.data.category.subcategories.length}</p>
-          </div>
-          <div className="flex flex-col gap-y-0">
-            <span className="text-muted-foreground text-sm">
-              Nu. of products
-            </span>
-            <p className="text-lg">{0}</p>
-          </div>
-          <div className="flex flex-col gap-y-0">
-            <span className="text-muted-foreground text-sm">Is Public</span>
-            <p className="text-lg">
-              {data.data.category.isPublic ? "Yes" : "No"}
-            </p>
+            </div>
           </div>
         </div>
         <div className="flex items-center justify-start gap-x-4">
@@ -129,7 +155,7 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
               <div className="flex-1 flex flex-col">
                 <div className="flex-1 px-4">
                   <EditCategoryForm
-                    refetchQueryKey={["category", id]}
+                    refetchQueryKey={queryKey}
                     categoriesQuery={data}
                     categoryId={id}
                     data={{
@@ -157,11 +183,8 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
         </div>
       </div>
       <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
-      <div className="space-y-6">
-        <h2 className="text-3xl">Category translations</h2>
-        <Button disabled={missingTranslations.length === 0}>
-          Add Translation
-        </Button>
+      <div className="space-y-8">
+        <h2 className="font-medium font-secondary">Translations</h2>
 
         <div className="flex gap-8">
           {data.data.category.translations?.map((translation) => {
@@ -169,38 +192,71 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
               (l) => l.code === translation.locale
             );
 
+            const availableLocales = [locale!, ...missingTranslations];
+
             return (
-              <Card className="w-lg" key={translation.locale}>
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    {locale
-                      ? `${locale?.name} ${locale?.flag}`
-                      : translation.locale}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 flex-auto">
-                  <div>
-                    <span className="text-muted-foreground text-sm">Name</span>
-                    <p>{translation.name}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground text-sm">
-                      Description
-                    </span>
-                    <p>{translation.description}</p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <div className="flex items-center gap-x-2 justify-center">
-                    <Button>Edit</Button>
-                    <Button variant={"secondary"}>Delete</Button>
-                  </div>
-                </CardFooter>
-              </Card>
+              <CategoryTranslation
+                locale={locale!}
+                name={translation.name}
+                description={translation.description || ""}
+                translationId={translation.id}
+                key={locale!.code}
+                refetchKey={queryKey}
+                formProps={{
+                  mode: "edit",
+                  translationId: translation.id,
+                  refetchQueryKey: queryKey,
+                  initialData: {
+                    name: translation.name,
+                    description: translation.description || undefined,
+                    locale: translation.locale,
+                  },
+                  availableLocales: availableLocales.map((l) => ({
+                    label: `${l.name} ${l.flag}`,
+                    value: l.code,
+                  })),
+                }}
+              />
             );
           })}
         </div>
+        <Sheet
+          open={isSheetOpen && missingTranslations.length > 0}
+          onOpenChange={setIsSheetOpen}
+        >
+          <SheetTrigger asChild>
+            <Button disabled={missingTranslations.length === 0}>
+              Add Translation
+            </Button>
+          </SheetTrigger>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Add translation</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 flex flex-col">
+              <div className="flex-1 px-4">
+                {missingTranslations.length > 0 && (
+                  <CategoryTranslationForm
+                    availableLocales={missingTranslations.map((t) => ({
+                      label: t.name,
+                      value: t.code,
+                    }))}
+                    mode="create"
+                    categoryId={id}
+                    refetchQueryKey={queryKey}
+                  />
+                )}
+              </div>
+              <SheetFooter>
+                <SheetClose asChild>
+                  <Button variant="outline">Close</Button>
+                </SheetClose>
+              </SheetFooter>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
+      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
     </div>
   );
 }

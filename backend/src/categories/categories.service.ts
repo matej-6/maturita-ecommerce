@@ -17,6 +17,8 @@ import {
   CategoriesServiceFindOneFilter,
   CategoriesServiceTranslationFilter,
 } from './categories.service.filters';
+import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
+import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 
 @Injectable()
 export class CategoriesService {
@@ -77,6 +79,89 @@ export class CategoriesService {
     return res;
   }
 
+  async editTranslation(
+    translationId: string,
+    input: EditCategoryTranslationInput,
+  ) {
+    this.logger.log(`updating category translation with ID: ${translationId}`);
+    const localeCode = this.localesService.findOne(input.localeCode)?.code;
+    if (!localeCode) {
+      throw new BadRequestException('categories.service.invalidLocaleCode');
+    }
+
+    const originalTranslation = await this.prisma.categoryTranslation.findFirst(
+      {
+        where: {
+          id: translationId,
+        },
+      },
+    );
+
+    if (!originalTranslation) {
+      throw new BadRequestException(
+        'categories.service.editTranslation.notFound',
+      );
+    }
+
+    if (originalTranslation?.locale !== localeCode) {
+      const otherTranslation = await this.prisma.categoryTranslation.findFirst({
+        where: {
+          categoryId: originalTranslation.categoryId,
+          locale: localeCode,
+        },
+      });
+
+      if (otherTranslation !== null) {
+        throw new BadRequestException(
+          'categories.service.editTranslation.translationWithThisLocaleAlreadyExists',
+        );
+      }
+    }
+
+    const res = await this.prisma.categoryTranslation.update({
+      where: {
+        id: translationId,
+      },
+      data: {
+        name: input.name,
+        description: input.description || null,
+        locale: localeCode,
+      },
+    });
+
+    await this.updateIsSetup(res.categoryId);
+
+    return res;
+  }
+
+  async removeTranslation(id: string) {
+    this.logger.log(`deleting category translation with ID: ${id}`);
+    try {
+      const translation = await this.prisma.categoryTranslation.delete({
+        where: {
+          id: id,
+        },
+        select: {
+          id: true,
+          categoryId: true,
+        },
+      });
+
+      await this.updateIsSetup(translation.categoryId);
+
+      return translation.id;
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new BadRequestException(
+            'categories.service.removeTranslation.notFound',
+          );
+        }
+      }
+      throw e;
+    }
+  }
+
   private async updateIsSetup(id: string) {
     const c = await this.prisma.category.findFirst({
       where: {
@@ -119,8 +204,8 @@ export class CategoriesService {
       where: {
         parentCategoryId:
           filter.parentCategoryId === '*' ? undefined : filter.parentCategoryId,
-        isSetup: filter.isSetup,
-        isPublic: filter.isPublic,
+        isSetup: filter.isSetup == null ? undefined : filter.isSetup,
+        isPublic: filter.isPublic == null ? undefined : filter.isPublic,
       },
     });
   }
@@ -129,8 +214,8 @@ export class CategoriesService {
     const category = await this.prisma.category.findFirst({
       where: {
         id: id,
-        isSetup: filter.isSetup,
-        isPublic: filter.isPublic,
+        isSetup: filter.isSetup == null ? undefined : filter.isSetup,
+        isPublic: filter.isPublic == null ? undefined : filter.isPublic,
       },
     });
 

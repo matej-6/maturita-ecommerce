@@ -9,7 +9,8 @@ import { useTranslations } from "next-intl";
  */
 export const categoryTranslationSchema = (
   t: ReturnType<typeof useTranslations<"form">>,
-  c: ReturnType<typeof useTranslations<"fields">>
+  c: ReturnType<typeof useTranslations<"fields">>,
+  locales: string[]
 ) =>
   z.object({
     name: z
@@ -39,6 +40,7 @@ export const categoryTranslationSchema = (
         }),
       })
       .optional(),
+    locale: z.literal(locales ?? [""]),
   });
 
 export type categoryTranslationSchemaType = z.infer<

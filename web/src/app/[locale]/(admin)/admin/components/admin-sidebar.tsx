@@ -18,6 +18,8 @@ import {
   LanguagesIcon,
   Layers2Icon,
   ShoppingBagIcon,
+  User2Icon,
+  UserCog2Icon,
 } from "lucide-react";
 import { getCurrentSession } from "@/app/data-access-layer/auth/queries";
 import { ElementType } from "react";
@@ -38,9 +40,9 @@ const generalNavItems: NavItem[] = [
   },
 
   {
-    label: "Locales",
-    href: "/admin/locales",
-    icon: LanguagesIcon,
+    label: "Users",
+    href: "/admin/users",
+    icon: UserCog2Icon,
   },
 ];
 
@@ -65,11 +67,13 @@ export async function AdminSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size={"lg"} asChild>
+            <SidebarMenuButton size={"lg"}>
               <Link href="/admin">
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="font-medium text-xl">Grably s.r.o.</span>
-                  <span className="text-xs truncate font-secondary">
+                  <span className="font-medium text-xl font-secondary">
+                    GoFitShop
+                  </span>
+                  <span className="text-xs truncate text-sidebar-foreground/70">
                     Dashboard
                   </span>
                 </div>

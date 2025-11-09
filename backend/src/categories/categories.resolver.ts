@@ -32,6 +32,7 @@ import {
   CategoriesServiceFindOneFilter,
   CategoriesServiceTranslationFilter,
 } from './categories.service.filters';
+import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -131,6 +132,31 @@ export class CategoriesResolver {
       input.categoryId,
       input,
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => CategoryTranslation, { name: 'updateCategoryTranslation' })
+  async updateCategoryTranslationMutation(
+    @Args('editTranslationInput')
+    input: EditCategoryTranslationInput,
+  ) {
+    return await this.categoriesService.editTranslation(
+      input.categoryTranslationId,
+      input,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ID, { name: 'deleteCategoryTranslation' })
+  async deleteCategoryTranslationMutation(
+    @Args('categoryTranslationId', { type: () => ID })
+    categoryTranslationId: string,
+  ) {
+    const res = await this.categoriesService.removeTranslation(
+      categoryTranslationId,
+    );
+
+    return res;
   }
 
   @ResolveField(() => String, { name: 'name', nullable: true })

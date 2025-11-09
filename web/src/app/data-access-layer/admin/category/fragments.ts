@@ -5,6 +5,7 @@ export const AllCategories_QueryFragment = graphql(`
     categories(filtersInput: { parentCategoryId: "*" }) {
       id
       slug
+      parentCategoryId
     }
   }
 `);

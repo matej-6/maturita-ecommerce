@@ -15,9 +15,9 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { use, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +39,6 @@ import { ExecutionResult } from "graphql";
 import { FragmentType, getFragmentData } from "@/graphql";
 import { AllCategories_QueryFragment } from "@/app/data-access-layer/admin/category/fragments";
 import { editCategoryAction } from "@/app/data-access-layer/admin/category/actions";
-import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { getQueryClient } from "@/lib/get-query-client";
 
@@ -63,6 +62,41 @@ export const EditCategoryForm = ({
     categoriesQuery.data
   );
 
+  const availableCategories = useMemo(() => {
+    if (!categoriesData?.categories) {
+      return [];
+    }
+    const categoriesToSubcategories = new Map<string, string[]>();
+    const categoryMap = new Map<
+      string,
+      (typeof categoriesData)["categories"][number]
+    >();
+    const res = [];
+    for (const c of categoriesData.categories) {
+      if (c.parentCategoryId != null) {
+        categoryMap.set(c.id, c);
+        const subcategories =
+          categoriesToSubcategories.get(c.parentCategoryId) ?? [];
+        subcategories.push(c.id);
+        categoriesToSubcategories.set(c.parentCategoryId, subcategories);
+      } else if (c.id !== categoryId) {
+        res.push(c);
+      }
+    }
+
+    const queue = [categoryId];
+
+    while (queue.length > 0) {
+      const c = queue.pop()!;
+      categoryMap.delete(c);
+      for (const subc of categoriesToSubcategories.get(c) ?? []) {
+        queue.push(subc);
+      }
+    }
+
+    return [...res, ...categoryMap.values()];
+  }, [categoriesData, categoryId]);
+
   const queryClient = getQueryClient();
 
   // translations
@@ -72,12 +106,10 @@ export const EditCategoryForm = ({
 
   const comboboxCategories = [
     { label: cft("parentCategoryId.combobox.emptyValueLabel"), value: "" },
-    ...(categoriesData?.categories
-      .filter((c) => c.id !== categoryId)
-      .map((c) => ({
-        label: c.slug,
-        value: c.id,
-      })) ?? []),
+    ...(availableCategories.map((c) => ({
+      label: c.slug,
+      value: c.id,
+    })) ?? []),
   ];
 
   const formSchema = categoryFormSchema(formt, ft);

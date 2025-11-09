@@ -10,7 +10,9 @@ export class LocalesService {
   }
 
   findOne(code: string) {
-    return code in Locales ? Locales[code as keyof typeof Locales] : undefined;
+    return this.findAll().find(
+      (l) => l.code.toLowerCase() === code.toLowerCase(),
+    );
   }
 
   locales() {

@@ -84,6 +84,20 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input EditCategoryTranslationInput {
+  """category translation id"""
+  categoryTranslationId: ID!
+
+  """Category description"""
+  description: String
+
+  """Locale code"""
+  localeCode: String!
+
+  """Category name"""
+  name: String!
+}
+
 type Locale {
   """Locale code"""
   code: String!
@@ -109,11 +123,13 @@ type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
   createUser(createUserInput: CreateUserInput!): User!
+  deleteCategoryTranslation(categoryTranslationId: ID!): ID!
   logoutAll: Void!
   removeCategory(id: ID!): Category!
   removeUser(id: String!): User!
   requestEmailVerification: Void!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
 }

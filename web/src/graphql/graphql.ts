@@ -94,6 +94,17 @@ export type CreateUserInput = {
   password: Scalars['String']['input'];
 };
 
+export type EditCategoryTranslationInput = {
+  /** category translation id */
+  categoryTranslationId: Scalars['ID']['input'];
+  /** Category description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** Locale code */
+  localeCode: Scalars['String']['input'];
+  /** Category name */
+  name: Scalars['String']['input'];
+};
+
 export type Locale = {
   __typename?: 'Locale';
   /** Locale code */
@@ -121,11 +132,13 @@ export type Mutation = {
   createCategory: Category;
   createCategoryTranslation: CategoryTranslation;
   createUser: User;
+  deleteCategoryTranslation: Scalars['ID']['output'];
   logoutAll: Scalars['Void']['output'];
   removeCategory: Category;
   removeUser: User;
   requestEmailVerification: Scalars['Void']['output'];
   updateCategory: Category;
+  updateCategoryTranslation: CategoryTranslation;
   updateUser: User;
   verifyEmail: Scalars['Void']['output'];
 };
@@ -146,6 +159,11 @@ export type MutationCreateUserArgs = {
 };
 
 
+export type MutationDeleteCategoryTranslationArgs = {
+  categoryTranslationId: Scalars['ID']['input'];
+};
+
+
 export type MutationRemoveCategoryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -158,6 +176,11 @@ export type MutationRemoveUserArgs = {
 
 export type MutationUpdateCategoryArgs = {
   updateCategoryInput: UpdateCategoryInput;
+};
+
+
+export type MutationUpdateCategoryTranslationArgs = {
+  editTranslationInput: EditCategoryTranslationInput;
 };
 
 
@@ -239,7 +262,34 @@ export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category'
 
 export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, translations?: Array<{ __typename?: 'CategoryTranslation', id: string }> | null }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
 
-export type AllCategories_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string }> } & { ' $fragmentName'?: 'AllCategories_QueryFragmentFragment' };
+export type DeleteCategoryTranslationMutationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteCategoryTranslationMutationMutation = { __typename?: 'Mutation', deleteCategoryTranslation: string };
+
+export type NewCategoryTranslationMutationMutationVariables = Exact<{
+  categoryId: Scalars['ID']['input'];
+  localeCode: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NewCategoryTranslationMutationMutation = { __typename?: 'Mutation', createCategoryTranslation: { __typename?: 'CategoryTranslation', name: string, locale: string, description?: string | null } };
+
+export type EditCategoryTranslationMutationMutationVariables = Exact<{
+  translationId: Scalars['ID']['input'];
+  localeCode: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type EditCategoryTranslationMutationMutation = { __typename?: 'Mutation', updateCategoryTranslation: { __typename?: 'CategoryTranslation', name: string, description?: string | null, locale: string } };
+
+export type AllCategories_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, parentCategoryId?: string | null }> } & { ' $fragmentName'?: 'AllCategories_QueryFragmentFragment' };
 
 export type NewCategoryMutationMutationVariables = Exact<{
   parentCategoryId?: InputMaybe<Scalars['String']['input']>;
@@ -272,7 +322,7 @@ export type EditCategory_QueryDocumentQueryVariables = Exact<{
 
 
 export type EditCategory_QueryDocumentQuery = (
-  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: string | null, isSetup: boolean, isPublic: boolean, translations?: Array<{ __typename?: 'CategoryTranslation', locale: string, name: string, description?: string | null }> | null, subcategories: Array<{ __typename?: 'Category', slug: string, id: string }> }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> }
+  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: string | null, isSetup: boolean, isPublic: boolean, translations?: Array<{ __typename?: 'CategoryTranslation', id: string, locale: string, name: string, description?: string | null }> | null, subcategories: Array<{ __typename?: 'Category', slug: string, id: string }> }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> }
   & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment } }
 );
 
@@ -346,6 +396,7 @@ export const AllCategories_QueryFragmentFragmentDoc = new TypedDocumentString(`
   categories(filtersInput: {parentCategoryId: "*"}) {
     id
     slug
+    parentCategoryId
   }
 }
     `, {"fragmentName":"AllCategories_QueryFragment"}) as unknown as TypedDocumentString<AllCategories_QueryFragmentFragment, unknown>;
@@ -383,6 +434,33 @@ export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"HeaderNav_QueryFragment"}) as unknown as TypedDocumentString<HeaderNav_QueryFragmentFragment, unknown>;
+export const DeleteCategoryTranslationMutationDocument = new TypedDocumentString(`
+    mutation DeleteCategoryTranslationMutation($id: ID!) {
+  deleteCategoryTranslation(categoryTranslationId: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteCategoryTranslationMutationMutation, DeleteCategoryTranslationMutationMutationVariables>;
+export const NewCategoryTranslationMutationDocument = new TypedDocumentString(`
+    mutation NewCategoryTranslationMutation($categoryId: ID!, $localeCode: String!, $name: String!, $description: String) {
+  createCategoryTranslation(
+    newTranslationinput: {categoryId: $categoryId, localeCode: $localeCode, name: $name, description: $description}
+  ) {
+    name
+    locale
+    description
+  }
+}
+    `) as unknown as TypedDocumentString<NewCategoryTranslationMutationMutation, NewCategoryTranslationMutationMutationVariables>;
+export const EditCategoryTranslationMutationDocument = new TypedDocumentString(`
+    mutation EditCategoryTranslationMutation($translationId: ID!, $localeCode: String!, $name: String!, $description: String) {
+  updateCategoryTranslation(
+    editTranslationInput: {categoryTranslationId: $translationId, name: $name, description: $description, localeCode: $localeCode}
+  ) {
+    name
+    description
+    locale
+  }
+}
+    `) as unknown as TypedDocumentString<EditCategoryTranslationMutationMutation, EditCategoryTranslationMutationMutationVariables>;
 export const NewCategoryMutationDocument = new TypedDocumentString(`
     mutation NewCategoryMutation($parentCategoryId: String, $slug: String!) {
   createCategory(
@@ -411,6 +489,7 @@ export const NewCategory_QueryDocumentDocument = new TypedDocumentString(`
   categories(filtersInput: {parentCategoryId: "*"}) {
     id
     slug
+    parentCategoryId
   }
 }
 fragment Locales_QueryFragment on Query {
@@ -421,13 +500,14 @@ fragment Locales_QueryFragment on Query {
 }`) as unknown as TypedDocumentString<NewCategory_QueryDocumentQuery, NewCategory_QueryDocumentQueryVariables>;
 export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
     query editCategory_QueryDocument($id: ID!) {
-  category(id: $id) {
+  category(id: $id, filters: {isPublic: null, isSetup: null}) {
     slug
     name
     parentCategoryId
     isSetup
     isPublic
     translations(filtersInput: {locales: []}) {
+      id
       locale
       name
       description
@@ -448,6 +528,7 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
   categories(filtersInput: {parentCategoryId: "*"}) {
     id
     slug
+    parentCategoryId
   }
 }`) as unknown as TypedDocumentString<EditCategory_QueryDocumentQuery, EditCategory_QueryDocumentQueryVariables>;
 export const LocalesQueryDocumentDocument = new TypedDocumentString(`

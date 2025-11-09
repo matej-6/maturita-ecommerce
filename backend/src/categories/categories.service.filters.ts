@@ -7,8 +7,8 @@ import {
 import z from 'zod';
 
 export class CategoriesServiceFindOneFilter {
-  isPublic: boolean;
-  isSetup: boolean;
+  isPublic: boolean | null;
+  isSetup: boolean | null;
 
   static fromCategoryFindOneQueryFilterInput(
     input: CategoryFindOneQueryFilterInput | null,
@@ -18,20 +18,16 @@ export class CategoriesServiceFindOneFilter {
     res.isPublic = true;
     res.isSetup = true;
     if (userRole === 'ADMIN') {
-      if (input?.isPublic != null) {
-        res.isPublic = input.isPublic;
-      }
-      if (input?.isSetup != null) {
-        res.isSetup = input.isSetup;
-      }
+      res.isPublic = input !== null ? input.isPublic : true;
+      res.isSetup = input !== null ? input.isSetup : true;
     }
     return res;
   }
 }
 
 export class CategoriesServiceFindAllFilter {
-  isPublic: boolean;
-  isSetup: boolean;
+  isPublic: boolean | null;
+  isSetup: boolean | null;
   parentCategoryId: string | null;
 
   static fromCategoryFindAllQueryFilterInput(
@@ -50,12 +46,8 @@ export class CategoriesServiceFindAllFilter {
     }
 
     if (userRole === 'ADMIN') {
-      if (input?.isPublic != null) {
-        res.isPublic = input.isPublic;
-      }
-      if (input?.isSetup != null) {
-        res.isSetup = input.isSetup;
-      }
+      res.isPublic = input == null ? true : input.isPublic;
+      res.isSetup = input == null ? true : input.isSetup;
     }
     return res;
   }

@@ -12,13 +12,14 @@ const newCategoryQueryDocument = graphql(`
 
 const editCategoryQueryDocument = graphql(`
   query editCategory_QueryDocument($id: ID!) {
-    category(id: $id) {
+    category(id: $id, filters: { isPublic: null, isSetup: null }) {
       slug
       name
       parentCategoryId
       isSetup
       isPublic
       translations(filtersInput: { locales: [] }) {
+        id
         locale
         name
         description
