@@ -84,14 +84,28 @@ model CategoryTranslation {
 }
 
 model Product {
-  id              String           @id @default(cuid())
-  slug            String           @unique
-  Category        Category?        @relation(fields: [categoryId], references: [id])
-  categoryId      String?
-  isPublic        Boolean          @default(true)
-  ThumbnailImage  Image?           @relation(fields: [imageId], references: [id])
-  ProductVariants ProductVariant[]
-  imageId         String?
+  id                  String               @id @default(cuid())
+  slug                String               @unique
+  Category            Category?            @relation(fields: [categoryId], references: [id])
+  categoryId          String?
+  isPublic            Boolean              @default(true)
+  ThumbnailImage      Image?               @relation(fields: [imageId], references: [id])
+  ProductVariants     ProductVariant[]
+  imageId             String?
+  ProductTranslations ProductTranslation[]
+  Attributes          Attribute[]
+}
+
+model ProductTranslation {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  content     String  @db.Text
+  locale      String
+  Product     Product @relation(fields: [productId], references: [id])
+  productId   String
+
+  @@index([productId, locale])
 }
 
 model ProductVariant {
@@ -119,6 +133,8 @@ model Attribute {
   attributeValueId String
   productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
   productVariantId String?
+  product          Product?        @relation(fields: [productId], references: [id])
+  productId        String?
 }
 
 model AttributeKey {
