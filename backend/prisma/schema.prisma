@@ -61,6 +61,7 @@ model Category {
   parentCategory      Category?             @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
   parentCategoryId    String?
   CategoryTranslation CategoryTranslation[]
+  Products            Product[]
   isSetup             Boolean               @default(false)
   isPublic            Boolean               @default(true)
 
@@ -80,4 +81,54 @@ model CategoryTranslation {
   @@unique([categoryId, locale])
   @@index([categoryId, locale])
   @@map("category_translations")
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  Category        Category?        @relation(fields: [categoryId], references: [id])
+  categoryId      String?
+  isPublic        Boolean          @default(true)
+  ThumbnailImage  Image?           @relation(fields: [imageId], references: [id])
+  ProductVariants ProductVariant[]
+  imageId         String?
+}
+
+model ProductVariant {
+  id           String      @id @default(cuid())
+  sku          String      @unique
+  stock        Int
+  priceInCents Int
+  Attributes   Attribute[]
+  Products     Product     @relation(fields: [productId], references: [id])
+  productId    String
+}
+
+model Image {
+  id       String    @id @default(cuid())
+  url      String
+  bucket   String
+  products Product[]
+}
+
+model Attribute {
+  id               String          @id @default(cuid())
+  AttributeKey     AttributeKey    @relation(fields: [attributeKeyId], references: [id])
+  AttributeValue   AttributeValue  @relation(fields: [attributeValueId], references: [id])
+  attributeKeyId   String
+  attributeValueId String
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  productVariantId String?
+}
+
+model AttributeKey {
+  id         String      @id @default(cuid())
+  key        String      @unique
+  Attributes Attribute[]
+}
+
+model AttributeValue {
+  id         String      @id @default(cuid())
+  value      String
+  Attributes Attribute[]
 }
