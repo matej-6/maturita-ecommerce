@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MODERATOR
+  USER
+}
+
+model User {
+  id             String                @id @default(uuid())
+  email          String                @unique
+  emailVerified  Boolean               @default(false)
+  hashedPassword String?
+  firstName      String?
+  lastName       String?
+  avatar         String?
+  role           Role                  @default(USER)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  Session        RefreshTokenSession[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model RefreshTokenSession {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blacklisted Boolean  @default(false)
+  token       String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, blacklisted, expiresAt])
+  @@index([token])
+  @@map("refresh_token_sessions")
+}
+
+model Category {
+  id                  String                @id @default(uuid())
+  slug                String                @unique
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  subcategories       Category[]            @relation("CategoryToSubcategory")
+  parentCategory      Category?             @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
+  parentCategoryId    String?
+  CategoryTranslation CategoryTranslation[]
+  Products            Product[]
+  isSetup             Boolean               @default(false)
+  isPublic            Boolean               @default(true)
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model CategoryTranslation {
+  id          String   @id @default(uuid())
+  locale      String
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, locale])
+  @@index([categoryId, locale])
+  @@map("category_translations")
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  Category        Category?        @relation(fields: [categoryId], references: [id])
+  categoryId      String?
+  isPublic        Boolean          @default(true)
+  ProductVariants ProductVariant[]
+  Images          ProductImage[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id           String         @id @default(cuid())
+  sku          String         @unique
+  stock        Int
+  priceInCents Int
+  Attributes   Attribute[]
+  Products     Product        @relation(fields: [productId], references: [id])
+  Images       ProductImage[]
+  productId    String
+
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id               String          @id @default(cuid())
+  base64           String
+  isThumbnail      Boolean         @default(false)
+  Product          Product?        @relation(fields: [productId], references: [id])
+  productId        String?
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  productVariantId String?
+
+  @@index([id, productId])
+  @@index([id, productVariantId])
+  @@map("product_images")
+}
+
+model Attribute {
+  id               String          @id @default(cuid())
+  AttributeKey     AttributeKey    @relation(fields: [attributeKeyId], references: [id])
+  AttributeValue   AttributeValue  @relation(fields: [attributeValueId], references: [id])
+  attributeKeyId   String
+  attributeValueId String
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  productVariantId String?
+
+  @@map("attributes")
+}
+
+model AttributeKey {
+  id         String      @id @default(cuid())
+  key        String      @unique
+  Attributes Attribute[]
+
+  @@map("attribute_keys")
+}
+
+model AttributeValue {
+  id         String      @id @default(cuid())
+  value      String
+  Attributes Attribute[]
+
+  @@map("attribute_values")
+}
