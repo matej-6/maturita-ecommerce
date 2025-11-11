@@ -84,15 +84,29 @@ model CategoryTranslation {
 }
 
 model Product {
-  id              String           @id @default(cuid())
-  slug            String           @unique
-  Category        Category?        @relation(fields: [categoryId], references: [id])
-  categoryId      String?
-  isPublic        Boolean          @default(true)
-  ProductVariants ProductVariant[]
-  Images          ProductImage[]
+  id                  String               @id @default(cuid())
+  slug                String               @unique
+  Category            Category?            @relation(fields: [categoryId], references: [id])
+  categoryId          String?
+  isPublic            Boolean              @default(true)
+  ProductVariants     ProductVariant[]
+  Images              ProductImage[]
+  ProductTranslations ProductTranslation[]
 
   @@map("products")
+}
+
+model ProductTranslation {
+  id              String  @id @default(cuid())
+  locale          String
+  Product         Product @relation(fields: [productId], references: [id])
+  productId       String
+  name            String
+  description     String
+  markdownContent String  @db.LongText
+
+  @@unique([productId, locale])
+  @@map("product_translations")
 }
 
 model ProductVariant {
@@ -101,7 +115,7 @@ model ProductVariant {
   stock        Int
   priceInCents Int
   Attributes   Attribute[]
-  Products     Product        @relation(fields: [productId], references: [id])
+  Product      Product        @relation(fields: [productId], references: [id])
   Images       ProductImage[]
   productId    String
 
@@ -123,29 +137,39 @@ model ProductImage {
 }
 
 model Attribute {
-  id               String          @id @default(cuid())
-  AttributeKey     AttributeKey    @relation(fields: [attributeKeyId], references: [id])
-  AttributeValue   AttributeValue  @relation(fields: [attributeValueId], references: [id])
-  attributeKeyId   String
-  attributeValueId String
-  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
-  productVariantId String?
+  id                    String                 @id @default(cuid())
+  AttributeKey          AttributeKey           @relation(fields: [attributeKeyId], references: [id])
+  attributeKeyId        String
+  ProductVariant        ProductVariant?        @relation(fields: [productVariantId], references: [id])
+  productVariantId      String?
+  AttributeTranslations AttributeTranslation[]
 
   @@map("attributes")
 }
 
+model AttributeTranslation {
+  id          String    @id @default(cuid())
+  value       String
+  locale      String
+  Attribute   Attribute @relation(fields: [attributeId], references: [id])
+  attributeId String
+}
+
 model AttributeKey {
-  id         String      @id @default(cuid())
-  key        String      @unique
-  Attributes Attribute[]
+  id           String                    @id @default(cuid())
+  key          String                    @unique
+  Attributes   Attribute[]
+  Translations AttributeKeyTranslation[]
 
   @@map("attribute_keys")
 }
 
-model AttributeValue {
-  id         String      @id @default(cuid())
-  value      String
-  Attributes Attribute[]
+model AttributeKeyTranslation {
+  id             String       @id @default(cuid())
+  keyTranslation String
+  locale         String
+  attributeKey   AttributeKey @relation(fields: [attributeKeyId], references: [id])
+  attributeKeyId String
 
-  @@map("attribute_values")
+  @@index([locale, attributeKeyId])
 }
