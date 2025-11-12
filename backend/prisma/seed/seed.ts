@@ -91,7 +91,7 @@ async function main() {
   const regenerationCategory = await db.category.create({
     data: {
       slug: 'regeneration',
-      isSetup: false,
+      isSetup: true,
       CategoryTranslation: {
         createMany: {
           data: [
@@ -116,7 +116,7 @@ async function main() {
   const creatineCategory = await db.category.create({
     data: {
       slug: 'creatine',
-      isSetup: false,
+      isSetup: true,
       parentCategory: {
         connect: {
           id: regenerationCategory.id,
@@ -161,7 +161,7 @@ async function main() {
               name: 'Creatine Monohydrate',
               description: 'Most popular form of creatine',
               markdownContent: fs.readFileSync(
-                './data/content/creatine-monohydrate.en.md',
+                __dirname + '/data/content/creatine-monohydrate.en.md',
                 'utf8',
               ),
             },
@@ -170,7 +170,7 @@ async function main() {
               name: 'Kreatín Monohydrát',
               description: 'Najpopulárnejšia forma kreatínu',
               markdownContent: fs.readFileSync(
-                './data/content/creatine-monohydrate.sk.md',
+                __dirname + '/data/content/creatine-monohydrate.sk.md',
                 'utf8',
               ),
             },
@@ -183,7 +183,57 @@ async function main() {
             {
               isThumbnail: true,
               base64: encodeToBase64(
-                './data/images/creatine-monohydrate-1.jpg',
+                __dirname + '/data/images/creatine-monohydrate-1.jpg',
+              ),
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  const creatineGummies = await db.product.create({
+    data: {
+      slug: 'creatine-gummies',
+      Category: {
+        connect: {
+          id: creatineCategory.id,
+        },
+      },
+      isPublic: true,
+      ProductTranslations: {
+        createMany: {
+          data: [
+            {
+              locale: english.code,
+              name: 'Creatine Gummies',
+              description:
+                'Packed with 5g of pure creatine per serving, these convenient, delicious gummies support muscle growth, improve strength, and enhance workout performance. No mixing, no mess—just pop, chew, and fuel your fitness goals. Perfect for busy days or on-the-go athletes!',
+              markdownContent: fs.readFileSync(
+                __dirname + '/data/content/creatine-gummies.en.md',
+                'utf8',
+              ),
+            },
+            {
+              locale: slovak.code,
+              name: 'Kreatín Monohydrát',
+              description:
+                'S obsahom 5g kreatínu, tieto praktické a chutné gumy podporujú rast svalov, zlepšujú silu a zvyšujú výkon počas tréningu. Žiadne miešanie, žiadny neporiadok - jednoducho zjedz, žuj a poháňaj svoje fitness ciele. Ideálne pre rušné dni alebo športovcov na cestách!',
+              markdownContent: fs.readFileSync(
+                __dirname + '/data/content/creatine-gummies.sk.md',
+                'utf8',
+              ),
+            },
+          ],
+        },
+      },
+      Images: {
+        createMany: {
+          data: [
+            {
+              isThumbnail: true,
+              base64: encodeToBase64(
+                __dirname + '/data/images/creatine-monohydrate-gummies-1.jpg',
               ),
             },
           ],
@@ -231,10 +281,82 @@ async function main() {
     },
   });
 
+  const creatineMonohydrate1000 = await db.productVariant.create({
+    data: {
+      Product: {
+        connect: {
+          id: creatineMonohydrate.id,
+        },
+      },
+      priceInCents: 4000,
+      sku: 'creatine-monohydrate-1000g',
+      stock: 100,
+    },
+  });
+
+  const creatineGummies500 = await db.productVariant.create({
+    data: {
+      priceInCents: 2499,
+      sku: 'creatine-gummies-500g',
+      stock: 100,
+      Product: {
+        connect: {
+          id: creatineGummies.id,
+        },
+      },
+    },
+  });
+
+  await db.attribute.create({
+    data: {
+      AttributeKey: {
+        connect: {
+          id: aWeightKey.id,
+        },
+      },
+      ProductVariant: {
+        connect: {
+          id: creatineMonohydrate1000.id,
+        },
+      },
+      AttributeTranslations: {
+        createMany: {
+          data: [
+            {
+              value: '1000g',
+              locale: english.code,
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  await db.attribute.create({
+    data: {
+      AttributeKey: {
+        connect: {
+          id: aWeightKey.id,
+        },
+      },
+      ProductVariant: {
+        connect: {
+          id: creatineGummies500.id,
+        },
+      },
+      AttributeTranslations: {
+        create: {
+          locale: english.code,
+          value: '500g',
+        },
+      },
+    },
+  });
+
   const proteinCategory = await db.category.create({
     data: {
       slug: 'protein',
-      isSetup: false,
+      isSetup: true,
       parentCategory: {
         connect: {
           id: regenerationCategory.id,

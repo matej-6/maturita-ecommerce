@@ -102,7 +102,7 @@ model ProductTranslation {
   Product         Product @relation(fields: [productId], references: [id])
   productId       String
   name            String
-  description     String
+  description     String  @db.LongText
   markdownContent String  @db.LongText
 
   @@unique([productId, locale])
@@ -124,7 +124,7 @@ model ProductVariant {
 
 model ProductImage {
   id               String          @id @default(cuid())
-  base64           String
+  base64           String          @db.LongText
   isThumbnail      Boolean         @default(false)
   Product          Product?        @relation(fields: [productId], references: [id])
   productId        String?
