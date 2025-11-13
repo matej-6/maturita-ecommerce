@@ -3,6 +3,8 @@ import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
+import { GetPaginationArgs } from 'src/lib/pagination.args';
+import { GetProductFindAllQueryArgs } from './products.resolver.args';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -16,8 +18,14 @@ export class ProductsResolver {
   }
 
   @Query(() => [Product], { name: 'products' })
-  findAll() {
-    return this.productsService.findAll();
+  findAll(
+    @Args({ nullable: true }) paginationArgs: GetPaginationArgs | null,
+    @Args() findAllQueryArgs: GetProductFindAllQueryArgs,
+  ) {
+    if (paginationArgs == null) {
+      paginationArgs = new GetPaginationArgs();
+    }
+    return this.productsService.findAll(findAllQueryArgs, paginationArgs);
   }
 
   @Query(() => Product, { name: 'product' })

@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import { Product as DbProduct } from 'generated/prisma/client';
+import { Paginated } from 'src/lib/pagination';
 
 @ObjectType()
 export class Product implements Partial<DbProduct> {
@@ -15,3 +16,6 @@ export class Product implements Partial<DbProduct> {
   @Field(() => Boolean)
   isPublic: boolean;
 }
+
+@ObjectType()
+class PaginatedProduct extends Paginated(Product) {}
