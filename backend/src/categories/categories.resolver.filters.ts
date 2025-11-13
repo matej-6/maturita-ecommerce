@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CategoryFindOneQueryFilterInput {
@@ -11,12 +11,12 @@ export class CategoryFindOneQueryFilterInput {
 
 @InputType()
 export class CategoryFindAllQueryFilterInput extends CategoryFindOneQueryFilterInput {
-  @Field(() => String, {
+  @Field(() => Int, {
     nullable: true,
     description:
-      "null - only categories with no parent category will be returned, '*' - all categories will be returned, 'uuid' - only the children of category with given uuid will be returned",
+      'null - only categories with no parent category will be returned, 0 - all categories will be returned, int >= 1 - only the children of category with given id will be returned',
   })
-  parentCategoryId: string | null;
+  parentCategoryId: number | null;
 }
 
 @InputType()

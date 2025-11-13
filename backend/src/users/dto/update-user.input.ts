@@ -1,10 +1,10 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import type { User } from 'generated/prisma/client';
 import {
   IsEmail,
+  IsInt,
   IsNotEmpty,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -13,9 +13,9 @@ import { i18nValidationMessage } from 'nestjs-i18n';
 @InputType()
 export class UpdateUserInput implements Partial<User> {
   @IsNotEmpty({ message: i18nValidationMessage('validation.required') })
-  @IsUUID(undefined, { message: i18nValidationMessage('validation.invalid') })
-  @Field(() => String)
-  id: string;
+  @IsInt({ message: i18nValidationMessage('validation.invalid') })
+  @Field(() => Int)
+  id: number;
 
   @IsString({ message: i18nValidationMessage('validation.required') })
   @MinLength(3, { message: i18nValidationMessage('validation.minLength') })

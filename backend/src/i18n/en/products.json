@@ -1,0 +1,13 @@
+{
+  "service": {
+    "slugAlreadyInUse": "This slug is already in use",
+    "invalidLocaleCode": "Invalid locale code.",
+    "editTranslation": {
+      "notFound": "Product translation with this id doesn't exist. Try refreshing the page to get fresh data.",
+      "translationWithThisLocaleAlreadyExists": "A translation with the locale you're trying to use already exists."
+    },
+    "removeTranslation": {
+      "notFound": "The product translation you're trying to delete doesn't exist. Please refresh the page and try again."
+    }
+  }
+}

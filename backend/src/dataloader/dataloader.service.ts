@@ -27,7 +27,7 @@ export class DataloaderService {
   }
 
   private _createSubcategoriesLoader() {
-    return new DataLoader<string, Category[]>(async (categoryIds: string[]) => {
+    return new DataLoader<number, Category[]>(async (categoryIds: number[]) => {
       const subcategories = await this.db.category.findMany({
         where: {
           parentCategoryId: {
@@ -43,8 +43,8 @@ export class DataloaderService {
   }
 
   private _createCategoryTranslationLoader(lang: string) {
-    return new DataLoader<string, CategoryTranslation | null>(
-      async (categoryIds: string[]) => {
+    return new DataLoader<number, CategoryTranslation | null>(
+      async (categoryIds: number[]) => {
         return await this.categoriesService.getAllTranslationsByBatch(
           lang,
           categoryIds,

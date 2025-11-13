@@ -23,6 +23,7 @@ import { AuthenticatedUserDto } from './auth/dto/authenticated-user.dto';
 import { IDataLoaders } from './dataloader/dataloader.interface';
 import { DataloaderModule } from './dataloader/dataloader.module';
 import { DEFAULT_LOCALE } from './locales';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { DEFAULT_LOCALE } from './locales';
     JwtModule.register({}),
     RedisModule,
     LocalesModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

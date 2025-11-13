@@ -76,7 +76,7 @@ export class AuthService {
 
   async verifyUserRefreshToken(
     refreshToken: string,
-    userId: string,
+    userId: number,
   ): Promise<UserDto> {
     try {
       const refreshTokenSessions =
@@ -139,7 +139,7 @@ export class AuthService {
 
   async blacklistRefreshToken(
     refreshToken: string,
-    userId: string,
+    userId: number,
   ): Promise<void> {
     try {
       const refreshTokenSessions =
@@ -202,7 +202,7 @@ export class AuthService {
   }
 
   async login(user: {
-    id: string;
+    id: number;
     role: Role;
     email: string;
   }): Promise<AuthResponseDto> {
@@ -374,7 +374,7 @@ export class AuthService {
     return resultArray.join('');
   }
 
-  async signOutAll(userId: string) {
+  async signOutAll(userId: number) {
     try {
       await this.prismaService.refreshTokenSession.deleteMany({
         where: {
@@ -389,7 +389,7 @@ export class AuthService {
     }
   }
 
-  async signOut(refreshToken: string, userId: string) {
+  async signOut(refreshToken: string, userId: number) {
     const refreshTokenSessions =
       await this.prismaService.refreshTokenSession.findMany({
         where: {

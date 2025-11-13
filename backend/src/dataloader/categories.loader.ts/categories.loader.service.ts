@@ -10,9 +10,9 @@ export class CategoriesLoaderService {
   constructor(private readonly db: PrismaService) {}
 
   public readonly batchSubcategoriesByParentId = new DataLoader<
-    string,
+    number,
     Category[]
-  >(async (categoryIds: string[]) => {
+  >(async (categoryIds: number[]) => {
     const subcategories = await this.db.category.findMany({
       where: {
         parentCategoryId: {

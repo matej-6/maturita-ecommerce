@@ -185,6 +185,7 @@ async function main() {
               base64: encodeToBase64(
                 __dirname + '/data/images/creatine-monohydrate-1.jpg',
               ),
+              mimeType: 'image/jpg',
             },
           ],
         },
@@ -235,6 +236,7 @@ async function main() {
               base64: encodeToBase64(
                 __dirname + '/data/images/creatine-monohydrate-gummies-1.jpg',
               ),
+              mimeType: 'image/jpg',
             },
           ],
         },

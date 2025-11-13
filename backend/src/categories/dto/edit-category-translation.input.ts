@@ -1,9 +1,9 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
 import { type CategoryTranslation as DbCategoryTranslation } from 'generated/prisma/client';
 import {
+  IsInt,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -14,8 +14,8 @@ export class EditCategoryTranslationInput
   implements Partial<DbCategoryTranslation>
 {
   @Field(() => ID, { description: 'category translation id' })
-  @IsUUID(undefined, { message: i18nValidationMessage('validation.invalid') })
-  categoryTranslationId: string;
+  @IsInt({ message: i18nValidationMessage('validation.invalid') })
+  categoryTranslationId: number;
 
   @Field(() => String, { description: 'Category name' })
   @MinLength(3, { message: i18nValidationMessage('validation.minLength') })

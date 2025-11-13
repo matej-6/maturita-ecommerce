@@ -68,7 +68,7 @@ export class CategoriesResolver {
   @UseGuards(OptionalJwtAuthGuard)
   findOne(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
-    @Args('id', { type: () => ID }) id: string,
+    @Args('id', { type: () => ID }) id: number,
     @Args('filters', {
       type: () => CategoryFindOneQueryFilterInput,
       nullable: true,
@@ -95,7 +95,7 @@ export class CategoriesResolver {
   }
 
   @Mutation(() => Category)
-  async removeCategory(@Args('id', { type: () => ID }) id: string) {
+  async removeCategory(@Args('id', { type: () => ID }) id: number) {
     return await this.categoriesService.remove(id);
   }
 
@@ -150,7 +150,7 @@ export class CategoriesResolver {
   @Mutation(() => ID, { name: 'deleteCategoryTranslation' })
   async deleteCategoryTranslationMutation(
     @Args('categoryTranslationId', { type: () => ID })
-    categoryTranslationId: string,
+    categoryTranslationId: number,
   ) {
     const res = await this.categoriesService.removeTranslation(
       categoryTranslationId,

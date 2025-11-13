@@ -1,11 +1,11 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { Category as CategoryEntity } from 'generated/prisma/client';
 import { CategoryTranslation } from './category-translation.entity';
 
 @ObjectType()
 export class Category implements Partial<CategoryEntity> {
   @Field(() => ID)
-  id: string;
+  id: number;
 
   @Field(() => String)
   slug: string;
@@ -16,8 +16,8 @@ export class Category implements Partial<CategoryEntity> {
   @Field(() => String, { nullable: true })
   description?: string;
 
-  @Field(() => String, { nullable: true })
-  parentCategoryId: string;
+  @Field(() => Int, { nullable: true })
+  parentCategoryId: number;
 
   @Field(() => Boolean, {
     description: 'If true, the category has a valid setup.',

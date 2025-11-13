@@ -4,7 +4,6 @@ import {
   CategoryFindOneQueryFilterInput,
   CategoryTranslationsQueryFilter,
 } from './categories.resolver.filters';
-import z from 'zod';
 
 export class CategoriesServiceFindOneFilter {
   isPublic: boolean | null;
@@ -28,7 +27,7 @@ export class CategoriesServiceFindOneFilter {
 export class CategoriesServiceFindAllFilter {
   isPublic: boolean | null;
   isSetup: boolean | null;
-  parentCategoryId: string | null;
+  parentCategoryId: number | null;
 
   static fromCategoryFindAllQueryFilterInput(
     input: CategoryFindAllQueryFilterInput | null,
@@ -40,9 +39,7 @@ export class CategoriesServiceFindAllFilter {
     res.parentCategoryId = null;
 
     if (input?.parentCategoryId != null) {
-      res.parentCategoryId = z.jwt().safeParse(res.parentCategoryId).success
-        ? res.parentCategoryId
-        : '*';
+      res.parentCategoryId = input.parentCategoryId;
     }
 
     if (userRole === 'ADMIN') {

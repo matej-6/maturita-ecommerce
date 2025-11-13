@@ -53,7 +53,7 @@ export class CategoriesService {
   }
 
   async createTranslation(
-    categoryId: string,
+    categoryId: number,
     input: CreateCategoryTranslationInput,
   ) {
     const localeCode = this.localesService.findOne(input.localeCode);
@@ -80,7 +80,7 @@ export class CategoriesService {
   }
 
   async editTranslation(
-    translationId: string,
+    translationId: number,
     input: EditCategoryTranslationInput,
   ) {
     this.logger.log(`updating category translation with ID: ${translationId}`);
@@ -134,7 +134,7 @@ export class CategoriesService {
     return res;
   }
 
-  async removeTranslation(id: string) {
+  async removeTranslation(id: number) {
     this.logger.log(`deleting category translation with ID: ${id}`);
     try {
       const translation = await this.prisma.categoryTranslation.delete({
@@ -162,7 +162,7 @@ export class CategoriesService {
     }
   }
 
-  private async updateIsSetup(id: string) {
+  private async updateIsSetup(id: number) {
     const c = await this.prisma.category.findFirst({
       where: {
         id: id,
@@ -195,7 +195,7 @@ export class CategoriesService {
     return null;
   }
 
-  private getCategoryCacheKey(id: string): string {
+  private getCategoryCacheKey(id: number): string {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
@@ -203,14 +203,14 @@ export class CategoriesService {
     return await this.prisma.category.findMany({
       where: {
         parentCategoryId:
-          filter.parentCategoryId === '*' ? undefined : filter.parentCategoryId,
+          filter.parentCategoryId === 0 ? undefined : filter.parentCategoryId,
         isSetup: filter.isSetup == null ? undefined : filter.isSetup,
         isPublic: filter.isPublic == null ? undefined : filter.isPublic,
       },
     });
   }
 
-  async findOne(id: string, filter: CategoriesServiceFindOneFilter) {
+  async findOne(id: number, filter: CategoriesServiceFindOneFilter) {
     const category = await this.prisma.category.findFirst({
       where: {
         id: id,
@@ -222,7 +222,7 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: string, updateCategoryInput: UpdateCategoryInput) {
+  async update(id: number, updateCategoryInput: UpdateCategoryInput) {
     const currentCategory = await this.prisma.category.findUnique({
       where: { id },
       select: {
@@ -236,7 +236,7 @@ export class CategoriesService {
     }
 
     if (updateCategoryInput.parentCategoryId != null) {
-      const categorySubcategoriesMap = new Map<string, Set<string>>();
+      const categorySubcategoriesMap = new Map<number, Set<number>>();
       (
         await this.prisma.category.findMany({
           select: {
@@ -288,7 +288,7 @@ export class CategoriesService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     try {
       await this.prisma.$transaction(async (tx) => {
         // 1. odstranit vsetky translations
@@ -312,7 +312,7 @@ export class CategoriesService {
   }
 
   async findAllSubcategoriesByParentIds(
-    parentIds: string[],
+    parentIds: number[],
   ): Promise<Category[]> {
     return await this.prisma.category.findMany({
       where: {
@@ -324,7 +324,7 @@ export class CategoriesService {
   }
 
   async getCategorySubcategoriesByBatch(
-    parentIds: string[],
+    parentIds: number[],
   ): Promise<(Category[] | null)[]> {
     const categories = await this.findAllSubcategoriesByParentIds(parentIds);
     return parentIds.map(
@@ -335,7 +335,7 @@ export class CategoriesService {
     );
   }
 
-  async findTranslation(categoryId: string, locale: string) {
+  async findTranslation(categoryId: number, locale: string) {
     return this.prisma.categoryTranslation.findFirst({
       where: {
         categoryId: categoryId,
@@ -353,7 +353,7 @@ export class CategoriesService {
    */
   async getAllTranslationsByBatch(
     lang: string,
-    categoryIds: string[],
+    categoryIds: number[],
   ): Promise<(CategoryTranslation | null)[]> {
     const categoryTranslations = await this.prisma.categoryTranslation.findMany(
       {
@@ -376,7 +376,7 @@ export class CategoriesService {
   }
 
   async findTranslations(
-    id: string,
+    id: number,
     filters: CategoriesServiceTranslationFilter,
   ) {
     if (filters.locales.length === 0) {

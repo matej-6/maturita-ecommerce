@@ -1,10 +1,10 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserDto } from 'src/users/dto/user.dto';
 
 @ObjectType()
 export class AuthResponse implements Partial<UserDto> {
-  @Field(() => String)
-  id: string;
+  @Field(() => ID)
+  id: number;
 
   @Field(() => String)
   email: string;

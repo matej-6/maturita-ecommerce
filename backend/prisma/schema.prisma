@@ -21,7 +21,7 @@ enum Role {
 }
 
 model User {
-  id             String                @id @default(uuid())
+  id             Int                   @id @default(autoincrement())
   email          String                @unique
   emailVerified  Boolean               @default(false)
   hashedPassword String?
@@ -38,8 +38,8 @@ model User {
 }
 
 model RefreshTokenSession {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int      @id @default(autoincrement())
+  userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   blacklisted Boolean  @default(false)
   token       String   @unique
@@ -53,13 +53,13 @@ model RefreshTokenSession {
 }
 
 model Category {
-  id                  String                @id @default(uuid())
+  id                  Int                   @id @default(autoincrement())
   slug                String                @unique
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   subcategories       Category[]            @relation("CategoryToSubcategory")
   parentCategory      Category?             @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
-  parentCategoryId    String?
+  parentCategoryId    Int?
   CategoryTranslation CategoryTranslation[]
   Products            Product[]
   isSetup             Boolean               @default(false)
@@ -70,12 +70,12 @@ model Category {
 }
 
 model CategoryTranslation {
-  id          String   @id @default(uuid())
+  id          Int      @id @default(autoincrement())
   locale      String
   name        String
   description String?
   isActive    Boolean  @default(true)
-  categoryId  String
+  categoryId  Int
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, locale])
@@ -84,10 +84,10 @@ model CategoryTranslation {
 }
 
 model Product {
-  id                  String               @id @default(cuid())
+  id                  Int                  @id @default(autoincrement())
   slug                String               @unique
   Category            Category?            @relation(fields: [categoryId], references: [id])
-  categoryId          String?
+  categoryId          Int?
   isPublic            Boolean              @default(true)
   ProductVariants     ProductVariant[]
   Images              ProductImage[]
@@ -97,10 +97,10 @@ model Product {
 }
 
 model ProductTranslation {
-  id              String  @id @default(cuid())
+  id              Int     @id @default(autoincrement())
   locale          String
   Product         Product @relation(fields: [productId], references: [id])
-  productId       String
+  productId       Int
   name            String
   description     String  @db.LongText
   markdownContent String  @db.LongText
@@ -110,26 +110,27 @@ model ProductTranslation {
 }
 
 model ProductVariant {
-  id           String         @id @default(cuid())
+  id           Int            @id @default(autoincrement())
   sku          String         @unique
   stock        Int
   priceInCents Int
   Attributes   Attribute[]
   Product      Product        @relation(fields: [productId], references: [id])
   Images       ProductImage[]
-  productId    String
+  productId    Int
 
   @@map("product_variants")
 }
 
 model ProductImage {
-  id               String          @id @default(cuid())
+  id               Int             @id @default(autoincrement())
   base64           String          @db.LongText
+  mimeType         String
   isThumbnail      Boolean         @default(false)
   Product          Product?        @relation(fields: [productId], references: [id])
-  productId        String?
+  productId        Int?
   ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
-  productVariantId String?
+  productVariantId Int?
 
   @@index([id, productId])
   @@index([id, productVariantId])
@@ -137,26 +138,26 @@ model ProductImage {
 }
 
 model Attribute {
-  id                    String                 @id @default(cuid())
+  id                    Int                    @id @default(autoincrement())
   AttributeKey          AttributeKey           @relation(fields: [attributeKeyId], references: [id])
-  attributeKeyId        String
+  attributeKeyId        Int
   ProductVariant        ProductVariant?        @relation(fields: [productVariantId], references: [id])
-  productVariantId      String?
+  productVariantId      Int?
   AttributeTranslations AttributeTranslation[]
 
   @@map("attributes")
 }
 
 model AttributeTranslation {
-  id          String    @id @default(cuid())
+  id          Int       @id @default(autoincrement())
   value       String
   locale      String
   Attribute   Attribute @relation(fields: [attributeId], references: [id])
-  attributeId String
+  attributeId Int
 }
 
 model AttributeKey {
-  id           String                    @id @default(cuid())
+  id           Int                       @id @default(autoincrement())
   key          String                    @unique
   Attributes   Attribute[]
   Translations AttributeKeyTranslation[]
@@ -165,11 +166,11 @@ model AttributeKey {
 }
 
 model AttributeKeyTranslation {
-  id             String       @id @default(cuid())
+  id             Int          @id @default(autoincrement())
   keyTranslation String
   locale         String
   attributeKey   AttributeKey @relation(fields: [attributeKeyId], references: [id])
-  attributeKeyId String
+  attributeKeyId Int
 
   @@index([locale, attributeKeyId])
 }

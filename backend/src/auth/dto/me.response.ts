@@ -19,7 +19,7 @@ export class MeResponse implements UserDto {
   }
 
   @Field(() => ID)
-  id: string;
+  id: number;
 
   @Field(() => String)
   email: string;
