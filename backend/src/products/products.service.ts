@@ -8,6 +8,7 @@ import { ProductFindAllQueryArgs as ProductFindAllQueryArgs } from './products.r
 import { PaginatedProduct, Product } from './entities/product.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { ca } from 'zod/v4/locales';
 
 @Injectable()
 export class ProductsService {
@@ -131,9 +132,7 @@ export class ProductsService {
       },
     });
 
-    await Promise.all(
-      productsWithCategory.map((p) => this.updateIsSetup(p.id)),
-    );
+    await this.updateIsSetupMultiple(productsWithCategory.map((p) => p.id)); // skontrolovat
   }
 
   async update(id: number, input: UpdateProductInput): Promise<Product> {
@@ -234,6 +233,73 @@ export class ProductsService {
       return deletedProduct.id;
     });
     return deletedProductId;
+  }
+
+  private async updateIsSetupMultiple(ids: number[]) {
+    try {
+      const productsToUpdate = await this.prisma.product.findMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+        select: {
+          id: true,
+          isSetup: true,
+          _count: {
+            select: {
+              ProductVariants: true,
+              Images: {
+                where: {
+                  isThumbnail: true,
+                },
+              },
+            },
+          },
+          ProductTranslations: {
+            select: {
+              locale: true,
+            },
+          },
+        },
+      });
+
+      await this.prisma.$transaction(async (tx) => {
+        await Promise.all(
+          productsToUpdate.map(async (p) => {
+            const isSetup =
+              p.ProductTranslations.some(
+                (t) => t.locale === this.localesService.locales().english.code,
+              ) &&
+              p._count.ProductVariants > 0 &&
+              p._count.Images > 0;
+
+            if (p.isSetup !== isSetup) {
+              await this.prisma.product.update({
+                where: {
+                  id: p.id,
+                },
+                data: {
+                  isSetup: isSetup,
+                },
+              });
+            }
+            await tx.product.update({
+              where: {
+                id: p.id,
+              },
+              data: {
+                isSetup: isSetup,
+              },
+            });
+          }),
+        );
+      });
+    } catch (e) {
+      this.logger.error(
+        `Failed to update isSetup for products with ids ${ids.join(', ')}: ${e}`,
+      );
+    }
   }
 
   private async updateIsSetup(id: number) {
