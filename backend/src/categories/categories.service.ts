@@ -223,7 +223,7 @@ export class CategoriesService {
   }
 
   async update(id: number, updateCategoryInput: UpdateCategoryInput) {
-    const currentCategory = await this.prisma.category.findUnique({
+    const currentCategory = await this.prisma.category.findFirst({
       where: { id },
       select: {
         id: true,
@@ -232,7 +232,19 @@ export class CategoriesService {
     });
 
     if (!currentCategory) {
-      throw new NotFoundException();
+      throw new BadRequestException(
+        'categories.service.update.categoryNotFound',
+      );
+    }
+
+    const countCategoriesWithNewSlug = await this.prisma.category.count({
+      where: {
+        slug: updateCategoryInput.slug,
+      },
+    });
+
+    if (countCategoriesWithNewSlug > 0) {
+      throw new BadRequestException('categories.service.slugAlreadyInUse');
     }
 
     if (updateCategoryInput.parentCategoryId != null) {

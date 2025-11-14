@@ -15,7 +15,10 @@ export class Product implements Partial<DbProduct> {
 
   @Field(() => Boolean)
   isPublic: boolean;
+
+  @Field(() => Boolean)
+  isSetup: boolean;
 }
 
 @ObjectType()
-class PaginatedProduct extends Paginated(Product) {}
+export class PaginatedProduct extends Paginated(Product) {}

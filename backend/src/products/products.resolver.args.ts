@@ -1,7 +1,7 @@
 import { ArgsType, Field, Int } from '@nestjs/graphql';
 
 @ArgsType()
-export class GetProductFindOneQueryArgs {
+export class ProductFindOneQueryArgs {
   @Field(() => Boolean, { nullable: true })
   isSetup: boolean | null;
 
@@ -10,7 +10,7 @@ export class GetProductFindOneQueryArgs {
 }
 
 @ArgsType()
-export class GetProductFindAllQueryArgs extends GetProductFindOneQueryArgs {
+export class ProductFindAllQueryArgs extends ProductFindOneQueryArgs {
   @Field(() => Int, {
     nullable: true,
     description:
@@ -20,7 +20,7 @@ export class GetProductFindAllQueryArgs extends GetProductFindOneQueryArgs {
 }
 
 @ArgsType()
-export class GetProductTranslationsQueryArgs {
+export class ProductTranslationsQueryArgs {
   @Field(() => [String], {
     defaultValue: [],
     description:

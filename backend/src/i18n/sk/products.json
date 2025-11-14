@@ -1,5 +1,8 @@
 {
   "service": {
+    "update": {
+      "notFound": "Produkt, ktorý sa snažíte aktualizovať, nebol nájdený."
+    },
     "slugAlreadyInUse": "Tento slug už používa iný produkt",
     "invalidLocaleCode": "Neplatný kód lokality",
     "editTranslation": {

@@ -1,31 +1,39 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { ProductsService } from './products.service';
-import { Product } from './entities/product.entity';
+import { PaginatedProduct, Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
-import { GetPaginationArgs } from 'src/lib/pagination.args';
-import { GetProductFindAllQueryArgs } from './products.resolver.args';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import { ProductFindAllQueryArgs } from './products.resolver.args';
+import { UseGuards } from '@nestjs/common';
+import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
+import {
+  OptionalCurrentUser,
+  OptionalCurrentUserDto,
+} from 'src/auth/optional-current-user.decorator';
 
 @Resolver(() => Product)
 export class ProductsResolver {
   constructor(private readonly productsService: ProductsService) {}
 
   @Mutation(() => Product)
-  createProduct(
+  async createProduct(
     @Args('createProductInput') createProductInput: CreateProductInput,
   ) {
-    return this.productsService.create(createProductInput);
+    return await this.productsService.create(createProductInput);
   }
-
-  @Query(() => [Product], { name: 'products' })
+  @UseGuards(OptionalJwtAuthGuard)
+  @Query(() => PaginatedProduct, { name: 'products' })
   findAll(
-    @Args({ nullable: true }) paginationArgs: GetPaginationArgs | null,
-    @Args() findAllQueryArgs: GetProductFindAllQueryArgs,
+    @Args() paginationArgs: PaginationArgs,
+    @Args() findAllQueryArgs: ProductFindAllQueryArgs,
+    @OptionalCurrentUser() user: OptionalCurrentUserDto,
   ) {
-    if (paginationArgs == null) {
-      paginationArgs = new GetPaginationArgs();
-    }
-    return this.productsService.findAll(findAllQueryArgs, paginationArgs);
+    return this.productsService.findAll(
+      findAllQueryArgs,
+      paginationArgs,
+      user?.role,
+    );
   }
 
   @Query(() => Product, { name: 'product' })
