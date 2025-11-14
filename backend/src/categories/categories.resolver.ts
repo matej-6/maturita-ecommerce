@@ -94,6 +94,7 @@ export class CategoriesResolver {
     );
   }
 
+  @UseGuards(AdminGuard)
   @Mutation(() => Category)
   async removeCategory(@Args('id', { type: () => ID }) id: number) {
     return await this.categoriesService.remove(id);
@@ -171,7 +172,7 @@ export class CategoriesResolver {
 
   @UseGuards(AdminGuard)
   @ResolveField(() => Boolean, { name: 'isSetup' })
-  async categoryIsSetup(@Parent() category: Category) {
+  categoryIsSetup(@Parent() category: Category) {
     return category.isSetup;
   }
 

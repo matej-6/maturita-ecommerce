@@ -6,15 +6,18 @@ import { RedisModule } from 'src/redis/redis.module';
 import { RedisService } from 'src/redis/redis.service';
 import { LocalesModule } from 'src/locales/locales.module';
 import { LocalesService } from 'src/locales/locales.service';
+import { ProductsModule } from 'src/products/products.module';
+import { ProductsService } from 'src/products/products.service';
 
 @Module({
-  imports: [RedisModule, LocalesModule],
+  imports: [RedisModule, LocalesModule, ProductsModule],
   providers: [
     CategoriesResolver,
     CategoriesService,
     LocalesService,
     PrismaService,
     RedisService,
+    ProductsService,
   ],
 })
 export class CategoriesModule {}

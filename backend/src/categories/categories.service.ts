@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -19,6 +13,7 @@ import {
 } from './categories.service.filters';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
+import { ProductsService } from 'src/products/products.service';
 
 @Injectable()
 export class CategoriesService {
@@ -28,6 +23,7 @@ export class CategoriesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly localesService: LocalesService,
+    private readonly productsService: ProductsService,
   ) {}
   async create(createCategoryInput: CreateCategoryInput) {
     // ak uz existuje takato kategoria => error
@@ -310,16 +306,18 @@ export class CategoriesService {
           },
         });
 
-        // 2. odstranit categry
+        // 2. odstranit category
         await tx.category.delete({
           where: { id },
         });
       });
+
+      await this.productsService.removeCategoryFromProducts(id);
     } catch (error) {
       this.logger.error(
         `Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`,
       );
-      throw new InternalServerErrorException();
+      throw error;
     }
   }
 

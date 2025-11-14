@@ -113,6 +113,29 @@ export class ProductsService {
     return product;
   }
 
+  async removeCategoryFromProducts(categoryId: number) {
+    const productsWithCategory = await this.prisma.product.findMany({
+      where: {
+        categoryId: categoryId,
+      },
+    });
+
+    await this.prisma.product.updateMany({
+      where: {
+        id: {
+          in: productsWithCategory.map((p) => p.id),
+        },
+      },
+      data: {
+        categoryId: null,
+      },
+    });
+
+    await Promise.all(
+      productsWithCategory.map((p) => this.updateIsSetup(p.id)),
+    );
+  }
+
   async update(id: number, input: UpdateProductInput): Promise<Product> {
     const existingCategory = await this.prisma.product.count({
       where: {
