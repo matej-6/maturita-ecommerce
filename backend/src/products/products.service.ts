@@ -4,11 +4,13 @@ import { UpdateProductInput } from './dto/update-product.input';
 import { LocalesService } from 'src/locales/locales.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
-import { ProductFindAllQueryArgs as ProductFindAllQueryArgs } from './products.resolver.args';
+import {
+  ProductFindAllQueryArgs as ProductFindAllQueryArgs,
+  ProductFindOneQueryArgs,
+} from './products.resolver.args';
 import { PaginatedProduct, Product } from './entities/product.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
-import { ca } from 'zod/v4/locales';
 
 @Injectable()
 export class ProductsService {
@@ -20,6 +22,7 @@ export class ProductsService {
   ) {}
 
   async create(input: CreateProductInput) {
+    input.slug = input.slug.trim().toLowerCase();
     this.logger.log(`creating prdouct with input: ${JSON.stringify(input)}`);
 
     try {
@@ -50,12 +53,32 @@ export class ProductsService {
     args.pageSize = Math.min(Math.abs(args.pageSize), 25);
   }
 
+  private validateFindOneQueryArgs(
+    queryArgs: ProductFindOneQueryArgs,
+    role?: AuthenticatedUserDto['role'],
+  ) {
+    queryArgs.isPublic = role === 'ADMIN' ? queryArgs.isPublic : true;
+    queryArgs.isSetup = role === 'ADMIN' ? queryArgs.isSetup : true;
+  }
+
   private validateFindAllQueryArgs(
     queryArgs: ProductFindAllQueryArgs,
     role?: AuthenticatedUserDto['role'],
   ) {
     queryArgs.isPublic = role === 'ADMIN' ? queryArgs.isPublic : true;
     queryArgs.isSetup = role === 'ADMIN' ? queryArgs.isSetup : true;
+  }
+
+  private getIsSetup(product: {
+    _count: {
+      ProductTranslations: number;
+      ProductVariants: number;
+    };
+  }) {
+    return (
+      product._count.ProductTranslations > 0 &&
+      product._count.ProductVariants > 0
+    );
   }
 
   async findAll(
@@ -65,77 +88,199 @@ export class ProductsService {
   ): Promise<PaginatedProduct> {
     this.validatePaginationArgs(paginationArgs);
     this.validateFindAllQueryArgs(queryArgs, role);
-    const products = await this.prisma.product.findMany({
-      where: {
-        isPublic: queryArgs.isPublic ?? undefined,
-        categoryId: queryArgs.categoryId ?? undefined,
-      },
-      cursor:
-        paginationArgs.cursor === 0
-          ? undefined
-          : {
-              id: paginationArgs.cursor,
+
+    if (queryArgs.isSetup == null) {
+      const products = await this.prisma.product.findMany({
+        where: {
+          isPublic: queryArgs.isPublic == null ? undefined : queryArgs.isPublic,
+          categoryId:
+            queryArgs.categoryId == null ? undefined : queryArgs.categoryId,
+        },
+        select: {
+          id: true,
+          isPublic: true,
+          slug: true,
+          categoryId: true,
+          _count: {
+            select: {
+              ProductTranslations: {
+                where: {
+                  locale: {
+                    equals: this.localesService.locales().english.code,
+                  },
+                },
+              },
+              ProductVariants: true,
             },
-      take: paginationArgs.pageSize + 1,
-      orderBy: {
-        id: 'asc',
+          },
+        },
+        cursor:
+          paginationArgs.cursor === 0
+            ? undefined
+            : {
+                id: paginationArgs.cursor,
+              },
+        take: paginationArgs.pageSize + 1,
+        orderBy: {
+          id: 'asc',
+        },
+      });
+      const hasNextPage = products.length === paginationArgs.pageSize + 1;
+      if (hasNextPage) {
+        products.pop();
+      }
+
+      return {
+        hasNextPage: hasNextPage,
+        totalCount: products.length,
+        edges: products.map((p) => ({
+          cursor: p.id,
+          node: {
+            id: p.id,
+            isPublic: p.isPublic,
+            slug: p.slug,
+            isSetup: this.getIsSetup(p),
+            categoryId: p.categoryId,
+          },
+        })),
+      };
+    } else {
+      const products =
+        queryArgs.isSetup === true
+          ? await this.prisma.product.findMany({
+              where: {
+                isPublic:
+                  queryArgs.isPublic == null ? undefined : queryArgs.isPublic,
+                categoryId:
+                  queryArgs.categoryId == null
+                    ? undefined
+                    : queryArgs.categoryId,
+                ProductTranslations: {
+                  some: {
+                    locale: {
+                      equals: this.localesService.locales().english.code,
+                    },
+                  },
+                },
+                ProductVariants: {
+                  some: {
+                    id: {
+                      gt: 0,
+                    },
+                  },
+                },
+              },
+            })
+          : await this.prisma.product.findMany({
+              where: {
+                isPublic:
+                  queryArgs.isPublic == null ? undefined : queryArgs.isPublic,
+                categoryId:
+                  queryArgs.categoryId == null
+                    ? undefined
+                    : queryArgs.categoryId,
+                ProductTranslations: {
+                  none: {
+                    locale: {
+                      equals: this.localesService.locales().english.code,
+                    },
+                  },
+                },
+                ProductVariants: {
+                  none: {
+                    id: {
+                      gt: 0,
+                    },
+                  },
+                },
+              },
+            });
+
+      const hasNextPage = products.length === paginationArgs.pageSize + 1;
+      if (hasNextPage) {
+        products.pop();
+      }
+
+      return {
+        hasNextPage: hasNextPage,
+        totalCount: products.length,
+        edges: products.map((p) => ({
+          cursor: p.id,
+          node: {
+            id: p.id,
+            isPublic: p.isPublic,
+            slug: p.slug,
+            categoryId: p.categoryId,
+            isSetup: queryArgs.isSetup!,
+          },
+        })),
+      };
+    }
+  }
+
+  async findOne(
+    queryArgs: ProductFindOneQueryArgs,
+    role?: AuthenticatedUserDto['role'],
+  ): Promise<Product | null> {
+    this.validateFindOneQueryArgs(queryArgs, role);
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id: queryArgs.id,
+        isPublic: queryArgs.isPublic == null ? undefined : queryArgs.isPublic,
+      },
+      select: {
+        _count: {
+          select: {
+            ProductTranslations: {
+              where: {
+                locale: this.localesService.locales().english.code,
+              },
+            },
+            ProductVariants: true,
+          },
+        },
+        id: true,
+        isPublic: true,
+        slug: true,
+        categoryId: true,
       },
     });
 
-    const hasNextPage = products.length === paginationArgs.pageSize + 1;
-    if (hasNextPage) {
-      products.pop();
+    if (!product) {
+      this.logger.warn(
+        `findOne(id=${queryArgs.id}, role?: ${role}) did not find any product`,
+      );
+      return null;
+    }
+    const isSetup = this.getIsSetup(product);
+
+    if (queryArgs.isSetup != null && queryArgs.isSetup !== isSetup) {
+      this.logger.warn(
+        `findOne(id=${queryArgs.id}, role?: ${role}) found product but isSetup does not match the queryArgs`,
+      );
+      return null;
     }
 
     return {
-      hasNextPage: hasNextPage,
-      totalCount: products.length,
-      edges: products.map((p) => ({
-        cursor: p.id,
-        node: p,
-      })),
+      ...product,
+      isSetup: isSetup,
     };
   }
 
-  async findOne(id: number, role?: AuthenticatedUserDto['role']) {
-    const product = await this.prisma.product.findFirst({
-      where: {
-        id: id,
-        isPublic: role === 'ADMIN',
-        // isSetup: role === 'ADMIN',
-      },
-    });
-    if (!product) {
-      this.logger.warn(
-        `findOne(id=${id}, role?: ${role}) did not find any product`,
-      );
-    }
-
-    return product;
-  }
-
   async removeCategoryFromProducts(categoryId: number) {
-    const productsWithCategory = await this.prisma.product.findMany({
-      where: {
-        categoryId: categoryId,
-      },
-    });
-
     await this.prisma.product.updateMany({
       where: {
-        id: {
-          in: productsWithCategory.map((p) => p.id),
-        },
+        categoryId: categoryId,
       },
       data: {
         categoryId: null,
       },
     });
-
-    await this.updateIsSetupMultiple(productsWithCategory.map((p) => p.id)); // skontrolovat
   }
 
   async update(id: number, input: UpdateProductInput): Promise<Product> {
+    input.slug = input.slug.trim().toLowerCase();
+
     const existingCategory = await this.prisma.product.count({
       where: {
         id: id,
@@ -148,7 +293,9 @@ export class ProductsService {
 
     const countProductWithSameSlug = await this.prisma.product.count({
       where: {
-        slug: input.slug,
+        slug: {
+          equals: input.slug,
+        },
       },
     });
 
@@ -165,13 +312,29 @@ export class ProductsService {
         isPublic: input.isPublic,
         slug: input.slug,
       },
+      select: {
+        id: true,
+        isPublic: true,
+        slug: true,
+        categoryId: true,
+        _count: {
+          select: {
+            ProductTranslations: {
+              where: {
+                locale: {
+                  equals: this.localesService.locales().english.code,
+                },
+              },
+            },
+            ProductVariants: true,
+          },
+        },
+      },
     });
-
-    const isSetup = await this.updateIsSetup(id);
 
     return {
       ...updatedProduct,
-      isSetup: isSetup,
+      isSetup: this.getIsSetup(updatedProduct),
     };
   }
 
@@ -233,129 +396,5 @@ export class ProductsService {
       return deletedProduct.id;
     });
     return deletedProductId;
-  }
-
-  private async updateIsSetupMultiple(ids: number[]) {
-    try {
-      const productsToUpdate = await this.prisma.product.findMany({
-        where: {
-          id: {
-            in: ids,
-          },
-        },
-        select: {
-          id: true,
-          isSetup: true,
-          _count: {
-            select: {
-              ProductVariants: true,
-              Images: {
-                where: {
-                  isThumbnail: true,
-                },
-              },
-            },
-          },
-          ProductTranslations: {
-            select: {
-              locale: true,
-            },
-          },
-        },
-      });
-
-      await this.prisma.$transaction(async (tx) => {
-        await Promise.all(
-          productsToUpdate.map(async (p) => {
-            const isSetup =
-              p.ProductTranslations.some(
-                (t) => t.locale === this.localesService.locales().english.code,
-              ) &&
-              p._count.ProductVariants > 0 &&
-              p._count.Images > 0;
-
-            if (p.isSetup !== isSetup) {
-              await this.prisma.product.update({
-                where: {
-                  id: p.id,
-                },
-                data: {
-                  isSetup: isSetup,
-                },
-              });
-            }
-            await tx.product.update({
-              where: {
-                id: p.id,
-              },
-              data: {
-                isSetup: isSetup,
-              },
-            });
-          }),
-        );
-      });
-    } catch (e) {
-      this.logger.error(
-        `Failed to update isSetup for products with ids ${ids.join(', ')}: ${e}`,
-      );
-    }
-  }
-
-  private async updateIsSetup(id: number) {
-    try {
-      const p = await this.prisma.product.findFirst({
-        where: {
-          id: id,
-        },
-        select: {
-          isSetup: true,
-          _count: {
-            select: {
-              ProductVariants: true,
-              Images: {
-                where: {
-                  isThumbnail: true,
-                },
-              },
-            },
-          },
-          ProductTranslations: {
-            select: {
-              locale: true,
-            },
-          },
-        },
-      });
-
-      if (!p) {
-        return false;
-      }
-
-      const isSetup =
-        p.ProductTranslations.some(
-          (t) => t.locale === this.localesService.locales().english.code,
-        ) &&
-        p._count.ProductVariants > 0 &&
-        p._count.Images > 0;
-
-      if (p.isSetup !== isSetup) {
-        await this.prisma.product.update({
-          where: {
-            id: id,
-          },
-          data: {
-            isSetup: isSetup,
-          },
-        });
-      }
-
-      return isSetup;
-    } catch (e) {
-      this.logger.error(
-        `Failed to update isSetup for product with id ${id}: ${e}`,
-      );
-      return false;
-    }
   }
 }

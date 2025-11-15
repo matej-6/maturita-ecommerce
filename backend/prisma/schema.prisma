@@ -62,7 +62,6 @@ model Category {
   parentCategoryId    Int?
   CategoryTranslation CategoryTranslation[]
   Products            Product[]
-  isSetup             Boolean               @default(false)
   isPublic            Boolean               @default(true)
 
   @@index([slug])
@@ -89,7 +88,6 @@ model Product {
   Category            Category?            @relation(fields: [categoryId], references: [id])
   categoryId          Int?
   isPublic            Boolean              @default(true)
-  isSetup             Boolean              @default(false)
   ProductVariants     ProductVariant[]
   Images              ProductImage[]
   ProductTranslations ProductTranslation[]

@@ -2,7 +2,10 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Category, CategoryTranslation } from 'generated/prisma/client';
+import {
+  Category as DbCategory,
+  CategoryTranslation,
+} from 'generated/prisma/client';
 import { LocalesService } from 'src/locales/locales.service';
 import { DEFAULT_LOCALE } from 'src/locales';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
@@ -14,6 +17,7 @@ import {
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 import { ProductsService } from 'src/products/products.service';
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -51,7 +55,7 @@ export class CategoriesService {
   async createTranslation(
     categoryId: number,
     input: CreateCategoryTranslationInput,
-  ) {
+  ): Promise<CategoryTranslation> {
     const localeCode = this.localesService.findOne(input.localeCode);
     if (!localeCode) {
       throw new BadRequestException('categories.service.invalidLocaleCode');
@@ -70,7 +74,6 @@ export class CategoriesService {
         },
       },
     });
-    await this.updateIsSetup(res.id);
 
     return res;
   }
@@ -125,8 +128,6 @@ export class CategoriesService {
       },
     });
 
-    await this.updateIsSetup(res.categoryId);
-
     return res;
   }
 
@@ -143,8 +144,6 @@ export class CategoriesService {
         },
       });
 
-      await this.updateIsSetup(translation.categoryId);
-
       return translation.id;
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
@@ -158,64 +157,106 @@ export class CategoriesService {
     }
   }
 
-  private async updateIsSetup(id: number) {
-    const c = await this.prisma.category.findFirst({
-      where: {
-        id: id,
-      },
-      select: {
-        CategoryTranslation: {
-          select: {
-            locale: true,
-          },
-        },
-      },
-    });
-
-    if (c !== null) {
-      const isSetup = c.CategoryTranslation.some(
-        (t) => t.locale === this.localesService.locales().english.code,
-      );
-      await this.prisma.category.update({
-        where: {
-          id: id,
-        },
-        data: {
-          isSetup: isSetup,
-        },
-      });
-
-      return isSetup;
-    }
-
-    return null;
-  }
-
   private getCategoryCacheKey(id: number): string {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
   async findAll(filter: CategoriesServiceFindAllFilter): Promise<Category[]> {
-    return await this.prisma.category.findMany({
+    const categories = await this.prisma.category.findMany({
       where: {
         parentCategoryId:
           filter.parentCategoryId === 0 ? undefined : filter.parentCategoryId,
-        isSetup: filter.isSetup == null ? undefined : filter.isSetup,
         isPublic: filter.isPublic == null ? undefined : filter.isPublic,
       },
+      select: {
+        id: true,
+        isPublic: true,
+        slug: true,
+        parentCategoryId: true,
+        updatedAt: true,
+        createdAt: true,
+        _count: {
+          select: {
+            Products: true,
+            CategoryTranslation: {
+              where: {
+                locale: {
+                  equals: this.localesService.locales().english.code,
+                },
+              },
+            },
+          },
+        },
+      },
     });
+
+    return categories
+      .map((category) => ({
+        ...category,
+        isSetup: this.getIsSetup(
+          category._count.Products,
+          category._count.CategoryTranslation > 0,
+        ),
+      }))
+      .filter(
+        (category) =>
+          filter.isSetup == null || category.isSetup === filter.isSetup,
+      );
   }
 
-  async findOne(id: number, filter: CategoriesServiceFindOneFilter) {
+  async findOne(
+    id: number,
+    filter: CategoriesServiceFindOneFilter,
+  ): Promise<Category | null> {
     const category = await this.prisma.category.findFirst({
       where: {
         id: id,
-        isSetup: filter.isSetup == null ? undefined : filter.isSetup,
         isPublic: filter.isPublic == null ? undefined : filter.isPublic,
+      },
+      select: {
+        id: true,
+        slug: true,
+        parentCategoryId: true,
+        isPublic: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            Products: true,
+            CategoryTranslation: {
+              where: {
+                locale: {
+                  equals: this.localesService.locales().english.code,
+                },
+              },
+            },
+          },
+        },
       },
     });
 
-    return category;
+    if (!category) return null;
+
+    const isSetup = this.getIsSetup(
+      category._count.Products,
+      category._count.CategoryTranslation > 0,
+    );
+
+    if (filter.isSetup != null && filter.isSetup !== isSetup) {
+      return null;
+    }
+
+    return {
+      ...category,
+      isSetup: isSetup,
+    };
+  }
+
+  private getIsSetup(
+    productCount: number,
+    hasEnglishTranslation: boolean,
+  ): boolean {
+    return productCount > 0 && hasEnglishTranslation;
   }
 
   async update(id: number, updateCategoryInput: UpdateCategoryInput) {
@@ -323,7 +364,7 @@ export class CategoriesService {
 
   async findAllSubcategoriesByParentIds(
     parentIds: number[],
-  ): Promise<Category[]> {
+  ): Promise<DbCategory[]> {
     return await this.prisma.category.findMany({
       where: {
         parentCategoryId: {
@@ -335,7 +376,7 @@ export class CategoriesService {
 
   async getCategorySubcategoriesByBatch(
     parentIds: number[],
-  ): Promise<(Category[] | null)[]> {
+  ): Promise<(DbCategory[] | null)[]> {
     const categories = await this.findAllSubcategoriesByParentIds(parentIds);
     return parentIds.map(
       (parentId) =>

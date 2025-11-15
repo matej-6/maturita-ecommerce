@@ -1,7 +1,10 @@
-import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { ArgsType, Field, ID, Int } from '@nestjs/graphql';
 
 @ArgsType()
 export class ProductFindOneQueryArgs {
+  @Field(() => ID)
+  id: number;
+
   @Field(() => Boolean, { nullable: true })
   isSetup: boolean | null;
 
@@ -10,7 +13,13 @@ export class ProductFindOneQueryArgs {
 }
 
 @ArgsType()
-export class ProductFindAllQueryArgs extends ProductFindOneQueryArgs {
+export class ProductFindAllQueryArgs {
+  @Field(() => Boolean, { nullable: true })
+  isSetup: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  isPublic: boolean | null;
+
   @Field(() => Int, {
     nullable: true,
     description:
