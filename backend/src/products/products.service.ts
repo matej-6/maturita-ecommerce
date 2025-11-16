@@ -11,6 +11,7 @@ import {
 import { PaginatedProduct, Product } from './entities/product.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { ProductTranslation } from 'generated/prisma/client';
 
 @Injectable()
 export class ProductsService {
@@ -49,7 +50,9 @@ export class ProductsService {
   }
 
   private validatePaginationArgs(args: PaginationArgs) {
-    args.cursor = Math.abs(args.cursor);
+    if (args.cursor != null) {
+      args.cursor = Math.abs(args.cursor);
+    }
     args.pageSize = Math.min(Math.abs(args.pageSize), 25);
   }
 
@@ -115,7 +118,7 @@ export class ProductsService {
           },
         },
         cursor:
-          paginationArgs.cursor === 0
+          paginationArgs.cursor == null
             ? undefined
             : {
                 id: paginationArgs.cursor,
@@ -216,6 +219,32 @@ export class ProductsService {
         })),
       };
     }
+  }
+
+  /**
+   * Metóda navrhnutá pre data loader
+   * source: @link https://blog.logrocket.com/use-dataloader-nestjs/#setting-up-nestjs-graphql
+   */
+  async getAllTranslationsByBatch(
+    lang: string,
+    productIds: number[],
+  ): Promise<(ProductTranslation | null)[]> {
+    const productTranslations = await this.prisma.productTranslation.findMany({
+      where: {
+        productId: {
+          in: productIds,
+        },
+        locale: {
+          in: [lang, this.localesService.getDefaultLocale().code],
+        },
+      },
+    });
+
+    return productIds.map((id) => {
+      const cts = productTranslations.filter((pt) => pt.productId === id);
+      if (cts.length === 0) return null;
+      return cts.find((ct) => ct.locale === lang) || cts[0];
+    });
   }
 
   async findOne(

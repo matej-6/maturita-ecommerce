@@ -30,9 +30,7 @@ export const categoryFormSchema = (
           value: 128,
         }),
       }),
-    parentCategoryId: z
-      .uuid({ error: t("uuid") })
-      .or(z.string({ error: t("uuid") }).length(0, { error: t("uuid") })),
+    parentCategoryId: z.number({ error: t("id") }).nullable(),
   });
 
 export type categoryFormSchemaType = z.infer<

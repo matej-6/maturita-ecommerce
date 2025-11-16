@@ -1,4 +1,4 @@
-export type FormActionResponse<T> =
+export type ActionResponse<T> =
   | {
       success: true;
       data: T;
@@ -6,5 +6,5 @@ export type FormActionResponse<T> =
   | {
       success: false;
       message: string;
-      fieldErrors?: { property: string; constraints: string[] }[];
+      fieldErrors?: { property: string; constraints: string[] }[]; // only if form validation error
     };

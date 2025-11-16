@@ -4,7 +4,7 @@ import { getEditCategoryQueryDocumentData } from "@/app/data-access-layer/admin/
 import { handleGraphqlError } from "@/app/data-access-layer/admin/handleGraphqlFormError";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { notFound } from "next/navigation";
@@ -29,20 +29,36 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { CategoryTranslationForm } from "../category-translation-form";
-import { deleteCategoryTranslationAction } from "@/app/data-access-layer/admin/category-translation/actions";
 import { CategoryTranslation } from "../../../components/categories/category-translation";
 import { useState } from "react";
 
-export default function EditCategoryPageClient({ id }: { id: string }) {
+export default function EditCategoryPageClient({
+  id,
+  startingCursor,
+  startingPageSize,
+}: {
+  id: number;
+  startingCursor: number | null;
+  startingPageSize: number;
+}) {
   const router = useRouter();
   const t = useTranslations("admin.categories.editCategory.page");
 
-  const queryKey = ["category", id];
+  const [productCursor, setProductCursor] = useState<number | null>(
+    startingCursor
+  );
+  const [productPageSize, setProductPageSize] = useState(startingPageSize);
+  const previousPageCursors: (number | null)[] = [];
+  const queryKey = ["category", id, productCursor, productPageSize];
 
   const { data } = useSuspenseQuery({
     queryKey: queryKey,
     queryFn: async () => {
-      const res = await getEditCategoryQueryDocumentData(id);
+      const res = await getEditCategoryQueryDocumentData(
+        id,
+        productCursor,
+        productPageSize
+      );
       if (res.errors) {
         const error = await handleGraphqlError(res.errors);
         toast.error(error.message);
@@ -98,7 +114,7 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
                     className="hover:underline"
                     href={`/admin/categories/edit-category/${data.data.category.parentCategoryId}`}
                   >
-                    {data.data.category.parentCategoryId}
+                    ID: {data.data.category.parentCategoryId}
                   </Link>
                 ) : (
                   "None"
@@ -109,7 +125,7 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
               <span className="text-muted-foreground text-xs">
                 Nu. of products
               </span>
-              <p>{0}</p>
+              <p>{data.data.category.productsCount}</p>
             </div>
             <div className="flex flex-col gap-y-0">
               <span className="text-muted-foreground text-xs">Is Public</span>
@@ -121,7 +137,7 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
               Subcategories ({data.data.category.subcategories.length})
             </span>
             <div className="flex flex-wrap gap-2">
-              {data.data.category.subcategories ? (
+              {data.data.category.subcategories.length > 0 ? (
                 data.data.category.subcategories.map((s) => (
                   <Link
                     key={s.id}
@@ -161,7 +177,7 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
                     data={{
                       slug: data.data.category.slug,
                       parentCategoryId:
-                        data.data.category.parentCategoryId || "",
+                        data.data.category.parentCategoryId || null,
                     }}
                   />
                 </div>
@@ -257,6 +273,65 @@ export default function EditCategoryPageClient({ id }: { id: string }) {
         </Sheet>
       </div>
       <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="space-y-8">
+        <h2 className="font-medium font-secondary">Products</h2>
+        <div className="flex flex-col gap-y-4">
+          {data.data.products.edges?.length === 0 ? (
+            <p>No products in this category.</p>
+          ) : (
+            data.data.products.edges!.map(({ node }) => (
+              <Card key={node.id} className="hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <CardTitle>{node.name ?? "No name translation"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Slug: {node.slug}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Link href={`/admin/products/edit-product/${node.id}`}>
+                    <Button asChild variant={"link"} className="gap-x-1">
+                      <div>
+                        <span>Edit product</span>
+                        <ArrowUpRight className="size-4" />
+                      </div>
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))
+          )}
+        </div>
+        {data.data.products.edges && data.data.products.edges.length > 0 && (
+          <div className="space-x-2">
+            <Button
+              size={"sm"}
+              disabled={previousPageCursors.length === 0}
+              onClick={() => {
+                const prevCursor = previousPageCursors.pop()!;
+                setProductCursor(prevCursor);
+              }}
+            >
+              Previous Page
+            </Button>
+            <Button
+              size={"sm"}
+              disabled={!data.data.products.hasNextPage}
+              onClick={() => {
+                setProductCursor((prev) => {
+                  previousPageCursors.push(prev);
+                  return data.data!.products.edges![
+                    data.data!.products.edges!.length - 1
+                  ]!.cursor!;
+                });
+              }}
+            >
+              Next Page
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

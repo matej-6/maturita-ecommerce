@@ -1,7 +1,7 @@
 import { graphql } from "@/graphql";
 
 export const NewCategoryMutation = graphql(`
-  mutation NewCategoryMutation($parentCategoryId: String, $slug: String!) {
+  mutation NewCategoryMutation($parentCategoryId: Int, $slug: String!) {
     createCategory(
       createCategoryInput: { parentCategoryId: $parentCategoryId, slug: $slug }
     ) {
@@ -12,8 +12,8 @@ export const NewCategoryMutation = graphql(`
 
 export const EditCategoryMutation = graphql(`
   mutation EditCategoryMutation(
-    $id: ID!
-    $parentCategoryId: String
+    $id: Int!
+    $parentCategoryId: Int
     $slug: String!
   ) {
     updateCategory(

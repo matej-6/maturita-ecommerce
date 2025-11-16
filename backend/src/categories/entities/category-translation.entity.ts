@@ -1,10 +1,10 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 import { type CategoryTranslation as DbCategoryTranslation } from 'generated/prisma/client';
 
 @ObjectType()
 export class CategoryTranslation implements Partial<DbCategoryTranslation> {
-  @Field(() => ID)
+  @Field(() => Int)
   id: number;
 
   @Field(() => String)
@@ -13,7 +13,7 @@ export class CategoryTranslation implements Partial<DbCategoryTranslation> {
   @Field(() => String, { nullable: true })
   description?: string | null;
 
-  @Field(() => ID)
+  @Field(() => Int)
   categoryId: number;
 
   @Field(() => String)

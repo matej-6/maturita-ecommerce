@@ -1,8 +1,7 @@
 "use server";
 
-import { categoryFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/category-form-schema";
 import { execute } from "@/graphql/execute";
-import { FormActionResponse } from "../../formActionResponse";
+import { ActionResponse } from "../../formActionResponse";
 import { handleGraphqlError } from "../handleGraphqlFormError";
 import { categoryTranslationSchemaType } from "@/app/[locale]/(admin)/admin/schemas/category-translation-schema";
 import { ExecutionResult } from "graphql";
@@ -18,9 +17,9 @@ import {
 } from "./mutations";
 
 export async function deleteCategoryTranslationAction(
-  translationId: string
+  translationId: number
 ): Promise<
-  FormActionResponse<
+  ActionResponse<
     NonNullable<
       ExecutionResult<DeleteCategoryTranslationMutationMutation>["data"]
     >["deleteCategoryTranslation"]
@@ -48,10 +47,10 @@ export async function deleteCategoryTranslationAction(
 }
 
 export async function createCategoryTranslationAction(
-  categoryId: string,
+  categoryId: number,
   data: categoryTranslationSchemaType
 ): Promise<
-  FormActionResponse<
+  ActionResponse<
     NonNullable<
       ExecutionResult<NewCategoryTranslationMutationMutation>["data"]
     >["createCategoryTranslation"]
@@ -82,10 +81,10 @@ export async function createCategoryTranslationAction(
 }
 
 export async function editCategoryTranslationAction(
-  categoryTranslationId: string,
+  categoryTranslationId: number,
   data: categoryTranslationSchemaType
 ): Promise<
-  FormActionResponse<
+  ActionResponse<
     NonNullable<
       ExecutionResult<EditCategoryTranslationMutationMutation>["data"]
     >["updateCategoryTranslation"]

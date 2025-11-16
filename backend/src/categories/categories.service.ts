@@ -9,15 +9,18 @@ import {
 import { LocalesService } from 'src/locales/locales.service';
 import { DEFAULT_LOCALE } from 'src/locales';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
-import {
-  CategoriesServiceFindAllFilter,
-  CategoriesServiceFindOneFilter,
-  CategoriesServiceTranslationFilter,
-} from './categories.service.filters';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 import { ProductsService } from 'src/products/products.service';
-import { Category } from './entities/category.entity';
+import { Category, PaginatedCategory } from './entities/category.entity';
+import {
+  CategoryFindAllQueryFilterArgs,
+  CategoryFindOneQueryFilterArgs,
+  CategorySortByArgs,
+  CategoryTranslationsQueryFilterArgs,
+} from './categories.resolver.args';
+import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { PaginationArgs } from 'src/lib/pagination.args';
 
 @Injectable()
 export class CategoriesService {
@@ -161,13 +164,57 @@ export class CategoriesService {
     return `${this.CATEGORIES_CACHE_KEY}:${id}`;
   }
 
-  async findAll(filter: CategoriesServiceFindAllFilter): Promise<Category[]> {
+  private validateFindAllArgs(
+    args: CategoryFindAllQueryFilterArgs,
+    role?: AuthenticatedUserDto['role'],
+  ): void {
+    args.isPublic = role === 'ADMIN' ? args.isPublic : true;
+    args.isSetup = role === 'ADMIN' ? args.isSetup : true;
+    if (args.parentCategoryId !== null && args.parentCategoryId < 0) {
+      args.parentCategoryId = null;
+    }
+  }
+
+  private validateSortingArgs(args: CategorySortByArgs): void {
+    const validSortFields = [
+      'createdAt',
+      'updatedAt',
+      'slug',
+      'id',
+      'productsCount',
+      null,
+    ];
+    if (
+      args.sortBy == null ||
+      !validSortFields.includes(args.sortBy) ||
+      (args.sortBy != null && args.ascending == null)
+    ) {
+      args.sortBy = null;
+      args.ascending = null;
+    }
+  }
+
+  async findAll(
+    filterArgs: CategoryFindAllQueryFilterArgs,
+    sortingArgs: CategorySortByArgs,
+    userRole?: AuthenticatedUserDto['role'],
+  ): Promise<Category[]> {
+    this.validateFindAllArgs(filterArgs, userRole);
+    this.validateSortingArgs(sortingArgs);
     const categories = await this.prisma.category.findMany({
       where: {
         parentCategoryId:
-          filter.parentCategoryId === 0 ? undefined : filter.parentCategoryId,
-        isPublic: filter.isPublic == null ? undefined : filter.isPublic,
+          filterArgs.parentCategoryId === 0
+            ? undefined
+            : filterArgs.parentCategoryId,
+        isPublic: filterArgs.isPublic == null ? undefined : filterArgs.isPublic,
       },
+      orderBy:
+        sortingArgs.sortBy !== null
+          ? {
+              [sortingArgs.sortBy]: sortingArgs.ascending ? 'asc' : 'desc',
+            }
+          : undefined,
       select: {
         id: true,
         isPublic: true,
@@ -177,7 +224,6 @@ export class CategoriesService {
         createdAt: true,
         _count: {
           select: {
-            Products: true,
             CategoryTranslation: {
               where: {
                 locale: {
@@ -193,25 +239,238 @@ export class CategoriesService {
     return categories
       .map((category) => ({
         ...category,
-        isSetup: this.getIsSetup(
-          category._count.Products,
-          category._count.CategoryTranslation > 0,
-        ),
+        isSetup: this.getIsSetup(category._count.CategoryTranslation > 0),
       }))
       .filter(
         (category) =>
-          filter.isSetup == null || category.isSetup === filter.isSetup,
+          filterArgs.isSetup == null || category.isSetup === filterArgs.isSetup,
       );
+  }
+
+  private validatePaginationArgs(args: PaginationArgs) {
+    if (args.cursor != null) {
+      args.cursor = Math.abs(args.cursor);
+    }
+    args.pageSize = Math.min(Math.abs(args.pageSize), 25);
+  }
+
+  async findPaginated(
+    filterArgs: CategoryFindAllQueryFilterArgs,
+    sortingArgs: CategorySortByArgs,
+    paginationArgs: PaginationArgs,
+    userRole?: AuthenticatedUserDto['role'],
+  ): Promise<PaginatedCategory> {
+    this.validateFindAllArgs(filterArgs, userRole);
+    this.validateSortingArgs(sortingArgs);
+    this.validatePaginationArgs(paginationArgs);
+
+    if (filterArgs.isSetup == null) {
+      const categories = await this.prisma.category.findMany({
+        where: {
+          parentCategoryId:
+            filterArgs.parentCategoryId === 0
+              ? undefined
+              : filterArgs.parentCategoryId,
+          isPublic:
+            filterArgs.isPublic == null ? undefined : filterArgs.isPublic,
+        },
+        orderBy:
+          sortingArgs.sortBy !== null
+            ? sortingArgs.sortBy !== 'productsCount'
+              ? {
+                  [sortingArgs.sortBy]: sortingArgs.ascending ? 'asc' : 'desc',
+                }
+              : {
+                  Products: {
+                    _count: sortingArgs.ascending ? 'asc' : 'desc',
+                  },
+                }
+            : undefined,
+        cursor:
+          paginationArgs.cursor != null
+            ? {
+                id: paginationArgs.cursor,
+              }
+            : undefined,
+        take: paginationArgs.pageSize + 1,
+        select: {
+          id: true,
+          isPublic: true,
+          slug: true,
+          parentCategoryId: true,
+          updatedAt: true,
+          createdAt: true,
+          _count: {
+            select: {
+              CategoryTranslation: {
+                where: {
+                  locale: {
+                    equals: this.localesService.locales().english.code,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const hasNextPage = categories.length > paginationArgs.pageSize;
+      if (hasNextPage) {
+        categories.pop();
+      }
+      return {
+        hasNextPage: hasNextPage,
+        totalCount: categories.length,
+        edges: categories.map((c) => ({
+          cursor: c.id,
+          node: {
+            ...c,
+            isSetup: this.getIsSetup(c._count.CategoryTranslation > 0),
+          },
+        })),
+      };
+    } else {
+      const categories = filterArgs.isSetup
+        ? await this.prisma.category.findMany({
+            where: {
+              parentCategoryId:
+                filterArgs.parentCategoryId === 0
+                  ? undefined
+                  : filterArgs.parentCategoryId,
+              isPublic:
+                filterArgs.isPublic == null ? undefined : filterArgs.isPublic,
+              CategoryTranslation: {
+                some: {
+                  locale: {
+                    equals: this.localesService.getDefaultLocale().code,
+                  },
+                },
+              },
+            },
+            orderBy:
+              sortingArgs.sortBy !== null
+                ? {
+                    [sortingArgs.sortBy]: sortingArgs.ascending
+                      ? 'asc'
+                      : 'desc',
+                  }
+                : undefined,
+            cursor:
+              paginationArgs.cursor != null
+                ? {
+                    id: paginationArgs.cursor,
+                  }
+                : undefined,
+            take: paginationArgs.pageSize + 1,
+            select: {
+              id: true,
+              isPublic: true,
+              slug: true,
+              parentCategoryId: true,
+              updatedAt: true,
+              createdAt: true,
+              _count: {
+                select: {
+                  CategoryTranslation: {
+                    where: {
+                      locale: {
+                        equals: this.localesService.locales().english.code,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          })
+        : await this.prisma.category.findMany({
+            where: {
+              parentCategoryId:
+                filterArgs.parentCategoryId === 0
+                  ? undefined
+                  : filterArgs.parentCategoryId,
+              isPublic:
+                filterArgs.isPublic == null ? undefined : filterArgs.isPublic,
+              CategoryTranslation: {
+                none: {
+                  locale: {
+                    equals: this.localesService.getDefaultLocale().code,
+                  },
+                },
+              },
+            },
+            orderBy:
+              sortingArgs.sortBy !== null
+                ? {
+                    [sortingArgs.sortBy]: sortingArgs.ascending
+                      ? 'asc'
+                      : 'desc',
+                  }
+                : undefined,
+            cursor:
+              paginationArgs.cursor != null
+                ? {
+                    id: paginationArgs.cursor,
+                  }
+                : undefined,
+            take: paginationArgs.pageSize + 1,
+            select: {
+              id: true,
+              isPublic: true,
+              slug: true,
+              parentCategoryId: true,
+              updatedAt: true,
+              createdAt: true,
+              _count: {
+                select: {
+                  CategoryTranslation: {
+                    where: {
+                      locale: {
+                        equals: this.localesService.locales().english.code,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+      const hasNextPage = categories.length > paginationArgs.pageSize;
+      if (hasNextPage) {
+        categories.pop();
+      }
+
+      return {
+        hasNextPage: hasNextPage,
+        totalCount: categories.length,
+        edges: categories.map((c) => ({
+          cursor: c.id,
+          node: {
+            ...c,
+            isSetup: this.getIsSetup(c._count.CategoryTranslation > 0),
+          },
+        })),
+      };
+    }
+  }
+
+  private validateFindOneArgs(
+    args: CategoryFindOneQueryFilterArgs,
+    role?: AuthenticatedUserDto['role'],
+  ): void {
+    args.isPublic = role === 'ADMIN' ? args.isPublic : true;
+    args.isSetup = role === 'ADMIN' ? args.isSetup : true;
   }
 
   async findOne(
     id: number,
-    filter: CategoriesServiceFindOneFilter,
+    filterArgs: CategoryFindOneQueryFilterArgs,
+    role?: AuthenticatedUserDto['role'],
   ): Promise<Category | null> {
+    this.validateFindOneArgs(filterArgs, role);
     const category = await this.prisma.category.findFirst({
       where: {
         id: id,
-        isPublic: filter.isPublic == null ? undefined : filter.isPublic,
+        isPublic: filterArgs.isPublic == null ? undefined : filterArgs.isPublic,
       },
       select: {
         id: true,
@@ -222,7 +481,6 @@ export class CategoriesService {
         updatedAt: true,
         _count: {
           select: {
-            Products: true,
             CategoryTranslation: {
               where: {
                 locale: {
@@ -237,12 +495,9 @@ export class CategoriesService {
 
     if (!category) return null;
 
-    const isSetup = this.getIsSetup(
-      category._count.Products,
-      category._count.CategoryTranslation > 0,
-    );
+    const isSetup = this.getIsSetup(category._count.CategoryTranslation > 0);
 
-    if (filter.isSetup != null && filter.isSetup !== isSetup) {
+    if (filterArgs.isSetup != null && filterArgs.isSetup !== isSetup) {
       return null;
     }
 
@@ -252,11 +507,8 @@ export class CategoriesService {
     };
   }
 
-  private getIsSetup(
-    productCount: number,
-    hasEnglishTranslation: boolean,
-  ): boolean {
-    return productCount > 0 && hasEnglishTranslation;
+  private getIsSetup(hasEnglishTranslation: boolean): boolean {
+    return hasEnglishTranslation;
   }
 
   async update(id: number, updateCategoryInput: UpdateCategoryInput) {
@@ -426,11 +678,20 @@ export class CategoriesService {
     });
   }
 
+  private validateTranslationsQueryFilterArgs(
+    args: CategoryTranslationsQueryFilterArgs,
+  ): void {
+    args.locales = args.locales.filter(
+      (locale) => !!this.localesService.findOne(locale.trim().toLowerCase()),
+    );
+  }
+
   async findTranslations(
     id: number,
-    filters: CategoriesServiceTranslationFilter,
+    filterArgs: CategoryTranslationsQueryFilterArgs,
   ) {
-    if (filters.locales.length === 0) {
+    this.validateTranslationsQueryFilterArgs(filterArgs);
+    if (filterArgs.locales.length === 0) {
       return await this.prisma.categoryTranslation.findMany({
         where: {
           categoryId: id,
@@ -442,7 +703,7 @@ export class CategoriesService {
       where: {
         categoryId: id,
         locale: {
-          in: filters.locales,
+          in: filterArgs.locales,
         },
       },
     });

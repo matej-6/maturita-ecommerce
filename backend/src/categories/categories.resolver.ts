@@ -3,13 +3,13 @@ import {
   Query,
   Mutation,
   Args,
-  ID,
   ResolveField,
   Parent,
   Context,
+  Int,
 } from '@nestjs/graphql';
 import { CategoriesService } from './categories.service';
-import { Category } from './entities/category.entity';
+import { Category, PaginatedCategory } from './entities/category.entity';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
@@ -23,16 +23,13 @@ import {
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
 import {
-  CategoryFindAllQueryFilterInput,
-  CategoryFindOneQueryFilterInput,
-  CategoryTranslationsQueryFilter,
-} from './categories.resolver.filters';
-import {
-  CategoriesServiceFindAllFilter,
-  CategoriesServiceFindOneFilter,
-  CategoriesServiceTranslationFilter,
-} from './categories.service.filters';
+  CategoryFindAllQueryFilterArgs,
+  CategoryFindOneQueryFilterArgs,
+  CategorySortByArgs,
+  CategoryTranslationsQueryFilterArgs,
+} from './categories.resolver.args';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
+import { PaginationArgs } from 'src/lib/pagination.args';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -50,37 +47,40 @@ export class CategoriesResolver {
   @UseGuards(OptionalJwtAuthGuard)
   findAll(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
-    @Args('filtersInput', {
-      type: () => CategoryFindAllQueryFilterInput,
-      nullable: true,
-    })
-    filterInput: CategoryFindAllQueryFilterInput,
+    @Args() filterArgs: CategoryFindAllQueryFilterArgs,
+    @Args() sortingArgs: CategorySortByArgs,
   ) {
-    const serviceFilter =
-      CategoriesServiceFindAllFilter.fromCategoryFindAllQueryFilterInput(
-        filterInput,
-        currentUser?.role,
-      );
-    return this.categoriesService.findAll(serviceFilter);
+    return this.categoriesService.findAll(
+      filterArgs,
+      sortingArgs,
+      currentUser?.role,
+    );
+  }
+
+  @Query(() => PaginatedCategory, { name: 'paginatedCategories' })
+  @UseGuards(OptionalJwtAuthGuard)
+  findPaginated(
+    @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
+    @Args() filterArgs: CategoryFindAllQueryFilterArgs,
+    @Args() sortingArgs: CategorySortByArgs,
+    @Args() paginationArgs: PaginationArgs,
+  ) {
+    return this.categoriesService.findPaginated(
+      filterArgs,
+      sortingArgs,
+      paginationArgs,
+      currentUser?.role,
+    );
   }
 
   @Query(() => Category, { name: 'category' })
   @UseGuards(OptionalJwtAuthGuard)
   findOne(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
-    @Args('id', { type: () => ID }) id: number,
-    @Args('filters', {
-      type: () => CategoryFindOneQueryFilterInput,
-      nullable: true,
-    })
-    filterInput: CategoryFindOneQueryFilterInput | null,
+    @Args('id', { type: () => Int }) id: number,
+    @Args() filterArgs: CategoryFindOneQueryFilterArgs,
   ) {
-    const serviceFilter =
-      CategoriesServiceFindOneFilter.fromCategoryFindOneQueryFilterInput(
-        filterInput,
-        currentUser?.role,
-      );
-    return this.categoriesService.findOne(id, serviceFilter);
+    return this.categoriesService.findOne(id, filterArgs, currentUser?.role);
   }
 
   @UseGuards(AdminGuard)
@@ -96,7 +96,7 @@ export class CategoriesResolver {
 
   @UseGuards(AdminGuard)
   @Mutation(() => Category)
-  async removeCategory(@Args('id', { type: () => ID }) id: number) {
+  async removeCategory(@Args('id', { type: () => Int }) id: number) {
     return await this.categoriesService.remove(id);
   }
 
@@ -113,14 +113,10 @@ export class CategoriesResolver {
   @ResolveField(() => [CategoryTranslation], { name: 'translations' })
   async translations(
     @Parent() category: Category,
-    @Args('filtersInput') filtersInput: CategoryTranslationsQueryFilter,
+    @Args() filterArgs: CategoryTranslationsQueryFilterArgs,
   ) {
     const { id } = category;
-    const serviceFilters =
-      CategoriesServiceTranslationFilter.fromCategoryTranslationsQueryFilter(
-        filtersInput,
-      );
-    return await this.categoriesService.findTranslations(id, serviceFilters);
+    return await this.categoriesService.findTranslations(id, filterArgs);
   }
 
   @UseGuards(AdminGuard)
@@ -148,9 +144,9 @@ export class CategoriesResolver {
   }
 
   @UseGuards(AdminGuard)
-  @Mutation(() => ID, { name: 'deleteCategoryTranslation' })
+  @Mutation(() => Int, { name: 'deleteCategoryTranslation' })
   async deleteCategoryTranslationMutation(
-    @Args('categoryTranslationId', { type: () => ID })
+    @Args('categoryTranslationId', { type: () => Int })
     categoryTranslationId: number,
   ) {
     const res = await this.categoriesService.removeTranslation(
@@ -168,6 +164,17 @@ export class CategoriesResolver {
     const res = await ctx.loaders.categoryTranslationLoader.load(category.id);
 
     return res?.name || null;
+  }
+
+  @ResolveField(() => Int, { name: 'productsCount' })
+  async getProductsCount(
+    @Parent() category: Category,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    const count = await ctx.loaders.categoryProductsCountLoader.load(
+      category.id,
+    );
+    return count;
   }
 
   @UseGuards(AdminGuard)

@@ -1,9 +1,10 @@
-import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Category as CategoryEntity } from 'generated/prisma/client';
+import { Paginated } from 'src/lib/pagination';
 
 @ObjectType()
 export class Category implements Partial<CategoryEntity> {
-  @Field(() => ID)
+  @Field(() => Int)
   id: number;
 
   @Field(() => String)
@@ -32,3 +33,6 @@ export class Category implements Partial<CategoryEntity> {
   @Field(() => Date)
   updatedAt: Date;
 }
+
+@ObjectType()
+export class PaginatedCategory extends Paginated(Category) {}

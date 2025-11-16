@@ -28,8 +28,8 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { toast } from "sonner";
 
 type CategoryTranslationProps = {
-  translationId: string;
-  refetchKey?: string[];
+  translationId: number;
+  refetchKey?: unknown[];
   formProps: CategoryTranslationFormProps;
   locale: {
     code: string;

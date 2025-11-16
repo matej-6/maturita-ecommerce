@@ -5,53 +5,40 @@
 type Category {
   createdAt: DateTime!
   description: String!
-  id: ID!
+  id: Int!
   isPublic: Boolean!
   isSetup: Boolean!
   name: String
-  parentCategoryId: String
+  parentCategoryId: Int
+  productsCount: Int!
   slug: String!
   subcategories: [Category!]!
-
-  """Category translations"""
-  translations(filtersInput: CategoryTranslationsQueryFilter!): [CategoryTranslation!]
+  translations(
+    """
+    empty array - all translations will be returned, [...string] - only the translation matching the locales in array will be returned
+    """
+    locales: [String!]!
+  ): [CategoryTranslation!]!
   updatedAt: DateTime!
 }
 
-input CategoryFindAllQueryFilterInput {
-  isPublic: Boolean
-  isSetup: Boolean
-
-  """
-  null - only categories with no parent category will be returned, '*' - all categories will be returned, 'uuid' - only the children of category with given uuid will be returned
-  """
-  parentCategoryId: String
-}
-
-input CategoryFindOneQueryFilterInput {
-  isPublic: Boolean
-  isSetup: Boolean
+type CategoryEdge {
+  cursor: Int!
+  node: Category!
 }
 
 type CategoryTranslation {
-  categoryId: ID!
+  categoryId: Int!
   description: String
-  id: ID!
+  id: Int!
   isActive: Boolean!
   locale: String!
   name: String!
 }
 
-input CategoryTranslationsQueryFilter {
-  """
-  empty array - all translations will be returned, [...string] - only the translation matching the locales in array will be returned
-  """
-  locales: [String!]!
-}
-
 input CreateCategoryInput {
   """Parent category id"""
-  parentCategoryId: String
+  parentCategoryId: Int
 
   """Slug of the category"""
   slug: String!
@@ -59,7 +46,7 @@ input CreateCategoryInput {
 
 input CreateCategoryTranslationInput {
   """category id"""
-  categoryId: ID!
+  categoryId: Int!
 
   """Category description"""
   description: String
@@ -69,6 +56,15 @@ input CreateCategoryTranslationInput {
 
   """Category name"""
   name: String!
+}
+
+input CreateProductInput {
+  """Parent category id"""
+  categoryId: Int
+  isPublic: Boolean!
+
+  """Product slug"""
+  slug: String!
 }
 
 input CreateUserInput {
@@ -86,7 +82,7 @@ scalar DateTime
 
 input EditCategoryTranslationInput {
   """category translation id"""
-  categoryTranslationId: ID!
+  categoryTranslationId: Int!
 
   """Category description"""
   description: String
@@ -122,25 +118,116 @@ type MeResponse {
 type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
+  createProduct(createProductInput: CreateProductInput!): Product!
   createUser(createUserInput: CreateUserInput!): User!
-  deleteCategoryTranslation(categoryTranslationId: ID!): ID!
+  deleteCategoryTranslation(categoryTranslationId: Int!): Int!
   logoutAll: Void!
-  removeCategory(id: ID!): Category!
-  removeUser(id: String!): User!
+  removeCategory(id: Int!): Category!
+  removeProduct(id: Int!): Product!
+  removeUser(id: ID!): User!
   requestEmailVerification: Void!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
+  updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
 }
 
+type PaginatedCategory {
+  edges: [CategoryEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type PaginatedProduct {
+  edges: [ProductEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type Product {
+  categoryId: Int
+  description: String
+
+  """Product ID"""
+  id: Int!
+  isPublic: Boolean!
+  isSetup: Boolean!
+  markdownContent: String
+  name: String
+
+  """Product slug"""
+  slug: String!
+}
+
+type ProductEdge {
+  cursor: Int!
+  node: Product!
+}
+
 type Query {
-  categories(filtersInput: CategoryFindAllQueryFilterInput): [Category!]!
-  category(filters: CategoryFindOneQueryFilterInput, id: ID!): Category!
+  categories(
+    """
+    If true, sort in ascending order, else descending. If null, default sorting order is used
+    """
+    ascending: Boolean
+
+    """Filter categories by id equal to this value"""
+    idQuery: Int
+    isPublic: Boolean
+    isSetup: Boolean
+
+    """
+    null - only categories with no parent category will be returned, 0 - all categories will be returned, int >= 1 - only the children of category with given id will be returned
+    """
+    parentCategoryId: Int
+
+    """Filter categories by slug containing this query string"""
+    slugQuery: String
+
+    """Field to sort by"""
+    sortBy: String
+  ): [Category!]!
+  category(id: Int!, isPublic: Boolean, isSetup: Boolean): Category!
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: MeResponse!
-  user(id: String!): User!
+  paginatedCategories(
+    """
+    If true, sort in ascending order, else descending. If null, default sorting order is used
+    """
+    ascending: Boolean
+    cursor: Int
+
+    """Filter categories by id equal to this value"""
+    idQuery: Int
+    isPublic: Boolean
+    isSetup: Boolean
+    pageSize: Int = 10
+
+    """
+    null - only categories with no parent category will be returned, 0 - all categories will be returned, int >= 1 - only the children of category with given id will be returned
+    """
+    parentCategoryId: Int
+
+    """Filter categories by slug containing this query string"""
+    slugQuery: String
+
+    """Field to sort by"""
+    sortBy: String
+  ): PaginatedCategory!
+  product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product!
+  products(
+    """
+    null - only products with no category will be returned, 0 - all products will be returned, int >= 1 - only the children of category with given id will be returned
+    """
+    categoryId: Int
+    cursor: Int
+    isPublic: Boolean
+    isSetup: Boolean
+    pageSize: Int = 10
+  ): PaginatedProduct!
+  user(id: ID!): User!
   users: [User!]!
 }
 
@@ -152,19 +239,30 @@ enum Role {
 }
 
 input UpdateCategoryInput {
-  id: ID!
+  """Category id"""
+  id: Int!
 
   """Parent category id"""
-  parentCategoryId: String
+  parentCategoryId: Int
 
   """Slug of the category"""
+  slug: String!
+}
+
+input UpdateProductInput {
+  """Parent category id"""
+  categoryId: Int
+  id: Int!
+  isPublic: Boolean!
+
+  """Product slug"""
   slug: String!
 }
 
 input UpdateUserInput {
   email: String!
   firstName: String!
-  id: String!
+  id: Int!
   lastName: String!
 }
 

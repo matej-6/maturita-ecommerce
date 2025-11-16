@@ -1,8 +1,8 @@
-import { ArgsType, Field, ID, Int } from '@nestjs/graphql';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 
 @ArgsType()
 export class ProductFindOneQueryArgs {
-  @Field(() => ID)
+  @Field(() => Int)
   id: number;
 
   @Field(() => Boolean, { nullable: true })

@@ -20,16 +20,26 @@ export default async function EditCategoryEditPage({
 }) {
   const { id } = await params;
 
+  const parsedId = parseInt(id, 10);
+
+  if (isNaN(parsedId)) {
+    notFound();
+  }
+
   const queryClient = getQueryClient();
 
+  const startingCursor = null;
+  const startingPageSize = 10;
+
   queryClient.prefetchQuery({
-    queryKey: ["category", id],
-    queryFn: async () => await getEditCategoryQueryDocumentData(id),
+    queryKey: ["category", parsedId, startingCursor, startingPageSize],
+    queryFn: async () =>
+      await getEditCategoryQueryDocumentData(parsedId, startingCursor, startingPageSize),
   });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <EditCategoryPageClient id={id} />
+      <EditCategoryPageClient id={parsedId} startingCursor={startingCursor} startingPageSize={startingPageSize} />
     </HydrationBoundary>
   );
 }

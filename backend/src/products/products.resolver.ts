@@ -1,4 +1,13 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+  Context,
+} from '@nestjs/graphql';
 import { ProductsService } from './products.service';
 import { PaginatedProduct, Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
@@ -15,6 +24,7 @@ import {
   OptionalCurrentUserDto,
 } from 'src/auth/optional-current-user.decorator';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { GraphqlAppContext } from 'src/app.module';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -45,6 +55,39 @@ export class ProductsResolver {
   @Query(() => Product, { name: 'product' })
   findOne(@Args() args: ProductFindOneQueryArgs) {
     return this.productsService.findOne(args);
+  }
+
+  @ResolveField(() => String, { name: 'name', nullable: true })
+  async resolveProductName(
+    @Parent() product: Product,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    const productTranslation = await ctx.loaders.productTranslationLoader.load(
+      product.id,
+    );
+    return productTranslation?.name ?? null;
+  }
+
+  @ResolveField(() => String, { name: 'description', nullable: true })
+  async resolveProductDescription(
+    @Parent() product: Product,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    const productTranslation = await ctx.loaders.productTranslationLoader.load(
+      product.id,
+    );
+    return productTranslation?.description ?? null;
+  }
+
+  @ResolveField(() => String, { name: 'markdownContent', nullable: true })
+  async resolveProductContent(
+    @Parent() product: Product,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    const productTranslation = await ctx.loaders.productTranslationLoader.load(
+      product.id,
+    );
+    return productTranslation?.markdownContent ?? null;
   }
 
   @UseGuards(AdminGuard)

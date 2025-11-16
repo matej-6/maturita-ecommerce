@@ -3,17 +3,64 @@
 import { categoryFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/category-form-schema";
 import { execute } from "@/graphql/execute";
 import { EditCategoryMutation, NewCategoryMutation } from "./mutations";
-import { authLogoutAction } from "../../auth/actions";
-import { FormActionResponse } from "../../formActionResponse";
+import { ActionResponse } from "../../formActionResponse";
 import { ExecutionResult } from "graphql";
-import { EditCategoryMutationMutation } from "@/graphql/graphql";
+import {
+  CategoriesTable_QueryDocumentDocument,
+  CategoriesTable_QueryDocumentQuery,
+  EditCategoryMutationMutation,
+} from "@/graphql/graphql";
 import { handleGraphqlError } from "../handleGraphqlFormError";
-import { revalidatePath } from "next/cache";
-import { getLocale } from "next-intl/server";
+
+export async function getCategoriesTableDataAction(
+  pagingArgs: {
+    cursor: number | null;
+    pageSize: number;
+  },
+  sortingArgs: {
+    sortBy: string | null;
+    ascending: boolean | null;
+  },
+  filterArgs: {
+    id: number | null;
+    slug: string | null;
+    parentCategoryId: number | null;
+    isSetup: boolean | null;
+    isPublic: boolean | null;
+  }
+): Promise<
+  ActionResponse<
+    | NonNullable<
+        ExecutionResult<CategoriesTable_QueryDocumentQuery>["data"]
+      >["paginatedCategories"]
+    | null
+  >
+> {
+  const res = await execute(CategoriesTable_QueryDocumentDocument, {
+    pageSize: pagingArgs.pageSize,
+    cursor: pagingArgs.cursor,
+    sortBy: sortingArgs.sortBy,
+    ascending: sortingArgs.ascending,
+    id: filterArgs.id,
+    slug: filterArgs.slug,
+    parentCategoryId: filterArgs.parentCategoryId,
+    isSetup: filterArgs.isSetup,
+    isPublic: filterArgs.isPublic,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  return {
+    success: true,
+    data: res.data?.paginatedCategories || null,
+  };
+}
 
 export async function createCategoryAction(
   data: categoryFormSchemaType
-): Promise<FormActionResponse<{ id: string }>> {
+): Promise<ActionResponse<{ id: number }>> {
   const res = await execute(NewCategoryMutation, {
     parentCategoryId: data.parentCategoryId || undefined,
     slug: data.slug,
@@ -39,10 +86,10 @@ export async function createCategoryAction(
 }
 
 export async function editCategoryAction(
-  id: string,
+  id: number,
   data: categoryFormSchemaType
 ): Promise<
-  FormActionResponse<
+  ActionResponse<
     NonNullable<
       ExecutionResult<EditCategoryMutationMutation>["data"]
     >["updateCategory"]

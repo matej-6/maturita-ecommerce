@@ -15,6 +15,10 @@ export class LocalesService {
     );
   }
 
+  getDefaultLocale() {
+    return Locales.english;
+  }
+
   locales() {
     return Locales;
   }

@@ -43,12 +43,12 @@ import { toast } from "sonner";
 import { getQueryClient } from "@/lib/get-query-client";
 
 type EditCategoryFormProps = {
-  categoryId: string;
+  categoryId: number;
   data: categoryFormSchemaType;
   categoriesQuery: ExecutionResult<
     FragmentType<typeof AllCategories_QueryFragment>
   >;
-  refetchQueryKey?: string[];
+  refetchQueryKey?: unknown[];
 };
 
 export const EditCategoryForm = ({
@@ -66,10 +66,10 @@ export const EditCategoryForm = ({
     if (!categoriesData?.categories) {
       return [];
     }
-    const categoriesToSubcategories = new Map<string, string[]>();
+    const categoriesToSubcategories = new Map<number, number[]>();
     const categoryMap = new Map<
-      string,
-      (typeof categoriesData)["categories"][number]
+      number,
+      { id: number; parentCategoryId?: number | null; slug: string }
     >();
     const res = [];
     for (const c of categoriesData.categories) {
@@ -105,7 +105,7 @@ export const EditCategoryForm = ({
   const cft = useTranslations("admin.categories.editCategory.form"); // specific form translations
 
   const comboboxCategories = [
-    { label: cft("parentCategoryId.combobox.emptyValueLabel"), value: "" },
+    { label: cft("parentCategoryId.combobox.emptyValueLabel"), value: null },
     ...(availableCategories.map((c) => ({
       label: c.slug,
       value: c.id,
@@ -130,7 +130,7 @@ export const EditCategoryForm = ({
         toast.success(cft("toastSuccess"));
         form.clearErrors();
         form.reset({
-          parentCategoryId: res.data.parentCategoryId || "",
+          parentCategoryId: res.data.parentCategoryId || null,
           slug: res.data.slug,
         });
         setErrorMessage(undefined);
@@ -219,14 +219,14 @@ export const EditCategoryForm = ({
   );
 
   type Status = {
-    value: string;
+    value: number | null;
     label: string;
   };
 
   type FormComboBoxProps = {
     data: Status[];
     selectedStatus: Status;
-    setSelectedValue: (value: string) => void;
+    setSelectedValue: (value: Status["value"]) => void;
     filterPlaceholderText?: string;
     noResultsFoundText?: string;
   };
@@ -249,10 +249,10 @@ export const EditCategoryForm = ({
           <CommandGroup>
             {data.map((option) => (
               <CommandItem
-                key={option.value}
-                value={option.value}
+                key={option.value?.toString() ?? "null"}
+                value={option.value?.toString() ?? "null"}
                 onSelect={(v) => {
-                  setSelectedValue(v);
+                  setSelectedValue(v === "null" ? null : parseInt(v));
                   setOpen(false);
                 }}
               >

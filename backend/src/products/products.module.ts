@@ -8,5 +8,6 @@ import { LocalesService } from 'src/locales/locales.service';
 @Module({
   imports: [LocalesModule],
   providers: [ProductsResolver, ProductsService, PrismaService, LocalesService],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

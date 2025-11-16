@@ -73,7 +73,7 @@ export const NewCategoryForm = ({
   const cft = useTranslations("admin.categories.newCategory.form"); // specific form translations
 
   const comboboxCategories = [
-    { label: cft("parentCategoryId.combobox.emptyValueLabel"), value: "" },
+    { label: cft("parentCategoryId.combobox.emptyValueLabel"), value: null },
     ...(categoriesData?.categories.map((c) => ({
       label: c.slug,
       value: c.id,
@@ -87,7 +87,7 @@ export const NewCategoryForm = ({
     mode: "all",
     defaultValues: {
       slug: "",
-      parentCategoryId: "",
+      parentCategoryId: null,
     },
   });
 
@@ -177,14 +177,14 @@ export const NewCategoryForm = ({
   );
 
   type Status = {
-    value: string;
+    value: number | null;
     label: string;
   };
 
   type FormComboBoxProps = {
     data: Status[];
     selectedStatus: Status;
-    setSelectedValue: (value: string) => void;
+    setSelectedValue: (value: Status["value"]) => void;
     filterPlaceholderText?: string;
     noResultsFoundText?: string;
   };
@@ -207,10 +207,10 @@ export const NewCategoryForm = ({
           <CommandGroup>
             {data.map((option) => (
               <CommandItem
-                key={option.value}
-                value={option.value}
+                key={option.value?.toString() ?? "null"}
+                value={option.value?.toString() || "null"}
                 onSelect={(v) => {
-                  setSelectedValue(v);
+                  setSelectedValue(v === "null" ? null : parseInt(v));
                   setOpen(false);
                 }}
               >

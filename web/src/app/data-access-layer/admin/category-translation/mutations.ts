@@ -3,7 +3,7 @@ import "server-only";
 
 export const DeleteCategoryTranslationMutation = graphql(
   `
-    mutation DeleteCategoryTranslationMutation($id: ID!) {
+    mutation DeleteCategoryTranslationMutation($id: Int!) {
       deleteCategoryTranslation(categoryTranslationId: $id)
     }
   `
@@ -11,7 +11,7 @@ export const DeleteCategoryTranslationMutation = graphql(
 
 export const NewCategoryTranslationMutation = graphql(`
   mutation NewCategoryTranslationMutation(
-    $categoryId: ID!
+    $categoryId: Int!
     $localeCode: String!
     $name: String!
     $description: String
@@ -33,7 +33,7 @@ export const NewCategoryTranslationMutation = graphql(`
 
 export const EditCategoryTranslationMutation = graphql(`
   mutation EditCategoryTranslationMutation(
-    $translationId: ID!
+    $translationId: Int!
     $localeCode: String!
     $name: String!
     $description: String

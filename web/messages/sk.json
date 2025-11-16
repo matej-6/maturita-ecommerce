@@ -8,6 +8,7 @@
     "minLength": "{fieldName} musí mať dĺžku najmenej {value, plural, =1 {# znak} other {#znakov}}",
     "passwordsMustMatch": "Heslá sa musia zhodovať",
     "uuid": "Nesprávny formát UUID",
+    "id": "Nesprávne ID",
     "newCategoryFormSchema": {
       "translations": {
         "atLeastEnRequired": "Anglicky preklad je povinný"

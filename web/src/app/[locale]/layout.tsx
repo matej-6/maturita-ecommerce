@@ -96,7 +96,7 @@ export default async function LocaleLayout({
           geistMono.variable,
           inter.variable,
           bricolage.variable,
-          "antialiased font-primary"
+          "antialiased font-primary dark"
         )}
       >
         <Providers>

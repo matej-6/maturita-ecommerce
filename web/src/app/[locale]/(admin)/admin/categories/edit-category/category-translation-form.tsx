@@ -35,15 +35,15 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 export type CategoryTranslationFormProps = {
-  categoryId?: string;
-  translationId?: string;
+  categoryId?: number;
+  translationId?: number;
   availableLocales: {
     label: string;
     value: string;
   }[];
   mode: "create" | "edit";
   initialData?: categoryTranslationSchemaType;
-  refetchQueryKey?: string[];
+  refetchQueryKey?: unknown[];
 };
 
 export const CategoryTranslationForm = ({

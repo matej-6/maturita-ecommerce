@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsInt,
   IsString,
@@ -16,7 +16,7 @@ export class CreateCategoryInput {
   @MaxLength(255, { message: i18nValidationMessage('validation.maxLength') })
   slug: string;
 
-  @Field(() => String, {
+  @Field(() => Int, {
     description: 'Parent category id',
     nullable: true,
   })

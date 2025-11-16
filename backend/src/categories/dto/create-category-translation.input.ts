@@ -1,4 +1,4 @@
-import { Field, ID, InputType } from '@nestjs/graphql';
+import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import { type CategoryTranslation as DbCategoryTranslation } from 'generated/prisma/client';
 import {
   IsInt,
@@ -13,7 +13,7 @@ import { i18nValidationMessage } from 'nestjs-i18n';
 export class CreateCategoryTranslationInput
   implements Partial<DbCategoryTranslation>
 {
-  @Field(() => ID, { description: 'category id' })
+  @Field(() => Int, { description: 'category id' })
   @IsInt({ message: i18nValidationMessage('validation.invalid') })
   categoryId: number;
 

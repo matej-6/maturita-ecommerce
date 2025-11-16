@@ -24,66 +24,63 @@ export type Category = {
   __typename?: 'Category';
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
+  id: Scalars['Int']['output'];
   isPublic: Scalars['Boolean']['output'];
   isSetup: Scalars['Boolean']['output'];
   name?: Maybe<Scalars['String']['output']>;
-  parentCategoryId?: Maybe<Scalars['String']['output']>;
+  parentCategoryId?: Maybe<Scalars['Int']['output']>;
+  productsCount: Scalars['Int']['output'];
   slug: Scalars['String']['output'];
   subcategories: Array<Category>;
-  /** Category translations */
-  translations?: Maybe<Array<CategoryTranslation>>;
+  translations: Array<CategoryTranslation>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
 
 export type CategoryTranslationsArgs = {
-  filtersInput: CategoryTranslationsQueryFilter;
+  locales: Array<Scalars['String']['input']>;
 };
 
-export type CategoryFindAllQueryFilterInput = {
-  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
-  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
-  /** null - only categories with no parent category will be returned, '*' - all categories will be returned, 'uuid' - only the children of category with given uuid will be returned */
-  parentCategoryId?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type CategoryFindOneQueryFilterInput = {
-  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
-  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+export type CategoryEdge = {
+  __typename?: 'CategoryEdge';
+  cursor: Scalars['Int']['output'];
+  node: Category;
 };
 
 export type CategoryTranslation = {
   __typename?: 'CategoryTranslation';
-  categoryId: Scalars['ID']['output'];
+  categoryId: Scalars['Int']['output'];
   description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
+  id: Scalars['Int']['output'];
   isActive: Scalars['Boolean']['output'];
   locale: Scalars['String']['output'];
   name: Scalars['String']['output'];
 };
 
-export type CategoryTranslationsQueryFilter = {
-  /** empty array - all translations will be returned, [...string] - only the translation matching the locales in array will be returned */
-  locales: Array<Scalars['String']['input']>;
-};
-
 export type CreateCategoryInput = {
   /** Parent category id */
-  parentCategoryId?: InputMaybe<Scalars['String']['input']>;
+  parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   /** Slug of the category */
   slug: Scalars['String']['input'];
 };
 
 export type CreateCategoryTranslationInput = {
   /** category id */
-  categoryId: Scalars['ID']['input'];
+  categoryId: Scalars['Int']['input'];
   /** Category description */
   description?: InputMaybe<Scalars['String']['input']>;
   /** Locale code */
   localeCode: Scalars['String']['input'];
   /** Category name */
   name: Scalars['String']['input'];
+};
+
+export type CreateProductInput = {
+  /** Parent category id */
+  categoryId?: InputMaybe<Scalars['Int']['input']>;
+  isPublic: Scalars['Boolean']['input'];
+  /** Product slug */
+  slug: Scalars['String']['input'];
 };
 
 export type CreateUserInput = {
@@ -96,7 +93,7 @@ export type CreateUserInput = {
 
 export type EditCategoryTranslationInput = {
   /** category translation id */
-  categoryTranslationId: Scalars['ID']['input'];
+  categoryTranslationId: Scalars['Int']['input'];
   /** Category description */
   description?: InputMaybe<Scalars['String']['input']>;
   /** Locale code */
@@ -131,14 +128,17 @@ export type Mutation = {
   __typename?: 'Mutation';
   createCategory: Category;
   createCategoryTranslation: CategoryTranslation;
+  createProduct: Product;
   createUser: User;
-  deleteCategoryTranslation: Scalars['ID']['output'];
+  deleteCategoryTranslation: Scalars['Int']['output'];
   logoutAll: Scalars['Void']['output'];
   removeCategory: Category;
+  removeProduct: Product;
   removeUser: User;
   requestEmailVerification: Scalars['Void']['output'];
   updateCategory: Category;
   updateCategoryTranslation: CategoryTranslation;
+  updateProduct: Product;
   updateUser: User;
   verifyEmail: Scalars['Void']['output'];
 };
@@ -154,23 +154,33 @@ export type MutationCreateCategoryTranslationArgs = {
 };
 
 
+export type MutationCreateProductArgs = {
+  createProductInput: CreateProductInput;
+};
+
+
 export type MutationCreateUserArgs = {
   createUserInput: CreateUserInput;
 };
 
 
 export type MutationDeleteCategoryTranslationArgs = {
-  categoryTranslationId: Scalars['ID']['input'];
+  categoryTranslationId: Scalars['Int']['input'];
 };
 
 
 export type MutationRemoveCategoryArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationRemoveProductArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
 export type MutationRemoveUserArgs = {
-  id: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -184,6 +194,11 @@ export type MutationUpdateCategoryTranslationArgs = {
 };
 
 
+export type MutationUpdateProductArgs = {
+  updateProductInput: UpdateProductInput;
+};
+
+
 export type MutationUpdateUserArgs = {
   updateUserInput: UpdateUserInput;
 };
@@ -193,6 +208,40 @@ export type MutationVerifyEmailArgs = {
   verifyEmailInput: VerifyEmailInput;
 };
 
+export type PaginatedCategory = {
+  __typename?: 'PaginatedCategory';
+  edges?: Maybe<Array<CategoryEdge>>;
+  hasNextPage: Scalars['Boolean']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PaginatedProduct = {
+  __typename?: 'PaginatedProduct';
+  edges?: Maybe<Array<ProductEdge>>;
+  hasNextPage: Scalars['Boolean']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
+export type Product = {
+  __typename?: 'Product';
+  categoryId?: Maybe<Scalars['Int']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  /** Product ID */
+  id: Scalars['Int']['output'];
+  isPublic: Scalars['Boolean']['output'];
+  isSetup: Scalars['Boolean']['output'];
+  markdownContent?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  /** Product slug */
+  slug: Scalars['String']['output'];
+};
+
+export type ProductEdge = {
+  __typename?: 'ProductEdge';
+  cursor: Scalars['Int']['output'];
+  node: Product;
+};
+
 export type Query = {
   __typename?: 'Query';
   categories: Array<Category>;
@@ -200,19 +249,29 @@ export type Query = {
   locale: Locale;
   locales: Array<Locale>;
   me: MeResponse;
+  paginatedCategories: PaginatedCategory;
+  product: Product;
+  products: PaginatedProduct;
   user: User;
   users: Array<User>;
 };
 
 
 export type QueryCategoriesArgs = {
-  filtersInput?: InputMaybe<CategoryFindAllQueryFilterInput>;
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  idQuery?: InputMaybe<Scalars['Int']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
+  slugQuery?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryCategoryArgs = {
-  filters?: InputMaybe<CategoryFindOneQueryFilterInput>;
-  id: Scalars['ID']['input'];
+  id: Scalars['Int']['input'];
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -221,8 +280,37 @@ export type QueryLocaleArgs = {
 };
 
 
+export type QueryPaginatedCategoriesArgs = {
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  idQuery?: InputMaybe<Scalars['Int']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
+  slugQuery?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryProductArgs = {
+  id: Scalars['Int']['input'];
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type QueryProductsArgs = {
+  categoryId?: InputMaybe<Scalars['Int']['input']>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryUserArgs = {
-  id: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 };
 
 /** User role */
@@ -233,17 +321,27 @@ export enum Role {
 }
 
 export type UpdateCategoryInput = {
-  id: Scalars['ID']['input'];
+  /** Category id */
+  id: Scalars['Int']['input'];
   /** Parent category id */
-  parentCategoryId?: InputMaybe<Scalars['String']['input']>;
+  parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   /** Slug of the category */
+  slug: Scalars['String']['input'];
+};
+
+export type UpdateProductInput = {
+  /** Parent category id */
+  categoryId?: InputMaybe<Scalars['Int']['input']>;
+  id: Scalars['Int']['input'];
+  isPublic: Scalars['Boolean']['input'];
+  /** Product slug */
   slug: Scalars['String']['input'];
 };
 
 export type UpdateUserInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
-  id: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
   lastName: Scalars['String']['input'];
 };
 
@@ -258,19 +356,19 @@ export type VerifyEmailInput = {
   email: Scalars['String']['input'];
 };
 
-export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category', id: string, slug: string } & { ' $fragmentName'?: 'CategoryParentSelectDataFragmentFragment' };
+export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category', id: number, slug: string } & { ' $fragmentName'?: 'CategoryParentSelectDataFragmentFragment' };
 
-export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, translations?: Array<{ __typename?: 'CategoryTranslation', id: string }> | null }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
+export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string, translations: Array<{ __typename?: 'CategoryTranslation', id: number }> }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
 
 export type DeleteCategoryTranslationMutationMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
+  id: Scalars['Int']['input'];
 }>;
 
 
-export type DeleteCategoryTranslationMutationMutation = { __typename?: 'Mutation', deleteCategoryTranslation: string };
+export type DeleteCategoryTranslationMutationMutation = { __typename?: 'Mutation', deleteCategoryTranslation: number };
 
 export type NewCategoryTranslationMutationMutationVariables = Exact<{
-  categoryId: Scalars['ID']['input'];
+  categoryId: Scalars['Int']['input'];
   localeCode: Scalars['String']['input'];
   name: Scalars['String']['input'];
   description?: InputMaybe<Scalars['String']['input']>;
@@ -280,7 +378,7 @@ export type NewCategoryTranslationMutationMutationVariables = Exact<{
 export type NewCategoryTranslationMutationMutation = { __typename?: 'Mutation', createCategoryTranslation: { __typename?: 'CategoryTranslation', name: string, locale: string, description?: string | null } };
 
 export type EditCategoryTranslationMutationMutationVariables = Exact<{
-  translationId: Scalars['ID']['input'];
+  translationId: Scalars['Int']['input'];
   localeCode: Scalars['String']['input'];
   name: Scalars['String']['input'];
   description?: InputMaybe<Scalars['String']['input']>;
@@ -289,24 +387,39 @@ export type EditCategoryTranslationMutationMutationVariables = Exact<{
 
 export type EditCategoryTranslationMutationMutation = { __typename?: 'Mutation', updateCategoryTranslation: { __typename?: 'CategoryTranslation', name: string, description?: string | null, locale: string } };
 
-export type AllCategories_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, slug: string, parentCategoryId?: string | null }> } & { ' $fragmentName'?: 'AllCategories_QueryFragmentFragment' };
+export type AllCategories_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> } & { ' $fragmentName'?: 'AllCategories_QueryFragmentFragment' };
 
 export type NewCategoryMutationMutationVariables = Exact<{
-  parentCategoryId?: InputMaybe<Scalars['String']['input']>;
+  parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   slug: Scalars['String']['input'];
 }>;
 
 
-export type NewCategoryMutationMutation = { __typename?: 'Mutation', createCategory: { __typename?: 'Category', id: string } };
+export type NewCategoryMutationMutation = { __typename?: 'Mutation', createCategory: { __typename?: 'Category', id: number } };
 
 export type EditCategoryMutationMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  parentCategoryId?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   slug: Scalars['String']['input'];
 }>;
 
 
-export type EditCategoryMutationMutation = { __typename?: 'Mutation', updateCategory: { __typename?: 'Category', slug: string, parentCategoryId?: string | null } };
+export type EditCategoryMutationMutation = { __typename?: 'Mutation', updateCategory: { __typename?: 'Category', slug: string, parentCategoryId?: number | null } };
+
+export type CategoriesTable_QueryDocumentQueryVariables = Exact<{
+  parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type CategoriesTable_QueryDocumentQuery = { __typename?: 'Query', paginatedCategories: { __typename?: 'PaginatedCategory', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'CategoryEdge', cursor: number, node: { __typename?: 'Category', id: number, slug: string, createdAt: any, updatedAt: any, isSetup: boolean, isPublic: boolean, name?: string | null, productsCount: number, parentCategoryId?: number | null } }> | null } };
 
 export type NewCategory_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -317,12 +430,14 @@ export type NewCategory_QueryDocumentQuery = (
 );
 
 export type EditCategory_QueryDocumentQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
+  id: Scalars['Int']['input'];
+  productCursor?: InputMaybe<Scalars['Int']['input']>;
+  productPageSize?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
 export type EditCategory_QueryDocumentQuery = (
-  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: string | null, isSetup: boolean, isPublic: boolean, translations?: Array<{ __typename?: 'CategoryTranslation', id: string, locale: string, name: string, description?: string | null }> | null, subcategories: Array<{ __typename?: 'Category', slug: string, id: string }> }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> }
+  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: number | null, isSetup: boolean, isPublic: boolean, productsCount: number, translations: Array<{ __typename?: 'CategoryTranslation', id: number, locale: string, name: string, description?: string | null }>, subcategories: Array<{ __typename?: 'Category', slug: string, id: number }> }, products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, name?: string | null } }> | null }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> }
   & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment } }
 );
 
@@ -354,7 +469,7 @@ export type HeaderQueryQuery = (
   & { ' $fragmentRefs'?: { 'HeaderNav_QueryFragmentFragment': HeaderNav_QueryFragmentFragment } }
 );
 
-export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: string, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: string, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
+export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -382,10 +497,10 @@ export const CategoryParentSelectDataFragmentFragmentDoc = new TypedDocumentStri
     `, {"fragmentName":"CategoryParentSelectDataFragment"}) as unknown as TypedDocumentString<CategoryParentSelectDataFragmentFragment, unknown>;
 export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment CategoryTable_QueryFragment on Query {
-  categories(filtersInput: {parentCategoryId: $parentId}) {
+  categories(parentCategoryId: $parentId) {
     id
     slug
-    translations(filtersInput: {locales: $langs}) {
+    translations(locales: $langs) {
       id
     }
   }
@@ -393,7 +508,7 @@ export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
     `, {"fragmentName":"CategoryTable_QueryFragment"}) as unknown as TypedDocumentString<CategoryTable_QueryFragmentFragment, unknown>;
 export const AllCategories_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment AllCategories_QueryFragment on Query {
-  categories(filtersInput: {parentCategoryId: "*"}) {
+  categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
     id
     slug
     parentCategoryId
@@ -421,7 +536,7 @@ export const MeFragmentFragmentDoc = new TypedDocumentString(`
     `, {"fragmentName":"MeFragment"}) as unknown as TypedDocumentString<MeFragmentFragment, unknown>;
 export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment HeaderNav_QueryFragment on Query {
-  categories(filtersInput: {parentCategoryId: null}) {
+  categories(parentCategoryId: null) {
     id
     name
     description
@@ -435,12 +550,12 @@ export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
 }
     `, {"fragmentName":"HeaderNav_QueryFragment"}) as unknown as TypedDocumentString<HeaderNav_QueryFragmentFragment, unknown>;
 export const DeleteCategoryTranslationMutationDocument = new TypedDocumentString(`
-    mutation DeleteCategoryTranslationMutation($id: ID!) {
+    mutation DeleteCategoryTranslationMutation($id: Int!) {
   deleteCategoryTranslation(categoryTranslationId: $id)
 }
     `) as unknown as TypedDocumentString<DeleteCategoryTranslationMutationMutation, DeleteCategoryTranslationMutationMutationVariables>;
 export const NewCategoryTranslationMutationDocument = new TypedDocumentString(`
-    mutation NewCategoryTranslationMutation($categoryId: ID!, $localeCode: String!, $name: String!, $description: String) {
+    mutation NewCategoryTranslationMutation($categoryId: Int!, $localeCode: String!, $name: String!, $description: String) {
   createCategoryTranslation(
     newTranslationinput: {categoryId: $categoryId, localeCode: $localeCode, name: $name, description: $description}
   ) {
@@ -451,7 +566,7 @@ export const NewCategoryTranslationMutationDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<NewCategoryTranslationMutationMutation, NewCategoryTranslationMutationMutationVariables>;
 export const EditCategoryTranslationMutationDocument = new TypedDocumentString(`
-    mutation EditCategoryTranslationMutation($translationId: ID!, $localeCode: String!, $name: String!, $description: String) {
+    mutation EditCategoryTranslationMutation($translationId: Int!, $localeCode: String!, $name: String!, $description: String) {
   updateCategoryTranslation(
     editTranslationInput: {categoryTranslationId: $translationId, name: $name, description: $description, localeCode: $localeCode}
   ) {
@@ -462,7 +577,7 @@ export const EditCategoryTranslationMutationDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<EditCategoryTranslationMutationMutation, EditCategoryTranslationMutationMutationVariables>;
 export const NewCategoryMutationDocument = new TypedDocumentString(`
-    mutation NewCategoryMutation($parentCategoryId: String, $slug: String!) {
+    mutation NewCategoryMutation($parentCategoryId: Int, $slug: String!) {
   createCategory(
     createCategoryInput: {parentCategoryId: $parentCategoryId, slug: $slug}
   ) {
@@ -471,7 +586,7 @@ export const NewCategoryMutationDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<NewCategoryMutationMutation, NewCategoryMutationMutationVariables>;
 export const EditCategoryMutationDocument = new TypedDocumentString(`
-    mutation EditCategoryMutation($id: ID!, $parentCategoryId: String, $slug: String!) {
+    mutation EditCategoryMutation($id: Int!, $parentCategoryId: Int, $slug: String!) {
   updateCategory(
     updateCategoryInput: {id: $id, parentCategoryId: $parentCategoryId, slug: $slug}
   ) {
@@ -480,13 +595,45 @@ export const EditCategoryMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EditCategoryMutationMutation, EditCategoryMutationMutationVariables>;
+export const CategoriesTable_QueryDocumentDocument = new TypedDocumentString(`
+    query categoriesTable_QueryDocument($parentCategoryId: Int, $pageSize: Int, $cursor: Int, $slug: String, $id: Int, $isSetup: Boolean, $isPublic: Boolean, $ascending: Boolean, $sortBy: String) {
+  paginatedCategories(
+    ascending: $ascending
+    cursor: $cursor
+    pageSize: $pageSize
+    isPublic: $isPublic
+    isSetup: $isSetup
+    idQuery: $id
+    slugQuery: $slug
+    parentCategoryId: $parentCategoryId
+    sortBy: $sortBy
+  ) {
+    edges {
+      cursor
+      node {
+        id
+        slug
+        createdAt
+        updatedAt
+        isSetup
+        isPublic
+        name
+        productsCount
+        parentCategoryId
+      }
+    }
+    hasNextPage
+    totalCount
+  }
+}
+    `) as unknown as TypedDocumentString<CategoriesTable_QueryDocumentQuery, CategoriesTable_QueryDocumentQueryVariables>;
 export const NewCategory_QueryDocumentDocument = new TypedDocumentString(`
     query newCategory_QueryDocument {
   ...AllCategories_QueryFragment
   ...Locales_QueryFragment
 }
     fragment AllCategories_QueryFragment on Query {
-  categories(filtersInput: {parentCategoryId: "*"}) {
+  categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
     id
     slug
     parentCategoryId
@@ -499,14 +646,15 @@ fragment Locales_QueryFragment on Query {
   }
 }`) as unknown as TypedDocumentString<NewCategory_QueryDocumentQuery, NewCategory_QueryDocumentQueryVariables>;
 export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
-    query editCategory_QueryDocument($id: ID!) {
-  category(id: $id, filters: {isPublic: null, isSetup: null}) {
+    query editCategory_QueryDocument($id: Int!, $productCursor: Int, $productPageSize: Int) {
+  category(id: $id, isPublic: null, isSetup: null) {
     slug
     name
     parentCategoryId
     isSetup
     isPublic
-    translations(filtersInput: {locales: []}) {
+    productsCount
+    translations(locales: []) {
       id
       locale
       name
@@ -517,6 +665,23 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
       id
     }
   }
+  products(
+    categoryId: $id
+    cursor: $productCursor
+    pageSize: $productPageSize
+    isPublic: null
+    isSetup: null
+  ) {
+    hasNextPage
+    edges {
+      cursor
+      node {
+        id
+        slug
+        name
+      }
+    }
+  }
   locales {
     code
     name
@@ -525,7 +690,7 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
   ...AllCategories_QueryFragment
 }
     fragment AllCategories_QueryFragment on Query {
-  categories(filtersInput: {parentCategoryId: "*"}) {
+  categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
     id
     slug
     parentCategoryId
@@ -561,7 +726,7 @@ export const HeaderQueryDocument = new TypedDocumentString(`
   ...HeaderNav_QueryFragment
 }
     fragment HeaderNav_QueryFragment on Query {
-  categories(filtersInput: {parentCategoryId: null}) {
+  categories(parentCategoryId: null) {
     id
     name
     description

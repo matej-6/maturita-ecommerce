@@ -35,7 +35,7 @@ export class AuthController {
     );
 
     if (!user) {
-      console.warn('Invalid email or password login attempt.');
+      this.logger.warn(`Invalid login attempt for email: ${loginDto.email}`);
       throw new UnauthorizedException('INVALID_EMAIL_OR_PASSWORD');
     }
 
