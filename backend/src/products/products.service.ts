@@ -426,4 +426,32 @@ export class ProductsService {
     });
     return deletedProductId;
   }
+
+  async getAllTranslationsForProductsByBatch(productIds: number[]) {
+    const productTranslations = await this.prisma.productTranslation.findMany({
+      where: {
+        productId: {
+          in: productIds,
+        },
+      },
+    });
+
+    return productIds.map((id) => {
+      return productTranslations.filter((pt) => pt.productId === id);
+    });
+  }
+
+  async getAllVariantsForProductsByBatch(productIds: number[]) {
+    const productVariants = await this.prisma.productVariant.findMany({
+      where: {
+        productId: {
+          in: productIds,
+        },
+      },
+    });
+
+    return productIds.map((id) => {
+      return productVariants.filter((pv) => pv.productId === id);
+    });
+  }
 }

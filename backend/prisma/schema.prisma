@@ -73,7 +73,6 @@ model CategoryTranslation {
   locale      String
   name        String
   description String?
-  isActive    Boolean  @default(true)
   categoryId  Int
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
@@ -101,8 +100,8 @@ model ProductTranslation {
   Product         Product @relation(fields: [productId], references: [id])
   productId       Int
   name            String
-  description     String  @db.LongText
-  markdownContent String  @db.LongText
+  description     String? @db.LongText
+  markdownContent String? @db.LongText
 
   @@unique([productId, locale])
   @@map("product_translations")
@@ -117,6 +116,7 @@ model ProductVariant {
   Product      Product        @relation(fields: [productId], references: [id])
   Images       ProductImage[]
   productId    Int
+  isPublic     Boolean        @default(true)
 
   @@map("product_variants")
 }

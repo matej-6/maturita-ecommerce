@@ -24,6 +24,10 @@ import { IDataLoaders } from './dataloader/dataloader.interface';
 import { DataloaderModule } from './dataloader/dataloader.module';
 import { DEFAULT_LOCALE } from './locales';
 import { ProductsModule } from './products/products.module';
+import { ProductVariantsModule } from './product-variants/product-variants.module';
+import { ProductAttributeResolver } from './product-attribute/product-attribute.resolver';
+import { ProductAttributesModule } from './product-attributes/product-attributes.module';
+import { ProductVariantAttributesModule } from './product-variant-attributes/product-variant-attributes.module';
 
 @Module({
   imports: [
@@ -88,9 +92,12 @@ import { ProductsModule } from './products/products.module';
     RedisModule,
     LocalesModule,
     ProductsModule,
+    ProductVariantsModule,
+    ProductAttributesModule,
+    ProductVariantAttributesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [AppService, AuthService, ProductAttributeResolver],
 })
 export class AppModule {}
 

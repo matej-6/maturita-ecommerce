@@ -2,15 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { IDataLoaders } from './dataloader.interface';
 import * as DataLoader from 'dataloader';
 import {
+  Attribute,
+  AttributeKey,
   Category,
   CategoryTranslation,
   ProductTranslation,
+  ProductVariant,
 } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoriesService } from 'src/categories/categories.service';
 import { I18nContext } from 'nestjs-i18n';
 import { DEFAULT_LOCALE } from 'src/locales';
 import { ProductsService } from 'src/products/products.service';
+import { ProductVariantsService } from 'src/product-variants/product-variants.service';
+import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
 
 @Injectable()
 export class DataloaderService {
@@ -18,6 +23,8 @@ export class DataloaderService {
     private readonly db: PrismaService,
     private readonly categoriesService: CategoriesService,
     private readonly productsService: ProductsService,
+    private readonly productVariantsService: ProductVariantsService,
+    private readonly productVariantAttributesService: ProductVariantAttributesService,
   ) {}
 
   getLoaders(): IDataLoaders {
@@ -30,11 +37,21 @@ export class DataloaderService {
       this._createCategoryProductsCountLoader();
     const productTranslationLoader =
       this._createProductTranslationLoader(locale);
+    const productAllTranslationsLoader =
+      this._createProductAllTranslationsLoader();
+    const productAllVariantsLoader = this._createProductAllVariantsLoader();
+    const productVariantAllAttributesLoader =
+      this._createProductVariantAllAttributesLoader();
+    const attributeKeyByIdLoader = this._createAttributeKeyByIdLoader();
     return {
       subcategoriesLoader,
       categoryTranslationLoader,
       categoryProductsCountLoader,
       productTranslationLoader,
+      productAllTranslationsLoader,
+      productAllVariantsLoader,
+      productVariantAllAttributesLoader,
+      attributeKeyByIdLoader,
     };
   }
 
@@ -90,6 +107,46 @@ export class DataloaderService {
         return await this.productsService.getAllTranslationsByBatch(
           lang,
           productIds,
+        );
+      },
+    );
+  }
+
+  private _createProductAllTranslationsLoader() {
+    return new DataLoader<number, ProductTranslation[]>(
+      async (productIds: number[]) => {
+        return await this.productsService.getAllTranslationsForProductsByBatch(
+          productIds,
+        );
+      },
+    );
+  }
+
+  private _createProductAllVariantsLoader() {
+    return new DataLoader<number, ProductVariant[]>(
+      async (productIds: number[]) => {
+        return await this.productsService.getAllVariantsForProductsByBatch(
+          productIds,
+        );
+      },
+    );
+  }
+
+  private _createProductVariantAllAttributesLoader() {
+    return new DataLoader<number, Attribute[]>(
+      async (productVariantIds: number[]) => {
+        return await this.productVariantsService.getAllAttributesForVariantsByBatch(
+          productVariantIds,
+        );
+      },
+    );
+  }
+
+  private _createAttributeKeyByIdLoader() {
+    return new DataLoader<number, AttributeKey | null>(
+      async (attributeIds: number[]) => {
+        return await this.productVariantAttributesService.getAttributeKeysByBatch(
+          attributeIds,
         );
       },
     );

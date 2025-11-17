@@ -2,12 +2,12 @@ import z from "zod";
 import { useTranslations } from "next-intl";
 
 /**
- * Function that returns a new categoryFormSchema, with error messages translated to match user preference
+ * Function that returns a new productFormSchema, with error messages translated to match user preference
  * @param t - next-intl translations on 'form'
  * @param c - next-intl translations on 'fields'
- * @returns newCategoryFormSchema
+ * @returns productFormSchema
  */
-export const categoryFormSchema = (
+export const productFormSchema = (
   t: ReturnType<typeof useTranslations<"form">>,
   c: ReturnType<typeof useTranslations<"fields">>
 ) =>
@@ -15,24 +15,27 @@ export const categoryFormSchema = (
     slug: z
       .string({
         error: t("required", {
-          fieldName: c("category.slug"),
+          fieldName: c("product.slug"),
         }),
       })
       .min(3, {
         error: t("minLength", {
-          fieldName: c("category.slug"),
+          fieldName: c("product.slug"),
           value: 3,
         }),
       })
       .max(255, {
         error: t("maxLength", {
-          fieldName: c("category.slug"),
+          fieldName: c("product.slug"),
           value: 255,
         }),
       }),
-    parentCategoryId: z.number({ error: t("id") }).nullable(),
+    categoryId: z.number({ error: t("id") }).nullable(),
+    isPublic: z.boolean({
+      error: t("required", { fieldName: c("product.isPublic") }),
+    }),
   });
 
-export type categoryFormSchemaType = z.infer<
-  ReturnType<typeof categoryFormSchema>
+export type productFormSchemaType = z.infer<
+  ReturnType<typeof productFormSchema>
 >;

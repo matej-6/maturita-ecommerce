@@ -32,7 +32,6 @@ type CategoryTranslation {
   categoryId: Int!
   description: String
   id: Int!
-  isActive: Boolean!
   locale: String!
   name: String!
 }
@@ -61,6 +60,11 @@ input CreateProductInput {
   isPublic: Boolean!
   """Product slug"""
   slug: String!
+}
+
+input CreateProductVariantInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 input CreateUserInput {
@@ -111,16 +115,19 @@ type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
   createProduct(createProductInput: CreateProductInput!): Product!
+  createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
   createUser(createUserInput: CreateUserInput!): User!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
   logoutAll: Void!
   removeCategory(id: Int!): Category!
   removeProduct(id: Int!): Product!
+  removeProductVariant(id: Int!): ProductVariant!
   removeUser(id: ID!): User!
   requestEmailVerification: Void!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
+  updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
 }
@@ -148,11 +155,37 @@ type Product {
   name: String
   """Product slug"""
   slug: String!
+  translations: [ProductTranslation!]!
+  variants(includeHidden: Boolean! = false): [ProductVariant!]!
 }
 
 type ProductEdge {
   cursor: Int!
   node: Product!
+}
+
+type ProductTranslation {
+  description: String
+  id: Int!
+  locale: String!
+  markdownContent: String
+  name: String!
+  productId: Int!
+}
+
+type ProductVariant {
+  attributes: [ProductVariantAttribute!]!
+  id: Float!
+  isPublic: Boolean!
+  priceInCents: Float!
+  productId: Float!
+  sku: String!
+}
+
+type ProductVariantAttribute {
+  attributeKeyId: Float!
+  id: Float!
+  productVariantId: Float
 }
 
 type Query {
@@ -236,6 +269,12 @@ input UpdateProductInput {
   isPublic: Boolean!
   """Product slug"""
   slug: String!
+}
+
+input UpdateProductVariantInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateUserInput {

@@ -52,7 +52,6 @@ export type CategoryTranslation = {
   categoryId: Scalars['Int']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['Int']['output'];
-  isActive: Scalars['Boolean']['output'];
   locale: Scalars['String']['output'];
   name: Scalars['String']['output'];
 };
@@ -81,6 +80,11 @@ export type CreateProductInput = {
   isPublic: Scalars['Boolean']['input'];
   /** Product slug */
   slug: Scalars['String']['input'];
+};
+
+export type CreateProductVariantInput = {
+  /** Example field (placeholder) */
+  exampleField: Scalars['Int']['input'];
 };
 
 export type CreateUserInput = {
@@ -129,16 +133,19 @@ export type Mutation = {
   createCategory: Category;
   createCategoryTranslation: CategoryTranslation;
   createProduct: Product;
+  createProductVariant: ProductVariant;
   createUser: User;
   deleteCategoryTranslation: Scalars['Int']['output'];
   logoutAll: Scalars['Void']['output'];
   removeCategory: Category;
   removeProduct: Product;
+  removeProductVariant: ProductVariant;
   removeUser: User;
   requestEmailVerification: Scalars['Void']['output'];
   updateCategory: Category;
   updateCategoryTranslation: CategoryTranslation;
   updateProduct: Product;
+  updateProductVariant: ProductVariant;
   updateUser: User;
   verifyEmail: Scalars['Void']['output'];
 };
@@ -156,6 +163,11 @@ export type MutationCreateCategoryTranslationArgs = {
 
 export type MutationCreateProductArgs = {
   createProductInput: CreateProductInput;
+};
+
+
+export type MutationCreateProductVariantArgs = {
+  createProductVariantInput: CreateProductVariantInput;
 };
 
 
@@ -179,6 +191,11 @@ export type MutationRemoveProductArgs = {
 };
 
 
+export type MutationRemoveProductVariantArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationRemoveUserArgs = {
   id: Scalars['ID']['input'];
 };
@@ -196,6 +213,11 @@ export type MutationUpdateCategoryTranslationArgs = {
 
 export type MutationUpdateProductArgs = {
   updateProductInput: UpdateProductInput;
+};
+
+
+export type MutationUpdateProductVariantArgs = {
+  updateProductVariantInput: UpdateProductVariantInput;
 };
 
 
@@ -234,12 +256,46 @@ export type Product = {
   name?: Maybe<Scalars['String']['output']>;
   /** Product slug */
   slug: Scalars['String']['output'];
+  translations: Array<ProductTranslation>;
+  variants: Array<ProductVariant>;
+};
+
+
+export type ProductVariantsArgs = {
+  includeHidden?: Scalars['Boolean']['input'];
 };
 
 export type ProductEdge = {
   __typename?: 'ProductEdge';
   cursor: Scalars['Int']['output'];
   node: Product;
+};
+
+export type ProductTranslation = {
+  __typename?: 'ProductTranslation';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  locale: Scalars['String']['output'];
+  markdownContent?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  productId: Scalars['Int']['output'];
+};
+
+export type ProductVariant = {
+  __typename?: 'ProductVariant';
+  attributes: Array<ProductVariantAttribute>;
+  id: Scalars['Float']['output'];
+  isPublic: Scalars['Boolean']['output'];
+  priceInCents: Scalars['Float']['output'];
+  productId: Scalars['Float']['output'];
+  sku: Scalars['String']['output'];
+};
+
+export type ProductVariantAttribute = {
+  __typename?: 'ProductVariantAttribute';
+  attributeKeyId: Scalars['Float']['output'];
+  id: Scalars['Float']['output'];
+  productVariantId?: Maybe<Scalars['Float']['output']>;
 };
 
 export type Query = {
@@ -336,6 +392,12 @@ export type UpdateProductInput = {
   isPublic: Scalars['Boolean']['input'];
   /** Product slug */
   slug: Scalars['String']['input'];
+};
+
+export type UpdateProductVariantInput = {
+  /** Example field (placeholder) */
+  exampleField?: InputMaybe<Scalars['Int']['input']>;
+  id: Scalars['Int']['input'];
 };
 
 export type UpdateUserInput = {
@@ -450,6 +512,27 @@ export type LocalesQueryDocumentQuery = (
   { __typename?: 'Query' }
   & { ' $fragmentRefs'?: { 'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
 );
+
+export type CreateProductMutationMutationVariables = Exact<{
+  slug: Scalars['String']['input'];
+  categoryId?: InputMaybe<Scalars['Int']['input']>;
+  isPublic: Scalars['Boolean']['input'];
+}>;
+
+
+export type CreateProductMutationMutation = { __typename?: 'Mutation', createProduct: { __typename?: 'Product', id: number } };
+
+export type NewProductPage_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NewProductPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }> };
+
+export type ProductDetailPage_QueryDocumentQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', product: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, translations: Array<{ __typename?: 'ProductTranslation', locale: string, name: string, description?: string | null }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean }> } };
 
 export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
@@ -706,6 +789,45 @@ export const LocalesQueryDocumentDocument = new TypedDocumentString(`
     name
   }
 }`) as unknown as TypedDocumentString<LocalesQueryDocumentQuery, LocalesQueryDocumentQueryVariables>;
+export const CreateProductMutationDocument = new TypedDocumentString(`
+    mutation CreateProductMutation($slug: String!, $categoryId: Int, $isPublic: Boolean!) {
+  createProduct(
+    createProductInput: {slug: $slug, categoryId: $categoryId, isPublic: $isPublic}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateProductMutationMutation, CreateProductMutationMutationVariables>;
+export const NewProductPage_QueryDocumentDocument = new TypedDocumentString(`
+    query NewProductPage_QueryDocument {
+  categories(isPublic: null, isSetup: null) {
+    id
+    slug
+  }
+}
+    `) as unknown as TypedDocumentString<NewProductPage_QueryDocumentQuery, NewProductPage_QueryDocumentQueryVariables>;
+export const ProductDetailPage_QueryDocumentDocument = new TypedDocumentString(`
+    query ProductDetailPage_QueryDocument($id: Int!) {
+  product(id: $id, isPublic: null, isSetup: null) {
+    id
+    slug
+    isPublic
+    isSetup
+    categoryId
+    translations {
+      locale
+      name
+      description
+    }
+    variants(includeHidden: true) {
+      id
+      sku
+      priceInCents
+      isPublic
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductDetailPage_QueryDocumentQuery, ProductDetailPage_QueryDocumentQueryVariables>;
 export const MeDocument = new TypedDocumentString(`
     query Me {
   me {

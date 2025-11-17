@@ -28,6 +28,9 @@ type Documents = {
     "\n  query editCategory_QueryDocument(\n    $id: Int!\n    $productCursor: Int\n    $productPageSize: Int\n  ) {\n    category(id: $id, isPublic: null, isSetup: null) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      productsCount\n      translations(locales: []) {\n        id\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    products(\n      categoryId: $id\n      cursor: $productCursor\n      pageSize: $productPageSize\n      isPublic: null\n      isSetup: null\n    ) {\n      hasNextPage\n      edges {\n        cursor\n        node {\n          id\n          slug\n          name\n        }\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n": typeof types.EditCategory_QueryDocumentDocument,
     "\n  fragment Locales_QueryFragment on Query {\n    locales {\n      code\n      name\n    }\n  }\n": typeof types.Locales_QueryFragmentFragmentDoc,
     "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n": typeof types.LocalesQueryDocumentDocument,
+    "\n  mutation CreateProductMutation(\n    $slug: String!\n    $categoryId: Int\n    $isPublic: Boolean!\n  ) {\n    createProduct(\n      createProductInput: {\n        slug: $slug\n        categoryId: $categoryId\n        isPublic: $isPublic\n      }\n    ) {\n      id\n    }\n  }\n": typeof types.CreateProductMutationDocument,
+    "\n  query NewProductPage_QueryDocument {\n    categories(isPublic: null, isSetup: null) {\n      id\n      slug\n    }\n  }\n": typeof types.NewProductPage_QueryDocumentDocument,
+    "\n  query ProductDetailPage_QueryDocument($id: Int!) {\n    product(id: $id, isPublic: null, isSetup: null) {\n      id\n      slug\n      isPublic\n      isSetup\n      categoryId\n      translations {\n        locale\n        name\n        description\n      }\n      variants(includeHidden: true) {\n        id\n        sku\n        priceInCents\n        isPublic\n      }\n    }\n  }\n": typeof types.ProductDetailPage_QueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": typeof types.MeFragmentFragmentDoc,
     "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n": typeof types.MeDocument,
     "\n  query HeaderQuery {\n    ...HeaderNav_QueryFragment\n  }\n": typeof types.HeaderQueryDocument,
@@ -47,6 +50,9 @@ const documents: Documents = {
     "\n  query editCategory_QueryDocument(\n    $id: Int!\n    $productCursor: Int\n    $productPageSize: Int\n  ) {\n    category(id: $id, isPublic: null, isSetup: null) {\n      slug\n      name\n      parentCategoryId\n      isSetup\n      isPublic\n      productsCount\n      translations(locales: []) {\n        id\n        locale\n        name\n        description\n      }\n      subcategories {\n        slug\n        id\n      }\n    }\n    products(\n      categoryId: $id\n      cursor: $productCursor\n      pageSize: $productPageSize\n      isPublic: null\n      isSetup: null\n    ) {\n      hasNextPage\n      edges {\n        cursor\n        node {\n          id\n          slug\n          name\n        }\n      }\n    }\n    locales {\n      code\n      name\n      flag\n    }\n    ...AllCategories_QueryFragment\n  }\n": types.EditCategory_QueryDocumentDocument,
     "\n  fragment Locales_QueryFragment on Query {\n    locales {\n      code\n      name\n    }\n  }\n": types.Locales_QueryFragmentFragmentDoc,
     "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n": types.LocalesQueryDocumentDocument,
+    "\n  mutation CreateProductMutation(\n    $slug: String!\n    $categoryId: Int\n    $isPublic: Boolean!\n  ) {\n    createProduct(\n      createProductInput: {\n        slug: $slug\n        categoryId: $categoryId\n        isPublic: $isPublic\n      }\n    ) {\n      id\n    }\n  }\n": types.CreateProductMutationDocument,
+    "\n  query NewProductPage_QueryDocument {\n    categories(isPublic: null, isSetup: null) {\n      id\n      slug\n    }\n  }\n": types.NewProductPage_QueryDocumentDocument,
+    "\n  query ProductDetailPage_QueryDocument($id: Int!) {\n    product(id: $id, isPublic: null, isSetup: null) {\n      id\n      slug\n      isPublic\n      isSetup\n      categoryId\n      translations {\n        locale\n        name\n        description\n      }\n      variants(includeHidden: true) {\n        id\n        sku\n        priceInCents\n        isPublic\n      }\n    }\n  }\n": types.ProductDetailPage_QueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": types.MeFragmentFragmentDoc,
     "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n": types.MeDocument,
     "\n  query HeaderQuery {\n    ...HeaderNav_QueryFragment\n  }\n": types.HeaderQueryDocument,
@@ -105,6 +111,18 @@ export function graphql(source: "\n  fragment Locales_QueryFragment on Query {\n
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query LocalesQueryDocument {\n    ...Locales_QueryFragment\n  }\n"): typeof import('./graphql').LocalesQueryDocumentDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateProductMutation(\n    $slug: String!\n    $categoryId: Int\n    $isPublic: Boolean!\n  ) {\n    createProduct(\n      createProductInput: {\n        slug: $slug\n        categoryId: $categoryId\n        isPublic: $isPublic\n      }\n    ) {\n      id\n    }\n  }\n"): typeof import('./graphql').CreateProductMutationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query NewProductPage_QueryDocument {\n    categories(isPublic: null, isSetup: null) {\n      id\n      slug\n    }\n  }\n"): typeof import('./graphql').NewProductPage_QueryDocumentDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query ProductDetailPage_QueryDocument($id: Int!) {\n    product(id: $id, isPublic: null, isSetup: null) {\n      id\n      slug\n      isPublic\n      isSetup\n      categoryId\n      translations {\n        locale\n        name\n        description\n      }\n      variants(includeHidden: true) {\n        id\n        sku\n        priceInCents\n        isPublic\n      }\n    }\n  }\n"): typeof import('./graphql').ProductDetailPage_QueryDocumentDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

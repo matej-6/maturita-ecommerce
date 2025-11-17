@@ -7,15 +7,28 @@ import { LocalesModule } from 'src/locales/locales.module';
 import { LocalesService } from 'src/locales/locales.service';
 import { ProductsModule } from 'src/products/products.module';
 import { ProductsService } from 'src/products/products.service';
+import { ProductVariantsModule } from 'src/product-variants/product-variants.module';
+import { ProductVariantsService } from 'src/product-variants/product-variants.service';
+import { ProductVariantAttributesModule } from 'src/product-variant-attributes/product-variant-attributes.module';
+import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
 
 @Global()
 @Module({
-  imports: [PrismaModule, CategoriesModule, LocalesModule, ProductsModule],
+  imports: [
+    PrismaModule,
+    CategoriesModule,
+    LocalesModule,
+    ProductsModule,
+    ProductVariantsModule,
+    ProductVariantAttributesModule,
+  ],
   providers: [
     DataloaderService,
     CategoriesService,
     LocalesService,
     ProductsService,
+    ProductVariantsService,
+    ProductVariantAttributesService,
   ],
   exports: [DataloaderService],
 })

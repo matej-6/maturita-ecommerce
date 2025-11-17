@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { NewCategoryForm } from "./new-category-form";
 import { getDataForNewCategory } from "@/app/data-access-layer/admin/category/queries";
+import { NewCategoryForm } from "../../forms/new-category-form";
 
 export default async function NewCategoryPage() {
   const newCategoryDataPromise = getDataForNewCategory();

@@ -10,18 +10,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Table, TableBody, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRightIcon,
-  ChevronDownIcon,
-  ChevronUp,
   ChevronUpIcon,
   MoreHorizontalIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type CategoriesTableWithFiltersProps = {
   initialPagingArgs: {
@@ -50,6 +65,18 @@ export function CategoriesTableWithFilters({
   const [sortingArgs, setSortingArgs] = useState(initialSortingArgs);
   const [tableArgs, setTableArgs] = useState(initialTableArgs);
 
+  const [prevCursors, setPrevCursors] = useState<(number | null)[]>([]);
+  const [selectedFilterField, setSelectedFilterField] = useState<
+    "id" | "parentCategoryId"
+  >("parentCategoryId");
+
+  const [idFilterValue, setIdFilterValue] = useState<string>("");
+  const [slugFilterValue, setSlugFilterValue] = useState<string>("");
+
+  useEffect(() => {
+    setPrevCursors([]);
+  }, [sortingArgs, tableArgs]);
+
   const { data, error } = useQuery({
     queryKey: ["categories", { ...tableArgs, ...pagingArgs, ...sortingArgs }],
     queryFn: async () => {
@@ -75,10 +102,147 @@ export function CategoriesTableWithFilters({
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center justify-start gap-x-2">
+          <Select
+            value={selectedFilterField}
+            onValueChange={(value) => {
+              setSelectedFilterField(value as "id" | "parentCategoryId");
+              setIdFilterValue("");
+            }}
+          >
+            <SelectTrigger className="w-[196px]">
+              <SelectValue placeholder="Select field to filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                onSelect={() => {
+                  setTableArgs((prev) => ({
+                    ...prev,
+                    id: null,
+                    parentCategoryId: null,
+                  }));
+                }}
+                value="parentCategoryId"
+              >
+                Parent Category ID
+              </SelectItem>
+              <SelectItem value="id">ID</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            value={idFilterValue}
+            onChange={(e) => setIdFilterValue(e.target.value)}
+            placeholder="type an ID to filter by"
+          />
+        </div>
+        <div className="max-w-fit flex justify-start items-center gap-x-2">
+          <Button
+            size={"sm"}
+            variant={"secondary"}
+            disabled={prevCursors.length === 0}
+            onClick={() => {
+              setPagingArgs((prev) => {
+                const newPrevCursors = [...prevCursors];
+                const lastCursor = newPrevCursors.pop() || 0;
+                setPrevCursors(newPrevCursors);
+                return {
+                  ...prev,
+                  cursor: lastCursor === 0 ? null : lastCursor,
+                };
+              });
+            }}
+          >
+            Previous
+          </Button>
+          <Button
+            variant={"secondary"}
+            size={"sm"}
+            disabled={!data?.hasNextPage}
+            onClick={() => {
+              if (!data?.hasNextPage || !data.edges || data.edges.length === 0)
+                return;
+              setPagingArgs((prev) => {
+                setPrevCursors((pc) => [...pc, prev.cursor]);
+                return {
+                  ...prev,
+                  cursor: data.edges![data.edges!.length - 1].node.id,
+                };
+              });
+            }}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+      <div className="flex flex-col gap-y-1">
+        <label htmlFor="slug-filter">Slug</label>
+        <Input
+          id="slug-filter"
+          className="w-fit"
+          value={slugFilterValue}
+          onChange={(e) => setSlugFilterValue(e.target.value)}
+          placeholder="type a slug to filter by"
+        />
+      </div>
+      <div className="flex gap-x-2 items-center justify-start">
+        <Button
+          variant={"secondary"}
+          onClick={() => {
+            const slug = !!slugFilterValue ? slugFilterValue : null;
+
+            if (selectedFilterField === "parentCategoryId") {
+              let id: number | null = 0;
+              if (idFilterValue === "null") {
+                id = null;
+              } else {
+                const parsedId = parseInt(idFilterValue, 10);
+                id = isNaN(parsedId) ? 0 : parsedId;
+              }
+              setTableArgs((prev) => ({
+                ...prev,
+                parentCategoryId: id,
+                slug: slug,
+              }));
+            } else {
+              let id: number | null = null;
+              if (idFilterValue === "null") {
+                setIdFilterValue("");
+              } else {
+                const parsedId = parseInt(idFilterValue, 10);
+                id = isNaN(parsedId) ? null : parsedId;
+              }
+              setTableArgs((prev) => ({
+                ...prev,
+                id: id,
+                slug: slug,
+              }));
+            }
+          }}
+        >
+          Apply Filter
+        </Button>
+        <Button
+          variant={"secondary"}
+          onClick={() => {
+            setIdFilterValue("");
+            setSlugFilterValue("");
+            setTableArgs((prev) => ({
+              id: null,
+              isPublic: null,
+              isSetup: null,
+              parentCategoryId: 0,
+              slug: null,
+            }));
+          }}
+        >
+          Clear
+        </Button>
+      </div>
       <div className="rounded-xl overflow-hidden">
-        <Table className="overflow-x-scroll">
+        <Table className="overflow-x-scroll p-2">
           <TableHeader>
-            <TableRow className="px-4 mt-10 py-2">
+            <TableRow className="">
               {[
                 {
                   label: "ID",
@@ -122,31 +286,36 @@ export function CategoriesTableWithFilters({
                   isSortByPossible: true,
                 },
               ].map((column) => (
-                <th className="text-left" key={column.key}>
-                  <Button
-                    onClick={() => {
-                      setSortingArgs((prev) => {
-                        console.log("Clicked column:", column.key);
-                        if (!column.isSortByPossible) return { ...prev };
-                        if (prev.sortBy === column.key) {
-                          prev.ascending =
-                            prev.ascending === null
-                              ? true
-                              : prev.ascending === true
-                              ? false
-                              : null;
-                          if (prev.ascending === null) {
-                            prev.sortBy = null;
-                          }
-                        } else {
-                          prev.sortBy = column.key;
-                          prev.ascending = true;
+                <TableHead
+                  className="p-4"
+                  key={column.key}
+                  onClick={() => {
+                    setSortingArgs((prev) => {
+                      console.log("Clicked column:", column.key);
+                      if (!column.isSortByPossible) return { ...prev };
+                      if (prev.sortBy === column.key) {
+                        const ascending =
+                          prev.ascending === null
+                            ? true
+                            : prev.ascending === true
+                            ? false
+                            : null;
+                        if (ascending === null) {
+                          prev.sortBy = null;
                         }
-                        return { ...prev };
-                      });
-                    }}
-                    className="py-1 px-1"
-                    variant={"ghost"}
+                        prev.ascending = ascending;
+                      } else {
+                        prev.sortBy = column.key;
+                        prev.ascending = true;
+                      }
+                      return { ...prev };
+                    });
+                  }}
+                >
+                  <div
+                    className={cn("flex gap-x-1 justify-start items-center", {
+                      "cursor-pointer hover:underline": column.isSortByPossible,
+                    })}
                   >
                     <span>{column.label}</span>
                     <ChevronUpIcon
@@ -157,50 +326,46 @@ export function CategoriesTableWithFilters({
                           sortingArgs.ascending,
                       })}
                     />
-                  </Button>
-                </th>
+                  </div>
+                </TableHead>
               ))}
-              <th className="sr-only">Actions</th>
+              <TableHead className="sr-only">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data?.edges?.map((category) => (
               <TableRow key={category.node.id} className="text-left px-2 py-1">
-                <td className="pl-3 py-1 flex items-center justify-start gap-x-1">
-                  <span>{category.node.id}</span>
-                  <Link href={`categories/edit-category/${category.node.id}`}>
-                    <Button className="gap-x-0.5" variant={"link"}>
-                      <span>Details</span>
-                      <ArrowUpRightIcon className="size-3" />
-                    </Button>
-                  </Link>
-                </td>
-                <td className="pl-3 py-1">{category.node.slug}</td>
-                <td className="pl-3 py-1">
+                <TableCell className="px-4 py-2">{category.node.id}</TableCell>
+                <TableCell className="px-4 py-2">
+                  {category.node.slug}
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   {category.node.parentCategoryId || "N/A"}
-                </td>
-                <td className="pl-3 py-1">{category.node.productsCount}</td>
-                <td className="pl-3 py-1">
+                </TableCell>
+                <TableCell className="px-4 py-2">
+                  {category.node.productsCount}
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   {
                     new Date(category.node.createdAt)
                       .toLocaleString()
                       .split(",")[0]
                   }
-                </td>
-                <td className="pl-3 py-1">
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   {
                     new Date(category.node.updatedAt)
                       .toLocaleString()
                       .split(",")[0]
                   }
-                </td>
-                <td className="pl-3 py-1">
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   {category.node.isSetup ? "Yes" : "No"}
-                </td>
-                <td className="pl-3 py-1">
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   {category.node.isPublic ? "Yes" : "No"}
-                </td>
-                <td className="pl-3 py-1">
+                </TableCell>
+                <TableCell className="px-4 py-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
@@ -209,18 +374,42 @@ export function CategoriesTableWithFilters({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-muted-foreground">
+                        Actions
+                      </DropdownMenuLabel>
                       <DropdownMenuItem>
-                        <Link href={``}>Go to page</Link>
+                        <Link
+                          className="grow hover:underline"
+                          href={`/category/${category.node.slug}`}
+                        >
+                          Visit page
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem>
-                        <Link href={``}>Details page</Link>
+                        <Link
+                          className="grow hover:underline"
+                          href={`categories/edit-category/${category.node.id}`}
+                        >
+                          Visit details page
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>Filter subcategories</DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="hover:cursor-pointer hover:bg-muted transition-colors duration-150"
+                        onClick={() => {
+                          setSelectedFilterField("parentCategoryId");
+                          setIdFilterValue(category.node.id.toString());
+                          setTableArgs((prev) => ({
+                            ...prev,
+                            parentCategoryId: category.node.id,
+                          }));
+                        }}
+                      >
+                        Filter subcategories
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </td>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

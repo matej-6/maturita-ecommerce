@@ -69,7 +69,6 @@ export class CategoriesService {
         locale: localeCode.code,
         name: input.name,
         description: input.description,
-        isActive: true,
         category: {
           connect: {
             id: categoryId,
@@ -273,6 +272,11 @@ export class CategoriesService {
               : filterArgs.parentCategoryId,
           isPublic:
             filterArgs.isPublic == null ? undefined : filterArgs.isPublic,
+          id: filterArgs.idQuery != null ? filterArgs.idQuery : undefined,
+          slug:
+            filterArgs.slugQuery != null
+              ? { contains: filterArgs.slugQuery }
+              : undefined,
         },
         orderBy:
           sortingArgs.sortBy !== null

@@ -9,7 +9,6 @@ import { AlertCircleIcon, ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { notFound } from "next/navigation";
 import { toast } from "sonner";
-import { EditCategoryForm } from "../edit-category-form";
 import {
   Card,
   CardContent,
@@ -28,9 +27,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { CategoryTranslationForm } from "../category-translation-form";
+import { CategoryTranslationForm } from "../../../forms/category-translation-form";
 import { CategoryTranslation } from "../../../components/categories/category-translation";
 import { useState } from "react";
+import { EditCategoryForm } from "../../../forms/edit-category-form";
 
 export default function EditCategoryPageClient({
   id,

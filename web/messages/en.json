@@ -83,6 +83,23 @@
     "INTERNAL_SERVER_ERROR": "An unknown error ocurred"
   },
   "admin": {
+    "products": {
+      "newProduct": {
+        "page": {
+          "title": "Add a New Product"
+        },
+        "form": {
+          "submitButton": "Create product",
+          "categoryId": {
+            "combobox": {
+              "noResultsFoundText": "No results found.",
+              "filterPlaceholderText": "Filter categories",
+              "emptyValueLabel": "Select category"
+            }
+          }
+        }
+      }
+    },
     "categories": {
       "newCategory": {
         "page": {
@@ -135,6 +152,13 @@
     "categoryTranslation": {
       "name": "Name",
       "description": "Description"
+    },
+    "product": {
+      "slug": "Slug",
+      "categoryId": "Category Id",
+      "isPublic": "Is Public",
+      "isSetup": "Is Setup",
+      "id": "ID"
     }
   }
 }

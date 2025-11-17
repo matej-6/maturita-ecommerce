@@ -25,6 +25,8 @@ import {
 } from 'src/auth/optional-current-user.decorator';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { GraphqlAppContext } from 'src/app.module';
+import { ProductTranslation } from './entities/product-translation.entity';
+import { ProductVariant } from '../product-variants/entities/product-variant.entity';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -105,5 +107,39 @@ export class ProductsResolver {
   @Mutation(() => Product)
   removeProduct(@Args('id', { type: () => Int }) id: number) {
     return this.productsService.remove(id);
+  }
+
+  @ResolveField(() => [ProductTranslation], { name: 'translations' })
+  async resolveProductTranslations(
+    @Parent() product: Product,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    const translations = await ctx.loaders.productAllTranslationsLoader.load(
+      product.id,
+    );
+    return translations;
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
+  @ResolveField(() => [ProductVariant], { name: 'variants' })
+  async resolveProductVariants(
+    @Parent() product: Product,
+    @Context() ctx: GraphqlAppContext,
+    @Args('includeHidden', { type: () => Boolean, defaultValue: false })
+    includeHidden: boolean,
+    @OptionalCurrentUser() user: OptionalCurrentUserDto,
+  ) {
+    const variants = await ctx.loaders.productAllVariantsLoader.load(
+      product.id,
+    );
+
+    if (user?.role !== 'ADMIN') {
+      includeHidden = false;
+    }
+
+    if (includeHidden) {
+      return variants;
+    }
+    return variants.filter((variant) => variant.isPublic);
   }
 }

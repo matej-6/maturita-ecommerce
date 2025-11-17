@@ -10,7 +10,7 @@ import {
 import {
   categoryTranslationSchema,
   categoryTranslationSchemaType,
-} from "../../schemas/category-translation-schema";
+} from "../schemas/category-translation-schema";
 import { useTranslations } from "next-intl";
 import { getQueryClient } from "@/lib/get-query-client";
 import { useForm } from "react-hook-form";

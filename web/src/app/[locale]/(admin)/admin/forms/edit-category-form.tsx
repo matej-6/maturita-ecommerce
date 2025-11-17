@@ -1,10 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import {
-  categoryFormSchema,
-  categoryFormSchemaType,
-} from "../../schemas/category-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -15,9 +11,9 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { use, useState } from "react";
+import { useMemo, useState } from "react";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,44 +33,80 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ExecutionResult } from "graphql";
 import { FragmentType, getFragmentData } from "@/graphql";
-import { Locales_QueryFragment } from "@/app/data-access-layer/admin/locale/fragments";
 import { AllCategories_QueryFragment } from "@/app/data-access-layer/admin/category/fragments";
-import { createCategoryAction } from "@/app/data-access-layer/admin/category/actions";
-import { useRouter } from "@/i18n/navigation";
+import { editCategoryAction } from "@/app/data-access-layer/admin/category/actions";
+import { toast } from "sonner";
+import { getQueryClient } from "@/lib/get-query-client";
+import {
+  categoryFormSchema,
+  categoryFormSchemaType,
+} from "../schemas/category-form-schema";
 
-type NewCategoryFormProps = {
-  localesQueryPromise: Promise<
-    ExecutionResult<FragmentType<typeof Locales_QueryFragment>>
+type EditCategoryFormProps = {
+  categoryId: number;
+  data: categoryFormSchemaType;
+  categoriesQuery: ExecutionResult<
+    FragmentType<typeof AllCategories_QueryFragment>
   >;
-  categoriesQueryPromise: Promise<
-    ExecutionResult<FragmentType<typeof AllCategories_QueryFragment>>
-  >;
+  refetchQueryKey?: unknown[];
 };
 
-export const NewCategoryForm = ({
-  localesQueryPromise,
-  categoriesQueryPromise,
-}: NewCategoryFormProps) => {
-  const localesQueryResult = use(localesQueryPromise);
-  const localesData = getFragmentData(
-    Locales_QueryFragment,
-    localesQueryResult.data
-  );
-
-  const categoriesQueryResult = use(categoriesQueryPromise);
+export const EditCategoryForm = ({
+  categoryId,
+  data,
+  categoriesQuery,
+  refetchQueryKey,
+}: EditCategoryFormProps) => {
   const categoriesData = getFragmentData(
     AllCategories_QueryFragment,
-    categoriesQueryResult.data
+    categoriesQuery.data
   );
+
+  const availableCategories = useMemo(() => {
+    if (!categoriesData?.categories) {
+      return [];
+    }
+    const categoriesToSubcategories = new Map<number, number[]>();
+    const categoryMap = new Map<
+      number,
+      { id: number; parentCategoryId?: number | null; slug: string }
+    >();
+    const res = [];
+    for (const c of categoriesData.categories) {
+      if (c.parentCategoryId != null) {
+        categoryMap.set(c.id, c);
+        const subcategories =
+          categoriesToSubcategories.get(c.parentCategoryId) ?? [];
+        subcategories.push(c.id);
+        categoriesToSubcategories.set(c.parentCategoryId, subcategories);
+      } else if (c.id !== categoryId) {
+        res.push(c);
+      }
+    }
+
+    const queue = [categoryId];
+
+    while (queue.length > 0) {
+      const c = queue.pop()!;
+      categoryMap.delete(c);
+      for (const subc of categoriesToSubcategories.get(c) ?? []) {
+        queue.push(subc);
+      }
+    }
+
+    return [...res, ...categoryMap.values()];
+  }, [categoriesData, categoryId]);
+
+  const queryClient = getQueryClient();
 
   // translations
   const formt = useTranslations("form"); // general form translations
   const ft = useTranslations("fields"); // fields translations
-  const cft = useTranslations("admin.categories.newCategory.form"); // specific form translations
+  const cft = useTranslations("admin.categories.editCategory.form"); // specific form translations
 
   const comboboxCategories = [
     { label: cft("parentCategoryId.combobox.emptyValueLabel"), value: null },
-    ...(categoriesData?.categories.map((c) => ({
+    ...(availableCategories.map((c) => ({
       label: c.slug,
       value: c.id,
     })) ?? []),
@@ -86,18 +118,28 @@ export const NewCategoryForm = ({
     resolver: zodResolver(formSchema),
     mode: "all",
     defaultValues: {
-      slug: "",
-      parentCategoryId: null,
+      slug: data.slug,
+      parentCategoryId: data.parentCategoryId,
     },
   });
 
-  const router = useRouter();
-
   const { mutate } = useMutation({
     mutationFn: async (data: categoryFormSchemaType) => {
-      const res = await createCategoryAction(data);
+      const res = await editCategoryAction(categoryId, data);
       if (res.success) {
-        router.push(`/admin/categories/edit-category/${res.data.id}`);
+        toast.success(cft("toastSuccess"));
+        form.clearErrors();
+        form.reset({
+          parentCategoryId: res.data.parentCategoryId || null,
+          slug: res.data.slug,
+        });
+        setErrorMessage(undefined);
+        if (refetchQueryKey) {
+          queryClient.refetchQueries({
+            queryKey: refetchQueryKey,
+            exact: true,
+          });
+        }
         return;
       }
       const fieldErrorsMap = new Map();
@@ -121,7 +163,7 @@ export const NewCategoryForm = ({
         onSubmit={form.handleSubmit(async (data) => {
           await mutate(data);
         })}
-        className="flex flex-col gap-y-8 "
+        className="flex flex-col gap-y-8 h-full"
       >
         <FormField
           control={form.control}
@@ -167,8 +209,8 @@ export const NewCategoryForm = ({
         <Button
           type="submit"
           variant={"default"}
-          className="w-fit"
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || !form.formState.isDirty}
+          className="mt-auto"
         >
           {cft("submitButton")}
         </Button>
@@ -208,7 +250,7 @@ export const NewCategoryForm = ({
             {data.map((option) => (
               <CommandItem
                 key={option.value?.toString() ?? "null"}
-                value={option.value?.toString() || "null"}
+                value={option.value?.toString() ?? "null"}
                 onSelect={(v) => {
                   setSelectedValue(v === "null" ? null : parseInt(v));
                   setOpen(false);
@@ -226,7 +268,7 @@ export const NewCategoryForm = ({
       return (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant={"outline"} className="w-[196px] justify-start">
+            <Button variant={"outline"} className="justify-start">
               {selectedStatus.label}
             </Button>
           </PopoverTrigger>

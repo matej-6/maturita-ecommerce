@@ -20,7 +20,7 @@ import {
 import {
   CategoryTranslationForm,
   CategoryTranslationFormProps,
-} from "../../categories/edit-category/category-translation-form";
+} from "../../forms/category-translation-form";
 import { useMutation } from "@tanstack/react-query";
 import { deleteCategoryTranslationAction } from "@/app/data-access-layer/admin/category-translation/actions";
 import { useState } from "react";

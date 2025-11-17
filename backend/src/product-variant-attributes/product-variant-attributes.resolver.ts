@@ -1,0 +1,58 @@
+import {
+  Resolver,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+  Context,
+} from '@nestjs/graphql';
+import { ProductVariantAttributesService } from './product-variant-attributes.service';
+import { ProductVariantAttribute } from './entities/product-variant-attribute.entity';
+import { CreateProductVariantAttributeInput } from './dto/create-product-variant-attribute.input';
+import { UpdateProductVariantAttributeInput } from './dto/update-product-variant-attribute.input';
+import { AttributeKey } from './entities/attribute-key.entity';
+import { GraphqlAppContext } from 'src/app.module';
+
+@Resolver(() => ProductVariantAttribute)
+export class ProductVariantAttributesResolver {
+  constructor(
+    private readonly productVariantAttributesService: ProductVariantAttributesService,
+  ) {}
+
+  @Mutation(() => ProductVariantAttribute)
+  createProductVariantAttribute(
+    @Args('createProductVariantAttributeInput')
+    createProductVariantAttributeInput: CreateProductVariantAttributeInput,
+  ) {
+    return this.productVariantAttributesService.create(
+      createProductVariantAttributeInput,
+    );
+  }
+
+  @Mutation(() => ProductVariantAttribute)
+  updateProductVariantAttribute(
+    @Args('updateProductVariantAttributeInput')
+    updateProductVariantAttributeInput: UpdateProductVariantAttributeInput,
+  ) {
+    return this.productVariantAttributesService.update(
+      updateProductVariantAttributeInput.id,
+      updateProductVariantAttributeInput,
+    );
+  }
+
+  @Mutation(() => ProductVariantAttribute)
+  removeProductVariantAttribute(@Args('id', { type: () => Int }) id: number) {
+    return this.productVariantAttributesService.remove(id);
+  }
+
+  @ResolveField(() => AttributeKey, { name: 'key', nullable: true })
+  async resolveAttributeKey(
+    @Parent() productVariantAttribute: ProductVariantAttribute,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    return ctx.loaders.attributeKeyByIdLoader.load(
+      productVariantAttribute.attributeKeyId,
+    );
+  }
+}
