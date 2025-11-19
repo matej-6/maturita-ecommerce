@@ -138,12 +138,13 @@ model ProductImage {
 
 model Attribute {
   id                    Int                    @id @default(autoincrement())
+  value                 String
   AttributeKey          AttributeKey           @relation(fields: [attributeKeyId], references: [id])
   attributeKeyId        Int
-  ProductVariant        ProductVariant?        @relation(fields: [productVariantId], references: [id])
-  productVariantId      Int?
+  ProductVariants       ProductVariant[]
   AttributeTranslations AttributeTranslation[]
 
+  @@unique([value, attributeKeyId])
   @@map("attributes")
 }
 

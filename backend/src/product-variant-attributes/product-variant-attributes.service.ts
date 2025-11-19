@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateProductVariantAttributeInput } from './dto/create-product-variant-attribute.input';
 import { UpdateProductVariantAttributeInput } from './dto/update-product-variant-attribute.input';
 import { PrismaService } from 'src/prisma/prisma.service';

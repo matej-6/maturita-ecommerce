@@ -263,7 +263,7 @@ async function main() {
           id: aWeightKey.id,
         },
       },
-      ProductVariant: {
+      ProductVariants: {
         connect: {
           id: creatineMonohydrate300.id,
         },
@@ -314,7 +314,7 @@ async function main() {
           id: aWeightKey.id,
         },
       },
-      ProductVariant: {
+      ProductVariants: {
         connect: {
           id: creatineMonohydrate1000.id,
         },
@@ -339,7 +339,7 @@ async function main() {
           id: aWeightKey.id,
         },
       },
-      ProductVariant: {
+      ProductVariants: {
         connect: {
           id: creatineGummies500.id,
         },
