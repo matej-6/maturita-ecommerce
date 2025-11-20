@@ -1,16 +1,16 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 import { ProductVariant as DbProductVariant } from 'generated/prisma/client';
 
 @ObjectType()
 export class ProductVariant implements Partial<DbProductVariant> {
-  @Field(() => Number)
+  @Field(() => Int)
   id: number;
   @Field(() => Boolean)
   isPublic: boolean;
-  @Field(() => Number)
+  @Field(() => Int)
   priceInCents: number;
-  @Field(() => Number)
+  @Field(() => Int)
   productId: number;
   @Field(() => String)
   sku: string;

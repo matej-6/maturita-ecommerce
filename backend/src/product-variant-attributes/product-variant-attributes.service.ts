@@ -49,4 +49,39 @@ export class ProductVariantAttributesService {
 
     return attributeIds.map((id) => keys.find((key) => key.id === id) ?? null);
   }
+
+  async getTranslationsByBatch(locale: string, attributeIds: number[]) {
+    const translations = await this.prisma.attributeTranslation.findMany({
+      where: {
+        attributeId: {
+          in: attributeIds,
+        },
+        locale: {
+          in: [locale, this.localesService.getDefaultLocale().code],
+        },
+      },
+    });
+    return attributeIds.map((id) => {
+      const filtered = translations.filter((t) => t.attributeId === id);
+      if (filtered.length === 0) {
+        return null;
+      }
+      const translation = filtered.find((t) => t.locale === locale);
+      return translation ?? filtered[0];
+    });
+  }
+
+  async getAllTranslationsByBatch(attributeIds: number[]) {
+    const translations = await this.prisma.attributeTranslation.findMany({
+      where: {
+        attributeId: {
+          in: attributeIds,
+        },
+      },
+    });
+
+    return attributeIds.map((id) =>
+      translations.filter((t) => t.attributeId === id),
+    );
+  }
 }

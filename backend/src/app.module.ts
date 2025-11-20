@@ -28,6 +28,7 @@ import { ProductVariantsModule } from './product-variants/product-variants.modul
 import { ProductAttributeResolver } from './product-attribute/product-attribute.resolver';
 import { ProductAttributesModule } from './product-attributes/product-attributes.module';
 import { ProductVariantAttributesModule } from './product-variant-attributes/product-variant-attributes.module';
+import { ProductVariantAttributeKeysModule } from './product-variant-attribute-keys/product-variant-attribute-keys.module';
 
 @Module({
   imports: [
@@ -95,6 +96,7 @@ import { ProductVariantAttributesModule } from './product-variant-attributes/pro
     ProductVariantsModule,
     ProductAttributesModule,
     ProductVariantAttributesModule,
+    ProductVariantAttributeKeysModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService, ProductAttributeResolver],

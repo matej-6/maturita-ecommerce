@@ -11,6 +11,8 @@ import { ProductVariantsModule } from 'src/product-variants/product-variants.mod
 import { ProductVariantsService } from 'src/product-variants/product-variants.service';
 import { ProductVariantAttributesModule } from 'src/product-variant-attributes/product-variant-attributes.module';
 import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
+import { ProductVariantAttributeKeysModule } from 'src/product-variant-attribute-keys/product-variant-attribute-keys.module';
+import { ProductVariantAttributeKeysService } from 'src/product-variant-attribute-keys/product-variant-attribute-keys.service';
 
 @Global()
 @Module({
@@ -21,6 +23,7 @@ import { ProductVariantAttributesService } from 'src/product-variant-attributes/
     ProductsModule,
     ProductVariantsModule,
     ProductVariantAttributesModule,
+    ProductVariantAttributeKeysModule,
   ],
   providers: [
     DataloaderService,
@@ -29,6 +32,7 @@ import { ProductVariantAttributesService } from 'src/product-variant-attributes/
     ProductsService,
     ProductVariantsService,
     ProductVariantAttributesService,
+    ProductVariantAttributeKeysService,
   ],
   exports: [DataloaderService],
 })

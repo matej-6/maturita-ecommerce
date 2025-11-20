@@ -1,6 +1,8 @@
 import {
   Attribute,
   AttributeKey,
+  AttributeKeyTranslation,
+  AttributeTranslation,
   Category,
   CategoryTranslation,
   ProductTranslation,
@@ -16,5 +18,21 @@ export interface IDataLoaders {
   productAllTranslationsLoader: DataLoader<number, ProductTranslation[]>;
   productAllVariantsLoader: DataLoader<number, ProductVariant[]>;
   productVariantAllAttributesLoader: DataLoader<number, Attribute[]>;
+  productVariantAttributeTranslationLoader: DataLoader<
+    number,
+    AttributeTranslation | null
+  >;
+  productVariantAttributeAllTranslationsLoader: DataLoader<
+    number,
+    AttributeTranslation[]
+  >;
   attributeKeyByIdLoader: DataLoader<number, AttributeKey | null>;
+  attributeKeyTranslationLoader: DataLoader<
+    number,
+    AttributeKeyTranslation | null
+  >;
+  attributeKeyAllTranslationsLoader: DataLoader<
+    number,
+    AttributeKeyTranslation[]
+  >;
 }

@@ -11,8 +11,9 @@ import { ProductVariantAttributesService } from './product-variant-attributes.se
 import { ProductVariantAttribute } from './entities/product-variant-attribute.entity';
 import { CreateProductVariantAttributeInput } from './dto/create-product-variant-attribute.input';
 import { UpdateProductVariantAttributeInput } from './dto/update-product-variant-attribute.input';
-import { AttributeKey } from './entities/attribute-key.entity';
+import { ProductVariantAttributeKey } from '../product-variant-attribute-keys/entities/product-variant-attribute-key.entity';
 import { GraphqlAppContext } from 'src/app.module';
+import { ProductVariantAttributeTranslation } from './entities/product-variant-attribute-translation.entity';
 
 @Resolver(() => ProductVariantAttribute)
 export class ProductVariantAttributesResolver {
@@ -46,13 +47,40 @@ export class ProductVariantAttributesResolver {
     return this.productVariantAttributesService.remove(id);
   }
 
-  @ResolveField(() => AttributeKey, { name: 'key', nullable: true })
+  @ResolveField(() => ProductVariantAttributeKey, {
+    name: 'key',
+    nullable: true,
+  })
   async resolveAttributeKey(
     @Parent() productVariantAttribute: ProductVariantAttribute,
     @Context() ctx: GraphqlAppContext,
   ) {
     return ctx.loaders.attributeKeyByIdLoader.load(
       productVariantAttribute.attributeKeyId,
+    );
+  }
+
+  @ResolveField(() => String, { name: 'translatedValue', nullable: true })
+  async resolveTranslatedValue(
+    @Parent() productVariantAttribute: ProductVariantAttribute,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    const res = await ctx.loaders.productVariantAttributeTranslationLoader.load(
+      productVariantAttribute.id,
+    );
+
+    return res?.value || null;
+  }
+
+  @ResolveField(() => [ProductVariantAttributeTranslation], {
+    name: 'translations',
+  })
+  async resolveTranslations(
+    @Parent() productVariantAttribute: ProductVariantAttribute,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    return ctx.loaders.productVariantAttributeAllTranslationsLoader.load(
+      productVariantAttribute.id,
     );
   }
 }
