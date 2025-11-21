@@ -37,6 +37,9 @@ export function Breadcrumbs({ defaultBreadcrumb }: BreadcrumbsProps) {
           const res = z.safeParse(z.uuid(), b); //aby sa nezobrazoval uuid v breadcrumbs
           return !res.success;
         })
+        .filter((b) => {
+          return isNaN(Number(b)); // aby sa nezobrazoval ciselny id v breadcrumbs
+        })
         .map((b, index) => ({
           label: b
             .split("-") // napriklad new-category -> New Category

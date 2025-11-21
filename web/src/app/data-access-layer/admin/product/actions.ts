@@ -8,9 +8,11 @@ import { NewProductPageQueryDocument } from "./queries";
 import { ExecutionResult } from "graphql";
 import {
   CreateProductMutationMutation,
+  EditProductMutationMutation,
   NewProductPage_QueryDocumentQuery,
 } from "@/graphql/graphql";
-import { CreateProductMutation } from "./mutations";
+import { CreateProductMutation, EditProductMutation } from "./mutations";
+import { revalidatePath } from "next/cache";
 
 export async function createProductAction(
   data: productFormSchemaType
@@ -41,6 +43,44 @@ export async function createProductAction(
   return {
     success: true,
     data: res.data.createProduct,
+  };
+}
+
+export async function editProductAction(
+  data: productFormSchemaType & { id: number },
+  revalidatePaths: string[] = []
+): Promise<
+  ActionResponse<
+    NonNullable<
+      ExecutionResult<EditProductMutationMutation>["data"]
+    >["updateProduct"]
+  >
+> {
+  const res = await execute(EditProductMutation, {
+    id: data.id,
+    categoryId: data.categoryId || undefined,
+    slug: data.slug,
+    isPublic: data.isPublic,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  for (const path of revalidatePaths) {
+    revalidatePath(path);
+  }
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data.updateProduct,
   };
 }
 

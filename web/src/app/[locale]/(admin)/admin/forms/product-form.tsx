@@ -34,21 +34,29 @@ import {
   productFormSchema,
   productFormSchemaType,
 } from "../schemas/product-form-schema";
-import { createProductAction } from "@/app/data-access-layer/admin/product/actions";
+import {
+  createProductAction,
+  editProductAction,
+} from "@/app/data-access-layer/admin/product/actions";
 import { Switch } from "@/components/ui/switch";
 
 type ProductFormProps = {
-  initialData: {
-    categories: {
-      id: number;
-      slug: string;
-    }[];
-  };
+  mode: "create" | "edit";
+  categories: {
+    id: number;
+    slug: string;
+  }[];
+  initialData?: productFormSchemaType;
+  revalidatePaths?: string[];
+  productId?: number;
 };
-
-export const ProductForm = ({ initialData }: ProductFormProps) => {
-  const { categories } = initialData;
-
+export const ProductForm = ({
+  initialData,
+  productId,
+  mode = "create",
+  categories,
+  revalidatePaths = [],
+}: ProductFormProps) => {
   // translations
   const formt = useTranslations("form"); // general form translations
   const ft = useTranslations("fields"); // fields translations
@@ -68,9 +76,9 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
     resolver: zodResolver(formSchema),
     mode: "all",
     defaultValues: {
-      slug: "",
-      categoryId: null,
-      isPublic: false,
+      slug: initialData?.slug ?? "",
+      categoryId: initialData?.categoryId ?? null,
+      isPublic: initialData?.isPublic ?? false,
     },
   });
 
@@ -78,17 +86,35 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
 
   const { mutate } = useMutation({
     mutationFn: async (data: productFormSchemaType) => {
-      const res = await createProductAction(data);
-      if (res.success) {
-        router.push(`/admin/products/product-detail?id=${res.data.id}`);
-        return;
+      if (mode === "edit") {
+        const res = await editProductAction(
+          {
+            ...data,
+            id: productId!,
+          },
+          revalidatePaths
+        );
+        if (!res.success) {
+          const fieldErrorsMap = new Map();
+          res.fieldErrors?.forEach((e) =>
+            fieldErrorsMap.set(e.property, e.constraints)
+          );
+          setFieldErrors(fieldErrorsMap);
+          setErrorMessage(res.message);
+        }
+      } else {
+        const res = await createProductAction(data);
+        if (res.success) {
+          router.push(`/admin/products/product-detail?id=${res.data.id}`);
+          return;
+        }
+        const fieldErrorsMap = new Map();
+        res.fieldErrors?.forEach((e) =>
+          fieldErrorsMap.set(e.property, e.constraints)
+        );
+        setFieldErrors(fieldErrorsMap);
+        setErrorMessage(res.message);
       }
-      const fieldErrorsMap = new Map();
-      res.fieldErrors?.forEach((e) =>
-        fieldErrorsMap.set(e.property, e.constraints)
-      );
-      setFieldErrors(fieldErrorsMap);
-      setErrorMessage(res.message);
     },
   });
 

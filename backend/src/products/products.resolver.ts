@@ -27,6 +27,7 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { GraphqlAppContext } from 'src/app.module';
 import { ProductTranslation } from './entities/product-translation.entity';
 import { ProductVariant } from '../product-variants/entities/product-variant.entity';
+import { ProductImage } from 'src/entities/product-image.entity';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -141,5 +142,50 @@ export class ProductsResolver {
       return variants;
     }
     return variants.filter((variant) => variant.isPublic);
+  }
+
+  @ResolveField(() => [ProductImage], { name: 'images' })
+  async resolveProductImages(
+    @Parent() product: Product,
+    @Context() ctx: GraphqlAppContext,
+  ): Promise<ProductImage[]> {
+    const images = await ctx.loaders.productAllImagesLoader.load(product.id);
+    return images.map((img) => ({
+      id: img.id,
+      base64: img.base64,
+      isThumbnail: img.isThumbnail,
+      mimeType: img.mimeType,
+      productId: img.productId!,
+    }));
+  }
+
+  @ResolveField(() => ProductImage, { name: 'thumbnailImage', nullable: true })
+  async resolveProductThumbnailImage(
+    @Parent() product: Product,
+    @Context() ctx: GraphqlAppContext,
+  ): Promise<ProductImage | null> {
+    const images = await ctx.loaders.productAllImagesLoader.load(product.id);
+    const thumbnail = images.find((img) => img.isThumbnail);
+    if (!thumbnail) {
+      return null;
+    }
+    return {
+      id: thumbnail.id,
+      base64: thumbnail.base64,
+      isThumbnail: thumbnail.isThumbnail,
+      mimeType: thumbnail.mimeType,
+      productId: thumbnail.productId!,
+    };
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => Int)
+  async deleteProductTranslation(
+    @Args('productTranslationId', { type: () => Int })
+    productTranslationId: number,
+  ) {
+    return await this.productsService.deleteProductTranslation(
+      productTranslationId,
+    );
   }
 }

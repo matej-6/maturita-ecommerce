@@ -164,8 +164,7 @@ export default function EditCategoryPageClient({
               <SheetHeader>
                 <SheetTitle>Edit category</SheetTitle>
                 <SheetDescription>
-                  Make changes to your profile here. Click save when you&apos;re
-                  done.
+                  Click save when you're done.
                 </SheetDescription>
               </SheetHeader>
               <div className="flex-1 flex flex-col">

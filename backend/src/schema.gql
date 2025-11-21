@@ -66,6 +66,16 @@ input CreateProductInput {
   slug: String!
 }
 
+input CreateProductVariantAttributeInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateProductVariantAttributeKeyInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateProductVariantInput {
   """Example field (placeholder)"""
   exampleField: Int!
@@ -124,18 +134,25 @@ type Mutation {
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
   createProduct(createProductInput: CreateProductInput!): Product!
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
+  createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
+  createProductVariantAttributeKey(createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   createUser(createUserInput: CreateUserInput!): User!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
+  deleteProductTranslation(productTranslationId: Int!): Int!
   logoutAll: Void!
   removeCategory(id: Int!): Category!
   removeProduct(id: Int!): Product!
   removeProductVariant(id: Int!): ProductVariant!
+  removeProductVariantAttribute(id: Int!): ProductVariantAttribute!
+  removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   removeUser(id: ID!): User!
   requestEmailVerification: Void!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
+  updateProductVariantAttribute(updateProductVariantAttributeInput: UpdateProductVariantAttributeInput!): ProductVariantAttribute!
+  updateProductVariantAttributeKey(updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
 }
@@ -154,10 +171,12 @@ type PaginatedProduct {
 
 type Product {
   categoryId: Int
+  createdAt: DateTime!
   description: String
 
   """Product ID"""
   id: Int!
+  images: [ProductImage!]!
   isPublic: Boolean!
   isSetup: Boolean!
   markdownContent: String
@@ -165,13 +184,23 @@ type Product {
 
   """Product slug"""
   slug: String!
+  thumbnailImage: ProductImage
   translations: [ProductTranslation!]!
+  updatedAt: DateTime!
   variants(includeHidden: Boolean! = false): [ProductVariant!]!
 }
 
 type ProductEdge {
   cursor: Int!
   node: Product!
+}
+
+type ProductImage {
+  base64: String!
+  id: Int!
+  isThumbnail: Boolean!
+  mimeType: String!
+  productId: Int!
 }
 
 type ProductTranslation {
@@ -185,17 +214,55 @@ type ProductTranslation {
 
 type ProductVariant {
   attributes: [ProductVariantAttribute!]!
-  id: Float!
+  createdAt: DateTime!
+  id: Int!
+  images: [ProductVariantImage!]!
   isPublic: Boolean!
-  priceInCents: Float!
-  productId: Float!
+  priceInCents: Int!
+  productId: Int!
   sku: String!
+  stock: Int!
+  thumbnailImage: ProductVariantImage!
+  updatedAt: DateTime!
 }
 
 type ProductVariantAttribute {
-  attributeKeyId: Float!
+  attributeKeyId: Int!
+  id: Int!
+  key: ProductVariantAttributeKey
+  productVariantId: Int
+  translatedValue: String
+  translations: [ProductVariantAttributeTranslation!]!
+  value: String!
+}
+
+type ProductVariantAttributeKey {
+  id: Int!
+  key: String!
+  translatedKey: String
+  translations: [ProductVariantAttributeKeyTranslation!]!
+}
+
+type ProductVariantAttributeKeyTranslation {
+  attributeKeyId: Int!
+  id: Int!
+  keyTranslation: String!
+  locale: String!
+}
+
+type ProductVariantAttributeTranslation {
+  attributeId: Float!
   id: Float!
-  productVariantId: Float
+  locale: String!
+  value: String!
+}
+
+type ProductVariantImage {
+  base64: String!
+  id: Int!
+  isThumbnail: Boolean!
+  mimeType: String!
+  productVariantId: Int!
 }
 
 type Query {
@@ -250,6 +317,8 @@ type Query {
     sortBy: String
   ): PaginatedCategory!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product!
+  productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
+  productVariantAttributeKeys: [ProductVariantAttributeKey!]!
   products(
     """
     null - only products with no category will be returned, 0 - all products will be returned, int >= 1 - only the children of category with given id will be returned
@@ -290,6 +359,18 @@ input UpdateProductInput {
 
   """Product slug"""
   slug: String!
+}
+
+input UpdateProductVariantAttributeInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateProductVariantAttributeKeyInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateProductVariantInput {

@@ -18,3 +18,23 @@ export const CreateProductMutation = graphql(`
     }
   }
 `);
+
+export const EditProductMutation = graphql(`
+  mutation EditProductMutation(
+    $id: Int!
+    $slug: String!
+    $categoryId: Int
+    $isPublic: Boolean!
+  ) {
+    updateProduct(
+      updateProductInput: {
+        id: $id
+        slug: $slug
+        categoryId: $categoryId
+        isPublic: $isPublic
+      }
+    ) {
+      id
+    }
+  }
+`);

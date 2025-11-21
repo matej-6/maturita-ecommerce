@@ -258,6 +258,7 @@ async function main() {
 
   await db.attribute.create({
     data: {
+      value: '300g',
       AttributeKey: {
         connect: {
           id: aWeightKey.id,
@@ -309,6 +310,7 @@ async function main() {
 
   await db.attribute.create({
     data: {
+      value: '1000g',
       AttributeKey: {
         connect: {
           id: aWeightKey.id,
@@ -334,6 +336,7 @@ async function main() {
 
   await db.attribute.create({
     data: {
+      value: '500g',
       AttributeKey: {
         connect: {
           id: aWeightKey.id,

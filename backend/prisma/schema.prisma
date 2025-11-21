@@ -90,6 +90,8 @@ model Product {
   ProductVariants     ProductVariant[]
   Images              ProductImage[]
   ProductTranslations ProductTranslation[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 
   @@map("products")
 }
@@ -97,7 +99,7 @@ model Product {
 model ProductTranslation {
   id              Int     @id @default(autoincrement())
   locale          String
-  Product         Product @relation(fields: [productId], references: [id])
+  Product         Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId       Int
   name            String
   description     String? @db.LongText
@@ -113,10 +115,12 @@ model ProductVariant {
   stock        Int
   priceInCents Int
   Attributes   Attribute[]
-  Product      Product        @relation(fields: [productId], references: [id])
+  Product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
   Images       ProductImage[]
   productId    Int
   isPublic     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@map("product_variants")
 }
@@ -126,9 +130,9 @@ model ProductImage {
   base64           String          @db.LongText
   mimeType         String
   isThumbnail      Boolean         @default(false)
-  Product          Product?        @relation(fields: [productId], references: [id])
+  Product          Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId        Int?
-  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
   productVariantId Int?
 
   @@index([id, productId])
@@ -139,7 +143,7 @@ model ProductImage {
 model Attribute {
   id                    Int                    @id @default(autoincrement())
   value                 String
-  AttributeKey          AttributeKey           @relation(fields: [attributeKeyId], references: [id])
+  AttributeKey          AttributeKey           @relation(fields: [attributeKeyId], references: [id], onDelete: Cascade)
   attributeKeyId        Int
   ProductVariants       ProductVariant[]
   AttributeTranslations AttributeTranslation[]
@@ -152,7 +156,7 @@ model AttributeTranslation {
   id          Int       @id @default(autoincrement())
   value       String
   locale      String
-  Attribute   Attribute @relation(fields: [attributeId], references: [id])
+  Attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
   attributeId Int
 }
 
@@ -169,7 +173,7 @@ model AttributeKeyTranslation {
   id             Int          @id @default(autoincrement())
   keyTranslation String
   locale         String
-  attributeKey   AttributeKey @relation(fields: [attributeKeyId], references: [id])
+  attributeKey   AttributeKey @relation(fields: [attributeKeyId], references: [id], onDelete: Cascade)
   attributeKeyId Int
 
   @@index([locale, attributeKeyId])

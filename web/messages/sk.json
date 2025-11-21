@@ -7,13 +7,17 @@
     "maxLength": "{fieldName} môže mať dĺžku najviac {value, plural, =1 {# znak} other {# znakov}}",
     "minLength": "{fieldName} musí mať dĺžku najmenej {value, plural, =1 {# znak} other {#znakov}}",
     "passwordsMustMatch": "Heslá sa musia zhodovať",
+    "min": "{fieldName} musí byť najmenej {value}",
+    "max": "{fieldName} musí byť najviac {value}",
     "uuid": "Nesprávny formát UUID",
     "id": "Nesprávne ID",
     "newCategoryFormSchema": {
       "translations": {
         "atLeastEnRequired": "Anglicky preklad je povinný"
       }
-    }
+    },
+    "never": "Pre toto pole nie je dostupná žiadna hodnota",
+    "positive": "{fieldName} musí byť kladné číslo"
   },
   "LocaleLayout": {
     "title": "GoFitShop",
@@ -98,6 +102,16 @@
             }
           }
         }
+      },
+      "productDetail": {
+        "page": {
+          "setupWarning": {
+            "title": "Tento produkt nie je úplne nastavený",
+            "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavený a viditeľný pre zákazníkov",
+            "englishTranslation": "Musí mať anglický preklad",
+            "atLeastOneVisibleVariant": "Musí obsahovať aspoň jednu viditeľnú variantu"
+          }
+        }
       }
     },
     "categories": {
@@ -159,6 +173,24 @@
       "isPublic": "Je verejný",
       "isSetup": "Je nastavený",
       "id": "ID"
+    },
+    "productTranslation": {
+      "title": "Názov",
+      "description": "Popis",
+      "content": "Obsah"
+    },
+    "productVariant": {
+      "sku": "SKU",
+      "price": "Cena",
+      "priceInCents": "Cena v centoch",
+      "isPublic": "Je verejný",
+      "stock": "Sklad",
+      "attribute": {
+        "key": "Kľúč atribútu",
+        "keyTranslation": "Preklad kľúča atribútu",
+        "value": "Hodnota atribútu",
+        "valueTranslation": "Preklad hodnoty atribútu"
+      }
     }
   }
 }

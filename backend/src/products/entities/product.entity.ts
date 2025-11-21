@@ -18,6 +18,12 @@ export class Product implements Partial<DbProduct> {
 
   @Field(() => Boolean)
   isSetup: boolean;
+
+  @Field(() => Date)
+  createdAt: Date;
+
+  @Field(() => Date)
+  updatedAt: Date;
 }
 
 @ObjectType()

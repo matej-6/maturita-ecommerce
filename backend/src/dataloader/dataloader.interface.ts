@@ -5,6 +5,7 @@ import {
   AttributeTranslation,
   Category,
   CategoryTranslation,
+  ProductImage,
   ProductTranslation,
   ProductVariant,
 } from 'generated/prisma/client';
@@ -14,6 +15,7 @@ export interface IDataLoaders {
   subcategoriesLoader: DataLoader<number, Category[]>;
   categoryTranslationLoader: DataLoader<number, CategoryTranslation | null>;
   categoryProductsCountLoader: DataLoader<number, number>;
+  productAllImagesLoader: DataLoader<number, ProductImage[]>;
   productTranslationLoader: DataLoader<number, ProductTranslation | null>;
   productAllTranslationsLoader: DataLoader<number, ProductTranslation[]>;
   productAllVariantsLoader: DataLoader<number, ProductVariant[]>;
@@ -26,6 +28,7 @@ export interface IDataLoaders {
     number,
     AttributeTranslation[]
   >;
+  productVariantAllImagesLoader: DataLoader<number, ProductImage[]>;
   attributeKeyByIdLoader: DataLoader<number, AttributeKey | null>;
   attributeKeyTranslationLoader: DataLoader<
     number,

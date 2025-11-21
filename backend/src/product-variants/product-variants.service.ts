@@ -28,6 +28,36 @@ export class ProductVariantsService {
   async getAllAttributesForVariantsByBatch(productVariantIds: number[]) {
     const atributes = await this.prisma.attribute.findMany({
       where: {
+        ProductVariants: {
+          some: {
+            id: {
+              in: productVariantIds,
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        attributeKeyId: true,
+        ProductVariants: {
+          select: {
+            id: true,
+          },
+        },
+        value: true,
+      },
+    });
+
+    return productVariantIds.map((id) =>
+      atributes.filter((attr) =>
+        attr.ProductVariants.some((pv) => pv.id === id),
+      ),
+    );
+  }
+
+  async getAllImagesForVariantsByBatch(productVariantIds: number[]) {
+    const images = await this.prisma.productImage.findMany({
+      where: {
         productVariantId: {
           in: productVariantIds,
         },
@@ -35,7 +65,7 @@ export class ProductVariantsService {
     });
 
     return productVariantIds.map((id) =>
-      atributes.filter((attr) => attr.productVariantId === id),
+      images.filter((img) => img.productVariantId === id),
     );
   }
 }

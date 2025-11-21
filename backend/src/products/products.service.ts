@@ -72,16 +72,8 @@ export class ProductsService {
     queryArgs.isSetup = role === 'ADMIN' ? queryArgs.isSetup : true;
   }
 
-  private getIsSetup(product: {
-    _count: {
-      ProductTranslations: number;
-      ProductVariants: number;
-    };
-  }) {
-    return (
-      product._count.ProductTranslations > 0 &&
-      product._count.ProductVariants > 0
-    );
+  private getIsSetup(hasEnglishTranslation: boolean, variantsCounts: number) {
+    return hasEnglishTranslation && variantsCounts > 0;
   }
 
   async findAll(
@@ -104,6 +96,8 @@ export class ProductsService {
           isPublic: true,
           slug: true,
           categoryId: true,
+          createdAt: true,
+          updatedAt: true,
           _count: {
             select: {
               ProductTranslations: {
@@ -142,8 +136,13 @@ export class ProductsService {
             id: p.id,
             isPublic: p.isPublic,
             slug: p.slug,
-            isSetup: this.getIsSetup(p),
+            isSetup: this.getIsSetup(
+              p._count.ProductTranslations > 0,
+              p._count.ProductVariants,
+            ),
             categoryId: p.categoryId,
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt,
           },
         })),
       };
@@ -215,6 +214,8 @@ export class ProductsService {
             slug: p.slug,
             categoryId: p.categoryId,
             isSetup: queryArgs.isSetup!,
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt,
           },
         })),
       };
@@ -272,6 +273,8 @@ export class ProductsService {
         isPublic: true,
         slug: true,
         categoryId: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -281,7 +284,10 @@ export class ProductsService {
       );
       return null;
     }
-    const isSetup = this.getIsSetup(product);
+    const isSetup = this.getIsSetup(
+      product._count.ProductTranslations > 0,
+      product._count.ProductVariants,
+    );
 
     if (queryArgs.isSetup != null && queryArgs.isSetup !== isSetup) {
       this.logger.warn(
@@ -346,6 +352,8 @@ export class ProductsService {
         isPublic: true,
         slug: true,
         categoryId: true,
+        createdAt: true,
+        updatedAt: true,
         _count: {
           select: {
             ProductTranslations: {
@@ -363,41 +371,29 @@ export class ProductsService {
 
     return {
       ...updatedProduct,
-      isSetup: this.getIsSetup(updatedProduct),
+      isSetup: this.getIsSetup(
+        updatedProduct._count.ProductTranslations > 0,
+        updatedProduct._count.ProductVariants,
+      ),
     };
   }
 
+  // otestovat este...
   async remove(id: number) {
     const deletedProductId = await this.prisma.$transaction(async (tx) => {
-      const attributes = await tx.attribute.findMany({
-        where: {
-          ProductVariant: {
-            productId: id,
-          },
-        },
-      });
-
-      await Promise.all(
-        attributes.map((attribute) =>
-          tx.attributeTranslation.deleteMany({
-            where: {
-              attributeId: attribute.id,
-            },
-          }),
-        ),
-      );
-
-      await tx.attribute.deleteMany({
-        where: {
-          ProductVariant: {
-            productId: id,
-          },
-        },
-      });
-
       await tx.productImage.deleteMany({
         where: {
           OR: [{ productId: id }, { ProductVariant: { productId: id } }],
+        },
+      });
+
+      await tx.attribute.deleteMany({
+        where: {
+          ProductVariants: {
+            every: {
+              productId: id,
+            },
+          },
         },
       });
 
@@ -453,5 +449,31 @@ export class ProductsService {
     return productIds.map((id) => {
       return productVariants.filter((pv) => pv.productId === id);
     });
+  }
+
+  async getAllImagesForProductsByBatch(productIds: number[]) {
+    const productImages = await this.prisma.productImage.findMany({
+      where: {
+        productId: {
+          in: productIds,
+        },
+      },
+    });
+
+    return productIds.map((id) => {
+      return productImages.filter((pi) => pi.productId === id);
+    });
+  }
+
+  async deleteProductTranslation(
+    productTranslationId: number,
+  ): Promise<number> {
+    await this.prisma.productTranslation.delete({
+      where: {
+        id: productTranslationId,
+      },
+    });
+
+    return productTranslationId;
   }
 }

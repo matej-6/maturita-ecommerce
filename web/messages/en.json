@@ -6,6 +6,8 @@
     "required": "{fieldName} is required",
     "maxLength": "{fieldName} can be at most {value, plural, =1 {# character} other {# characters}} long",
     "minLength": "{fieldName} must be at least {value, plural, =1 {# character} other {# characters}} long",
+    "min": "{fieldName} must be at least {value}",
+    "max": "{fieldName} must be at most {value}",
     "passwordsMustMatch": "Password and Confirm Password must match",
     "uuid": "Invalid UUID",
     "id": "Invalid ID",
@@ -13,7 +15,9 @@
       "translations": {
         "atLeastEnRequired": "An English translation is required"
       }
-    }
+    },
+    "never": "No value is available for this field",
+    "positive": "{fieldName} must be a positive number"
   },
   "LocaleLayout": {
     "title": "GoFitShop",
@@ -98,6 +102,16 @@
             }
           }
         }
+      },
+      "productDetail": {
+        "page": {
+          "setupWarning": {
+            "title": "This product has not been setup completely",
+            "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
+            "englishTranslation": "Ensure an english translation exists",
+            "atLeastOneVisibleVariant": "Make sure it has at least one visible variant"
+          }
+        }
       }
     },
     "categories": {
@@ -159,6 +173,24 @@
       "isPublic": "Is Public",
       "isSetup": "Is Setup",
       "id": "ID"
+    },
+    "productTranslation": {
+      "title": "Title",
+      "description": "Description",
+      "content": "Content"
+    },
+    "productVariant": {
+      "sku": "SKU",
+      "price": "Price",
+      "priceInCents": "Price in Cents",
+      "isPublic": "Is Public",
+      "stock": "Stock",
+      "attribute": {
+        "key": "Attribute Key",
+        "keyTranslation": "Attribute Key Translation",
+        "value": "Attribute Value",
+        "valueTranslation": "Attribute Value Translation"
+      }
     }
   }
 }

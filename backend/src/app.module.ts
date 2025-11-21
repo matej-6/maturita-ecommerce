@@ -25,8 +25,6 @@ import { DataloaderModule } from './dataloader/dataloader.module';
 import { DEFAULT_LOCALE } from './locales';
 import { ProductsModule } from './products/products.module';
 import { ProductVariantsModule } from './product-variants/product-variants.module';
-import { ProductAttributeResolver } from './product-attribute/product-attribute.resolver';
-import { ProductAttributesModule } from './product-attributes/product-attributes.module';
 import { ProductVariantAttributesModule } from './product-variant-attributes/product-variant-attributes.module';
 import { ProductVariantAttributeKeysModule } from './product-variant-attribute-keys/product-variant-attribute-keys.module';
 
@@ -94,12 +92,11 @@ import { ProductVariantAttributeKeysModule } from './product-variant-attribute-k
     LocalesModule,
     ProductsModule,
     ProductVariantsModule,
-    ProductAttributesModule,
     ProductVariantAttributesModule,
     ProductVariantAttributeKeysModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService, ProductAttributeResolver],
+  providers: [AppService, AuthService],
 })
 export class AppModule {}
 

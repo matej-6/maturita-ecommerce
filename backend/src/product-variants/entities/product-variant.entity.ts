@@ -14,4 +14,12 @@ export class ProductVariant implements Partial<DbProductVariant> {
   productId: number;
   @Field(() => String)
   sku: string;
+  @Field(() => Int)
+  stock: number;
+
+  @Field(() => Date)
+  createdAt: Date;
+
+  @Field(() => Date)
+  updatedAt: Date;
 }

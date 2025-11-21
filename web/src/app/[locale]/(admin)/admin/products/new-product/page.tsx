@@ -21,7 +21,8 @@ export default async function NewProductPage() {
       <h1 className="text-3xl mb-8">{t("title")}</h1>
       <div className="flex flex-col gap-y-8">
         <ProductForm
-          initialData={{ categories: newProductDataPromise.data.categories }}
+          mode="create"
+          categories={newProductDataPromise.data.categories}
         />
       </div>
     </div>

@@ -10,6 +10,7 @@ import {
   ProductVariant,
   AttributeKeyTranslation,
   AttributeTranslation,
+  ProductImage,
 } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoriesService } from 'src/categories/categories.service';
@@ -35,27 +36,30 @@ export class DataloaderService {
   getLoaders(): IDataLoaders {
     const locale = I18nContext.current()?.lang || DEFAULT_LOCALE.code;
 
-    const subcategoriesLoader = this._createSubcategoriesLoader();
+    const subcategoriesLoader = this.createSubcategoriesLoader();
     const categoryTranslationLoader =
-      this._createCategoryTranslationLoader(locale);
+      this.createCategoryTranslationLoader(locale);
     const categoryProductsCountLoader =
-      this._createCategoryProductsCountLoader();
+      this.createCategoryProductsCountLoader();
     const productTranslationLoader =
-      this._createProductTranslationLoader(locale);
+      this.createProductTranslationLoader(locale);
     const productAllTranslationsLoader =
-      this._createProductAllTranslationsLoader();
-    const productAllVariantsLoader = this._createProductAllVariantsLoader();
+      this.createProductAllTranslationsLoader();
+    const productAllVariantsLoader = this.createProductAllVariantsLoader();
     const productVariantAllAttributesLoader =
-      this._createProductVariantAllAttributesLoader();
-    const attributeKeyByIdLoader = this._createAttributeKeyByIdLoader();
+      this.createProductVariantAllAttributesLoader();
+    const attributeKeyByIdLoader = this.createAttributeKeyByIdLoader();
     const attributeKeyTranslationLoader =
-      this._createAttributeKeyTranslationLoader(locale);
+      this.createAttributeKeyTranslationLoader(locale);
     const attributeKeyAllTranslationsLoader =
-      this._createAttributeKeyAllTranslationsLoader();
+      this.createAttributeKeyAllTranslationsLoader();
     const productVariantAttributeTranslationLoader =
-      this._createProductVariantAttributeTranslationLoader(locale);
+      this.createProductVariantAttributeTranslationLoader(locale);
     const productVariantAttributeAllTranslationsLoader =
-      this._createProductVariantAttributeAllTranslationsLoader();
+      this.createProductVariantAttributeAllTranslationsLoader();
+    const productAllImagesLoader = this.createProductAllImagesLoader();
+    const productVariantAllImagesLoader =
+      this.createProductVariantAllImagesLoader();
     return {
       subcategoriesLoader,
       categoryTranslationLoader,
@@ -69,10 +73,12 @@ export class DataloaderService {
       attributeKeyAllTranslationsLoader,
       productVariantAttributeTranslationLoader,
       productVariantAttributeAllTranslationsLoader,
+      productAllImagesLoader,
+      productVariantAllImagesLoader,
     };
   }
 
-  private _createCategoryProductsCountLoader() {
+  private createCategoryProductsCountLoader() {
     return new DataLoader<number, number>(async (categoryIds: number[]) => {
       const counts = await this.db.product.groupBy({
         by: ['categoryId'],
@@ -91,7 +97,7 @@ export class DataloaderService {
     });
   }
 
-  private _createSubcategoriesLoader() {
+  private createSubcategoriesLoader() {
     return new DataLoader<number, Category[]>(async (categoryIds: number[]) => {
       const subcategories = await this.db.category.findMany({
         where: {
@@ -107,7 +113,7 @@ export class DataloaderService {
     });
   }
 
-  private _createCategoryTranslationLoader(lang: string) {
+  private createCategoryTranslationLoader(lang: string) {
     return new DataLoader<number, CategoryTranslation | null>(
       async (categoryIds: number[]) => {
         return await this.categoriesService.getAllTranslationsByBatch(
@@ -118,7 +124,7 @@ export class DataloaderService {
     );
   }
 
-  private _createProductTranslationLoader(lang: string) {
+  private createProductTranslationLoader(lang: string) {
     return new DataLoader<number, ProductTranslation | null>(
       async (productIds: number[]) => {
         return await this.productsService.getAllTranslationsByBatch(
@@ -129,7 +135,7 @@ export class DataloaderService {
     );
   }
 
-  private _createProductAllTranslationsLoader() {
+  private createProductAllTranslationsLoader() {
     return new DataLoader<number, ProductTranslation[]>(
       async (productIds: number[]) => {
         return await this.productsService.getAllTranslationsForProductsByBatch(
@@ -139,7 +145,7 @@ export class DataloaderService {
     );
   }
 
-  private _createProductAllVariantsLoader() {
+  private createProductAllVariantsLoader() {
     return new DataLoader<number, ProductVariant[]>(
       async (productIds: number[]) => {
         return await this.productsService.getAllVariantsForProductsByBatch(
@@ -149,7 +155,7 @@ export class DataloaderService {
     );
   }
 
-  private _createProductVariantAllAttributesLoader() {
+  private createProductVariantAllAttributesLoader() {
     return new DataLoader<number, Attribute[]>(
       async (productVariantIds: number[]) => {
         return await this.productVariantsService.getAllAttributesForVariantsByBatch(
@@ -159,7 +165,7 @@ export class DataloaderService {
     );
   }
 
-  private _createAttributeKeyByIdLoader() {
+  private createAttributeKeyByIdLoader() {
     return new DataLoader<number, AttributeKey | null>(
       async (attributeIds: number[]) => {
         return await this.productVariantAttributesService.getAttributeKeysByBatch(
@@ -169,7 +175,7 @@ export class DataloaderService {
     );
   }
 
-  private _createAttributeKeyTranslationLoader(lang: string) {
+  private createAttributeKeyTranslationLoader(lang: string) {
     return new DataLoader<number, AttributeKeyTranslation | null>(
       async (attributeKeyIds: number[]) => {
         return await this.productVariantAttributeKeysService.getTranslationsByBatch(
@@ -180,7 +186,7 @@ export class DataloaderService {
     );
   }
 
-  private _createAttributeKeyAllTranslationsLoader() {
+  private createAttributeKeyAllTranslationsLoader() {
     return new DataLoader<number, AttributeKeyTranslation[]>(
       async (attributeKeyIds: number[]) => {
         return await this.productVariantAttributeKeysService.getAllTranslationsByBatch(
@@ -190,7 +196,7 @@ export class DataloaderService {
     );
   }
 
-  private _createProductVariantAttributeTranslationLoader(lang: string) {
+  private createProductVariantAttributeTranslationLoader(lang: string) {
     return new DataLoader<number, AttributeTranslation | null>(
       async (attributeIds: number[]) => {
         return await this.productVariantAttributesService.getTranslationsByBatch(
@@ -201,11 +207,31 @@ export class DataloaderService {
     );
   }
 
-  private _createProductVariantAttributeAllTranslationsLoader() {
+  private createProductVariantAttributeAllTranslationsLoader() {
     return new DataLoader<number, AttributeTranslation[]>(
       async (attributeIds: number[]) => {
         return await this.productVariantAttributesService.getAllTranslationsByBatch(
           attributeIds,
+        );
+      },
+    );
+  }
+
+  private createProductAllImagesLoader() {
+    return new DataLoader<number, ProductImage[]>(
+      async (productIds: number[]) => {
+        return await this.productsService.getAllImagesForProductsByBatch(
+          productIds,
+        );
+      },
+    );
+  }
+
+  private createProductVariantAllImagesLoader() {
+    return new DataLoader<number, ProductImage[]>(
+      async (productVariantIds: number[]) => {
+        return await this.productVariantsService.getAllImagesForVariantsByBatch(
+          productVariantIds,
         );
       },
     );
