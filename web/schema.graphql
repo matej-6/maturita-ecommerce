@@ -62,14 +62,24 @@ input CreateProductInput {
   slug: String!
 }
 
+input CreateProductTranslationInput {
+  """Product description"""
+  description: String
+  """Locale code"""
+  localeCode: String!
+  """Product markdown content"""
+  markdownContent: String
+  """Product name"""
+  name: String!
+}
+
 input CreateProductVariantAttributeInput {
   """Example field (placeholder)"""
   exampleField: Int!
 }
 
 input CreateProductVariantAttributeKeyInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  key: String!
 }
 
 input CreateProductVariantInput {
@@ -101,6 +111,19 @@ input EditCategoryTranslationInput {
   name: String!
 }
 
+input EditProductTranslationInput {
+  """Product description"""
+  description: String
+  """Locale code"""
+  localeCode: String!
+  """Product markdown content"""
+  markdownContent: String
+  """Product name"""
+  name: String!
+  """product translation id"""
+  productTranslationId: Int!
+}
+
 type Locale {
   """Locale code"""
   code: String!
@@ -122,15 +145,19 @@ type MeResponse {
 }
 
 type Mutation {
+  addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
   createProduct(createProductInput: CreateProductInput!): Product!
+  createProductTranslation(createProductTranslationInput: CreateProductTranslationInput!, productId: Int!): ProductTranslation!
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
   createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
   createProductVariantAttributeKey(createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   createUser(createUserInput: CreateUserInput!): User!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
+  deleteProductImage(productImageId: Int!): Int!
   deleteProductTranslation(productTranslationId: Int!): Int!
+  editProductTranslation(editProductTranslationInput: EditProductTranslationInput!): ProductTranslation!
   logoutAll: Void!
   removeCategory(id: Int!): Category!
   removeProduct(id: Int!): Product!
@@ -139,6 +166,7 @@ type Mutation {
   removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   removeUser(id: ID!): User!
   requestEmailVerification: Void!
+  setProductThumbnailImage(productImageId: Int!): ProductImage!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
@@ -347,9 +375,8 @@ input UpdateProductVariantAttributeInput {
 }
 
 input UpdateProductVariantAttributeKeyInput {
-  """Example field (placeholder)"""
-  exampleField: Int
   id: Int!
+  key: String
 }
 
 input UpdateProductVariantInput {

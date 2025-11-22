@@ -1,9 +1,6 @@
 "use server";
 
-import {
-  getProductDetailPageData,
-  ProductDetailPageQueryDocument,
-} from "@/app/data-access-layer/admin/product/queries";
+import { getProductDetailPageData } from "@/app/data-access-layer/admin/product/queries";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +13,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { execute } from "@/graphql/execute";
 import { Link } from "@/i18n/navigation";
 import { AlertCircleIcon, ArrowUpRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ProductForm } from "../../../forms/product-form";
+import { ProductTranslation } from "../../../components/products/product-translation";
+import { AddProductTranslationSheet } from "../../../components/products/add-product-translation-sheet";
+import { getImageSrc } from "@/app/lib/utils";
+import Image from "next/image";
+import { ProductImageForm } from "../../../forms/product-image-form";
+import { SetImageThumbnailButton } from "../../../components/products/set-image-thumbnail-button";
+import { DeleteImage } from "../../../components/products/delete-image-button";
 
 export default async function ProductDetailPage({
   params,
@@ -64,8 +67,7 @@ export default async function ProductDetailPage({
   const t = await getTranslations("admin.products.productDetail.page");
 
   return (
-    <div className="bg-muted/50 dark:bg-muted/50 flex flex-col flex-1 rounded-xl p-6">
-      <h1 className="text-3xl mb-8">Product Detail - ID: {id}</h1>
+    <div className="bg-muted/50 dark:bg-muted/50 flex flex-col flex-1 rounded-xl p-6 gap-y-8 ">
       <div className="flex flex-col gap-y-8">
         <div className="flex flex-col gap-y-8">
           <h1 className="font-medium font-secondary">Overview</h1>
@@ -170,15 +172,90 @@ export default async function ProductDetailPage({
       </div>
       <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
       <div className="flex flex-col gap-y-8">
+        <h2 className="font-medium font-secondary">Images</h2>
+        {product.images.length === 0 ? (
+          <span>No images uploaded.</span>
+        ) : (
+          <div className="flex flex-wrap gap-4">
+            {product.images.map((img) => (
+              <div
+                key={img.id}
+                className="w-48 h-48 bg-muted rounded-md overflow-hidden flex items-center justify-center relative group"
+              >
+                <Image
+                  src={getImageSrc(img.mimeType, img.base64)}
+                  alt={product.slug}
+                  className="object-cover w-full h-full"
+                  width={200}
+                  height={200}
+                />
+                <div className="absolute top-2 left-2 flex gap-x-1 items-center justify-start">
+                  {img.isThumbnail ? (
+                    <span className=" bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+                      Thumbnail
+                    </span>
+                  ) : (
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <SetImageThumbnailButton
+                        productId={product.id}
+                        imageId={img.id}
+                      />
+                    </div>
+                  )}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DeleteImage productId={product.id} imageId={img.id} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <ProductImageForm productId={product.id} />
+      </div>
+      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="flex flex-col gap-y-8">
         <h2 className="font-medium font-secondary">Translations</h2>
         <div className="flex gap-8">
           {product.translations.map((t) => {
             const locale = locales.find((l) => l.code === t.locale);
+            if (!locale) return null;
 
-            const availableLocales = [locale!, ...missingTranslations];
-            return null;
+            const availableLocales = [locale, ...missingTranslations];
+
+            return (
+              <ProductTranslation
+                key={t.id}
+                formProps={{
+                  availableLocales: availableLocales.map((l) => ({
+                    label: l.name,
+                    value: l.code,
+                  })),
+                  mode: "edit",
+                  productId: product.id,
+                  translationId: t.id,
+                  initialData: {
+                    locale: t.locale,
+                    markdownContent: t.markdownContent || "",
+                    name: t.name,
+                    description: t.description || "",
+                  },
+                }}
+                locale={locale}
+                name={t.name}
+                description={t.description || ""}
+                translationId={t.id}
+                productId={product.id}
+              />
+            );
           })}
         </div>
+        <AddProductTranslationSheet
+          id={product.id}
+          availableLocales={missingTranslations.map((t) => ({
+            label: t.name,
+            value: t.code,
+          }))}
+        />
       </div>
     </div>
   );

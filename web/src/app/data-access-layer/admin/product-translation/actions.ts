@@ -4,16 +4,24 @@ import { execute } from "@/graphql/execute";
 import { ActionResponse } from "../../formActionResponse";
 import { handleGraphqlError } from "../handleGraphqlFormError";
 import { ExecutionResult } from "graphql";
-import { DeleteProductTranslationMutationMutation } from "@/graphql/graphql";
-import { DeleteProductTranslationMutation } from "./mutations";
+import {
+  CreateProductTranslationMutationMutation,
+  DeleteProductTranslationMutationMutation,
+  EditProductTranslationMutationMutation,
+} from "@/graphql/graphql";
+import {
+  CreateProductTranslationMutation,
+  DeleteProductTranslationMutation,
+  EditProductTranslationMutation,
+} from "./mutations";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
+import { productTranslationFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/product-translation-schema";
 
 export async function deleteProductTranslationAction(
   translationId: number,
   product: {
     id: number;
-    slug: number;
   }
 ): Promise<
   ActionResponse<
@@ -34,7 +42,6 @@ export async function deleteProductTranslationAction(
 
   revalidatePath(`/${locale}/admin/products`);
   revalidatePath(`/${locale}/admin/products/product-detail/${product.id}`);
-  revalidatePath(`/${locale}/product/${product.slug}`);
 
   if (!res.data) {
     return {
@@ -46,5 +53,84 @@ export async function deleteProductTranslationAction(
   return {
     success: true,
     data: res.data.deleteProductTranslation,
+  };
+}
+
+export async function createProductTranslationAction(
+  productId: number,
+  data: productTranslationFormSchemaType
+): Promise<
+  ActionResponse<
+    NonNullable<
+      ExecutionResult<CreateProductTranslationMutationMutation>["data"]
+    >["createProductTranslation"]
+  >
+> {
+  const res = await execute(CreateProductTranslationMutation, {
+    productId: productId,
+    name: data.name,
+    description: data.description || null,
+    localeCode: data.locale,
+    markdownContent: data.markdownContent || null,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products`);
+  revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data.createProductTranslation,
+  };
+}
+
+export async function editProductTranslationAction(
+  productTranslationId: number,
+  productId: number,
+  data: productTranslationFormSchemaType
+): Promise<
+  ActionResponse<
+    NonNullable<
+      ExecutionResult<EditProductTranslationMutationMutation>["data"]
+    >["editProductTranslation"]
+  >
+> {
+  const res = await execute(EditProductTranslationMutation, {
+    translationId: productTranslationId,
+    name: data.name,
+    description: data.description || null,
+    localeCode: data.locale,
+    markdownContent: data.markdownContent || null,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products`);
+  revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data.editProductTranslation,
   };
 }

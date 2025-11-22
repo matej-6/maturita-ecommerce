@@ -28,6 +28,8 @@ import { GraphqlAppContext } from 'src/app.module';
 import { ProductTranslation } from './entities/product-translation.entity';
 import { ProductVariant } from '../product-variants/entities/product-variant.entity';
 import { ProductImage } from 'src/entities/product-image.entity';
+import { CreateProductTranslationInput } from './dto/create-product-translation.input';
+import { EditProductTranslationInput } from './dto/edit-product-translation.input';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -39,6 +41,30 @@ export class ProductsResolver {
     @Args('createProductInput') createProductInput: CreateProductInput,
   ) {
     return await this.productsService.create(createProductInput);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductTranslation)
+  async createProductTranslation(
+    @Args('productId', { type: () => Int }) productId: number,
+    @Args('createProductTranslationInput')
+    createProductTranslationInput: CreateProductTranslationInput,
+  ) {
+    return await this.productsService.createProductTranslation(
+      productId,
+      createProductTranslationInput,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductTranslation)
+  async editProductTranslation(
+    @Args('editProductTranslationInput')
+    editProductTranslationInput: EditProductTranslationInput,
+  ) {
+    return await this.productsService.editProductTranslation(
+      editProductTranslationInput,
+    );
   }
 
   @UseGuards(OptionalJwtAuthGuard)
@@ -53,6 +79,36 @@ export class ProductsResolver {
       findAllQueryArgs,
       user?.role,
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductImage)
+  async addProductImage(
+    @Args('productId', { type: () => Int }) productId: number,
+    @Args('base64') base64: string,
+    @Args('mimeType') mimeType: string,
+  ) {
+    return await this.productsService.addProductImage(
+      productId,
+      base64,
+      mimeType,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => Int)
+  async deleteProductImage(
+    @Args('productImageId', { type: () => Int }) productImageId: number,
+  ) {
+    return await this.productsService.deleteProductImage(productImageId);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductImage)
+  async setProductThumbnailImage(
+    @Args('productImageId', { type: () => Int }) productImageId: number,
+  ) {
+    return await this.productsService.setProductImageThumbnail(productImageId);
   }
 
   @Query(() => Product, { name: 'product' })

@@ -9,41 +9,45 @@ export const DeleteProductTranslationMutation = graphql(
   `
 );
 
-export const NewCategoryTranslationMutation = graphql(`
-  mutation NewCategoryTranslationMutation(
-    $categoryId: Int!
+export const CreateProductTranslationMutation = graphql(`
+  mutation CreateProductTranslationMutation(
+    $productId: Int!
     $localeCode: String!
     $name: String!
     $description: String
+    $markdownContent: String
   ) {
-    createCategoryTranslation(
-      newTranslationinput: {
-        categoryId: $categoryId
-        localeCode: $localeCode
+    createProductTranslation(
+      productId: $productId
+      createProductTranslationInput: {
         name: $name
         description: $description
+        localeCode: $localeCode
+        markdownContent: $markdownContent
       }
     ) {
       name
-      locale
       description
+      locale
     }
   }
 `);
 
-export const EditCategoryTranslationMutation = graphql(`
-  mutation EditCategoryTranslationMutation(
+export const EditProductTranslationMutation = graphql(`
+  mutation EditProductTranslationMutation(
     $translationId: Int!
     $localeCode: String!
     $name: String!
     $description: String
+    $markdownContent: String
   ) {
-    updateCategoryTranslation(
-      editTranslationInput: {
-        categoryTranslationId: $translationId
+    editProductTranslation(
+      editProductTranslationInput: {
+        productTranslationId: $translationId
         name: $name
         description: $description
         localeCode: $localeCode
+        markdownContent: $markdownContent
       }
     ) {
       name

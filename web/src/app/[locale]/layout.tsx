@@ -96,7 +96,7 @@ export default async function LocaleLayout({
           geistMono.variable,
           inter.variable,
           bricolage.variable,
-          "antialiased font-primary dark"
+          "antialiased font-primary dark overflow-y-scroll!"
         )}
       >
         <Providers>

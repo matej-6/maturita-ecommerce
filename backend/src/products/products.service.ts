@@ -12,6 +12,8 @@ import { PaginatedProduct, Product } from './entities/product.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { ProductTranslation } from 'generated/prisma/client';
+import { CreateProductTranslationInput } from './dto/create-product-translation.input';
+import { EditProductTranslationInput } from './dto/edit-product-translation.input';
 
 @Injectable()
 export class ProductsService {
@@ -47,6 +49,142 @@ export class ProductsService {
       }
       throw e;
     }
+  }
+
+  async setProductImageThumbnail(productImageId: number) {
+    const image = await this.prisma.productImage.findFirst({
+      where: {
+        id: productImageId,
+      },
+    });
+
+    if (!image) {
+      throw new BadRequestException('products.service.imageNotFound');
+    }
+
+    const updatedImage = await this.prisma.$transaction(async (tx) => {
+      await tx.productImage.updateMany({
+        where: {
+          productId: image.productId,
+        },
+        data: {
+          isThumbnail: false,
+        },
+      });
+
+      return await tx.productImage.update({
+        where: {
+          id: productImageId,
+        },
+        data: {
+          isThumbnail: true,
+        },
+      });
+    });
+
+    return updatedImage;
+  }
+
+  async addProductImage(productId: number, base64: string, mimeType: string) {
+    if (!mimeType.startsWith('image/')) {
+      throw new BadRequestException('products.service.invalidImageMimeType');
+    }
+
+    const [product, existingThumbnail] = await Promise.all([
+      this.prisma.product.findFirst({
+        where: {
+          id: productId,
+        },
+        select: {
+          id: true,
+        },
+      }),
+      this.prisma.productImage.findFirst({
+        where: {
+          productId: productId,
+          isThumbnail: true,
+        },
+        select: {
+          id: true,
+        },
+      }),
+    ]);
+
+    if (!product) {
+      throw new BadRequestException(
+        'products.service.addImage.productNotFound',
+      );
+    }
+
+    const newImage = await this.prisma.productImage.create({
+      data: {
+        productId: productId,
+        base64: base64,
+        mimeType: mimeType,
+        isThumbnail: existingThumbnail ? false : true,
+      },
+    });
+
+    return newImage;
+  }
+
+  async editProductTranslation(
+    input: EditProductTranslationInput,
+  ): Promise<ProductTranslation> {
+    const foundLocale = this.localesService.findOne(input.localeCode);
+    if (!foundLocale) {
+      throw new BadRequestException('products.service.invalidLocaleCode');
+    }
+
+    const foundTranslation = await this.prisma.productTranslation.findFirst({
+      where: {
+        id: input.productTranslationId,
+      },
+      select: {
+        productId: true,
+        id: true,
+        locale: true,
+      },
+    });
+
+    if (!foundTranslation) {
+      throw new BadRequestException(
+        'products.service.editTranslation.notFound',
+      );
+    }
+
+    if (foundTranslation.locale !== input.localeCode) {
+      const existingTranslation =
+        await this.prisma.productTranslation.findFirst({
+          where: {
+            productId: foundTranslation.productId,
+            locale: input.localeCode,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (existingTranslation) {
+        throw new BadRequestException(
+          'products.service.editTranslation.translationWithThisLocaleAlreadyExists',
+        );
+      }
+    }
+
+    const updatedTranslation = await this.prisma.productTranslation.update({
+      where: {
+        id: input.productTranslationId,
+      },
+      data: {
+        description: input.description || null,
+        name: input.name,
+        locale: input.localeCode,
+        markdownContent: input.markdownContent || null,
+      },
+    });
+
+    return updatedTranslation;
   }
 
   private validatePaginationArgs(args: PaginationArgs) {
@@ -475,5 +613,105 @@ export class ProductsService {
     });
 
     return productTranslationId;
+  }
+
+  async createProductTranslation(
+    productId: number,
+    input: CreateProductTranslationInput,
+  ): Promise<ProductTranslation> {
+    const foundLocale = this.localesService.findOne(input.localeCode);
+    if (!foundLocale) {
+      throw new BadRequestException('products.service.invalidLocaleCode');
+    }
+
+    const [existingTranslation, existingProduct] = await Promise.all([
+      this.prisma.productTranslation.findFirst({
+        where: {
+          productId: productId,
+          locale: input.localeCode,
+        },
+        select: {
+          id: true,
+        },
+      }),
+      this.prisma.product.findFirst({
+        where: {
+          id: productId,
+        },
+        select: {
+          id: true,
+        },
+      }),
+    ]);
+
+    if (existingTranslation) {
+      throw new BadRequestException(
+        'products.service.createTranslation.translationWithThisLocaleAlreadyExists',
+      );
+    }
+
+    if (!existingProduct) {
+      throw new BadRequestException(
+        'products.service.createTranslation.productNotFound',
+      );
+    }
+
+    const newTranslation = await this.prisma.productTranslation.create({
+      data: {
+        productId: productId,
+        locale: input.localeCode,
+        name: input.name,
+        description: input.description || null,
+        markdownContent: input.markdownContent || null,
+      },
+    });
+    return newTranslation;
+  }
+
+  async deleteProductImage(productImageId: number): Promise<number> {
+    const existingImage = await this.prisma.productImage.findFirst({
+      where: {
+        id: productImageId,
+      },
+      select: {
+        id: true,
+        isThumbnail: true,
+        productId: true,
+      },
+    });
+
+    if (!existingImage) {
+      throw new BadRequestException('products.service.imageNotFound');
+    }
+
+    await this.prisma.productImage.delete({
+      where: {
+        id: productImageId,
+      },
+    });
+
+    if (existingImage.isThumbnail) {
+      const anotherImage = await this.prisma.productImage.findFirst({
+        where: {
+          productId: existingImage.productId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (anotherImage) {
+        await this.prisma.productImage.update({
+          where: {
+            id: anotherImage.id,
+          },
+          data: {
+            isThumbnail: true,
+          },
+        });
+      }
+    }
+
+    return productImageId;
   }
 }

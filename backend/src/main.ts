@@ -5,6 +5,7 @@ import { I18nMiddleware, I18nValidationPipe } from 'nestjs-i18n';
 import { AllExceptionsFilter } from './exception/all-exceptions.filter';
 import { ValidationFilter } from './validation/validation.filter';
 import { ErrorFilter } from './exception/error.filter';
+import { json } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,6 +19,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.use(I18nMiddleware);
+  app.use(json({ limit: '10mb' }));
 
   app.useGlobalFilters(
     new ErrorFilter(),

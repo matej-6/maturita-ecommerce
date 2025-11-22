@@ -38,3 +38,33 @@ export const EditProductMutation = graphql(`
     }
   }
 `);
+
+export const AddImageMutation = graphql(`
+  mutation AddImageMutation(
+    $productId: Int!
+    $mimeType: String!
+    $base64: String!
+  ) {
+    addProductImage(
+      productId: $productId
+      mimeType: $mimeType
+      base64: $base64
+    ) {
+      id
+    }
+  }
+`);
+
+export const SetImageThumbnailMutation = graphql(`
+  mutation SetImageThumbnailMutation($imageId: Int!) {
+    setProductThumbnailImage(productImageId: $imageId) {
+      id
+    }
+  }
+`);
+
+export const DeleteProductImageMutation = graphql(`
+  mutation DeleteProductImageMutation($imageId: Int!) {
+    deleteProductImage(productImageId: $imageId)
+  }
+`);

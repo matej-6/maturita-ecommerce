@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteCategoryTranslationAction } from "@/app/data-access-layer/admin/category-translation/actions";
+import { deleteProductTranslationAction } from "@/app/data-access-layer/admin/product-translation/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,9 +18,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { getQueryClient } from "@/lib/get-query-client";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
+import {
+  ProductTranslationForm,
+  ProductTranslationFormProps,
+} from "../../forms/product-translation-form";
 
 type ProductTranslationProps = {
   translationId: number;
@@ -31,7 +35,8 @@ type ProductTranslationProps = {
   };
   name: string;
   description?: string;
-  formProps: unknown;
+  formProps: ProductTranslationFormProps;
+  productId: number;
 };
 
 export function ProductTranslation({
@@ -40,8 +45,9 @@ export function ProductTranslation({
   translationId,
   name,
   description,
+  productId,
 }: ProductTranslationProps) {
-  const queryClient = getQueryClient();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const { mutate: deleteTranslation, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -51,6 +57,14 @@ export function ProductTranslation({
           setConfirmation(false);
         }, 3000);
         return;
+      }
+
+      const res = await deleteProductTranslationAction(translationId, {
+        id: productId,
+      });
+
+      if (!res.success) {
+        toast.error(res.message);
       }
     },
   });
@@ -76,16 +90,18 @@ export function ProductTranslation({
       </CardContent>
       <CardFooter>
         <div className="flex items-center gap-x-2 justify-center">
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button>Edit</Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="overflow-y-scroll">
               <SheetHeader>
-                <SheetTitle>Add translation</SheetTitle>
+                <SheetTitle>Edit translation</SheetTitle>
               </SheetHeader>
               <div className="flex-1 flex flex-col">
-                <div className="flex-1 px-4"></div>
+                <div className="flex-1 px-4">
+                  {isSheetOpen && <ProductTranslationForm {...formProps} />}
+                </div>
                 <SheetFooter>
                   <SheetClose asChild>
                     <Button variant="outline">Close</Button>

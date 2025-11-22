@@ -7,12 +7,21 @@ import { handleGraphqlError } from "../handleGraphqlFormError";
 import { NewProductPageQueryDocument } from "./queries";
 import { ExecutionResult } from "graphql";
 import {
+  AddImageMutationMutation,
   CreateProductMutationMutation,
   EditProductMutationMutation,
   NewProductPage_QueryDocumentQuery,
 } from "@/graphql/graphql";
-import { CreateProductMutation, EditProductMutation } from "./mutations";
+import {
+  AddImageMutation,
+  CreateProductMutation,
+  DeleteProductImageMutation,
+  EditProductMutation,
+  SetImageThumbnailMutation,
+} from "./mutations";
 import { revalidatePath } from "next/cache";
+import { readFileSync } from "fs";
+import { getLocale } from "next-intl/server";
 
 export async function createProductAction(
   data: productFormSchemaType
@@ -84,6 +93,44 @@ export async function editProductAction(
   };
 }
 
+export async function uploadProductImageAction(
+  productId: number,
+  base64Image: string,
+  mimeType: string
+): Promise<
+  ActionResponse<
+    NonNullable<
+      ExecutionResult<AddImageMutationMutation>["data"]
+    >["addProductImage"]
+  >
+> {
+  const res = await execute(AddImageMutation, {
+    productId: productId,
+    mimeType: mimeType,
+    base64: base64Image,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+  revalidatePath(`/${locale}/admin/products`);
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data.addProductImage,
+  };
+}
+
 export async function getDataForNewProductPage(): Promise<
   ActionResponse<
     NonNullable<ExecutionResult<NewProductPage_QueryDocumentQuery>["data"]>
@@ -104,5 +151,63 @@ export async function getDataForNewProductPage(): Promise<
   return {
     success: true,
     data: res.data,
+  };
+}
+
+export async function setProductThumbnailImageAction(
+  productId: number,
+  imageId: number
+): Promise<ActionResponse<null>> {
+  const res = await execute(SetImageThumbnailMutation, {
+    imageId: imageId,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+  revalidatePath(`/${locale}/admin/products`);
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: null,
+  };
+}
+
+export async function deleteProductImageAction(
+  productId: number,
+  imageId: number
+): Promise<ActionResponse<null>> {
+  const res = await execute(DeleteProductImageMutation, {
+    imageId: imageId,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+  revalidatePath(`/${locale}/admin/products`);
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: null,
   };
 }

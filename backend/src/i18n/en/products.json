@@ -11,6 +11,15 @@
     },
     "removeTranslation": {
       "notFound": "The product translation you're trying to delete doesn't exist. Please refresh the page and try again."
-    }
+    },
+    "createTranslation": {
+      "productNotFound": "The product you're trying to add a translation to doesn't exist.",
+      "translationWithThisLocaleAlreadyExists": "A translation with the locale you're trying to create already exists."
+    },
+    "invalidImageMimeType": "Invalid image mime type.",
+    "addImage": {
+      "productNotFound": "The product you're trying to add an image to doesn't exist."
+    },
+    "imageNotFound": "The product image with that ID doesn't exist."
   }
 }

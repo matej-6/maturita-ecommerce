@@ -36,9 +36,11 @@ export const ProductDetailPageQueryDocument = graphql(`
       createdAt
       updatedAt
       translations {
+        id
         locale
         name
         description
+        markdownContent
       }
       images {
         id
