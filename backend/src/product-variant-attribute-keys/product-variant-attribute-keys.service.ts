@@ -13,10 +13,24 @@ export class ProductVariantAttributeKeysService {
     private readonly localesService: LocalesService,
   ) {}
 
-  create(
+  async create(
     createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput,
   ) {
-    return 'This action adds a new productVariantAttributeKey';
+    const existingKey = await this.prisma.attributeKey.findFirst({
+      where: { key: createProductVariantAttributeKeyInput.key },
+    });
+
+    if (existingKey) {
+      throw new Error(
+        'product-variant-attribute-keys.service.attributeKeyAlreadyExists',
+      );
+    }
+
+    return this.prisma.attributeKey.create({
+      data: {
+        key: createProductVariantAttributeKeyInput.key,
+      },
+    });
   }
 
   async findAll(productId: number | null) {
@@ -43,11 +57,29 @@ export class ProductVariantAttributeKeysService {
     });
   }
 
-  update(
-    id: number,
+  async update(
     updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput,
   ) {
-    return `This action updates a #${id} productVariantAttributeKey`;
+    const keyToUpdate = await this.prisma.attributeKey.findUnique({
+      where: {
+        id: updateProductVariantAttributeKeyInput.id,
+      },
+    });
+
+    if (!keyToUpdate) {
+      throw new Error(
+        'product-variant-attribute-keys.service.attributeKeyNotFound',
+      );
+    }
+
+    return this.prisma.attributeKey.update({
+      where: {
+        id: updateProductVariantAttributeKeyInput.id,
+      },
+      data: {
+        key: updateProductVariantAttributeKeyInput.key,
+      },
+    });
   }
 
   remove(id: number) {

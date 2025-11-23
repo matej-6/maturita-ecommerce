@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateProductVariantAttributeInput } from './dto/create-product-variant-attribute.input';
 import { UpdateProductVariantAttributeInput } from './dto/update-product-variant-attribute.input';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,10 +13,42 @@ export class ProductVariantAttributesService {
     private readonly localesService: LocalesService,
   ) {}
 
-  create(
+  async create(
     createProductVariantAttributeInput: CreateProductVariantAttributeInput,
   ) {
-    return 'This action adds a new productVariantAttribute';
+    const [existingAttribute, existingKey] = await this.prisma.$transaction(
+      async (tx) => {
+        const attribute = await tx.attribute.findFirst({
+          where: {
+            attributeKeyId: createProductVariantAttributeInput.keyId,
+            value: createProductVariantAttributeInput.value,
+          },
+        });
+        const key = await tx.attributeKey.findUnique({
+          where: { id: createProductVariantAttributeInput.keyId },
+        });
+        return [attribute, key];
+      },
+    );
+
+    if (existingAttribute) {
+      throw new BadRequestException(
+        'product-variant-attributes.service.attributeAlreadyExists',
+      );
+    }
+
+    if (!existingKey) {
+      throw new BadRequestException(
+        'product-variant-attributes.service.attributeKeyNotFound',
+      );
+    }
+
+    return this.prisma.attribute.create({
+      data: {
+        value: createProductVariantAttributeInput.value,
+        attributeKeyId: createProductVariantAttributeInput.keyId,
+      },
+    });
   }
 
   findAll() {
@@ -27,11 +59,42 @@ export class ProductVariantAttributesService {
     return `This action returns a #${id} productVariantAttribute`;
   }
 
-  update(
-    id: number,
+  async update(
     updateProductVariantAttributeInput: UpdateProductVariantAttributeInput,
   ) {
-    return `This action updates a #${id} productVariantAttribute`;
+    const attributeToUpdate = await this.prisma.attribute.findUnique({
+      where: { id: updateProductVariantAttributeInput.id },
+    });
+
+    if (!attributeToUpdate) {
+      throw new BadRequestException(
+        'product-variant-attributes.service.attributeNotFound',
+      );
+    }
+
+    const existingAttribute = await this.prisma.attribute.findFirst({
+      where: {
+        attributeKeyId: attributeToUpdate.attributeKeyId,
+        value: updateProductVariantAttributeInput.value,
+      },
+    });
+
+    if (existingAttribute?.id === updateProductVariantAttributeInput.id) {
+      return existingAttribute;
+    }
+
+    if (existingAttribute) {
+      throw new BadRequestException(
+        'product-variant-attributes.service.attributeAlreadyExists',
+      );
+    }
+
+    return this.prisma.attribute.update({
+      where: { id: updateProductVariantAttributeInput.id },
+      data: {
+        value: updateProductVariantAttributeInput.value,
+      },
+    });
   }
 
   remove(id: number) {

@@ -14,6 +14,8 @@ import { UpdateProductVariantAttributeInput } from './dto/update-product-variant
 import { ProductVariantAttributeKey } from '../product-variant-attribute-keys/entities/product-variant-attribute-key.entity';
 import { GraphqlAppContext } from 'src/app.module';
 import { ProductVariantAttributeTranslation } from './entities/product-variant-attribute-translation.entity';
+import { UseGuards } from '@nestjs/common';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 
 @Resolver(() => ProductVariantAttribute)
 export class ProductVariantAttributesResolver {
@@ -21,6 +23,7 @@ export class ProductVariantAttributesResolver {
     private readonly productVariantAttributesService: ProductVariantAttributesService,
   ) {}
 
+  @UseGuards(AdminGuard)
   @Mutation(() => ProductVariantAttribute)
   createProductVariantAttribute(
     @Args('createProductVariantAttributeInput')
@@ -31,17 +34,18 @@ export class ProductVariantAttributesResolver {
     );
   }
 
+  @UseGuards(AdminGuard)
   @Mutation(() => ProductVariantAttribute)
   updateProductVariantAttribute(
     @Args('updateProductVariantAttributeInput')
     updateProductVariantAttributeInput: UpdateProductVariantAttributeInput,
   ) {
     return this.productVariantAttributesService.update(
-      updateProductVariantAttributeInput.id,
       updateProductVariantAttributeInput,
     );
   }
 
+  @UseGuards(AdminGuard)
   @Mutation(() => ProductVariantAttribute)
   removeProductVariantAttribute(@Args('id', { type: () => Int }) id: number) {
     return this.productVariantAttributesService.remove(id);

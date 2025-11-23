@@ -14,7 +14,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "@/i18n/navigation";
-import { AlertCircleIcon, ArrowUpRightIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  ArrowUpRightIcon,
+  MoreHorizontalIcon,
+} from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ProductForm } from "../../../forms/product-form";
@@ -27,6 +31,16 @@ import { SetImageThumbnailButton } from "../../../components/products/set-image-
 import { DeleteImage } from "../../../components/products/delete-image-button";
 
 import { ProductVariantsDetails } from "../../../components/products/product-variant-details";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AttributeKeyForm } from "../../../forms/attribute-key-form";
 
 export default async function ProductDetailPage({
   params,
@@ -40,9 +54,7 @@ export default async function ProductDetailPage({
   const parsedId = parseInt(id, 10);
 
   if (isNaN(parsedId)) {
-    return (
-      <div className="text-red-500">Invalid product ID provided in query.</div>
-    );
+    return notFound();
   }
 
   const res = await getProductDetailPageData(parsedId);
@@ -266,28 +278,187 @@ export default async function ProductDetailPage({
       </div>
       <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <ProductVariantsDetails
-          attributeKeys={attributeKeys.map((a) => ({
-            key: a.key,
-            keyId: a.id,
-            attributes: a.attributes,
-          }))}
-          productId={product.id}
-          variants={product.variants.map((v) => ({
-            ...v,
-            attributes: v.attributes.map((va) => ({
-              value: va.value,
-              key: va.key!.key,
-            })),
-            images: v.images.map((vi) => ({
-              id: vi.id,
-              src: getImageSrc(vi.mimeType, vi.base64),
-              alt: v.sku,
-              isThumbnail: vi.isThumbnail,
-            })),
-          }))}
-        />
-        <Button className="w-fit">Add Variant</Button>
+        <h2 className="font-medium font-secondary">Variants</h2>
+
+        <div className="flex flex-wrap gap-8">
+          {product.variants.map((variant) => {
+            return (
+              <Card key={variant.id} className="w-lg">
+                <CardHeader>
+                  <CardTitle>{variant.sku}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-y-4">
+                  <div className="grid grid-cols-3 gap-2 max-w-xl">
+                    <div className="flex flex-col gap-y-0">
+                      <span className="font-medium text-xs text-muted-foreground">
+                        Price
+                      </span>
+                      <span>{(variant.priceInCents / 100).toFixed(2)}€</span>
+                    </div>
+                    <div className="flex flex-col gap-y-0">
+                      <span className="font-medium text-xs text-muted-foreground">
+                        Stock
+                      </span>
+                      <span>{variant.stock}</span>
+                    </div>
+                    <div className="flex flex-col gap-y-0">
+                      <span className="font-medium text-xs text-muted-foreground">
+                        Is Public
+                      </span>
+                      <span>{variant.isPublic ? "Yes" : "No"}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-y-2">
+                    <h3 className="font-medium text-xs text-muted-foreground">
+                      Attributes
+                    </h3>
+                    <div className="">
+                      {variant.attributes.length === 0 ? (
+                        <span>No attributes.</span>
+                      ) : (
+                          <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr] justify-start items-center w-full">
+                            <span className="font-medium text-xs text-muted-foreground">
+                              Key
+                            </span>
+                            <span className="font-medium text-xs text-muted-foreground ">
+                              Value
+                            </span>
+                            <span className="col-span-3 font-medium text-xs text-muted-foreground">
+                              Actions</span>
+                        </div>
+                      )}
+                      {variant.attributes.map((attr) => (
+                        <div
+                          key={attr.id}
+                          className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr] items-center w-full justify-start"
+                        >
+                          <span>{attr.key?.key}</span>
+                          <span>{attr.value}</span>
+                          <Button variant={"ghost"} size={"sm"}>
+                            Edit
+                          </Button>
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <Button
+                                disabled={!attr.key}
+                                variant={"ghost"}
+                                size={"sm"}
+                              >
+                                Edit key
+                              </Button>
+                            </SheetTrigger>
+                            <SheetContent>
+                              <SheetHeader>
+                                <SheetTitle>Edit Attribute Key</SheetTitle>
+                              </SheetHeader>
+                              <div className="grow flex flex-col">
+                                <div className="flex-1 px-4">
+                                  <AttributeKeyForm
+                                    mode="edit"
+                                    productId={product.id}
+                                    keyId={attr.key!.id}
+                                    initialData={{
+                                      key: attr.key?.key || "",
+                                    }}
+                                  />
+                                </div>
+                                <SheetFooter>
+                                  <SheetClose asChild>
+                                    <Button variant="outline">Close</Button>
+                                  </SheetClose>
+                                </SheetFooter>
+                              </div>
+                            </SheetContent>
+                          </Sheet>
+                          <Button variant={"ghost"} size={"sm"}>
+                            Delete
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-y-4">
+                    <h3 className="font-medium text-xs text-muted-foreground">
+                      Images
+                    </h3>
+                    {variant.images.length === 0 ? (
+                      <span className="text-sm">No images uploaded.</span>
+                    ) : (
+                      <div className="flex flex-wrap gap-4">
+                        {variant.images.map((img) => (
+                          <div
+                            key={img.id}
+                            className="w-48 h-48 bg-muted rounded-md overflow-hidden flex items-center justify-center relative group"
+                          >
+                            <Image
+                              src={getImageSrc(img.mimeType, img.base64)}
+                              alt={variant.sku}
+                              className="object-cover w-full h-full"
+                              width={200}
+                              height={200}
+                            />
+                            <div className="absolute top-2 left-2 flex gap-x-1 justify-start items-end">
+                              {img.isThumbnail ? (
+                                <span className=" bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+                                  Thumbnail
+                                </span>
+                              ) : (
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <SetImageThumbnailButton
+                                    productId={product.id}
+                                    productVariantId={variant.id}
+                                    imageId={img.id}
+                                  />
+                                </div>
+                              )}
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                <DeleteImage
+                                  productVariantId={variant.id}
+                                  productId={product.id}
+                                  imageId={img.id}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <ProductImageForm
+                      productVariantId={variant.id}
+                      productId={product.id}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+        <div className="flex items-center justify-start gap-x-2">
+          <Button className="w-fit">Add Variant</Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button className="w-fit" variant={"secondary"}>
+                New Attribute Key
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Add Attribute</SheetTitle>
+              </SheetHeader>
+              <div className="grow flex flex-col">
+                <div className="flex-1 px-4">
+                  <AttributeKeyForm mode="create" productId={product.id} />
+                </div>
+                <SheetFooter>
+                  <SheetClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </SheetClose>
+                </SheetFooter>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </div>
   );

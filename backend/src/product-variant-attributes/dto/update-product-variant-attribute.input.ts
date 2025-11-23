@@ -1,8 +1,10 @@
-import { CreateProductVariantAttributeInput } from './create-product-variant-attribute.input';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateProductVariantAttributeInput extends PartialType(CreateProductVariantAttributeInput) {
+export class UpdateProductVariantAttributeInput {
   @Field(() => Int)
   id: number;
+
+  @Field(() => String, { description: 'Attribute Value' })
+  value: string;
 }

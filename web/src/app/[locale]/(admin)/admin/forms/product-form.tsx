@@ -84,7 +84,7 @@ export const ProductForm = ({
 
   const router = useRouter();
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async (data: productFormSchemaType) => {
       if (mode === "edit") {
         const res = await editProductAction(
@@ -190,7 +190,7 @@ export const ProductForm = ({
           type="submit"
           variant={"default"}
           className="w-fit"
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || !form.formState.isDirty || isPending}
         >
           {cft("submitButton")}
         </Button>

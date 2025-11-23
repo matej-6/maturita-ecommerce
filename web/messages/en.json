@@ -87,6 +87,13 @@
     "INTERNAL_SERVER_ERROR": "An unknown error ocurred"
   },
   "admin": {
+    "productVariant": {
+      "attributeKey": {
+        "form": {
+          "submitButton": "Submit"
+        }
+      }
+    },
     "products": {
       "newProduct": {
         "page": {

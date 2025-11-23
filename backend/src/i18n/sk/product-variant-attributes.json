@@ -1,0 +1,7 @@
+{
+  "service": {
+    "attributeAlreadyExists": "Taký atribút už existuje.",
+    "attributeKeyNotFound": "Kľúč s poskytnutým ID neexistuje.",
+    "attributeNotFound": "Taký atribút neexistuje."
+  }
+}

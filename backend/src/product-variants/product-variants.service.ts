@@ -48,7 +48,7 @@ export class ProductVariantsService {
 
         const thumbnailImage = await tx.productImage.findFirst({
           where: {
-            productVariantId,
+            productVariantId: productVariantId,
             isThumbnail: true,
           },
           select: {
@@ -71,7 +71,7 @@ export class ProductVariantsService {
         base64,
         mimeType,
         isThumbnail,
-        productVariantId,
+        productVariantId: productVariant.id,
       },
     });
 

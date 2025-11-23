@@ -81,8 +81,11 @@ input CreateProductTranslationInput {
 }
 
 input CreateProductVariantAttributeInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Attribute Key ID"""
+  keyId: Int!
+
+  """Attribute Value"""
+  value: String!
 }
 
 input CreateProductVariantAttributeKeyInput {
@@ -401,9 +404,10 @@ input UpdateProductInput {
 }
 
 input UpdateProductVariantAttributeInput {
-  """Example field (placeholder)"""
-  exampleField: Int
   id: Int!
+
+  """Attribute Value"""
+  value: String!
 }
 
 input UpdateProductVariantAttributeKeyInput {

@@ -1,15 +1,20 @@
 "use client";
 
-import { uploadProductImageAction } from "@/app/data-access-layer/admin/product/actions";
-import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  uploadProductImageAction,
+  uploadVariantImageAction,
+} from "@/app/data-access-layer/admin/product/actions";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 
 type Props = {
   productId: number;
+  productVariantId?: number;
 };
 
-export function ProductImageForm({ productId }: Props) {
+export function ProductImageForm({ productId, productVariantId }: Props) {
+
   const { mutate: uploadProductImage, isPending: isUploading } = useMutation({
     mutationFn: async (file: File) => {
       const reader = new FileReader();
@@ -18,7 +23,16 @@ export function ProductImageForm({ productId }: Props) {
         if (!base64String) return;
         const mimeType = file.type;
 
-        await uploadProductImageAction(productId, base64String, mimeType);
+        if (productVariantId !== undefined) {
+          await uploadVariantImageAction(
+            productId,
+            productVariantId,
+            base64String,
+            mimeType
+          );
+        } else {
+          await uploadProductImageAction(productId, base64String, mimeType);
+        }
       };
       reader.onerror = (error) => {
         console.error("Error reading file:", error);
@@ -30,11 +44,22 @@ export function ProductImageForm({ productId }: Props) {
 
   return (
     <form>
-      <label htmlFor="productImage" className={cn(buttonVariants())}>
+      <label
+        htmlFor={
+          `productImage-${productId}` + productVariantId
+            ? `-variant-${productVariantId}`
+            : ""
+        }
+        className={cn(buttonVariants())}
+      >
         {isUploading ? "Uploading..." : "Upload Image"}
       </label>
       <input
-        id="productImage"
+        id={
+          `productImage-${productId}` + productVariantId
+            ? `-variant-${productVariantId}`
+            : ""
+        }
         type="file"
         accept="image/*"
         multiple={false}

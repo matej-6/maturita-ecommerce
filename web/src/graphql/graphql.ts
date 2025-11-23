@@ -94,8 +94,10 @@ export type CreateProductTranslationInput = {
 };
 
 export type CreateProductVariantAttributeInput = {
-  /** Example field (placeholder) */
-  exampleField: Scalars['Int']['input'];
+  /** Attribute Key ID */
+  keyId: Scalars['Int']['input'];
+  /** Attribute Value */
+  value: Scalars['String']['input'];
 };
 
 export type CreateProductVariantAttributeKeyInput = {
@@ -591,9 +593,9 @@ export type UpdateProductInput = {
 };
 
 export type UpdateProductVariantAttributeInput = {
-  /** Example field (placeholder) */
-  exampleField?: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['Int']['input'];
+  /** Attribute Value */
+  value: Scalars['String']['input'];
 };
 
 export type UpdateProductVariantAttributeKeyInput = {
@@ -748,6 +750,21 @@ export type EditProductTranslationMutationMutationVariables = Exact<{
 
 
 export type EditProductTranslationMutationMutation = { __typename?: 'Mutation', editProductTranslation: { __typename?: 'ProductTranslation', name: string, description?: string | null, locale: string } };
+
+export type CreateAttributeKeyMutationMutationVariables = Exact<{
+  key: Scalars['String']['input'];
+}>;
+
+
+export type CreateAttributeKeyMutationMutation = { __typename?: 'Mutation', createProductVariantAttributeKey: { __typename?: 'ProductVariantAttributeKey', id: number, key: string } };
+
+export type EditAttributeKeyMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  key: Scalars['String']['input'];
+}>;
+
+
+export type EditAttributeKeyMutationMutation = { __typename?: 'Mutation', updateProductVariantAttributeKey: { __typename?: 'ProductVariantAttributeKey', id: number, key: string } };
 
 export type CreateProductMutationMutationVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -1109,6 +1126,26 @@ export const EditProductTranslationMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EditProductTranslationMutationMutation, EditProductTranslationMutationMutationVariables>;
+export const CreateAttributeKeyMutationDocument = new TypedDocumentString(`
+    mutation CreateAttributeKeyMutation($key: String!) {
+  createProductVariantAttributeKey(
+    createProductVariantAttributeKeyInput: {key: $key}
+  ) {
+    id
+    key
+  }
+}
+    `) as unknown as TypedDocumentString<CreateAttributeKeyMutationMutation, CreateAttributeKeyMutationMutationVariables>;
+export const EditAttributeKeyMutationDocument = new TypedDocumentString(`
+    mutation EditAttributeKeyMutation($id: Int!, $key: String!) {
+  updateProductVariantAttributeKey(
+    updateProductVariantAttributeKeyInput: {id: $id, key: $key}
+  ) {
+    id
+    key
+  }
+}
+    `) as unknown as TypedDocumentString<EditAttributeKeyMutationMutation, EditAttributeKeyMutationMutationVariables>;
 export const CreateProductMutationDocument = new TypedDocumentString(`
     mutation CreateProductMutation($slug: String!, $categoryId: Int, $isPublic: Boolean!) {
   createProduct(

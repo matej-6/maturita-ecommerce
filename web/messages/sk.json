@@ -87,6 +87,13 @@
     "INTERNAL_SERVER_ERROR": "Nastala neočakávaná chyba"
   },
   "admin": {
+    "productVariant": {
+      "attributeKey": {
+        "form": {
+          "submitButton": "Odoslať"
+        }
+      }
+    },
     "products": {
       "newProduct": {
         "page": {
