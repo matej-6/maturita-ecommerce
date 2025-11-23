@@ -1,0 +1,14 @@
+{
+  "service": {
+    "update": {
+      "notFound": "The product variant you're trying to update doesn't exist."
+    },
+    "skuAlreadyInUse": "This SKU is already in use",
+    "invalidLocaleCode": "Invalid locale code.",
+    "invalidImageMimeType": "Invalid image mime type.",
+    "addImage": {
+      "productVariantNotFound": "The product variant you're trying to add an image to doesn't exist."
+    },
+    "imageNotFound": "The product image with that ID doesn't exist."
+  }
+}

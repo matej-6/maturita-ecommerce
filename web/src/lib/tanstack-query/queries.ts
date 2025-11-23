@@ -25,7 +25,7 @@ export const useSession = () =>
       return query.state.data === null
         ? Infinity
         : query.state.data?.__fromServer === true
-        ? 0
+        ? 1000 * 5
         : 60 * 1000 * 14;
     },
     refetchInterval(query) {

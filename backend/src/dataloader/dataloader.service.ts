@@ -60,6 +60,7 @@ export class DataloaderService {
     const productAllImagesLoader = this.createProductAllImagesLoader();
     const productVariantAllImagesLoader =
       this.createProductVariantAllImagesLoader();
+    const attributesByKeyLoader = this.createAttributesByKeyLoader();
     return {
       subcategoriesLoader,
       categoryTranslationLoader,
@@ -75,6 +76,7 @@ export class DataloaderService {
       productVariantAttributeAllTranslationsLoader,
       productAllImagesLoader,
       productVariantAllImagesLoader,
+      attributesByKeyLoader,
     };
   }
 
@@ -235,5 +237,13 @@ export class DataloaderService {
         );
       },
     );
+  }
+
+  private createAttributesByKeyLoader() {
+    return new DataLoader<number, Attribute[]>(async (keyIds: number[]) => {
+      return await this.productVariantAttributeKeysService.getAllAttributesByBatch(
+        keyIds,
+      );
+    });
   }
 }

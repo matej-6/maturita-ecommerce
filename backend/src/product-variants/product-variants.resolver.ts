@@ -14,6 +14,8 @@ import { UpdateProductVariantInput } from './dto/update-product-variant.input';
 import { ProductVariantAttribute } from '../product-variant-attributes/entities/product-variant-attribute.entity';
 import { GraphqlAppContext } from 'src/app.module';
 import { ProductVariantImage } from 'src/entities/product-variant.image.entity';
+import { UseGuards } from '@nestjs/common';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 
 @Resolver(() => ProductVariant)
 export class ProductVariantsResolver {
@@ -90,5 +92,35 @@ export class ProductVariantsResolver {
       isThumbnail: thumbnail.isThumbnail,
       productVariantId: thumbnail.productVariantId!,
     };
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductVariantImage)
+  async addProductVariantImage(
+    @Args('productVariantId', { type: () => Int }) productVariantId: number,
+    @Args('base64', { type: () => String }) base64: string,
+    @Args('mimeType', { type: () => String }) mimeType: string,
+  ): Promise<ProductVariantImage> {
+    return this.productVariantsService.addImage(
+      productVariantId,
+      base64,
+      mimeType,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => Int)
+  async removeProductVariantImage(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<number> {
+    return this.productVariantsService.removeImage(id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductVariantImage)
+  async setProductVariantThumbnailImage(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<ProductVariantImage> {
+    return this.productVariantsService.setThumbnailImage(id);
   }
 }

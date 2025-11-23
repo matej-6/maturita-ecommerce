@@ -1,18 +1,34 @@
 "use client";
 
-import { setProductThumbnailImageAction } from "@/app/data-access-layer/admin/product/actions";
+import {
+  setProductThumbnailImageAction,
+  setVariantThumbnailImageAction,
+} from "@/app/data-access-layer/admin/product/actions";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 
 type Props = {
   productId: number;
+  productVariantId?: number;
   imageId: number;
 };
 
-export function SetImageThumbnailButton({ productId, imageId }: Props) {
+export function SetImageThumbnailButton({
+  productId,
+  productVariantId,
+  imageId,
+}: Props) {
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      await setProductThumbnailImageAction(productId, imageId);
+      if (productVariantId !== undefined) {
+        await setVariantThumbnailImageAction(
+          productId,
+          productVariantId,
+          imageId
+        );
+      } else {
+        await setProductThumbnailImageAction(productId, imageId);
+      }
     },
   });
 

@@ -27,6 +27,18 @@ export const ProductDetailPageQueryDocument = graphql(`
       code
       name
     }
+    productVariantAttributeKeys(productId: null) {
+      id
+      key
+      attributes {
+        id
+        value
+        translations {
+          value
+          locale
+        }
+      }
+    }
     product(id: $id, isPublic: null, isSetup: null) {
       id
       slug
@@ -53,6 +65,7 @@ export const ProductDetailPageQueryDocument = graphql(`
         sku
         priceInCents
         isPublic
+        stock
         attributes {
           id
           value

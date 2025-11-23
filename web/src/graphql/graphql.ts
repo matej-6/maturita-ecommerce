@@ -164,6 +164,7 @@ export type MeResponse = {
 export type Mutation = {
   __typename?: 'Mutation';
   addProductImage: ProductImage;
+  addProductVariantImage: ProductVariantImage;
   createCategory: Category;
   createCategoryTranslation: CategoryTranslation;
   createProduct: Product;
@@ -182,9 +183,11 @@ export type Mutation = {
   removeProductVariant: ProductVariant;
   removeProductVariantAttribute: ProductVariantAttribute;
   removeProductVariantAttributeKey: ProductVariantAttributeKey;
+  removeProductVariantImage: Scalars['Int']['output'];
   removeUser: User;
   requestEmailVerification: Scalars['Void']['output'];
   setProductThumbnailImage: ProductImage;
+  setProductVariantThumbnailImage: ProductVariantImage;
   updateCategory: Category;
   updateCategoryTranslation: CategoryTranslation;
   updateProduct: Product;
@@ -200,6 +203,13 @@ export type MutationAddProductImageArgs = {
   base64: Scalars['String']['input'];
   mimeType: Scalars['String']['input'];
   productId: Scalars['Int']['input'];
+};
+
+
+export type MutationAddProductVariantImageArgs = {
+  base64: Scalars['String']['input'];
+  mimeType: Scalars['String']['input'];
+  productVariantId: Scalars['Int']['input'];
 };
 
 
@@ -289,6 +299,11 @@ export type MutationRemoveProductVariantAttributeKeyArgs = {
 };
 
 
+export type MutationRemoveProductVariantImageArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationRemoveUserArgs = {
   id: Scalars['ID']['input'];
 };
@@ -296,6 +311,11 @@ export type MutationRemoveUserArgs = {
 
 export type MutationSetProductThumbnailImageArgs = {
   productImageId: Scalars['Int']['input'];
+};
+
+
+export type MutationSetProductVariantThumbnailImageArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -430,6 +450,7 @@ export type ProductVariantAttribute = {
 
 export type ProductVariantAttributeKey = {
   __typename?: 'ProductVariantAttributeKey';
+  attributes: Array<ProductVariantAttribute>;
   id: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   translatedKey?: Maybe<Scalars['String']['output']>;
@@ -523,6 +544,11 @@ export type QueryProductArgs = {
 
 export type QueryProductVariantAttributeKeyArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type QueryProductVariantAttributeKeysArgs = {
+  productId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -751,6 +777,15 @@ export type AddImageMutationMutationVariables = Exact<{
 
 export type AddImageMutationMutation = { __typename?: 'Mutation', addProductImage: { __typename?: 'ProductImage', id: number } };
 
+export type AddVariantImageMutationMutationVariables = Exact<{
+  productVariantId: Scalars['Int']['input'];
+  mimeType: Scalars['String']['input'];
+  base64: Scalars['String']['input'];
+}>;
+
+
+export type AddVariantImageMutationMutation = { __typename?: 'Mutation', addProductVariantImage: { __typename?: 'ProductVariantImage', id: number } };
+
 export type SetImageThumbnailMutationMutationVariables = Exact<{
   imageId: Scalars['Int']['input'];
 }>;
@@ -758,12 +793,26 @@ export type SetImageThumbnailMutationMutationVariables = Exact<{
 
 export type SetImageThumbnailMutationMutation = { __typename?: 'Mutation', setProductThumbnailImage: { __typename?: 'ProductImage', id: number } };
 
+export type SetVariantImageThumbnailMutationMutationVariables = Exact<{
+  imageId: Scalars['Int']['input'];
+}>;
+
+
+export type SetVariantImageThumbnailMutationMutation = { __typename?: 'Mutation', setProductVariantThumbnailImage: { __typename?: 'ProductVariantImage', id: number } };
+
 export type DeleteProductImageMutationMutationVariables = Exact<{
   imageId: Scalars['Int']['input'];
 }>;
 
 
 export type DeleteProductImageMutationMutation = { __typename?: 'Mutation', deleteProductImage: number };
+
+export type DeleteVariantImageMutationMutationVariables = Exact<{
+  imageId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteVariantImageMutationMutation = { __typename?: 'Mutation', removeProductVariantImage: number };
 
 export type NewProductPage_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -775,7 +824,7 @@ export type ProductDetailPage_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }>, locales: Array<{ __typename?: 'Locale', flag: string, code: string, name: string }>, product: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any, translations: Array<{ __typename?: 'ProductTranslation', id: number, locale: string, name: string, description?: string | null, markdownContent?: string | null }>, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string }> } | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string }> }>, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }> }> } };
+export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }>, locales: Array<{ __typename?: 'Locale', flag: string, code: string, name: string }>, productVariantAttributeKeys: Array<{ __typename?: 'ProductVariantAttributeKey', id: number, key: string, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string, locale: string }> }> }>, product: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any, translations: Array<{ __typename?: 'ProductTranslation', id: number, locale: string, name: string, description?: string | null, markdownContent?: string | null }>, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean, stock: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string }> } | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string }> }>, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }> }> } };
 
 export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
@@ -1085,6 +1134,17 @@ export const AddImageMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AddImageMutationMutation, AddImageMutationMutationVariables>;
+export const AddVariantImageMutationDocument = new TypedDocumentString(`
+    mutation AddVariantImageMutation($productVariantId: Int!, $mimeType: String!, $base64: String!) {
+  addProductVariantImage(
+    productVariantId: $productVariantId
+    mimeType: $mimeType
+    base64: $base64
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<AddVariantImageMutationMutation, AddVariantImageMutationMutationVariables>;
 export const SetImageThumbnailMutationDocument = new TypedDocumentString(`
     mutation SetImageThumbnailMutation($imageId: Int!) {
   setProductThumbnailImage(productImageId: $imageId) {
@@ -1092,11 +1152,23 @@ export const SetImageThumbnailMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SetImageThumbnailMutationMutation, SetImageThumbnailMutationMutationVariables>;
+export const SetVariantImageThumbnailMutationDocument = new TypedDocumentString(`
+    mutation SetVariantImageThumbnailMutation($imageId: Int!) {
+  setProductVariantThumbnailImage(id: $imageId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SetVariantImageThumbnailMutationMutation, SetVariantImageThumbnailMutationMutationVariables>;
 export const DeleteProductImageMutationDocument = new TypedDocumentString(`
     mutation DeleteProductImageMutation($imageId: Int!) {
   deleteProductImage(productImageId: $imageId)
 }
     `) as unknown as TypedDocumentString<DeleteProductImageMutationMutation, DeleteProductImageMutationMutationVariables>;
+export const DeleteVariantImageMutationDocument = new TypedDocumentString(`
+    mutation DeleteVariantImageMutation($imageId: Int!) {
+  removeProductVariantImage(id: $imageId)
+}
+    `) as unknown as TypedDocumentString<DeleteVariantImageMutationMutation, DeleteVariantImageMutationMutationVariables>;
 export const NewProductPage_QueryDocumentDocument = new TypedDocumentString(`
     query NewProductPage_QueryDocument {
   categories(isPublic: null, isSetup: null) {
@@ -1115,6 +1187,18 @@ export const ProductDetailPage_QueryDocumentDocument = new TypedDocumentString(`
     flag
     code
     name
+  }
+  productVariantAttributeKeys(productId: null) {
+    id
+    key
+    attributes {
+      id
+      value
+      translations {
+        value
+        locale
+      }
+    }
   }
   product(id: $id, isPublic: null, isSetup: null) {
     id
@@ -1142,6 +1226,7 @@ export const ProductDetailPage_QueryDocumentDocument = new TypedDocumentString(`
       sku
       priceInCents
       isPublic
+      stock
       attributes {
         id
         value

@@ -19,12 +19,28 @@ export class ProductVariantAttributeKeysService {
     return 'This action adds a new productVariantAttributeKey';
   }
 
-  findAll() {
-    return `This action returns all productVariantAttributeKeys`;
+  async findAll(productId: number | null) {
+    return await this.prisma.attributeKey.findMany({
+      where: {
+        Attributes: {
+          some: {
+            ProductVariants: {
+              some: {
+                productId: productId ?? undefined,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} productVariantAttributeKey`;
+  async findOne(id: number) {
+    return await this.prisma.attributeKey.findUnique({
+      where: {
+        id: id,
+      },
+    });
   }
 
   update(
@@ -78,6 +94,20 @@ export class ProductVariantAttributeKeysService {
 
     return keyIds.map((id) =>
       translations.filter((t) => t.attributeKeyId === id),
+    );
+  }
+
+  async getAllAttributesByBatch(keyIds: number[]) {
+    const attributes = await this.prisma.attribute.findMany({
+      where: {
+        attributeKeyId: {
+          in: keyIds,
+        },
+      },
+    });
+
+    return keyIds.map((id) =>
+      attributes.filter((a) => a.attributeKeyId === id),
     );
   }
 }

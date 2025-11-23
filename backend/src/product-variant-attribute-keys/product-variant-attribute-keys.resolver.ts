@@ -14,6 +14,7 @@ import { CreateProductVariantAttributeKeyInput } from './dto/create-product-vari
 import { UpdateProductVariantAttributeKeyInput } from './dto/update-product-variant-attribute-key.input';
 import { GraphqlAppContext } from 'src/app.module';
 import { ProductVariantAttributeKeyTranslation } from './entities/product-variant-attribute-key-translation.entity';
+import { ProductVariantAttribute } from 'src/product-variant-attributes/entities/product-variant-attribute.entity';
 
 @Resolver(() => ProductVariantAttributeKey)
 export class ProductVariantAttributeKeysResolver {
@@ -34,8 +35,11 @@ export class ProductVariantAttributeKeysResolver {
   @Query(() => [ProductVariantAttributeKey], {
     name: 'productVariantAttributeKeys',
   })
-  findAll() {
-    return this.productVariantAttributeKeysService.findAll();
+  findAll(
+    @Args({ name: 'productId', type: () => Int, nullable: true })
+    productId?: number | null,
+  ) {
+    return this.productVariantAttributeKeysService.findAll(productId ?? null);
   }
 
   @Query(() => ProductVariantAttributeKey, {
@@ -82,6 +86,16 @@ export class ProductVariantAttributeKeysResolver {
     @Context() ctx: GraphqlAppContext,
   ) {
     return ctx.loaders.attributeKeyAllTranslationsLoader.load(
+      productVariantAttributeKey.id,
+    );
+  }
+
+  @ResolveField(() => [ProductVariantAttribute], { name: 'attributes' })
+  async resolveAttributes(
+    @Parent() productVariantAttributeKey: ProductVariantAttributeKey,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    return ctx.loaders.attributesByKeyLoader.load(
       productVariantAttributeKey.id,
     );
   }

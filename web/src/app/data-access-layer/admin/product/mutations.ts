@@ -55,6 +55,22 @@ export const AddImageMutation = graphql(`
   }
 `);
 
+export const AddVariantImageMutation = graphql(`
+  mutation AddVariantImageMutation(
+    $productVariantId: Int!
+    $mimeType: String!
+    $base64: String!
+  ) {
+    addProductVariantImage(
+      productVariantId: $productVariantId
+      mimeType: $mimeType
+      base64: $base64
+    ) {
+      id
+    }
+  }
+`);
+
 export const SetImageThumbnailMutation = graphql(`
   mutation SetImageThumbnailMutation($imageId: Int!) {
     setProductThumbnailImage(productImageId: $imageId) {
@@ -63,8 +79,22 @@ export const SetImageThumbnailMutation = graphql(`
   }
 `);
 
+export const SetVariantImageThumbnailMutation = graphql(`
+  mutation SetVariantImageThumbnailMutation($imageId: Int!) {
+    setProductVariantThumbnailImage(id: $imageId) {
+      id
+    }
+  }
+`);
+
 export const DeleteProductImageMutation = graphql(`
   mutation DeleteProductImageMutation($imageId: Int!) {
     deleteProductImage(productImageId: $imageId)
+  }
+`);
+
+export const DeleteVariantImageMutation = graphql(`
+  mutation DeleteVariantImageMutation($imageId: Int!) {
+    removeProductVariantImage(id: $imageId)
   }
 `);

@@ -38,4 +38,5 @@ export interface IDataLoaders {
     number,
     AttributeKeyTranslation[]
   >;
+  attributesByKeyLoader: DataLoader<number, Attribute[]>;
 }

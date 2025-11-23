@@ -26,6 +26,8 @@ import { ProductImageForm } from "../../../forms/product-image-form";
 import { SetImageThumbnailButton } from "../../../components/products/set-image-thumbnail-button";
 import { DeleteImage } from "../../../components/products/delete-image-button";
 
+import { ProductVariantsDetails } from "../../../components/products/product-variant-details";
+
 export default async function ProductDetailPage({
   params,
 }: {
@@ -59,7 +61,12 @@ export default async function ProductDetailPage({
     `/${locale}/admin/products`,
   ];
 
-  const { product, categories, locales } = res.data;
+  const {
+    product,
+    categories,
+    locales,
+    productVariantAttributeKeys: attributeKeys,
+  } = res.data;
   const missingTranslations = locales.filter(
     (l) => !product.translations.some((t) => t.locale === l.code)
   );
@@ -189,7 +196,7 @@ export default async function ProductDetailPage({
                   width={200}
                   height={200}
                 />
-                <div className="absolute top-2 left-2 flex gap-x-1 items-center justify-start">
+                <div className="absolute top-2 left-2 flex gap-x-1 justify-start items-end">
                   {img.isThumbnail ? (
                     <span className=" bg-black/60 text-white text-xs px-2 py-1 rounded-md">
                       Thumbnail
@@ -256,6 +263,31 @@ export default async function ProductDetailPage({
             value: t.code,
           }))}
         />
+      </div>
+      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="flex flex-col gap-y-8">
+        <ProductVariantsDetails
+          attributeKeys={attributeKeys.map((a) => ({
+            key: a.key,
+            keyId: a.id,
+            attributes: a.attributes,
+          }))}
+          productId={product.id}
+          variants={product.variants.map((v) => ({
+            ...v,
+            attributes: v.attributes.map((va) => ({
+              value: va.value,
+              key: va.key!.key,
+            })),
+            images: v.images.map((vi) => ({
+              id: vi.id,
+              src: getImageSrc(vi.mimeType, vi.base64),
+              alt: v.sku,
+              isThumbnail: vi.isThumbnail,
+            })),
+          }))}
+        />
+        <Button className="w-fit">Add Variant</Button>
       </div>
     </div>
   );

@@ -146,6 +146,7 @@ type MeResponse {
 
 type Mutation {
   addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
+  addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
   createProduct(createProductInput: CreateProductInput!): Product!
@@ -164,9 +165,11 @@ type Mutation {
   removeProductVariant(id: Int!): ProductVariant!
   removeProductVariantAttribute(id: Int!): ProductVariantAttribute!
   removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
+  removeProductVariantImage(id: Int!): Int!
   removeUser(id: ID!): User!
   requestEmailVerification: Void!
   setProductThumbnailImage(productImageId: Int!): ProductImage!
+  setProductVariantThumbnailImage(id: Int!): ProductVariantImage!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
@@ -255,6 +258,7 @@ type ProductVariantAttribute {
 }
 
 type ProductVariantAttributeKey {
+  attributes: [ProductVariantAttribute!]!
   id: Int!
   key: String!
   translatedKey: String
@@ -328,7 +332,7 @@ type Query {
   ): PaginatedCategory!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product!
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
-  productVariantAttributeKeys: [ProductVariantAttributeKey!]!
+  productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
   products(
     """
     null - only products with no category will be returned, 0 - all products will be returned, int >= 1 - only the children of category with given id will be returned
