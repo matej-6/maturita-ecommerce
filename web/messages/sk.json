@@ -92,6 +92,9 @@
         "form": {
           "submitButton": "Odoslať"
         }
+      },
+      "form": {
+        "submitButton": "Odoslať"
       }
     },
     "products": {
@@ -197,7 +200,9 @@
         "keyTranslation": "Preklad kľúča atribútu",
         "value": "Hodnota atribútu",
         "valueTranslation": "Preklad hodnoty atribútu"
-      }
+      },
+      "attributes": "Atribúty",
+      "selectAttribute": "Vybrať atribút"
     }
   }
 }

@@ -111,9 +111,13 @@ export class ProductsResolver {
     return await this.productsService.setProductImageThumbnail(productImageId);
   }
 
-  @Query(() => Product, { name: 'product' })
-  findOne(@Args() args: ProductFindOneQueryArgs) {
-    return this.productsService.findOne(args);
+  @UseGuards(OptionalJwtAuthGuard)
+  @Query(() => Product, { name: 'product', nullable: true })
+  findOne(
+    @Args() args: ProductFindOneQueryArgs,
+    @OptionalCurrentUser() user: OptionalCurrentUserDto,
+  ) {
+    return this.productsService.findOne(args, user?.role);
   }
 
   @ResolveField(() => String, { name: 'name', nullable: true })

@@ -23,6 +23,7 @@ export class ProductVariantsResolver {
     private readonly productVariantsService: ProductVariantsService,
   ) {}
 
+  @UseGuards(AdminGuard)
   @Mutation(() => ProductVariant)
   createProductVariant(
     @Args('createProductVariantInput')
@@ -31,18 +32,17 @@ export class ProductVariantsResolver {
     return this.productVariantsService.create(createProductVariantInput);
   }
 
+  @UseGuards(AdminGuard)
   @Mutation(() => ProductVariant)
   updateProductVariant(
     @Args('updateProductVariantInput')
     updateProductVariantInput: UpdateProductVariantInput,
   ) {
-    return this.productVariantsService.update(
-      updateProductVariantInput.id,
-      updateProductVariantInput,
-    );
+    return this.productVariantsService.update(updateProductVariantInput);
   }
 
-  @Mutation(() => ProductVariant)
+  @UseGuards(AdminGuard)
+  @Mutation(() => Int)
   removeProductVariant(@Args('id', { type: () => Int }) id: number) {
     return this.productVariantsService.remove(id);
   }

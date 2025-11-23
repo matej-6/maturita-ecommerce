@@ -6,6 +6,7 @@ import { ActionResponse } from "../../formActionResponse";
 import { ExecutionResult } from "graphql";
 import { ProductDetailPage_QueryDocumentQuery } from "@/graphql/graphql";
 import { handleGraphqlError } from "../handleGraphqlFormError";
+import { notFound } from "next/navigation";
 
 export const NewProductPageQueryDocument = graphql(`
   query NewProductPage_QueryDocument {
@@ -103,10 +104,7 @@ export async function getProductDetailPageData(
   }
 
   if (!res.data) {
-    return {
-      success: false,
-      message: "An unknown error ocurred",
-    };
+    return notFound();
   }
 
   return {

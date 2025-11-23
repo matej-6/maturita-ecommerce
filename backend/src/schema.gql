@@ -93,8 +93,15 @@ input CreateProductVariantAttributeKeyInput {
 }
 
 input CreateProductVariantInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """List of Product Variant Attribute IDs"""
+  attributes: [Int!]!
+  isPublic: Boolean!
+  priceInCents: Int!
+  productId: Int!
+
+  """Stock keeping unit"""
+  sku: String!
+  stock: Int!
 }
 
 input CreateUserInput {
@@ -180,7 +187,7 @@ type Mutation {
   logoutAll: Void!
   removeCategory(id: Int!): Category!
   removeProduct(id: Int!): Product!
-  removeProductVariant(id: Int!): ProductVariant!
+  removeProductVariant(id: Int!): Int!
   removeProductVariantAttribute(id: Int!): ProductVariantAttribute!
   removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   removeProductVariantImage(id: Int!): Int!
@@ -358,7 +365,7 @@ type Query {
     """Field to sort by"""
     sortBy: String
   ): PaginatedCategory!
-  product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product!
+  product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
   products(
@@ -416,9 +423,16 @@ input UpdateProductVariantAttributeKeyInput {
 }
 
 input UpdateProductVariantInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  """List of Product Variant Attribute IDs"""
+  attributes: [Int!]
   id: Int!
+  isPublic: Boolean
+  priceInCents: Int
+  productId: Int
+
+  """Stock keeping unit"""
+  sku: String
+  stock: Int
 }
 
 input UpdateUserInput {

@@ -14,16 +14,133 @@ export class ProductVariantsService {
     private readonly localesService: LocalesService,
   ) {}
 
-  create(createProductVariantInput: CreateProductVariantInput) {
-    return 'This action adds a new productVariant';
+  async create(createProductVariantInput: CreateProductVariantInput) {
+    const attributes = await this.prisma.$transaction(async (tx) => {
+      const attrs = [];
+      for (const attrId of createProductVariantInput.attributes) {
+        const attribute = await tx.attribute.findUnique({
+          where: { id: attrId },
+        });
+        if (!attribute) {
+          throw new BadRequestException(
+            'product-variants.service.create.attributeNotFound',
+          );
+        }
+        attrs.push(attribute);
+      }
+      const prod = await tx.product.findUnique({
+        where: { id: createProductVariantInput.productId },
+      });
+      if (!prod) {
+        throw new BadRequestException(
+          'product-variants.service.create.productNotFound',
+        );
+      }
+      return attrs;
+    });
+
+    return this.prisma.productVariant.create({
+      data: {
+        sku: createProductVariantInput.sku,
+        priceInCents: createProductVariantInput.priceInCents,
+        productId: createProductVariantInput.productId,
+        Attributes: {
+          connect: attributes.map((attr) => ({ id: attr.id })),
+        },
+        isPublic: createProductVariantInput.isPublic,
+        stock: createProductVariantInput.stock,
+      },
+    });
   }
 
-  update(id: number, updateProductVariantInput: UpdateProductVariantInput) {
-    return `This action updates a #${id} productVariant`;
+  async update(updateProductVariantInput: UpdateProductVariantInput) {
+    return await this.prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.findUnique({
+        where: { id: updateProductVariantInput.id },
+        select: {
+          Attributes: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+      if (!variant) {
+        throw new BadRequestException(
+          'product-variants.service.update.productVariantNotFound',
+        );
+      }
+
+      const attrs = [];
+      if (updateProductVariantInput.attributes) {
+        for (const attrId of updateProductVariantInput.attributes) {
+          const attribute = await tx.attribute.findUnique({
+            where: { id: attrId },
+          });
+          if (!attribute) {
+            throw new BadRequestException(
+              'product-variants.service.update.attributeNotFound',
+            );
+          }
+          attrs.push(attribute);
+        }
+      }
+
+      const newAttributes = updateProductVariantInput.attributes?.filter(
+        (id) => !variant.Attributes.some((a) => a.id === id),
+      );
+      const removedAttributes = variant.Attributes.filter(
+        (a) =>
+          !updateProductVariantInput.attributes ||
+          !updateProductVariantInput.attributes.includes(a.id),
+      ).map((a) => a.id);
+
+      const updatedVariant = await tx.productVariant.update({
+        where: {
+          id: updateProductVariantInput.id,
+        },
+        data: {
+          sku: updateProductVariantInput.sku,
+          priceInCents: updateProductVariantInput.priceInCents,
+          isPublic: updateProductVariantInput.isPublic,
+          stock: updateProductVariantInput.stock,
+          ...(newAttributes && newAttributes.length > 0
+            ? {
+                Attributes: {
+                  connect: newAttributes.map((id) => ({ id })),
+                },
+              }
+            : {}),
+          ...(removedAttributes.length > 0
+            ? {
+                Attributes: {
+                  disconnect: removedAttributes.map((id) => ({ id })),
+                },
+              }
+            : {}),
+        },
+      });
+
+      return updatedVariant;
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productVariant`;
+  async remove(id: number) {
+    const exists = await this.prisma.productVariant.findUnique({
+      where: { id },
+    });
+
+    if (!exists) {
+      throw new BadRequestException(
+        'product-variants.service.remove.productVariantNotFound',
+      );
+    }
+
+    const deleted = await this.prisma.productVariant.delete({
+      where: { id },
+    });
+
+    return deleted.id;
   }
 
   async addImage(

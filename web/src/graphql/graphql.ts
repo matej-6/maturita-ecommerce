@@ -105,8 +105,14 @@ export type CreateProductVariantAttributeKeyInput = {
 };
 
 export type CreateProductVariantInput = {
-  /** Example field (placeholder) */
-  exampleField: Scalars['Int']['input'];
+  /** List of Product Variant Attribute IDs */
+  attributes: Array<Scalars['Int']['input']>;
+  isPublic: Scalars['Boolean']['input'];
+  priceInCents: Scalars['Int']['input'];
+  productId: Scalars['Int']['input'];
+  /** Stock keeping unit */
+  sku: Scalars['String']['input'];
+  stock: Scalars['Int']['input'];
 };
 
 export type CreateUserInput = {
@@ -182,7 +188,7 @@ export type Mutation = {
   logoutAll: Scalars['Void']['output'];
   removeCategory: Category;
   removeProduct: Product;
-  removeProductVariant: ProductVariant;
+  removeProductVariant: Scalars['Int']['output'];
   removeProductVariantAttribute: ProductVariantAttribute;
   removeProductVariantAttributeKey: ProductVariantAttributeKey;
   removeProductVariantImage: Scalars['Int']['output'];
@@ -492,7 +498,7 @@ export type Query = {
   locales: Array<Locale>;
   me: MeResponse;
   paginatedCategories: PaginatedCategory;
-  product: Product;
+  product?: Maybe<Product>;
   productVariantAttributeKey: ProductVariantAttributeKey;
   productVariantAttributeKeys: Array<ProductVariantAttributeKey>;
   products: PaginatedProduct;
@@ -604,9 +610,15 @@ export type UpdateProductVariantAttributeKeyInput = {
 };
 
 export type UpdateProductVariantInput = {
-  /** Example field (placeholder) */
-  exampleField?: InputMaybe<Scalars['Int']['input']>;
+  /** List of Product Variant Attribute IDs */
+  attributes?: InputMaybe<Array<Scalars['Int']['input']>>;
   id: Scalars['Int']['input'];
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  priceInCents?: InputMaybe<Scalars['Int']['input']>;
+  productId?: InputMaybe<Scalars['Int']['input']>;
+  /** Stock keeping unit */
+  sku?: InputMaybe<Scalars['String']['input']>;
+  stock?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type UpdateUserInput = {
@@ -766,6 +778,14 @@ export type EditAttributeKeyMutationMutationVariables = Exact<{
 
 export type EditAttributeKeyMutationMutation = { __typename?: 'Mutation', updateProductVariantAttributeKey: { __typename?: 'ProductVariantAttributeKey', id: number, key: string } };
 
+export type CreateAttributeMutationMutationVariables = Exact<{
+  attributeKeyId: Scalars['Int']['input'];
+  attributeValue: Scalars['String']['input'];
+}>;
+
+
+export type CreateAttributeMutationMutation = { __typename?: 'Mutation', createProductVariantAttribute: { __typename?: 'ProductVariantAttribute', id: number } };
+
 export type CreateProductMutationMutationVariables = Exact<{
   slug: Scalars['String']['input'];
   categoryId?: InputMaybe<Scalars['Int']['input']>;
@@ -831,6 +851,37 @@ export type DeleteVariantImageMutationMutationVariables = Exact<{
 
 export type DeleteVariantImageMutationMutation = { __typename?: 'Mutation', removeProductVariantImage: number };
 
+export type CreateVariantMutationMutationVariables = Exact<{
+  productId: Scalars['Int']['input'];
+  sku: Scalars['String']['input'];
+  priceInCents: Scalars['Int']['input'];
+  isPublic: Scalars['Boolean']['input'];
+  stock: Scalars['Int']['input'];
+  attributes: Array<Scalars['Int']['input']> | Scalars['Int']['input'];
+}>;
+
+
+export type CreateVariantMutationMutation = { __typename?: 'Mutation', createProductVariant: { __typename?: 'ProductVariant', id: number } };
+
+export type EditVariantMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  sku: Scalars['String']['input'];
+  priceInCents: Scalars['Int']['input'];
+  isPublic: Scalars['Boolean']['input'];
+  stock: Scalars['Int']['input'];
+  attributes: Array<Scalars['Int']['input']> | Scalars['Int']['input'];
+}>;
+
+
+export type EditVariantMutationMutation = { __typename?: 'Mutation', updateProductVariant: { __typename?: 'ProductVariant', id: number } };
+
+export type DeleteVariantMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteVariantMutationMutation = { __typename?: 'Mutation', removeProductVariant: number };
+
 export type NewProductPage_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -841,7 +892,7 @@ export type ProductDetailPage_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }>, locales: Array<{ __typename?: 'Locale', flag: string, code: string, name: string }>, productVariantAttributeKeys: Array<{ __typename?: 'ProductVariantAttributeKey', id: number, key: string, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string, locale: string }> }> }>, product: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any, translations: Array<{ __typename?: 'ProductTranslation', id: number, locale: string, name: string, description?: string | null, markdownContent?: string | null }>, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean, stock: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string }> } | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string }> }>, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }> }> } };
+export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }>, locales: Array<{ __typename?: 'Locale', flag: string, code: string, name: string }>, productVariantAttributeKeys: Array<{ __typename?: 'ProductVariantAttributeKey', id: number, key: string, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string, locale: string }> }> }>, product?: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any, translations: Array<{ __typename?: 'ProductTranslation', id: number, locale: string, name: string, description?: string | null, markdownContent?: string | null }>, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean, stock: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string }> } | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string }> }>, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }> }> } | null };
 
 export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
@@ -1146,6 +1197,15 @@ export const EditAttributeKeyMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EditAttributeKeyMutationMutation, EditAttributeKeyMutationMutationVariables>;
+export const CreateAttributeMutationDocument = new TypedDocumentString(`
+    mutation CreateAttributeMutation($attributeKeyId: Int!, $attributeValue: String!) {
+  createProductVariantAttribute(
+    createProductVariantAttributeInput: {keyId: $attributeKeyId, value: $attributeValue}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateAttributeMutationMutation, CreateAttributeMutationMutationVariables>;
 export const CreateProductMutationDocument = new TypedDocumentString(`
     mutation CreateProductMutation($slug: String!, $categoryId: Int, $isPublic: Boolean!) {
   createProduct(
@@ -1206,6 +1266,29 @@ export const DeleteVariantImageMutationDocument = new TypedDocumentString(`
   removeProductVariantImage(id: $imageId)
 }
     `) as unknown as TypedDocumentString<DeleteVariantImageMutationMutation, DeleteVariantImageMutationMutationVariables>;
+export const CreateVariantMutationDocument = new TypedDocumentString(`
+    mutation CreateVariantMutation($productId: Int!, $sku: String!, $priceInCents: Int!, $isPublic: Boolean!, $stock: Int!, $attributes: [Int!]!) {
+  createProductVariant(
+    createProductVariantInput: {productId: $productId, sku: $sku, priceInCents: $priceInCents, isPublic: $isPublic, stock: $stock, attributes: $attributes}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateVariantMutationMutation, CreateVariantMutationMutationVariables>;
+export const EditVariantMutationDocument = new TypedDocumentString(`
+    mutation EditVariantMutation($id: Int!, $sku: String!, $priceInCents: Int!, $isPublic: Boolean!, $stock: Int!, $attributes: [Int!]!) {
+  updateProductVariant(
+    updateProductVariantInput: {id: $id, sku: $sku, priceInCents: $priceInCents, isPublic: $isPublic, stock: $stock, attributes: $attributes}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<EditVariantMutationMutation, EditVariantMutationMutationVariables>;
+export const DeleteVariantMutationDocument = new TypedDocumentString(`
+    mutation DeleteVariantMutation($id: Int!) {
+  removeProductVariant(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteVariantMutationMutation, DeleteVariantMutationMutationVariables>;
 export const NewProductPage_QueryDocumentDocument = new TypedDocumentString(`
     query NewProductPage_QueryDocument {
   categories(isPublic: null, isSetup: null) {

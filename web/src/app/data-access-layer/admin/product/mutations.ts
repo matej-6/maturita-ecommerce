@@ -98,3 +98,57 @@ export const DeleteVariantImageMutation = graphql(`
     removeProductVariantImage(id: $imageId)
   }
 `);
+
+export const CreateVariantMutation = graphql(`
+  mutation CreateVariantMutation(
+    $productId: Int!
+    $sku: String!
+    $priceInCents: Int!
+    $isPublic: Boolean!
+    $stock: Int!
+    $attributes: [Int!]!
+  ) {
+    createProductVariant(
+      createProductVariantInput: {
+        productId: $productId
+        sku: $sku
+        priceInCents: $priceInCents
+        isPublic: $isPublic
+        stock: $stock
+        attributes: $attributes
+      }
+    ) {
+      id
+    }
+  }
+`);
+
+export const EditVariantMutation = graphql(`
+  mutation EditVariantMutation(
+    $id: Int!
+    $sku: String!
+    $priceInCents: Int!
+    $isPublic: Boolean!
+    $stock: Int!
+    $attributes: [Int!]!
+  ) {
+    updateProductVariant(
+      updateProductVariantInput: {
+        id: $id
+        sku: $sku
+        priceInCents: $priceInCents
+        isPublic: $isPublic
+        stock: $stock
+        attributes: $attributes
+      }
+    ) {
+      id
+    }
+  }
+`);
+
+export const DeleteVariantMutation = graphql(`
+  mutation DeleteVariantMutation($id: Int!) {
+    removeProductVariant(id: $id)
+  }
+`);

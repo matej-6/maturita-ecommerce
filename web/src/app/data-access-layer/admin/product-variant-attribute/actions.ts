@@ -10,11 +10,13 @@ import {
 import { execute } from "@/graphql/execute";
 import {
   CreateAttributeKeyMutation,
+  CreateAttributeMutation,
   EditAttributeKeyMutation,
 } from "./mutations";
 import { handleGraphqlError } from "../handleGraphqlFormError";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { productVariantAttributeFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/product-variant-attribute-schema";
 
 export async function createAttributeKeyAction(
   data: productVariantAttributeKeyFormSchemaType,
@@ -88,5 +90,35 @@ export async function editAttributeKeyAction(
   return {
     success: true,
     data: res.data.updateProductVariantAttributeKey,
+  };
+}
+
+export async function createAttributeAction(
+  data: productVariantAttributeFormSchemaType,
+  productId?: number
+): Promise<ActionResponse<null>> {
+  const res = await execute(CreateAttributeMutation, {
+    attributeKeyId: data.attributeKeyId,
+    attributeValue: data.attributeValue,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products`);
+  if (productId) {
+    revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+  }
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+  return {
+    success: true,
+    data: null,
   };
 }

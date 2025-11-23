@@ -36,15 +36,18 @@ export class ProductVariantAttributeKeysService {
   async findAll(productId: number | null) {
     return await this.prisma.attributeKey.findMany({
       where: {
-        Attributes: {
-          some: {
-            ProductVariants: {
-              some: {
-                productId: productId ?? undefined,
+        Attributes:
+          productId === null
+            ? undefined
+            : {
+                some: {
+                  ProductVariants: {
+                    some: {
+                      productId: productId,
+                    },
+                  },
+                },
               },
-            },
-          },
-        },
       },
     });
   }

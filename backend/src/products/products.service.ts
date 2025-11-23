@@ -427,6 +427,7 @@ export class ProductsService {
       product._count.ProductVariants,
     );
 
+    console.log('isSetup', isSetup, queryArgs.isSetup);
     if (queryArgs.isSetup != null && queryArgs.isSetup !== isSetup) {
       this.logger.warn(
         `findOne(id=${queryArgs.id}, role?: ${role}) found product but isSetup does not match the queryArgs`,

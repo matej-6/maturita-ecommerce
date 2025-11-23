@@ -92,6 +92,9 @@
         "form": {
           "submitButton": "Submit"
         }
+      },
+      "form": {
+        "submitButton": "Submit"
       }
     },
     "products": {
@@ -197,7 +200,9 @@
         "keyTranslation": "Attribute Key Translation",
         "value": "Attribute Value",
         "valueTranslation": "Attribute Value Translation"
-      }
+      },
+      "attributes": "Attributes",
+      "selectAttribute": "Select Attribute"
     }
   }
 }

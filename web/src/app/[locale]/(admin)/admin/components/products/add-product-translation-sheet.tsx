@@ -34,7 +34,7 @@ export function AddProductTranslationSheet({ id, availableLocales }: Props) {
           Add Translation
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-scroll">
         <SheetHeader>
           <SheetTitle>Add translation</SheetTitle>
         </SheetHeader>

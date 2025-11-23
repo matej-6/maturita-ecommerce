@@ -14,11 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "@/i18n/navigation";
-import {
-  AlertCircleIcon,
-  ArrowUpRightIcon,
-  MoreHorizontalIcon,
-} from "lucide-react";
+import { AlertCircleIcon, ArrowUpRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ProductForm } from "../../../forms/product-form";
@@ -30,17 +26,10 @@ import { ProductImageForm } from "../../../forms/product-image-form";
 import { SetImageThumbnailButton } from "../../../components/products/set-image-thumbnail-button";
 import { DeleteImage } from "../../../components/products/delete-image-button";
 
-import { ProductVariantsDetails } from "../../../components/products/product-variant-details";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { AttributeKeyForm } from "../../../forms/attribute-key-form";
+import { AttributeForm } from "../../../forms/attribute-form";
+import { ProductVariantForm } from "../../../forms/product-variant-form";
 
 export default async function ProductDetailPage({
   params,
@@ -316,15 +305,16 @@ export default async function ProductDetailPage({
                       {variant.attributes.length === 0 ? (
                         <span>No attributes.</span>
                       ) : (
-                          <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr] justify-start items-center w-full">
-                            <span className="font-medium text-xs text-muted-foreground">
-                              Key
-                            </span>
-                            <span className="font-medium text-xs text-muted-foreground ">
-                              Value
-                            </span>
-                            <span className="col-span-3 font-medium text-xs text-muted-foreground">
-                              Actions</span>
+                        <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr] justify-start items-center w-full">
+                          <span className="font-medium text-xs text-muted-foreground">
+                            Key
+                          </span>
+                          <span className="font-medium text-xs text-muted-foreground ">
+                            Value
+                          </span>
+                          <span className="col-span-3 font-medium text-xs text-muted-foreground">
+                            Actions
+                          </span>
                         </div>
                       )}
                       {variant.attributes.map((attr) => (
@@ -428,6 +418,53 @@ export default async function ProductDetailPage({
                       productVariantId={variant.id}
                       productId={product.id}
                     />
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button className="w-fit">Edit</Button>
+                      </SheetTrigger>
+                      <SheetContent>
+                        <SheetHeader>
+                          <SheetTitle>Edit variant</SheetTitle>
+                        </SheetHeader>
+                        <div className="grow flex flex-col">
+                          <div className="flex-1 px-4">
+                            <ProductVariantForm
+                              mode="edit"
+                              productId={product.id}
+                              productVariantId={variant.id}
+                              initialData={{
+                                ...variant,
+                                attributes: variant.attributes.map((a) => a.id),
+                              }}
+                              allAttributes={attributeKeys.reduce(
+                                (acc, val) => {
+                                  val.attributes.forEach((a) =>
+                                    acc.push({
+                                      id: a.id,
+                                      key: val.key,
+                                      keyId: val.id,
+                                      value: a.value,
+                                    })
+                                  );
+                                  return acc;
+                                },
+                                [] as {
+                                  id: number;
+                                  key: string;
+                                  keyId: number;
+                                  value: string;
+                                }[]
+                              )}
+                            />
+                          </div>
+                          <SheetFooter>
+                            <SheetClose asChild>
+                              <Button variant="outline">Close</Button>
+                            </SheetClose>
+                          </SheetFooter>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
                   </div>
                 </CardContent>
               </Card>
@@ -444,11 +481,40 @@ export default async function ProductDetailPage({
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Add Attribute</SheetTitle>
+                <SheetTitle>Add Attribute Key</SheetTitle>
               </SheetHeader>
               <div className="grow flex flex-col">
                 <div className="flex-1 px-4">
                   <AttributeKeyForm mode="create" productId={product.id} />
+                </div>
+                <SheetFooter>
+                  <SheetClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </SheetClose>
+                </SheetFooter>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button className="w-fit" variant={"secondary"}>
+                New Attribute
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Add Attribute</SheetTitle>
+              </SheetHeader>
+              <div className="grow flex flex-col">
+                <div className="flex-1 px-4">
+                  <AttributeForm
+                    mode="create"
+                    productId={product.id}
+                    availableKeys={attributeKeys.map((k) => ({
+                      id: k.id,
+                      key: k.key,
+                    }))}
+                  />
                 </div>
                 <SheetFooter>
                   <SheetClose asChild>

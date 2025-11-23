@@ -39,7 +39,7 @@ export const productVariantFormSchema = (
           fieldName: c("productVariant.priceInCents"),
         }),
       }),
-    isPublic: z.boolean().default(true),
+    isPublic: z.boolean(),
     stock: z
       .int({
         error: t("required", {

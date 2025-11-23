@@ -18,6 +18,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const i18n = I18nContext.current();
 
     const message: string =
+      i18n?.t(exc.message, { defaultValue: undefined }) ||
       i18n?.t('error.' + exc.message, { defaultValue: undefined }) ||
       exc.message;
 

@@ -22,3 +22,19 @@ export const EditAttributeKeyMutation = graphql(`
     }
   }
 `);
+
+export const CreateAttributeMutation = graphql(`
+  mutation CreateAttributeMutation(
+    $attributeKeyId: Int!
+    $attributeValue: String!
+  ) {
+    createProductVariantAttribute(
+      createProductVariantAttributeInput: {
+        keyId: $attributeKeyId
+        value: $attributeValue
+      }
+    ) {
+      id
+    }
+  }
+`);

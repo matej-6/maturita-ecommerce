@@ -10,22 +10,27 @@ import {
   AddImageMutationMutation,
   AddVariantImageMutationMutation,
   CreateProductMutationMutation,
+  CreateVariantMutationMutation,
   EditProductMutationMutation,
+  EditVariantMutationMutation,
   NewProductPage_QueryDocumentQuery,
 } from "@/graphql/graphql";
 import {
   AddImageMutation,
   AddVariantImageMutation,
   CreateProductMutation,
+  CreateVariantMutation,
   DeleteProductImageMutation,
   DeleteVariantImageMutation,
   EditProductMutation,
+  EditVariantMutation,
   SetImageThumbnailMutation,
   SetVariantImageThumbnailMutation,
 } from "./mutations";
 import { revalidatePath } from "next/cache";
 import { readFileSync } from "fs";
 import { getLocale } from "next-intl/server";
+import { productVariantFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/product-variant-schema";
 
 export async function createProductAction(
   data: productFormSchemaType
@@ -312,5 +317,86 @@ export async function deleteVariantImageAction(
   return {
     success: true,
     data: null,
+  };
+}
+
+export async function createVariantAction(
+  productId: number,
+  data: productVariantFormSchemaType
+): Promise<
+  ActionResponse<
+    NonNullable<
+      ExecutionResult<CreateVariantMutationMutation>["data"]
+    >["createProductVariant"]
+  >
+> {
+  const res = await execute(CreateVariantMutation, {
+    productId: productId,
+    sku: data.sku,
+    priceInCents: data.priceInCents,
+    isPublic: data.isPublic,
+    stock: data.stock,
+    attributes: data.attributes || [],
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+  revalidatePath(`/${locale}/admin/products`);
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data.createProductVariant,
+  };
+}
+
+export async function editVariantAction(
+  productId: number,
+  variantId: number,
+  data: productVariantFormSchemaType
+): Promise<
+  ActionResponse<
+    NonNullable<
+      ExecutionResult<EditVariantMutationMutation>["data"]
+    >["updateProductVariant"]
+  >
+> {
+  const res = await execute(EditVariantMutation, {
+    id: variantId,
+    sku: data.sku,
+    priceInCents: data.priceInCents,
+    isPublic: data.isPublic,
+    stock: data.stock,
+    attributes: data.attributes || [],
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
+  revalidatePath(`/${locale}/admin/products`);
+
+  if (!res.data) {
+    return {
+      success: false,
+      message: "An unknown error ocurred",
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data.updateProductVariant,
   };
 }
