@@ -21,19 +21,6 @@ export class AuthResolver {
     private readonly configService: ConfigService,
   ) {}
 
-  // @Mutation(() => AuthResponse)
-  // async login(@Args('authInput') authInput: AuthInput) {
-  //   const user = await this.authService.validateUserWithCredentials(
-  //     authInput.email,
-  //     authInput.password,
-  //   );
-  //   if (!user) {
-  //     throw new BadRequestException('Invalid email or password');
-  //   }
-
-  //   return this.authService.login(user);
-  // }
-
   @Mutation(() => GraphQLVoid)
   async verifyEmail(
     @Args('verifyEmailInput') verifyEmailInput: VerifyEmailInput,

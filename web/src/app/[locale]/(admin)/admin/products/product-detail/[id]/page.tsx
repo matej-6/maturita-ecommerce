@@ -324,10 +324,12 @@ export default async function ProductDetailPage({
                         >
                           <span>{attr.key?.key}</span>
                           <span>{attr.value}</span>
-                          <Button variant={"ghost"} size={"sm"}>
-                            Edit
-                          </Button>
-                          <Sheet>
+                          <Link href={`/admin/attribute-keys/${attr.key?.id}`}>
+                            <Button variant={"link"} size={"sm"}>
+                              Details
+                            </Button>
+                          </Link>
+                          {/* <Sheet>
                             <SheetTrigger asChild>
                               <Button
                                 disabled={!attr.key}
@@ -359,10 +361,7 @@ export default async function ProductDetailPage({
                                 </SheetFooter>
                               </div>
                             </SheetContent>
-                          </Sheet>
-                          <Button variant={"ghost"} size={"sm"}>
-                            Delete
-                          </Button>
+                          </Sheet> */}
                         </div>
                       ))}
                     </div>

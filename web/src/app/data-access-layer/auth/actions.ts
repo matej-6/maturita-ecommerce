@@ -146,8 +146,11 @@ export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult
   if (!refreshTokenCookie) {
     return { success: false };
   }
-
   const refreshToken = refreshTokenCookie.value;
+
+  console.log(`
+    REFRESHING TOKEN WITH REFRESH TOKEN VALUE: ${refreshToken}
+    `);
 
   const res = await fetchBackend(`/auth/refresh-token`, {
     method: "POST",
@@ -157,11 +160,19 @@ export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult
   });
   if (res.ok) {
     const data: AuthResponse = await res.json();
+    console.log(`
+      REFRESH TOKEN SUCCESS
+      WITH DATA: ${JSON.stringify(data)}
+      `);
     setAuthCookies(cookieStore, data);
     return {
       success: true,
     };
   }
+  console.log(`
+    REFRESH TOKEN FAILED
+    WITH STATUS: ${res.status}
+    `);
   setAuthCookies(cookieStore, null);
   return {
     success: false,

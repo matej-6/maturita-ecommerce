@@ -26,6 +26,18 @@ export class ProductFindAllQueryArgs {
       'null - only products with no category will be returned, 0 - all products will be returned, int >= 1 - only the children of category with given id will be returned',
   })
   categoryId: number | null;
+
+  @Field(() => String, { nullable: true })
+  slug: string | null;
+}
+
+@ArgsType()
+export class ProductSortingArgs {
+  @Field(() => String, { nullable: true })
+  sortBy: string | null;
+
+  @Field(() => Boolean, { nullable: true })
+  ascending: boolean | null;
 }
 
 @ArgsType()

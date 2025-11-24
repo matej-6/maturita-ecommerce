@@ -369,6 +369,8 @@ type Query {
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
   products(
+    ascending: Boolean
+
     """
     null - only products with no category will be returned, 0 - all products will be returned, int >= 1 - only the children of category with given id will be returned
     """
@@ -377,6 +379,8 @@ type Query {
     isPublic: Boolean
     isSetup: Boolean
     pageSize: Int = 10
+    slug: String
+    sortBy: String
   ): PaginatedProduct!
   user(id: ID!): User!
   users: [User!]!

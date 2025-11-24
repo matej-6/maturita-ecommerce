@@ -16,6 +16,7 @@ import { PaginationArgs } from 'src/lib/pagination.args';
 import {
   ProductFindAllQueryArgs,
   ProductFindOneQueryArgs,
+  ProductSortingArgs,
 } from './products.resolver.args';
 import { UseGuards } from '@nestjs/common';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
@@ -72,11 +73,13 @@ export class ProductsResolver {
   findAll(
     @Args() paginationArgs: PaginationArgs,
     @Args() findAllQueryArgs: ProductFindAllQueryArgs,
+    @Args() sortByArgs: ProductSortingArgs,
     @OptionalCurrentUser() user: OptionalCurrentUserDto,
   ) {
     return this.productsService.findAll(
       paginationArgs,
       findAllQueryArgs,
+      sortByArgs,
       user?.role,
     );
   }

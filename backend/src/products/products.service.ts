@@ -7,6 +7,7 @@ import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaN
 import {
   ProductFindAllQueryArgs as ProductFindAllQueryArgs,
   ProductFindOneQueryArgs,
+  ProductSortingArgs,
 } from './products.resolver.args';
 import { PaginatedProduct, Product } from './entities/product.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
@@ -208,6 +209,15 @@ export class ProductsService {
   ) {
     queryArgs.isPublic = role === 'ADMIN' ? queryArgs.isPublic : true;
     queryArgs.isSetup = role === 'ADMIN' ? queryArgs.isSetup : true;
+    queryArgs.categoryId =
+      queryArgs.categoryId === null ? null : Math.abs(queryArgs.categoryId);
+  }
+
+  private validateSortingArgs(args: ProductSortingArgs) {
+    const validSortByFields = ['createdAt', 'updatedAt', 'id', null];
+    if (!validSortByFields.includes(args.sortBy)) {
+      args.sortBy = null;
+    }
   }
 
   private getIsSetup(hasEnglishTranslation: boolean, variantsCounts: number) {
@@ -217,10 +227,12 @@ export class ProductsService {
   async findAll(
     paginationArgs: PaginationArgs,
     queryArgs: ProductFindAllQueryArgs,
+    sortingArgs: ProductSortingArgs,
     role?: AuthenticatedUserDto['role'],
   ): Promise<PaginatedProduct> {
     this.validatePaginationArgs(paginationArgs);
     this.validateFindAllQueryArgs(queryArgs, role);
+    this.validateSortingArgs(sortingArgs);
 
     if (queryArgs.isSetup == null) {
       const products = await this.prisma.product.findMany({
@@ -256,9 +268,15 @@ export class ProductsService {
                 id: paginationArgs.cursor,
               },
         take: paginationArgs.pageSize + 1,
-        orderBy: {
-          id: 'asc',
-        },
+        orderBy:
+          sortingArgs.sortBy === null
+            ? {
+                id: sortingArgs.ascending === false ? 'desc' : 'asc',
+              }
+            : {
+                [sortingArgs.sortBy]:
+                  sortingArgs.ascending === false ? 'desc' : 'asc',
+              },
       });
       const hasNextPage = products.length === paginationArgs.pageSize + 1;
       if (hasNextPage) {
