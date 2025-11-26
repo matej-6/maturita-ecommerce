@@ -25,6 +25,7 @@ const CategoryQueryDocument = graphql(`
         name
         description
       }
+      
     }
   }
 `);

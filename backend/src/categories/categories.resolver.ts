@@ -100,6 +100,8 @@ export class CategoriesResolver {
   @Query(() => PaginatedProduct, { name: 'categoryProducts' })
   async findCategoryProducts(
     @Args('categorySlug', { type: () => String }) categorySlug: string,
+    @Args('includeSubcategories', { type: () => Boolean, nullable: true })
+    includeSubcategories: boolean | null,
     @Args() paginationArgs: PaginationArgs,
   ): Promise<PaginatedProduct> {
     const category = await this.categoriesService.findOne(null, categorySlug, {
@@ -113,6 +115,13 @@ export class CategoriesResolver {
         hasNextPage: false,
         totalCount: 0,
       };
+    }
+
+    if (includeSubcategories != null && includeSubcategories === true) {
+      return await this.productsService.findAllForCategory(
+        category.id,
+        paginationArgs,
+      );
     }
 
     return await this.productsService.findAll(

@@ -338,7 +338,7 @@ type Query {
     sortBy: String
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
-  categoryProducts(categorySlug: String!, cursor: Int, pageSize: Int = 10): PaginatedProduct!
+  categoryProducts(categorySlug: String!, cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProduct!
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: MeResponse!

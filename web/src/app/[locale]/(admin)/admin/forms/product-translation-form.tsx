@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/form";
 import { categoryTranslationSchemaType } from "../schemas/category-translation-schema";
 import { useTranslations } from "next-intl";
-import { getQueryClient } from "@/lib/get-query-client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -56,8 +55,6 @@ export const ProductTranslationForm = ({
   const formTranslations = useTranslations("form");
   const generalFieldTranslations = useTranslations("fields");
   // const formTranslations = useTranslations("admin.")
-
-  const queryClient = getQueryClient();
 
   if (mode === "create" && !productId) {
     throw new Error("product id must be provided to create new translation");
@@ -197,7 +194,11 @@ export const ProductTranslationForm = ({
                 {generalFieldTranslations("productTranslation.content")}
               </FormLabel>
               <FormControl>
-                <MDEditor  className="min-h-[600px]" {...field} />
+                <MDEditor
+                  data-color-mode="light"
+                  className="min-h-[600px]"
+                  {...field}
+                />
               </FormControl>
               <FormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>

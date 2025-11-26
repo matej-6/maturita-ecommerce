@@ -236,10 +236,10 @@ export class ProductsService {
   ): Promise<PaginatedProduct> {
     this.validatePaginationArgs(paginationArgs);
     const allCategories = await this.prisma.$transaction(async (tx) => {
-      const res = [];
+      const res: number[] = [];
       const categoriesToProcess = [categoryId];
       while (categoriesToProcess.length > 0) {
-        const currentCategoryId = categoriesToProcess.pop();
+        const currentCategoryId = categoriesToProcess.pop()!;
         res.push(currentCategoryId);
         const childCategories = await tx.category.findMany({
           where: {
@@ -253,6 +253,14 @@ export class ProductsService {
       }
       return res;
     });
+
+    if (allCategories.length === 0) {
+      return {
+        hasNextPage: false,
+        totalCount: 0,
+        edges: [],
+      };
+    }
 
     const products = await this.prisma.product.findMany({
       where: {

@@ -494,6 +494,7 @@ export type Query = {
   __typename?: 'Query';
   categories: Array<Category>;
   category: Category;
+  categoryProducts: PaginatedProduct;
   locale: Locale;
   locales: Array<Locale>;
   me: MeResponse;
@@ -523,6 +524,14 @@ export type QueryCategoryArgs = {
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryCategoryProductsArgs = {
+  categorySlug: Scalars['String']['input'];
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  includeSubcategories?: InputMaybe<Scalars['Boolean']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
