@@ -103,7 +103,8 @@
           "title": "Add a New Product"
         },
         "form": {
-          "submitButton": "Create product",
+          "submitButtonCreate": "Create product",
+          "submitButtonUpdate": "Save changes",
           "categoryId": {
             "combobox": {
               "noResultsFoundText": "No results found.",

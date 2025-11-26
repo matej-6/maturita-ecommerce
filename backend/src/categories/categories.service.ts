@@ -466,14 +466,16 @@ export class CategoriesService {
   }
 
   async findOne(
-    id: number,
+    id: number | null,
+    slug: string | null,
     filterArgs: CategoryFindOneQueryFilterArgs,
     role?: AuthenticatedUserDto['role'],
   ): Promise<Category | null> {
     this.validateFindOneArgs(filterArgs, role);
     const category = await this.prisma.category.findFirst({
       where: {
-        id: id,
+        id: id == null ? undefined : id,
+        slug: slug == null ? undefined : slug,
         isPublic: filterArgs.isPublic == null ? undefined : filterArgs.isPublic,
       },
       select: {

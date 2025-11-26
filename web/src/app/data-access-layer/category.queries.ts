@@ -12,3 +12,19 @@ const HeaderQueryDocument = graphql(`
 export const getHeaderQueryData = cache(async () => {
   return await fetchGraphql(HeaderQueryDocument);
 });
+
+const CategoryQueryDocument = graphql(`
+  query CategoryQuery($slug: String!) {
+    category(slug: $slug) {
+      id
+      name
+      slug
+      description
+      subcategories {
+        slug
+        name
+        description
+      }
+    }
+  }
+`);

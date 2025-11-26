@@ -105,7 +105,7 @@ export const ProductForm = ({
       } else {
         const res = await createProductAction(data);
         if (res.success) {
-          router.push(`/admin/products/product-detail?id=${res.data.id}`);
+          router.push(`/admin/products/product-detail/${res.data.id}`);
           return;
         }
         const fieldErrorsMap = new Map();
@@ -130,7 +130,7 @@ export const ProductForm = ({
         onSubmit={form.handleSubmit(async (data) => {
           await mutate(data);
         })}
-        className="flex flex-col gap-y-8 max-w-[600px]"
+        className="flex flex-col gap-y-8 max-w-[600px] h-full"
       >
         <FormField
           control={form.control}
@@ -189,10 +189,14 @@ export const ProductForm = ({
         <Button
           type="submit"
           variant={"default"}
-          className="w-fit"
-          disabled={!form.formState.isValid || !form.formState.isDirty || isPending}
+          className="mt-auto"
+          disabled={
+            !form.formState.isValid || !form.formState.isDirty || isPending
+          }
         >
-          {cft("submitButton")}
+          {mode === "create"
+            ? cft("submitButtonCreate")
+            : cft("submitButtonUpdate")}
         </Button>
       </form>
     </Form>

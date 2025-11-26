@@ -103,7 +103,8 @@
           "title": "Pridať nový produkt"
         },
         "form": {
-          "submitButton": "Vytvoriť produkt",
+          "submitButtonCreate": "Vytvoriť produkt",
+          "submitButtonUpdate": "Uložiť zmeny",
           "categoryId": {
             "combobox": {
               "noResultsFoundText": "Neboli nájdené žiadne výsledky.",

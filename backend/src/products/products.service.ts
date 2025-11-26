@@ -214,7 +214,13 @@ export class ProductsService {
   }
 
   private validateSortingArgs(args: ProductSortingArgs) {
-    const validSortByFields = ['createdAt', 'updatedAt', 'id', null];
+    const validSortByFields = [
+      'createdAt',
+      'updatedAt',
+      'id',
+      'categoryId',
+      null,
+    ];
     if (!validSortByFields.includes(args.sortBy)) {
       args.sortBy = null;
     }
@@ -222,6 +228,94 @@ export class ProductsService {
 
   private getIsSetup(hasEnglishTranslation: boolean, variantsCounts: number) {
     return hasEnglishTranslation && variantsCounts > 0;
+  }
+
+  async findAllForCategory(
+    categoryId: number,
+    paginationArgs: PaginationArgs,
+  ): Promise<PaginatedProduct> {
+    this.validatePaginationArgs(paginationArgs);
+    const allCategories = await this.prisma.$transaction(async (tx) => {
+      const res = [];
+      const categoriesToProcess = [categoryId];
+      while (categoriesToProcess.length > 0) {
+        const currentCategoryId = categoriesToProcess.pop();
+        res.push(currentCategoryId);
+        const childCategories = await tx.category.findMany({
+          where: {
+            parentCategoryId: currentCategoryId,
+          },
+          select: {
+            id: true,
+          },
+        });
+        categoriesToProcess.push(...childCategories.map((c) => c.id));
+      }
+      return res;
+    });
+
+    const products = await this.prisma.product.findMany({
+      where: {
+        categoryId: {
+          in: allCategories,
+        },
+      },
+      select: {
+        id: true,
+        isPublic: true,
+        slug: true,
+        categoryId: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            ProductTranslations: {
+              where: {
+                locale: {
+                  equals: this.localesService.locales().english.code,
+                },
+              },
+            },
+            ProductVariants: true,
+          },
+        },
+      },
+      cursor:
+        paginationArgs.cursor == null
+          ? undefined
+          : {
+              id: paginationArgs.cursor,
+            },
+      take: paginationArgs.pageSize + 1,
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    const hasNextPage = products.length === paginationArgs.pageSize + 1;
+    if (hasNextPage) {
+      products.pop();
+    }
+
+    return {
+      hasNextPage: hasNextPage,
+      totalCount: products.length,
+      edges: products.map((p) => ({
+        cursor: p.id,
+        node: {
+          id: p.id,
+          isPublic: p.isPublic,
+          slug: p.slug,
+          isSetup: this.getIsSetup(
+            p._count.ProductTranslations > 0,
+            p._count.ProductVariants,
+          ),
+          categoryId: p.categoryId,
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+        },
+      })),
+    };
   }
 
   async findAll(
@@ -239,7 +333,17 @@ export class ProductsService {
         where: {
           isPublic: queryArgs.isPublic == null ? undefined : queryArgs.isPublic,
           categoryId:
-            queryArgs.categoryId == null ? undefined : queryArgs.categoryId,
+            queryArgs.categoryId == null
+              ? undefined
+              : queryArgs.categoryId === 0
+                ? null
+                : queryArgs.categoryId,
+          slug:
+            queryArgs.slug == null
+              ? undefined
+              : {
+                  contains: queryArgs.slug,
+                },
         },
         select: {
           id: true,
@@ -312,7 +416,15 @@ export class ProductsService {
                 categoryId:
                   queryArgs.categoryId == null
                     ? undefined
-                    : queryArgs.categoryId,
+                    : queryArgs.categoryId === 0
+                      ? null
+                      : queryArgs.categoryId,
+                slug:
+                  queryArgs.slug == null
+                    ? undefined
+                    : {
+                        contains: queryArgs.slug,
+                      },
                 ProductTranslations: {
                   some: {
                     locale: {
@@ -336,7 +448,15 @@ export class ProductsService {
                 categoryId:
                   queryArgs.categoryId == null
                     ? undefined
-                    : queryArgs.categoryId,
+                    : queryArgs.categoryId === 0
+                      ? null
+                      : queryArgs.categoryId,
+                slug:
+                  queryArgs.slug == null
+                    ? undefined
+                    : {
+                        contains: queryArgs.slug,
+                      },
                 ProductTranslations: {
                   none: {
                     locale: {

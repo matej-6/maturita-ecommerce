@@ -16,7 +16,6 @@ import * as types from './graphql';
  */
 type Documents = {
     "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": typeof types.CategoryParentSelectDataFragmentFragmentDoc,
-    "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(parentCategoryId: $parentId) {\n      id\n      slug\n      translations(locales: $langs) {\n        id\n      }\n    }\n  }\n": typeof types.CategoryTable_QueryFragmentFragmentDoc,
     "\n    mutation DeleteCategoryTranslationMutation($id: Int!) {\n      deleteCategoryTranslation(categoryTranslationId: $id)\n    }\n  ": typeof types.DeleteCategoryTranslationMutationDocument,
     "\n  mutation NewCategoryTranslationMutation(\n    $categoryId: Int!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    createCategoryTranslation(\n      newTranslationinput: {\n        categoryId: $categoryId\n        localeCode: $localeCode\n        name: $name\n        description: $description\n      }\n    ) {\n      name\n      locale\n      description\n    }\n  }\n": typeof types.NewCategoryTranslationMutationDocument,
     "\n  mutation EditCategoryTranslationMutation(\n    $translationId: Int!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    updateCategoryTranslation(\n      editTranslationInput: {\n        categoryTranslationId: $translationId\n        name: $name\n        description: $description\n        localeCode: $localeCode\n      }\n    ) {\n      name\n      description\n      locale\n    }\n  }\n": typeof types.EditCategoryTranslationMutationDocument,
@@ -47,14 +46,15 @@ type Documents = {
     "\n  mutation DeleteVariantMutation($id: Int!) {\n    removeProductVariant(id: $id)\n  }\n": typeof types.DeleteVariantMutationDocument,
     "\n  query NewProductPage_QueryDocument {\n    categories(isPublic: null, isSetup: null) {\n      id\n      slug\n    }\n  }\n": typeof types.NewProductPage_QueryDocumentDocument,
     "\n  query ProductDetailPage_QueryDocument($id: Int!) {\n    categories(isPublic: null, isSetup: null) {\n      id\n      slug\n    }\n    locales {\n      flag\n      code\n      name\n    }\n    productVariantAttributeKeys(productId: null) {\n      id\n      key\n      attributes {\n        id\n        value\n        translations {\n          value\n          locale\n        }\n      }\n    }\n    product(id: $id, isPublic: null, isSetup: null) {\n      id\n      slug\n      isPublic\n      isSetup\n      categoryId\n      createdAt\n      updatedAt\n      translations {\n        id\n        locale\n        name\n        description\n        markdownContent\n      }\n      images {\n        id\n        base64\n        mimeType\n        isThumbnail\n      }\n      variants(includeHidden: true) {\n        id\n        sku\n        priceInCents\n        isPublic\n        stock\n        attributes {\n          id\n          value\n          key {\n            id\n            key\n            translations {\n              keyTranslation\n            }\n          }\n          translations {\n            value\n          }\n        }\n        images {\n          id\n          base64\n          mimeType\n          isThumbnail\n        }\n      }\n    }\n  }\n": typeof types.ProductDetailPage_QueryDocumentDocument,
+    "\n  query ProductsPage_QueryDocument(\n    $cursor: Int\n    $pageSize: Int!\n    $sortBy: String\n    $ascending: Boolean\n    $slug: String\n    $isSetup: Boolean\n    $isPublic: Boolean\n    $categoryId: Int\n  ) {\n    products(\n      cursor: $cursor\n      pageSize: $pageSize\n      sortBy: $sortBy\n      ascending: $ascending\n      slug: $slug\n      isSetup: $isSetup\n      isPublic: $isPublic\n      categoryId: $categoryId\n    ) {\n      hasNextPage\n      edges {\n        node {\n          id\n          slug\n          isPublic\n          isSetup\n          categoryId\n          createdAt\n          updatedAt\n        }\n        cursor\n      }\n    }\n  }\n": typeof types.ProductsPage_QueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": typeof types.MeFragmentFragmentDoc,
     "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n": typeof types.MeDocument,
     "\n  query HeaderQuery {\n    ...HeaderNav_QueryFragment\n  }\n": typeof types.HeaderQueryDocument,
+    "\n  query CategoryQuery($slug: String!) {\n    category(slug: $slug) {\n      id\n      name\n      slug\n      description\n      subcategories {\n        slug\n        name\n        description\n      }\n    }\n  }\n": typeof types.CategoryQueryDocument,
     "\n  fragment HeaderNav_QueryFragment on Query {\n    categories(parentCategoryId: null) {\n      id\n      name\n      description\n      slug\n      subcategories {\n        id\n        slug\n        name\n      }\n    }\n  }\n": typeof types.HeaderNav_QueryFragmentFragmentDoc,
 };
 const documents: Documents = {
     "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n": types.CategoryParentSelectDataFragmentFragmentDoc,
-    "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(parentCategoryId: $parentId) {\n      id\n      slug\n      translations(locales: $langs) {\n        id\n      }\n    }\n  }\n": types.CategoryTable_QueryFragmentFragmentDoc,
     "\n    mutation DeleteCategoryTranslationMutation($id: Int!) {\n      deleteCategoryTranslation(categoryTranslationId: $id)\n    }\n  ": types.DeleteCategoryTranslationMutationDocument,
     "\n  mutation NewCategoryTranslationMutation(\n    $categoryId: Int!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    createCategoryTranslation(\n      newTranslationinput: {\n        categoryId: $categoryId\n        localeCode: $localeCode\n        name: $name\n        description: $description\n      }\n    ) {\n      name\n      locale\n      description\n    }\n  }\n": types.NewCategoryTranslationMutationDocument,
     "\n  mutation EditCategoryTranslationMutation(\n    $translationId: Int!\n    $localeCode: String!\n    $name: String!\n    $description: String\n  ) {\n    updateCategoryTranslation(\n      editTranslationInput: {\n        categoryTranslationId: $translationId\n        name: $name\n        description: $description\n        localeCode: $localeCode\n      }\n    ) {\n      name\n      description\n      locale\n    }\n  }\n": types.EditCategoryTranslationMutationDocument,
@@ -85,9 +85,11 @@ const documents: Documents = {
     "\n  mutation DeleteVariantMutation($id: Int!) {\n    removeProductVariant(id: $id)\n  }\n": types.DeleteVariantMutationDocument,
     "\n  query NewProductPage_QueryDocument {\n    categories(isPublic: null, isSetup: null) {\n      id\n      slug\n    }\n  }\n": types.NewProductPage_QueryDocumentDocument,
     "\n  query ProductDetailPage_QueryDocument($id: Int!) {\n    categories(isPublic: null, isSetup: null) {\n      id\n      slug\n    }\n    locales {\n      flag\n      code\n      name\n    }\n    productVariantAttributeKeys(productId: null) {\n      id\n      key\n      attributes {\n        id\n        value\n        translations {\n          value\n          locale\n        }\n      }\n    }\n    product(id: $id, isPublic: null, isSetup: null) {\n      id\n      slug\n      isPublic\n      isSetup\n      categoryId\n      createdAt\n      updatedAt\n      translations {\n        id\n        locale\n        name\n        description\n        markdownContent\n      }\n      images {\n        id\n        base64\n        mimeType\n        isThumbnail\n      }\n      variants(includeHidden: true) {\n        id\n        sku\n        priceInCents\n        isPublic\n        stock\n        attributes {\n          id\n          value\n          key {\n            id\n            key\n            translations {\n              keyTranslation\n            }\n          }\n          translations {\n            value\n          }\n        }\n        images {\n          id\n          base64\n          mimeType\n          isThumbnail\n        }\n      }\n    }\n  }\n": types.ProductDetailPage_QueryDocumentDocument,
+    "\n  query ProductsPage_QueryDocument(\n    $cursor: Int\n    $pageSize: Int!\n    $sortBy: String\n    $ascending: Boolean\n    $slug: String\n    $isSetup: Boolean\n    $isPublic: Boolean\n    $categoryId: Int\n  ) {\n    products(\n      cursor: $cursor\n      pageSize: $pageSize\n      sortBy: $sortBy\n      ascending: $ascending\n      slug: $slug\n      isSetup: $isSetup\n      isPublic: $isPublic\n      categoryId: $categoryId\n    ) {\n      hasNextPage\n      edges {\n        node {\n          id\n          slug\n          isPublic\n          isSetup\n          categoryId\n          createdAt\n          updatedAt\n        }\n        cursor\n      }\n    }\n  }\n": types.ProductsPage_QueryDocumentDocument,
     "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n": types.MeFragmentFragmentDoc,
     "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n": types.MeDocument,
     "\n  query HeaderQuery {\n    ...HeaderNav_QueryFragment\n  }\n": types.HeaderQueryDocument,
+    "\n  query CategoryQuery($slug: String!) {\n    category(slug: $slug) {\n      id\n      name\n      slug\n      description\n      subcategories {\n        slug\n        name\n        description\n      }\n    }\n  }\n": types.CategoryQueryDocument,
     "\n  fragment HeaderNav_QueryFragment on Query {\n    categories(parentCategoryId: null) {\n      id\n      name\n      description\n      slug\n      subcategories {\n        id\n        slug\n        name\n      }\n    }\n  }\n": types.HeaderNav_QueryFragmentFragmentDoc,
 };
 
@@ -95,10 +97,6 @@ const documents: Documents = {
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  fragment CategoryParentSelectDataFragment on Category {\n    id\n    slug\n  }\n"): typeof import('./graphql').CategoryParentSelectDataFragmentFragmentDoc;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  fragment CategoryTable_QueryFragment on Query {\n    categories(parentCategoryId: $parentId) {\n      id\n      slug\n      translations(locales: $langs) {\n        id\n      }\n    }\n  }\n"): typeof import('./graphql').CategoryTable_QueryFragmentFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -222,6 +220,10 @@ export function graphql(source: "\n  query ProductDetailPage_QueryDocument($id: 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query ProductsPage_QueryDocument(\n    $cursor: Int\n    $pageSize: Int!\n    $sortBy: String\n    $ascending: Boolean\n    $slug: String\n    $isSetup: Boolean\n    $isPublic: Boolean\n    $categoryId: Int\n  ) {\n    products(\n      cursor: $cursor\n      pageSize: $pageSize\n      sortBy: $sortBy\n      ascending: $ascending\n      slug: $slug\n      isSetup: $isSetup\n      isPublic: $isPublic\n      categoryId: $categoryId\n    ) {\n      hasNextPage\n      edges {\n        node {\n          id\n          slug\n          isPublic\n          isSetup\n          categoryId\n          createdAt\n          updatedAt\n        }\n        cursor\n      }\n    }\n  }\n"): typeof import('./graphql').ProductsPage_QueryDocumentDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  fragment MeFragment on MeResponse {\n    id\n    avatar\n    emailVerified\n    firstName\n    lastName\n    role\n    email\n  }\n"): typeof import('./graphql').MeFragmentFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -231,6 +233,10 @@ export function graphql(source: "\n  query Me {\n    me {\n      ...MeFragment\n
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query HeaderQuery {\n    ...HeaderNav_QueryFragment\n  }\n"): typeof import('./graphql').HeaderQueryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query CategoryQuery($slug: String!) {\n    category(slug: $slug) {\n      id\n      name\n      slug\n      description\n      subcategories {\n        slug\n        name\n        description\n      }\n    }\n  }\n"): typeof import('./graphql').CategoryQueryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

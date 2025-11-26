@@ -14,7 +14,7 @@ import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
 import { CategoryTranslation } from './entities/category-translation.entity';
-import { UseGuards } from '@nestjs/common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
 import {
   OptionalCurrentUser,
@@ -30,10 +30,15 @@ import {
 } from './categories.resolver.args';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 import { PaginationArgs } from 'src/lib/pagination.args';
+import { PaginatedProduct } from 'src/products/entities/product.entity';
+import { ProductsService } from 'src/products/products.service';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly productsService: ProductsService,
+  ) {}
 
   @UseGuards(AdminGuard)
   @Mutation(() => Category)
@@ -77,10 +82,52 @@ export class CategoriesResolver {
   @UseGuards(OptionalJwtAuthGuard)
   findOne(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
-    @Args('id', { type: () => Int }) id: number,
+    @Args('id', { type: () => Int, nullable: true }) id: number | null,
+    @Args('slug', { type: () => String, nullable: true }) slug: string | null,
     @Args() filterArgs: CategoryFindOneQueryFilterArgs,
   ) {
-    return this.categoriesService.findOne(id, filterArgs, currentUser?.role);
+    if (id == null && slug == null) {
+      throw new BadRequestException();
+    }
+    return this.categoriesService.findOne(
+      id,
+      slug,
+      filterArgs,
+      currentUser?.role,
+    );
+  }
+
+  @Query(() => PaginatedProduct, { name: 'categoryProducts' })
+  async findCategoryProducts(
+    @Args('categorySlug', { type: () => String }) categorySlug: string,
+    @Args() paginationArgs: PaginationArgs,
+  ): Promise<PaginatedProduct> {
+    const category = await this.categoriesService.findOne(null, categorySlug, {
+      isPublic: true,
+      isSetup: true,
+    });
+
+    if (!category) {
+      return {
+        edges: [],
+        hasNextPage: false,
+        totalCount: 0,
+      };
+    }
+
+    return await this.productsService.findAll(
+      paginationArgs,
+      {
+        categoryId: category.id,
+        isPublic: true,
+        isSetup: true,
+        slug: null,
+      },
+      {
+        ascending: null,
+        sortBy: null,
+      },
+    );
   }
 
   @UseGuards(AdminGuard)

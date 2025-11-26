@@ -519,9 +519,10 @@ export type QueryCategoriesArgs = {
 
 
 export type QueryCategoryArgs = {
-  id: Scalars['Int']['input'];
+  id?: InputMaybe<Scalars['Int']['input']>;
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -561,11 +562,14 @@ export type QueryProductVariantAttributeKeysArgs = {
 
 
 export type QueryProductsArgs = {
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
   categoryId?: InputMaybe<Scalars['Int']['input']>;
   cursor?: InputMaybe<Scalars['Int']['input']>;
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
   pageSize?: InputMaybe<Scalars['Int']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -640,8 +644,6 @@ export type VerifyEmailInput = {
 };
 
 export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category', id: number, slug: string } & { ' $fragmentName'?: 'CategoryParentSelectDataFragmentFragment' };
-
-export type CategoryTable_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string, translations: Array<{ __typename?: 'CategoryTranslation', id: number }> }> } & { ' $fragmentName'?: 'CategoryTable_QueryFragmentFragment' };
 
 export type DeleteCategoryTranslationMutationMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -894,6 +896,20 @@ export type ProductDetailPage_QueryDocumentQueryVariables = Exact<{
 
 export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }>, locales: Array<{ __typename?: 'Locale', flag: string, code: string, name: string }>, productVariantAttributeKeys: Array<{ __typename?: 'ProductVariantAttributeKey', id: number, key: string, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string, locale: string }> }> }>, product?: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any, translations: Array<{ __typename?: 'ProductTranslation', id: number, locale: string, name: string, description?: string | null, markdownContent?: string | null }>, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean, stock: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string }> } | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string }> }>, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }> }> } | null };
 
+export type ProductsPage_QueryDocumentQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  pageSize: Scalars['Int']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  categoryId?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null } };
+
 export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
@@ -911,6 +927,13 @@ export type HeaderQueryQuery = (
   { __typename?: 'Query' }
   & { ' $fragmentRefs'?: { 'HeaderNav_QueryFragmentFragment': HeaderNav_QueryFragmentFragment } }
 );
+
+export type CategoryQueryQueryVariables = Exact<{
+  slug: Scalars['String']['input'];
+}>;
+
+
+export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }> } };
 
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
@@ -938,17 +961,6 @@ export const CategoryParentSelectDataFragmentFragmentDoc = new TypedDocumentStri
   slug
 }
     `, {"fragmentName":"CategoryParentSelectDataFragment"}) as unknown as TypedDocumentString<CategoryParentSelectDataFragmentFragment, unknown>;
-export const CategoryTable_QueryFragmentFragmentDoc = new TypedDocumentString(`
-    fragment CategoryTable_QueryFragment on Query {
-  categories(parentCategoryId: $parentId) {
-    id
-    slug
-    translations(locales: $langs) {
-      id
-    }
-  }
-}
-    `, {"fragmentName":"CategoryTable_QueryFragment"}) as unknown as TypedDocumentString<CategoryTable_QueryFragmentFragment, unknown>;
 export const AllCategories_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment AllCategories_QueryFragment on Query {
   categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
@@ -1371,6 +1383,34 @@ export const ProductDetailPage_QueryDocumentDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductDetailPage_QueryDocumentQuery, ProductDetailPage_QueryDocumentQueryVariables>;
+export const ProductsPage_QueryDocumentDocument = new TypedDocumentString(`
+    query ProductsPage_QueryDocument($cursor: Int, $pageSize: Int!, $sortBy: String, $ascending: Boolean, $slug: String, $isSetup: Boolean, $isPublic: Boolean, $categoryId: Int) {
+  products(
+    cursor: $cursor
+    pageSize: $pageSize
+    sortBy: $sortBy
+    ascending: $ascending
+    slug: $slug
+    isSetup: $isSetup
+    isPublic: $isPublic
+    categoryId: $categoryId
+  ) {
+    hasNextPage
+    edges {
+      node {
+        id
+        slug
+        isPublic
+        isSetup
+        categoryId
+        createdAt
+        updatedAt
+      }
+      cursor
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductsPage_QueryDocumentQuery, ProductsPage_QueryDocumentQueryVariables>;
 export const MeDocument = new TypedDocumentString(`
     query Me {
   me {
@@ -1403,3 +1443,18 @@ export const HeaderQueryDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<HeaderQueryQuery, HeaderQueryQueryVariables>;
+export const CategoryQueryDocument = new TypedDocumentString(`
+    query CategoryQuery($slug: String!) {
+  category(slug: $slug) {
+    id
+    name
+    slug
+    description
+    subcategories {
+      slug
+      name
+      description
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CategoryQueryQuery, CategoryQueryQueryVariables>;
