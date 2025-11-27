@@ -2,6 +2,10 @@ import { graphql } from "@/graphql";
 import { cache } from "react";
 import "server-only";
 import { fetchGraphql } from "./fetch-graphql";
+import { execute } from "@/graphql/execute";
+import { ActionResponse } from "./formActionResponse";
+import { ExecutionResult } from "graphql";
+import { CategoryQueryQuery } from "@/graphql/graphql";
 
 const HeaderQueryDocument = graphql(`
   query HeaderQuery {
@@ -14,7 +18,11 @@ export const getHeaderQueryData = cache(async () => {
 });
 
 const CategoryQueryDocument = graphql(`
-  query CategoryQuery($slug: String!) {
+  query CategoryQuery(
+    $slug: String!
+    $productsCursor: Int
+    $productsPageSize: Int
+  ) {
     category(slug: $slug) {
       id
       name
@@ -25,7 +33,66 @@ const CategoryQueryDocument = graphql(`
         name
         description
       }
-      
+      categoryProducts(
+        cursor: $productsCursor
+        pageSize: $productsPageSize
+        includeSubcategories: true
+      ) {
+        hasNextPage
+        edges {
+          cursor
+          node {
+            slug
+            thumbnailImage {
+              base64
+              mimeType
+            }
+            name
+            description
+            variants {
+              sku
+              thumbnailImage {
+                base64
+                mimeType
+              }
+              priceInCents
+              stock
+              attributes {
+                key {
+                  key
+                  translatedKey
+                }
+                value
+                translatedValue
+              }
+            }
+          }
+        }
+      }
     }
   }
 `);
+
+export async function getCategoryQueryData(
+  slug: string,
+  productsCursor: number | null,
+  productsPageSize: number | null
+): Promise<ActionResponse<ExecutionResult<CategoryQueryQuery>["data"]>> {
+  const res = await execute(CategoryQueryDocument, {
+    slug,
+    productsCursor,
+    productsPageSize,
+  });
+
+  if (res.errors) {
+    return {
+      success: false,
+      message: res.errors.map((e) => e.message).join(", "),
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data,
+  };
+}

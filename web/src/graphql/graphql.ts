@@ -22,6 +22,7 @@ export type Scalars = {
 
 export type Category = {
   __typename?: 'Category';
+  categoryProducts: PaginatedProduct;
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   id: Scalars['Int']['output'];
@@ -34,6 +35,13 @@ export type Category = {
   subcategories: Array<Category>;
   translations: Array<CategoryTranslation>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type CategoryCategoryProductsArgs = {
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  includeSubcategories?: InputMaybe<Scalars['Boolean']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -441,7 +449,7 @@ export type ProductVariant = {
   productId: Scalars['Int']['output'];
   sku: Scalars['String']['output'];
   stock: Scalars['Int']['output'];
-  thumbnailImage: ProductVariantImage;
+  thumbnailImage?: Maybe<ProductVariantImage>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -494,7 +502,6 @@ export type Query = {
   __typename?: 'Query';
   categories: Array<Category>;
   category: Category;
-  categoryProducts: PaginatedProduct;
   locale: Locale;
   locales: Array<Locale>;
   me: MeResponse;
@@ -524,14 +531,6 @@ export type QueryCategoryArgs = {
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type QueryCategoryProductsArgs = {
-  categorySlug: Scalars['String']['input'];
-  cursor?: InputMaybe<Scalars['Int']['input']>;
-  includeSubcategories?: InputMaybe<Scalars['Boolean']['input']>;
-  pageSize?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -939,10 +938,12 @@ export type HeaderQueryQuery = (
 
 export type CategoryQueryQueryVariables = Exact<{
   slug: Scalars['String']['input'];
+  productsCursor?: InputMaybe<Scalars['Int']['input']>;
+  productsPageSize?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }> } };
+export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProducts: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null, variants: Array<{ __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> }> } }> | null } } };
 
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
@@ -1453,7 +1454,7 @@ export const HeaderQueryDocument = new TypedDocumentString(`
   }
 }`) as unknown as TypedDocumentString<HeaderQueryQuery, HeaderQueryQueryVariables>;
 export const CategoryQueryDocument = new TypedDocumentString(`
-    query CategoryQuery($slug: String!) {
+    query CategoryQuery($slug: String!, $productsCursor: Int, $productsPageSize: Int) {
   category(slug: $slug) {
     id
     name
@@ -1463,6 +1464,42 @@ export const CategoryQueryDocument = new TypedDocumentString(`
       slug
       name
       description
+    }
+    categoryProducts(
+      cursor: $productsCursor
+      pageSize: $productsPageSize
+      includeSubcategories: true
+    ) {
+      hasNextPage
+      edges {
+        cursor
+        node {
+          slug
+          thumbnailImage {
+            base64
+            mimeType
+          }
+          name
+          description
+          variants {
+            sku
+            thumbnailImage {
+              base64
+              mimeType
+            }
+            priceInCents
+            stock
+            attributes {
+              key {
+                key
+                translatedKey
+              }
+              value
+              translatedValue
+            }
+          }
+        }
+      }
     }
   }
 }

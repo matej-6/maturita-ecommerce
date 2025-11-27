@@ -4,6 +4,7 @@ schema {
 }
 
 type Category {
+  categoryProducts(cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProduct!
   createdAt: DateTime!
   description: String!
   id: Int!
@@ -251,7 +252,7 @@ type ProductVariant {
   productId: Int!
   sku: String!
   stock: Int!
-  thumbnailImage: ProductVariantImage!
+  thumbnailImage: ProductVariantImage
   updatedAt: DateTime!
 }
 
@@ -315,7 +316,6 @@ type Query {
     sortBy: String
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
-  categoryProducts(categorySlug: String!, cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProduct!
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: MeResponse!

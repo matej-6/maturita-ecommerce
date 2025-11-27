@@ -97,18 +97,13 @@ export class CategoriesResolver {
     );
   }
 
-  @Query(() => PaginatedProduct, { name: 'categoryProducts' })
+  @ResolveField(() => PaginatedProduct, { name: 'categoryProducts' })
   async findCategoryProducts(
-    @Args('categorySlug', { type: () => String }) categorySlug: string,
     @Args('includeSubcategories', { type: () => Boolean, nullable: true })
     includeSubcategories: boolean | null,
     @Args() paginationArgs: PaginationArgs,
+    @Parent() category: Category,
   ): Promise<PaginatedProduct> {
-    const category = await this.categoriesService.findOne(null, categorySlug, {
-      isPublic: true,
-      isSetup: true,
-    });
-
     if (!category) {
       return {
         edges: [],

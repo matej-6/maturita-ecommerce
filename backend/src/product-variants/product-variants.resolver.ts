@@ -73,7 +73,10 @@ export class ProductVariantsResolver {
     }));
   }
 
-  @ResolveField(() => ProductVariantImage, { name: 'thumbnailImage' })
+  @ResolveField(() => ProductVariantImage, {
+    name: 'thumbnailImage',
+    nullable: true,
+  })
   async resolveProductVariantThumbnailImage(
     @Parent() productVariant: ProductVariant,
     @Context() ctx: GraphqlAppContext,
