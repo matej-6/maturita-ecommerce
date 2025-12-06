@@ -5,11 +5,12 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -20,7 +21,7 @@ enum Role {
 }
 
 model User {
-  id             String                @id @default(uuid())
+  id             Int                   @id @default(autoincrement())
   email          String                @unique
   emailVerified  Boolean               @default(false)
   hashedPassword String?
@@ -37,8 +38,8 @@ model User {
 }
 
 model RefreshTokenSession {
-  id          String   @id @default(uuid())
-  userId      String
+  id          Int      @id @default(autoincrement())
+  userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   blacklisted Boolean  @default(false)
   token       String   @unique
@@ -52,39 +53,128 @@ model RefreshTokenSession {
 }
 
 model Category {
-  id                  String                @id @default(uuid())
+  id                  Int                   @id @default(autoincrement())
   slug                String                @unique
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   subcategories       Category[]            @relation("CategoryToSubcategory")
   parentCategory      Category?             @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id])
-  parentCategoryId    String?
+  parentCategoryId    Int?
   CategoryTranslation CategoryTranslation[]
+  Products            Product[]
+  isPublic            Boolean               @default(true)
 
   @@index([slug])
   @@map("categories")
 }
 
 model CategoryTranslation {
-  id          String   @id @default(uuid())
-  localeId    String
-  locale      Locale   @relation(fields: [localeId], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
+  locale      String
   name        String
   description String?
-  categoryId  String
+  categoryId  Int
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  @@index([localeId, categoryId])
+  @@unique([categoryId, locale])
+  @@index([categoryId, locale])
   @@map("category_translations")
 }
 
-model Locale {
-  id       String  @id @default(uuid())
-  code     String  @unique
-  name     String
-  isActive Boolean @default(true)
+model Product {
+  id                  Int                  @id @default(autoincrement())
+  slug                String               @unique
+  Category            Category?            @relation(fields: [categoryId], references: [id])
+  categoryId          Int?
+  isPublic            Boolean              @default(true)
+  ProductVariants     ProductVariant[]
+  Images              ProductImage[]
+  ProductTranslations ProductTranslation[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 
-  CategoryTranslations CategoryTranslation[]
+  @@map("products")
+}
 
-  @@map("locales")
+model ProductTranslation {
+  id              Int     @id @default(autoincrement())
+  locale          String
+  Product         Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId       Int
+  name            String
+  description     String? @db.LongText
+  markdownContent String? @db.LongText
+
+  @@unique([productId, locale])
+  @@map("product_translations")
+}
+
+model ProductVariant {
+  id           Int            @id @default(autoincrement())
+  sku          String         @unique
+  stock        Int
+  priceInCents Int
+  Attributes   Attribute[]
+  Product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Images       ProductImage[]
+  productId    Int
+  isPublic     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id               Int             @id @default(autoincrement())
+  base64           String          @db.LongText
+  mimeType         String
+  isThumbnail      Boolean         @default(false)
+  Product          Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId        Int?
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  productVariantId Int?
+
+  @@index([id, productId])
+  @@index([id, productVariantId])
+  @@map("product_images")
+}
+
+model Attribute {
+  id                    Int                    @id @default(autoincrement())
+  value                 String
+  AttributeKey          AttributeKey           @relation(fields: [attributeKeyId], references: [id], onDelete: Cascade)
+  attributeKeyId        Int
+  ProductVariants       ProductVariant[]
+  AttributeTranslations AttributeTranslation[]
+
+  @@unique([value, attributeKeyId])
+  @@map("attributes")
+}
+
+model AttributeTranslation {
+  id          Int       @id @default(autoincrement())
+  value       String
+  locale      String
+  Attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  attributeId Int
+}
+
+model AttributeKey {
+  id           Int                       @id @default(autoincrement())
+  key          String                    @unique
+  Attributes   Attribute[]
+  Translations AttributeKeyTranslation[]
+
+  @@map("attribute_keys")
+}
+
+model AttributeKeyTranslation {
+  id             Int          @id @default(autoincrement())
+  keyTranslation String
+  locale         String
+  attributeKey   AttributeKey @relation(fields: [attributeKeyId], references: [id], onDelete: Cascade)
+  attributeKeyId Int
+
+  @@index([locale, attributeKeyId])
 }

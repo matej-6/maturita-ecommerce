@@ -1,6 +1,26 @@
 {
+  "form": {
+    "invalidEmail": "Nesprávna emailová adresa",
+    "invalidPassword": "Nesprávne heslo",
+    "minLengthPassword": "Heslo musí mať najmenej {minLength, plural, =1 {# znak} other {# znaky}}",
+    "required": "{fieldName} je povinné",
+    "maxLength": "{fieldName} môže mať dĺžku najviac {value, plural, =1 {# znak} other {# znakov}}",
+    "minLength": "{fieldName} musí mať dĺžku najmenej {value, plural, =1 {# znak} other {#znakov}}",
+    "passwordsMustMatch": "Heslá sa musia zhodovať",
+    "min": "{fieldName} musí byť najmenej {value}",
+    "max": "{fieldName} musí byť najviac {value}",
+    "uuid": "Nesprávny formát UUID",
+    "id": "Nesprávne ID",
+    "newCategoryFormSchema": {
+      "translations": {
+        "atLeastEnRequired": "Anglicky preklad je povinný"
+      }
+    },
+    "never": "Pre toto pole nie je dostupná žiadna hodnota",
+    "positive": "{fieldName} musí byť kladné číslo"
+  },
   "LocaleLayout": {
-    "title": "GRABLY",
+    "title": "GoFitShop",
     "description": "Najlepší online obchod pre všetky vaše potreby"
   },
   "header": {
@@ -19,7 +39,7 @@
     "locale": "{locale, select, sk {🇸🇰 Slovenský} en {🇺🇸 English} other {Neznámy}}"
   },
   "footer": {
-    "copyright": "© 2025 GRABLY. Všetky práva vyhradené.",
+    "copyright": "© 2025 GoFitShop. Všetky práva vyhradené.",
     "dark-mode": {
       "light": "Svetlý",
       "dark": "Tmavý",
@@ -61,5 +81,129 @@
     "home-button": "Domovská stránka",
     "back-button": "Späť na predchádzajúcu stránku",
     "back-button-admin": "Späť na admin panel"
+  },
+  "error": {
+    "unknownError": "Nastala neočakávaná chyba",
+    "INTERNAL_SERVER_ERROR": "Nastala neočakávaná chyba"
+  },
+  "admin": {
+    "productVariant": {
+      "attributeKey": {
+        "form": {
+          "submitButton": "Odoslať"
+        }
+      },
+      "form": {
+        "submitButton": "Odoslať"
+      }
+    },
+    "products": {
+      "newProduct": {
+        "page": {
+          "title": "Pridať nový produkt"
+        },
+        "form": {
+          "submitButtonCreate": "Vytvoriť produkt",
+          "submitButtonUpdate": "Uložiť zmeny",
+          "categoryId": {
+            "combobox": {
+              "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
+              "filterPlaceholderText": "Filtrovať kategórie",
+              "emptyValueLabel": "Vybrať kategóriu"
+            }
+          }
+        }
+      },
+      "productDetail": {
+        "page": {
+          "setupWarning": {
+            "title": "Tento produkt nie je úplne nastavený",
+            "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavený a viditeľný pre zákazníkov",
+            "englishTranslation": "Musí mať anglický preklad",
+            "atLeastOneVisibleVariant": "Musí obsahovať aspoň jednu viditeľnú variantu"
+          }
+        }
+      }
+    },
+    "categories": {
+      "newCategory": {
+        "page": {
+          "title": "Vytvoriť novú kategóriu"
+        },
+        "form": {
+          "submitButton": "Vytvoriť kategóriu",
+          "parentCategoryId": {
+            "combobox": {
+              "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
+              "filterPlaceholderText": "Filtrovať kategórie",
+              "emptyValueLabel": "Vybrať kategóriu"
+            }
+          }
+        }
+      },
+      "editCategory": {
+        "form": {
+          "submitButton": "Uložiť zmeny",
+          "parentCategoryId": {
+            "combobox": {
+              "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
+              "filterPlaceholderText": "Filtrovať kategórie",
+              "emptyValueLabel": "Vybrať kategóriu"
+            }
+          },
+          "toastSuccess": "Zmeny boli uložené"
+        },
+        "page": {
+          "setupWarning": {
+            "title": "Táto kategória nie je úplne nastavená",
+            "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavená a vidiťeľná pre zákazníkov",
+            "englishTranslation": "Musí mať anglický preklad",
+            "atLeastOneVisibleProduct": "Musí sa obsahovať aspoň jeden viditeľný produkt na predaj"
+          }
+        }
+      }
+    }
+  },
+  "fields": {
+    "category": {
+      "slug": "Slug",
+      "parentCategoryId": "ID nadkategórie",
+      "name": "Meno",
+      "description": "Popis"
+    },
+    "locale": {
+      "code": "Kód lokality"
+    },
+    "categoryTranslation": {
+      "name": "Meno",
+      "description": "Popis"
+    },
+    "product": {
+      "slug": "Slug",
+      "categoryId": "ID kategórie",
+      "isPublic": "Je verejný",
+      "isSetup": "Je nastavený",
+      "id": "ID"
+    },
+    "productTranslation": {
+      "title": "Názov",
+      "description": "Popis",
+      "content": "Obsah"
+    },
+    "productVariant": {
+      "sku": "SKU",
+      "price": "Cena",
+      "priceInCents": "Cena v centoch",
+      "isPublic": "Je verejný",
+      "stock": "Sklad",
+      "attribute": {
+        "key": "Kľúč atribútu",
+        "keyTranslation": "Preklad kľúča atribútu",
+        "value": "Hodnota atribútu",
+        "valueTranslation": "Preklad hodnoty atribútu"
+      },
+      "attributes": "Atribúty",
+      "selectAttribute": "Vybrať atribút"
+    }
   }
 }

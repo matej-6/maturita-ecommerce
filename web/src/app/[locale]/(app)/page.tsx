@@ -1,5 +1,5 @@
-"use client";
+import { getCurrentSession } from "@/app/data-access-layer/auth/queries";
 
-export default function Home() {
+export default async function Home() {
   return <div></div>;
 }

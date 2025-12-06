@@ -1,0 +1,9 @@
+{
+  "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password.",
+  "unknownError": "An unknown error ocurred",
+  "badRequest": "Bad request",
+  "emailAlreadyInUse": "This email is already in use.",
+  "emailAlreadyVerified": "Email was already verified",
+  "emailInvalidVerificationCode": "Invalid verification code",
+  "unauthorizedException": "You are not authorized to perform this action."
+}

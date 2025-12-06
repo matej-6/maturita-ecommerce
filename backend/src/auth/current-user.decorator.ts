@@ -1,27 +1,34 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  ContextType,
+  createParamDecorator,
+  ExecutionContext,
+} from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { GraphqlAppContext } from '../app.module';
-
-type CurrentUser = AuthenticatedUserDto;
+import { Request } from 'express';
+import { UnauthorizedException } from 'src/exception/unauthorized.exception';
 
 export const CurrentUser = createParamDecorator(
   (_data: unknown, context: ExecutionContext) => {
-    try {
-      const ctx = GqlExecutionContext.create(context);
-      const gqlContext = ctx.getContext<GraphqlAppContext>();
-      const req = gqlContext.req as { user?: CurrentUser };
+    switch (context.getType<ContextType | 'graphql'>()) {
+      case 'http': {
+        const req = context
+          .switchToHttp()
+          .getRequest<Request & { user?: AuthenticatedUserDto }>();
 
-      if (req.user) {
+        if (!req.user) throw new UnauthorizedException();
         return req.user;
       }
-    } catch {
-      const req = context.switchToHttp().getRequest<{ user?: CurrentUser }>();
-      if (!req.user) {
-        throw new Error('User not found. Did you forget to use the AuthGuard?');
+      case 'graphql': {
+        const ctx =
+          GqlExecutionContext.create(context).getContext<GraphqlAppContext>();
+        const req = ctx.req as { user?: AuthenticatedUserDto };
+        if (!req.user) throw new UnauthorizedException();
+        return req.user;
       }
-
-      return req.user;
+      default:
+        throw new UnauthorizedException();
     }
   },
 );

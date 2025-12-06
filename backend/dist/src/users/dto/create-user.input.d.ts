@@ -1,7 +1,0 @@
-export declare class CreateUserInput {
-    name: string;
-    lastName: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-}

@@ -1,12 +1,22 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { type CategoryTranslation as DbCategoryTranslation } from '@prisma/client';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { type CategoryTranslation as DbCategoryTranslation } from 'generated/prisma/client';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 
 @InputType()
 export class CreateCategoryTranslationInput
   implements Partial<DbCategoryTranslation>
 {
+  @Field(() => Int, { description: 'category id' })
+  @IsInt({ message: i18nValidationMessage('validation.invalid') })
+  categoryId: number;
+
   @Field(() => String, { description: 'Category name' })
   @MinLength(3, { message: i18nValidationMessage('validation.minLength') })
   @MaxLength(255, { message: i18nValidationMessage('validation.maxLength') })
@@ -17,7 +27,7 @@ export class CreateCategoryTranslationInput
   @MaxLength(4000, {
     message: i18nValidationMessage('validation.maxLength'),
   })
-  description?: string | null;
+  description?: string;
 
   @Field(() => String, { description: 'Locale code' })
   @IsString({ message: i18nValidationMessage('validation.required') })

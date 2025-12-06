@@ -53,7 +53,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
   async validate(
     req: RequestWithToken,
-    payload: { userId: string },
+    payload: { userId: number },
   ): Promise<AuthenticatedUserDto> {
     this.logger.log(`Validating JWT refresh token for user ${payload.userId}`);
 

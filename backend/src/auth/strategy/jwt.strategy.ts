@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Role } from '@prisma/client';
+import { Role } from 'generated/prisma/client';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Env } from 'src/config/validate';
@@ -46,11 +46,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   validate(payload: {
-    userId: string;
+    userId: number;
     role: Role;
     email: string;
   }): AuthenticatedUserDto {
     this.logger.debug(`Validating JWT payload for user ID: ${payload.userId}`);
+    this.logger.debug({
+      id: payload.userId,
+      role: payload.role,
+      email: payload.email,
+    });
     return {
       id: payload.userId,
       role: payload.role,

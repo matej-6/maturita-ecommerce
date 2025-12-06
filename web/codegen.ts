@@ -3,15 +3,34 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// DOLEZITE: codegen command nefunguje dobre s bun. pouzivat len npm run codegen!!!!!!!
+
 const config: CodegenConfig = {
-  schema: process.env.GRAPHQL_ENDPOINT ?? "http://localhost:8080/graphql",
-  documents: ["src/**/*.tsx"],
-  ignoreNoDocuments: true,
+  schema: process.env.GRAPHQL_URL!,
+  documents: [
+    "src/**/*.tsx",
+    "src/**/*queries.ts",
+    "src/**/*fragments.ts",
+    "src/**/queries.ts",
+    "src/**/fragments.ts",
+    "src/**/mutations.ts",
+    "src/**/*mutations.ts",
+    "!src/gql/**/*",
+  ],
+  ignoreNoDocuments: false,
+  verbose: true,
+  noSilentErrors: true,
+  debug: true,
   generates: {
     "./src/graphql/": {
       preset: "client",
       config: {
         documentMode: "string",
+      },
+      presetConfig: {
+        fragmentMasking: {
+          unmaskFunctionName: "getFragmentData",
+        },
       },
     },
     "./schema.graphql": {

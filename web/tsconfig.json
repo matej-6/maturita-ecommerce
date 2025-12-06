@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "allowArbitraryExtensions": true,
     "plugins": [
       {
         "name": "next"
@@ -31,7 +32,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "codegen.ts"
+    "codegen.ts",
+    "messages/en.d.json.ts"
   ],
   "exclude": ["node_modules"]
 }

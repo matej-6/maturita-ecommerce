@@ -2,54 +2,52 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AuthInput {
-  email: String!
-  password: String!
-}
-
-type AuthResponse {
-  createdAt: DateTime!
-  email: String!
-  emailVerified: Boolean!
-  firstName: String
-  id: String!
-  lastName: String
-  updatedAt: DateTime!
-}
-
 type Category {
+  categoryProducts(cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProduct!
   createdAt: DateTime!
-  id: ID!
-  parentCategoryId: String
+  description: String!
+  id: Int!
+  isPublic: Boolean!
+  isSetup: Boolean!
+  name: String
+  parentCategoryId: Int
+  productsCount: Int!
   slug: String!
   subcategories: [Category!]!
-
-  """Category translations"""
-  translations: [CategoryTranslation!]!
+  translations(
+    """
+    empty array - all translations will be returned, [...string] - only the translation matching the locales in array will be returned
+    """
+    locales: [String!]!
+  ): [CategoryTranslation!]!
   updatedAt: DateTime!
+}
+
+type CategoryEdge {
+  cursor: Int!
+  node: Category!
 }
 
 type CategoryTranslation {
-  categoryId: ID!
+  categoryId: Int!
   description: String
-  id: ID!
-  locale: Locale!
-  localeId: ID!
+  id: Int!
+  locale: String!
   name: String!
 }
 
 input CreateCategoryInput {
   """Parent category id"""
-  parentCategoryId: String
+  parentCategoryId: Int
 
   """Slug of the category"""
   slug: String!
-
-  """Category translations"""
-  translations: [CreateCategoryTranslationInput!]!
 }
 
 input CreateCategoryTranslationInput {
+  """category id"""
+  categoryId: Int!
+
   """Category description"""
   description: String
 
@@ -60,15 +58,51 @@ input CreateCategoryTranslationInput {
   name: String!
 }
 
-input CreateLocaleInput {
+input CreateProductInput {
+  """Parent category id"""
+  categoryId: Int
+  isPublic: Boolean!
+
+  """Product slug"""
+  slug: String!
+}
+
+input CreateProductTranslationInput {
+  """Product description"""
+  description: String
+
   """Locale code"""
-  code: String!
+  localeCode: String!
 
-  """Is the locale active?"""
-  isActive: Boolean!
+  """Product markdown content"""
+  markdownContent: String
 
-  """Native locale name"""
+  """Product name"""
   name: String!
+}
+
+input CreateProductVariantAttributeInput {
+  """Attribute Key ID"""
+  keyId: Int!
+
+  """Attribute Value"""
+  value: String!
+}
+
+input CreateProductVariantAttributeKeyInput {
+  key: String!
+}
+
+input CreateProductVariantInput {
+  """List of Product Variant Attribute IDs"""
+  attributes: [Int!]!
+  isPublic: Boolean!
+  priceInCents: Int!
+  productId: Int!
+
+  """Stock keeping unit"""
+  sku: String!
+  stock: Int!
 }
 
 input CreateUserInput {
@@ -84,13 +118,41 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input EditCategoryTranslationInput {
+  """category translation id"""
+  categoryTranslationId: Int!
+
+  """Category description"""
+  description: String
+
+  """Locale code"""
+  localeCode: String!
+
+  """Category name"""
+  name: String!
+}
+
+input EditProductTranslationInput {
+  """Product description"""
+  description: String
+
+  """Locale code"""
+  localeCode: String!
+
+  """Product markdown content"""
+  markdownContent: String
+
+  """Product name"""
+  name: String!
+
+  """product translation id"""
+  productTranslationId: Int!
+}
+
 type Locale {
   """Locale code"""
   code: String!
-  id: ID!
-
-  """Is the locale active?"""
-  isActive: Boolean!
+  flag: String!
 
   """Native locale name"""
   name: String!
@@ -109,29 +171,219 @@ type MeResponse {
 }
 
 type Mutation {
+  addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
+  addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
-  createLocale(createLocaleInput: CreateLocaleInput!): Locale!
+  createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
+  createProduct(createProductInput: CreateProductInput!): Product!
+  createProductTranslation(createProductTranslationInput: CreateProductTranslationInput!, productId: Int!): ProductTranslation!
+  createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
+  createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
+  createProductVariantAttributeKey(createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   createUser(createUserInput: CreateUserInput!): User!
-  login(authInput: AuthInput!): AuthResponse!
+  deleteCategoryTranslation(categoryTranslationId: Int!): Int!
+  deleteProductImage(productImageId: Int!): Int!
+  deleteProductTranslation(productTranslationId: Int!): Int!
+  editProductTranslation(editProductTranslationInput: EditProductTranslationInput!): ProductTranslation!
   logoutAll: Void!
-  refreshToken: Void!
-  removeCategory(id: ID!): Category!
-  removeLocale(id: String!): Locale!
-  removeUser(id: String!): User!
+  removeCategory(id: Int!): Category!
+  removeProduct(id: Int!): Product!
+  removeProductVariant(id: Int!): Int!
+  removeProductVariantAttribute(id: Int!): ProductVariantAttribute!
+  removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
+  removeProductVariantImage(id: Int!): Int!
+  removeUser(id: ID!): User!
   requestEmailVerification: Void!
+  setProductThumbnailImage(productImageId: Int!): ProductImage!
+  setProductVariantThumbnailImage(id: Int!): ProductVariantImage!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
-  updateLocale(updateLocaleInput: UpdateLocaleInput!): Locale!
+  updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
+  updateProduct(updateProductInput: UpdateProductInput!): Product!
+  updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
+  updateProductVariantAttribute(updateProductVariantAttributeInput: UpdateProductVariantAttributeInput!): ProductVariantAttribute!
+  updateProductVariantAttributeKey(updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   updateUser(updateUserInput: UpdateUserInput!): User!
   verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
 }
 
+type PaginatedCategory {
+  edges: [CategoryEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type PaginatedProduct {
+  edges: [ProductEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type Product {
+  categoryId: Int
+  createdAt: DateTime!
+  description: String
+
+  """Product ID"""
+  id: Int!
+  images: [ProductImage!]!
+  isPublic: Boolean!
+  isSetup: Boolean!
+  markdownContent: String
+  name: String
+
+  """Product slug"""
+  slug: String!
+  thumbnailImage: ProductImage
+  translations: [ProductTranslation!]!
+  updatedAt: DateTime!
+  variants(includeHidden: Boolean! = false): [ProductVariant!]!
+}
+
+type ProductEdge {
+  cursor: Int!
+  node: Product!
+}
+
+type ProductImage {
+  base64: String!
+  id: Int!
+  isThumbnail: Boolean!
+  mimeType: String!
+  productId: Int!
+}
+
+type ProductTranslation {
+  description: String
+  id: Int!
+  locale: String!
+  markdownContent: String
+  name: String!
+  productId: Int!
+}
+
+type ProductVariant {
+  attributes: [ProductVariantAttribute!]!
+  createdAt: DateTime!
+  id: Int!
+  images: [ProductVariantImage!]!
+  isPublic: Boolean!
+  priceInCents: Int!
+  productId: Int!
+  sku: String!
+  stock: Int!
+  thumbnailImage: ProductVariantImage
+  updatedAt: DateTime!
+}
+
+type ProductVariantAttribute {
+  attributeKeyId: Int!
+  id: Int!
+  key: ProductVariantAttributeKey
+  productVariantId: Int
+  translatedValue: String
+  translations: [ProductVariantAttributeTranslation!]!
+  value: String!
+}
+
+type ProductVariantAttributeKey {
+  attributes: [ProductVariantAttribute!]!
+  id: Int!
+  key: String!
+  translatedKey: String
+  translations: [ProductVariantAttributeKeyTranslation!]!
+}
+
+type ProductVariantAttributeKeyTranslation {
+  attributeKeyId: Int!
+  id: Int!
+  keyTranslation: String!
+  locale: String!
+}
+
+type ProductVariantAttributeTranslation {
+  attributeId: Float!
+  id: Float!
+  locale: String!
+  value: String!
+}
+
+type ProductVariantImage {
+  base64: String!
+  id: Int!
+  isThumbnail: Boolean!
+  mimeType: String!
+  productVariantId: Int!
+}
+
 type Query {
-  categories(withParentId: String): [Category!]!
-  category(id: ID!): Category!
+  categories(
+    """
+    If true, sort in ascending order, else descending. If null, default sorting order is used
+    """
+    ascending: Boolean
+
+    """Filter categories by id equal to this value"""
+    idQuery: Int
+    isPublic: Boolean
+    isSetup: Boolean
+
+    """
+    null - only categories with no parent category will be returned, 0 - all categories will be returned, int >= 1 - only the children of category with given id will be returned
+    """
+    parentCategoryId: Int
+
+    """Filter categories by slug containing this query string"""
+    slugQuery: String
+
+    """Field to sort by"""
+    sortBy: String
+  ): [Category!]!
+  category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: MeResponse!
-  user(id: String!): User!
+  paginatedCategories(
+    """
+    If true, sort in ascending order, else descending. If null, default sorting order is used
+    """
+    ascending: Boolean
+    cursor: Int
+
+    """Filter categories by id equal to this value"""
+    idQuery: Int
+    isPublic: Boolean
+    isSetup: Boolean
+    pageSize: Int = 10
+
+    """
+    null - only categories with no parent category will be returned, 0 - all categories will be returned, int >= 1 - only the children of category with given id will be returned
+    """
+    parentCategoryId: Int
+
+    """Filter categories by slug containing this query string"""
+    slugQuery: String
+
+    """Field to sort by"""
+    sortBy: String
+  ): PaginatedCategory!
+  product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
+  productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
+  productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
+  products(
+    ascending: Boolean
+
+    """
+    null - only products with no category will be returned, 0 - all products will be returned, int >= 1 - only the children of category with given id will be returned
+    """
+    categoryId: Int
+    cursor: Int
+    isPublic: Boolean
+    isSetup: Boolean
+    pageSize: Int = 10
+    slug: String
+    sortBy: String
+  ): PaginatedProduct!
+  user(id: ID!): User!
   users: [User!]!
 }
 
@@ -143,33 +395,55 @@ enum Role {
 }
 
 input UpdateCategoryInput {
-  id: ID!
+  """Category id"""
+  id: Int!
 
   """Parent category id"""
-  parentCategoryId: String
+  parentCategoryId: Int
 
   """Slug of the category"""
   slug: String!
 }
 
-input UpdateLocaleInput {
-  """Locale code"""
-  code: String!
+input UpdateProductInput {
+  """Parent category id"""
+  categoryId: Int
+  id: Int!
+  isPublic: Boolean!
 
-  """Locale ID"""
-  id: ID!
+  """Product slug"""
+  slug: String!
+}
 
-  """Is the locale active?"""
-  isActive: Boolean!
+input UpdateProductVariantAttributeInput {
+  id: Int!
 
-  """Native locale name"""
-  name: String!
+  """Attribute Value"""
+  value: String!
+}
+
+input UpdateProductVariantAttributeKeyInput {
+  id: Int!
+  key: String
+}
+
+input UpdateProductVariantInput {
+  """List of Product Variant Attribute IDs"""
+  attributes: [Int!]
+  id: Int!
+  isPublic: Boolean
+  priceInCents: Int
+  productId: Int
+
+  """Stock keeping unit"""
+  sku: String
+  stock: Int
 }
 
 input UpdateUserInput {
   email: String!
   firstName: String!
-  id: String!
+  id: Int!
   lastName: String!
 }
 

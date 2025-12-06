@@ -19,28 +19,59 @@ import { RedisModule } from './redis/redis.module';
 import { LocalesModule } from './locales/locales.module';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import * as path from 'path';
+import { AuthenticatedUserDto } from './auth/dto/authenticated-user.dto';
+import { IDataLoaders } from './dataloader/dataloader.interface';
+import { DataloaderModule } from './dataloader/dataloader.module';
+import { DEFAULT_LOCALE } from './locales';
+import { ProductsModule } from './products/products.module';
+import { ProductVariantsModule } from './product-variants/product-variants.module';
+import { ProductVariantAttributesModule } from './product-variant-attributes/product-variant-attributes.module';
+import { ProductVariantAttributeKeysModule } from './product-variant-attribute-keys/product-variant-attribute-keys.module';
 
 @Module({
   imports: [
     I18nModule.forRoot({
-      fallbackLanguage: 'en',
+      fallbackLanguage: DEFAULT_LOCALE.code,
       loaderOptions: {
         path: path.join(__dirname, '/i18n/'),
         watch: true,
       },
-      resolvers: [new HeaderResolver(['x-custom-header'])],
+      typesOutputPath: path.join(
+        __dirname,
+        '../src/generated/i18n.generated.ts',
+      ),
+      resolvers: [new HeaderResolver(['x-custom-lang'])],
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      imports: [PrismaModule],
-      inject: [PrismaService],
-      useFactory: (db: PrismaService) => ({
+      imports: [PrismaModule, DataloaderModule],
+      inject: [PrismaService, DataloaderService],
+      useFactory: (
+        db: PrismaService,
+        dataLoaderService: DataloaderService,
+      ) => ({
+        hideSchemaDetailsFromClientErrors: true,
+        formatError: (error) => {
+          console.log(error);
+          return {
+            message: error.message,
+            extensions: {
+              statusCode:
+                error.extensions?.statusCode ||
+                (error.extensions?.originalError as { statusCode?: number })
+                  ?.statusCode ||
+                500,
+              errors: error.extensions?.errors,
+            },
+          };
+        },
+        fieldResolverEnhancers: ['interceptors', 'guards'], // aby som mohol pouzivat @UseGuards() aj nad fieldResolvers
         graphiql: true,
         autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,
         context: ({ req, res }: { req: Request; res: Response }) => {
           return {
-            dataLoaderService: new DataloaderService(db),
+            loaders: dataLoaderService.getLoaders(),
             req,
             res,
           } as GraphqlAppContext;
@@ -59,6 +90,10 @@ import * as path from 'path';
     JwtModule.register({}),
     RedisModule,
     LocalesModule,
+    ProductsModule,
+    ProductVariantsModule,
+    ProductVariantAttributesModule,
+    ProductVariantAttributeKeysModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
@@ -66,5 +101,6 @@ import * as path from 'path';
 export class AppModule {}
 
 export type GraphqlAppContext = GraphQlContext & {
-  dataLoaderService: DataloaderService;
+  user?: AuthenticatedUserDto;
+  loaders: IDataLoaders;
 };

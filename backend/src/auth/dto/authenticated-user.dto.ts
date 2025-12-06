@@ -1,7 +1,7 @@
-import { Role } from '@prisma/client';
+import { Role } from 'generated/prisma/client';
 
 export type AuthenticatedUserDto = {
-  id: string;
+  id: number;
   role: Role;
   email: string;
 };

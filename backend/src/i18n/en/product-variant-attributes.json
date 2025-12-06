@@ -1,0 +1,7 @@
+{
+  "service": {
+    "attributeAlreadyExists": "This attribute already exists.",
+    "attributeKeyNotFound": "Attribute key with that ID doesn't exist.",
+    "attributeNotFound": "Attribute with that ID doesn't exist."
+  }
+}

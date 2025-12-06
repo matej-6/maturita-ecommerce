@@ -1,0 +1,12 @@
+web/.idea/modules.xml
+web/.idea/vcs.xml
+web/.idea/web.iml
+web/.idea/inspectionProfiles/Project_Default.xml
+web/node_modules
+backend/dist/*
+backend/node_modules
+backend/.vscode/*
+backend/.idea
+backend/.env
+backend/.env.*
+!backend/.env.example

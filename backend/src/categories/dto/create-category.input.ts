@@ -1,15 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import {
-  ArrayMinSize,
-  IsOptional,
+  IsInt,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
-  ValidateNested,
+  ValidateIf,
 } from 'class-validator';
-import { CreateCategoryTranslationInput } from './create-category-translation.input';
-import { ContainsEnglishTranslation } from '../validators/contains-english-translation.constraint';
 import { i18nValidationMessage } from 'nestjs-i18n';
 
 @InputType()
@@ -20,25 +16,11 @@ export class CreateCategoryInput {
   @MaxLength(255, { message: i18nValidationMessage('validation.maxLength') })
   slug: string;
 
-  @Field(() => String, {
+  @Field(() => Int, {
     description: 'Parent category id',
     nullable: true,
   })
-  @IsOptional()
-  @IsUUID(undefined, { message: i18nValidationMessage('validation.invalid') })
-  parentCategoryId?: string;
-
-  @Field(() => [CreateCategoryTranslationInput], {
-    description: 'Category translations',
-  })
-  @ValidateNested({ each: true })
-  @ArrayMinSize(1, {
-    message: i18nValidationMessage('validation.field.translation.minLength'),
-  })
-  @ContainsEnglishTranslation({
-    message: i18nValidationMessage(
-      'validation.field.translation.englishRequired',
-    ),
-  })
-  translations: CreateCategoryTranslationInput[];
+  @ValidateIf((obj, value) => ![undefined, null].includes(value))
+  @IsInt({ message: i18nValidationMessage('validation.invalid') })
+  parentCategoryId?: number;
 }

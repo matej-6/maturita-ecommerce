@@ -1,47 +1,12 @@
 "use server";
 
-import { graphql } from "@/graphql";
-import { execute } from "@/graphql/execute";
 import Link from "next/link";
 import { HeaderRightNav } from "./header-right-nav";
 import { HeaderNav } from "./header-nav";
-import { getLocale } from "next-intl/server";
 import { Suspense } from "react";
-
-const CategoryFields = graphql(`
-  fragment CategoryFields on Category {
-    id
-    slug
-    parentCategoryId
-    translations(locale: $locale) {
-      id
-      name
-      description
-    }
-  }
-`);
-
-const CategoryWithChildrenFields = graphql(`
-  fragment CategoryWithChildrenFields on Category {
-    ...CategoryFields
-    subcategories {
-      ...CategoryFields
-    }
-  }
-`);
-
-const CategoriesQuery = graphql(`
-  query AllCategories($locale: String) {
-    categories(withParentId: null, locale: $locale) {
-      ...CategoryWithChildrenFields
-    }
-  }
-`);
-
+import { getHeaderQueryData } from "@/app/data-access-layer/category.queries";
 export async function Header() {
-  const locale = await getLocale();
-
-  const res = await execute({}, CategoriesQuery, { locale: locale });
+  const headerQueryDataPromise = getHeaderQueryData();
 
   return (
     <header className="w-full border-b-2">
@@ -49,30 +14,15 @@ export async function Header() {
         <div className="col-span-1 flex justify-start">
           <Link
             href="/"
-            className="font-primary font-light text-3xl md:text-3xl"
+            className="font-secondary font-light text-3xl md:text-3xl"
           >
-            GRABLY
+            GoFitShop
           </Link>
         </div>
         <div className="col-span-3 flex justify-center">
           <div className="hidden sm:block">
-            <Suspense>
-              <HeaderNav
-                categories={
-                  res.data?.categories.map((c) => ({
-                    id: c.id,
-                    name: c.name,
-                    subcategories: c.subcategories.map((s) => ({
-                      id: s.id,
-                      name: s.name,
-                      link: `/categories/${c.slug}/${s.slug}`,
-                      subcategories: [],
-                    })),
-                    description: c.description ?? undefined,
-                    link: `/categories/${c.slug}`,
-                  })) ?? []
-                }
-              />
+            <Suspense fallback={null}>
+              <HeaderNav queryPromise={headerQueryDataPromise} />
             </Suspense>
           </div>
         </div>

@@ -1,3 +1,5 @@
+"use server";
+
 import {
   Bricolage_Grotesque,
   Geist,
@@ -11,6 +13,11 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import "../globals.css";
+import { Metadata } from "next";
+import { getQueryClient } from "@/lib/get-query-client";
+import { getCurrentSessionAction } from "../data-access-layer/auth/actions";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { SESSION_QUERY_KEY } from "@/lib/tanstack-query/query-keys";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +39,7 @@ const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
 });
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
@@ -42,8 +49,8 @@ type LocaleLayoutProps = Readonly<{
 }>;
 
 export async function generateMetadata(
-  props: Omit<LocaleLayoutProps, "children">,
-) {
+  props: Omit<LocaleLayoutProps, "children">
+): Promise<Metadata> {
   const { locale } = await props.params;
 
   const t = await getTranslations({
@@ -66,6 +73,20 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
+  const queryClient = getQueryClient();
+  queryClient.prefetchQuery({
+    queryKey: SESSION_QUERY_KEY,
+    queryFn: async () => {
+      const session = await getCurrentSessionAction();
+      return session === null
+        ? null
+        : {
+            ...session,
+            __fromServer: true,
+          };
+    },
+  });
+
   return (
     <html className="h-full" lang={locale}>
       <body
@@ -75,11 +96,15 @@ export default async function LocaleLayout({
           geistMono.variable,
           inter.variable,
           bricolage.variable,
-          "antialiased font-primary",
+          "antialiased font-primary overflow-y-scroll!"
         )}
       >
         <Providers>
-          <div className="h-screen">{children}</div>
+          <div className="h-screen">
+            <HydrationBoundary state={dehydrate(queryClient)}>
+              {children}
+            </HydrationBoundary>
+          </div>
         </Providers>
       </body>
     </html>

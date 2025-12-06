@@ -1,20 +1,31 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Category as CategoryEntity } from '@prisma/client';
-import { CategoryTranslation } from './category-translation.entity';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { Category as CategoryEntity } from 'generated/prisma/client';
+import { Paginated } from 'src/lib/pagination';
 
 @ObjectType()
-export class Category implements CategoryEntity {
-  @Field(() => ID)
-  id: string;
+export class Category implements Partial<CategoryEntity> {
+  @Field(() => Int)
+  id: number;
 
   @Field(() => String)
   slug: string;
 
   @Field(() => String, { nullable: true })
-  parentCategoryId: string | null;
+  name?: string;
 
-  @Field(() => [CategoryTranslation], { description: 'Category translations' })
-  translations: Array<CategoryTranslation>;
+  @Field(() => String, { nullable: true })
+  description?: string;
+
+  @Field(() => Int, { nullable: true })
+  parentCategoryId: number | null;
+
+  @Field(() => Boolean, {
+    description: 'If true, the category has a valid setup.',
+  })
+  isSetup: boolean;
+
+  @Field(() => Boolean)
+  isPublic: boolean;
 
   @Field(() => Date)
   createdAt: Date;
@@ -22,3 +33,6 @@ export class Category implements CategoryEntity {
   @Field(() => Date)
   updatedAt: Date;
 }
+
+@ObjectType()
+export class PaginatedCategory extends Paginated(Category) {}

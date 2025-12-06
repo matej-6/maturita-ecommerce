@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { Role } from '@prisma/client';
+import { Role } from 'generated/prisma/client';
 import { UserDto } from 'src/users/dto/user.dto';
 
 @ObjectType()
@@ -19,7 +19,7 @@ export class MeResponse implements UserDto {
   }
 
   @Field(() => ID)
-  id: string;
+  id: number;
 
   @Field(() => String)
   email: string;

@@ -1,5 +1,5 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { Category } from '@prisma/client';
+import { Category } from 'generated/prisma/client';
 import DataLoader from 'dataloader';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -10,9 +10,9 @@ export class CategoriesLoaderService {
   constructor(private readonly db: PrismaService) {}
 
   public readonly batchSubcategoriesByParentId = new DataLoader<
-    string,
+    number,
     Category[]
-  >(async (categoryIds: string[]) => {
+  >(async (categoryIds: number[]) => {
     const subcategories = await this.db.category.findMany({
       where: {
         parentCategoryId: {

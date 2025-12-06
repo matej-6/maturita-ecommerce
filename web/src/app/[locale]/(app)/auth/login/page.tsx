@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,21 +13,40 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { JsonErrorResponse } from "@/lib/json-error-response";
 import { toast } from "sonner";
-import { getQueryClient } from "@/providers/queryProvider";
-import { CURRENT_SESSION_QUERY_KEY } from "@/queries/current-session-query-options";
-import { loginSchema } from "./login-schema";
 import { ContinueWithGoogleLightButton } from "@/components/buttons/continue-with-google-light-button";
 import { useTranslations } from "next-intl";
+import {
+  authLoginAction,
+  getCurrentSessionAction,
+} from "@/app/data-access-layer/auth/actions";
+import { createLoginSchema, loginSchemaType } from "./login-schema";
+import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/tanstack-query/queries";
+import { getQueryClient } from "@/lib/get-query-client";
+import { SESSION_QUERY_KEY } from "@/lib/tanstack-query/query-keys";
 
-export default function RegisterPage() {
-  const t = useTranslations("auth.sign-in");
+export default function LoginPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  useEffect(() => {
+    if (session !== null) {
+      router.replace("/");
+    }
+  }, [session, router]);
+
+  const t = useTranslations("auth.sign-in"); // translations for this page
+  const ft = useTranslations("form"); // general form translations (napr. invalidEmail, invalidPassword ...)
+
+  const loginSchema = createLoginSchema(ft);
+
+  const queryClient = getQueryClient();
+
+  const form = useForm<loginSchemaType>({
     resolver: zodResolver(loginSchema),
     mode: "all",
     defaultValues: {
@@ -37,39 +55,39 @@ export default function RegisterPage() {
     },
   });
 
-  const [fieldErrors, setFieldErrors] = useState(new Map<string, string[]>());
-  const [globalErrors, setGlobalErrors] = useState<string[]>([]);
-
-  const queryClient = getQueryClient();
-  const router = useRouter();
+  const [fieldErrors, setFieldErrors] = useState<
+    Map<string, string[]> | undefined
+  >(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: z.infer<typeof loginSchema>) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`,
-        {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!res.ok) {
-        const errorResponse = JsonErrorResponse.fromError(await res.json());
-        setGlobalErrors(errorResponse.getMessages());
-        setFieldErrors(errorResponse.getFieldValidationErrors());
+    mutationFn: async (data: loginSchemaType) => {
+      const result = await authLoginAction(data);
+      if (!result.success) {
+        setFieldErrors(
+          result.fieldErrors
+            ? new Map(Object.entries(result.fieldErrors))
+            : undefined
+        );
+        setErrorMessage(result.message);
         throw new Error();
       }
     },
 
     onSuccess: async () => {
+      const session = await getCurrentSessionAction();
+      queryClient.setQueryData(
+        SESSION_QUERY_KEY,
+        session === null
+          ? null
+          : {
+              ...session,
+              __fromServer: false,
+            }
+      );
       toast.success(t("messages.success"));
-      await queryClient.invalidateQueries({
-        queryKey: CURRENT_SESSION_QUERY_KEY,
-      });
-
       router.replace("/");
     },
   });
@@ -83,10 +101,8 @@ export default function RegisterPage() {
         <CardContent className="space-y-8">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(async (data) => {
-                await mutate(data);
-              })}
-              className="space-y-8 font-secondary"
+              onSubmit={form.handleSubmit(async (data) => await mutate(data))}
+              className="space-y-8"
             >
               <FormField
                 control={form.control}
@@ -97,8 +113,7 @@ export default function RegisterPage() {
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormMessage />
-                    <CustomFieldError errors={fieldErrors.get("email") || []} />
+                    <FormFieldErrorMessage fieldErrors={fieldErrors} />
                   </FormItem>
                 )}
               />
@@ -112,20 +127,15 @@ export default function RegisterPage() {
                       <Input type="password" {...field} />
                     </FormControl>
                     <FormMessage />
-                    <CustomFieldError
-                      errors={fieldErrors.get("password") || []}
-                    />
+                    <FormFieldErrorMessage fieldErrors={fieldErrors} />
                   </FormItem>
                 )}
               />
-              {globalErrors.length > 0 && (
-                <div className="text-red-500 text-sm">
-                  {globalErrors.map((error) => (
-                    <p key={error}>{error}</p>
-                  ))}
-                </div>
+              {errorMessage && (
+                <p className="text-destructive text-sm">{errorMessage}</p>
               )}
               <Button
+                className="w-full"
                 type="submit"
                 disabled={isPending || !form.formState.isValid}
               >
@@ -133,16 +143,8 @@ export default function RegisterPage() {
               </Button>
             </form>
           </Form>
-          <div className="h-px bg-muted-foreground rounded-full w-full" />
-          <div className="flex justify-center w-full flex-col px-8">
-            <ContinueWithGoogleLightButton />
-          </div>
         </CardContent>
       </Card>
     </div>
   );
-}
-
-function CustomFieldError({ errors }: { errors: string[] }) {
-  return <p className="text-red-500 text-sm">{errors.join(", ")}</p>;
 }

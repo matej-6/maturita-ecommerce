@@ -1,8 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
+import { I18nMiddleware, I18nValidationPipe } from 'nestjs-i18n';
+import { AllExceptionsFilter } from './exception/all-exceptions.filter';
+import { ValidationFilter } from './validation/validation.filter';
+import { ErrorFilter } from './exception/error.filter';
+import { json } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,25 +16,25 @@ async function bootstrap() {
     ],
     credentials: true,
   });
+  app.use(cookieParser());
+
+  app.use(I18nMiddleware);
+  app.use(json({ limit: '10mb' }));
+
+  app.useGlobalFilters(
+    new ErrorFilter(),
+    new AllExceptionsFilter(),
+    new ValidationFilter(),
+  );
+
   app.useGlobalPipes(
     new I18nValidationPipe({
       transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
+      validateCustomDecorators: true,
+      enableDebugMessages: false,
     }),
   );
-  app.useGlobalFilters(
-    new I18nValidationExceptionFilter({
-      detailedErrors: false,
-      // errorFormatter(errors) {
-      //   return errors.map((e) => ({
-      //     property: e.property,
-      //     constraints: e.constraints,
-      //   }));
-      // },
-    }),
-  );
-  app.use(cookieParser());
+
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();

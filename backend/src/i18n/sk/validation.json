@@ -1,0 +1,16 @@
+{
+  "required": "{property} nemôže byť prázdne",
+  "minLength": "{property} musí mať aspoň {constraints.0} znakov",
+  "maxLength": "{property} musí mať menej ako {constraints.0} znakov",
+  "match": "{property} sa musí presne zhodovať s {message}",
+  "invalid": "Hodnota pre '{property}' je neplatná",
+  "field": {
+    "confirmPassword": {
+      "match": "Potvrdenie hesla sa musí presne zhodovať s heslom"
+    },
+    "translation": {
+      "minLength": "Aspoň {constraints.0} preklad/prekladov je povinný/ch.",
+      "englishRequired": "Preklad v angličtine je povinný"
+    }
+  }
+}

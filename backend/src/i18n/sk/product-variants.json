@@ -1,0 +1,25 @@
+{
+  "service": {
+    "update": {
+      "notFound": "Variant produktu, ktorý sa snažíte aktualizovať, nebol nájdený."
+    },
+    "slugAlreadyInUse": "Tento slug už používa iný variant produktu",
+    "invalidLocaleCode": "Neplatný kód lokality",
+    "editTranslation": {
+      "notFound": "Preklad produktu s týmto ID neexistuje. Skúste obnoviť stránku aby ste mali čerstvé dáta.",
+      "translationWithThisLocaleAlreadyExists": "Preklad s jazykom, ktorý chcete nastaviť, už existuje."
+    },
+    "removeTranslation": {
+      "notFound": "Preklad produktu, ktorý chcete vymazať, nebol nájdený. Prosím obnovte stránku a skúste znova."
+    },
+    "createTranslation": {
+      "productNotFound": "Produkt, ku ktorému sa snažíte pridať preklad, nebol nájdený.",
+      "translationWithThisLocaleAlreadyExists": "Preklad s jazykom, ktorý sa snažíte vytvoriť, už existuje."
+    },
+    "invalidImageMimeType": "Neplatný typ obrázka.",
+    "addImage": {
+      "productNotFound": "Produkt, ku ktorému sa snažíte pridať obrázok, nebol nájdený."
+    },
+    "imageNotFound": "Obrázok produktu s poskytnutým ID nebol nájdený."
+  }
+}

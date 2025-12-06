@@ -8,9 +8,9 @@ import { CreateUserInput } from './dto/create-user.input';
 import { PrismaService } from 'src/prisma/prisma.service';
 import bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { User } from '@prisma/client';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserDto } from './dto/user.dto';
+import { User } from 'generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -64,7 +64,7 @@ export class UsersService {
     }
   }
 
-  async update(id: string, updateUserInput: UpdateUserInput): Promise<UserDto> {
+  async update(id: number, updateUserInput: UpdateUserInput): Promise<UserDto> {
     try {
       const user = await this.prisma.user.update({
         where: { id },
@@ -87,7 +87,7 @@ export class UsersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     try {
       await this.prisma.user.delete({
         where: { id },
@@ -117,7 +117,7 @@ export class UsersService {
     }
   }
 
-  async findOne(id: string): Promise<UserDto | null> {
+  async findOne(id: number): Promise<UserDto | null> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },

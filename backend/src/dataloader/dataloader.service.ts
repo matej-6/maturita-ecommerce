@@ -1,40 +1,106 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IDataLoaders } from './dataloader.interface';
 import * as DataLoader from 'dataloader';
-import { Category } from '@prisma/client';
+import {
+  Attribute,
+  AttributeKey,
+  Category,
+  CategoryTranslation,
+  ProductTranslation,
+  ProductVariant,
+  AttributeKeyTranslation,
+  AttributeTranslation,
+  ProductImage,
+} from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CategoriesService } from 'src/categories/categories.service';
+import { I18nContext } from 'nestjs-i18n';
+import { DEFAULT_LOCALE } from 'src/locales';
+import { ProductsService } from 'src/products/products.service';
+import { ProductVariantsService } from 'src/product-variants/product-variants.service';
+import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
 
-@Injectable({
-  scope: Scope.REQUEST,
-})
+import { ProductVariantAttributeKeysService } from 'src/product-variant-attribute-keys/product-variant-attribute-keys.service';
+
+@Injectable()
 export class DataloaderService {
-  constructor(private readonly db: PrismaService) {}
+  constructor(
+    private readonly db: PrismaService,
+    private readonly categoriesService: CategoriesService,
+    private readonly productsService: ProductsService,
+    private readonly productVariantsService: ProductVariantsService,
+    private readonly productVariantAttributesService: ProductVariantAttributesService,
+    private readonly productVariantAttributeKeysService: ProductVariantAttributeKeysService,
+  ) {}
 
-  private readonly loaders: Record<
-    keyof IDataLoaders,
-    DataLoader<any, any> | undefined
-  > = {
-    subcategoriesLoader: undefined,
-  };
+  getLoaders(): IDataLoaders {
+    const locale = I18nContext.current()?.lang || DEFAULT_LOCALE.code;
 
-  getLoader<K extends keyof IDataLoaders>(loader: K): IDataLoaders[K] {
-    if (!this.loaders[loader]) {
-      this.loaders[loader] = this._createLoader(loader);
-    }
-    return this.loaders[loader] as IDataLoaders[K];
+    const subcategoriesLoader = this.createSubcategoriesLoader();
+    const categoryTranslationLoader =
+      this.createCategoryTranslationLoader(locale);
+    const categoryProductsCountLoader =
+      this.createCategoryProductsCountLoader();
+    const productTranslationLoader =
+      this.createProductTranslationLoader(locale);
+    const productAllTranslationsLoader =
+      this.createProductAllTranslationsLoader();
+    const productAllVariantsLoader = this.createProductAllVariantsLoader();
+    const productVariantAllAttributesLoader =
+      this.createProductVariantAllAttributesLoader();
+    const attributeKeyByIdLoader = this.createAttributeKeyByIdLoader();
+    const attributeKeyTranslationLoader =
+      this.createAttributeKeyTranslationLoader(locale);
+    const attributeKeyAllTranslationsLoader =
+      this.createAttributeKeyAllTranslationsLoader();
+    const productVariantAttributeTranslationLoader =
+      this.createProductVariantAttributeTranslationLoader(locale);
+    const productVariantAttributeAllTranslationsLoader =
+      this.createProductVariantAttributeAllTranslationsLoader();
+    const productAllImagesLoader = this.createProductAllImagesLoader();
+    const productVariantAllImagesLoader =
+      this.createProductVariantAllImagesLoader();
+    const attributesByKeyLoader = this.createAttributesByKeyLoader();
+    return {
+      subcategoriesLoader,
+      categoryTranslationLoader,
+      categoryProductsCountLoader,
+      productTranslationLoader,
+      productAllTranslationsLoader,
+      productAllVariantsLoader,
+      productVariantAllAttributesLoader,
+      attributeKeyByIdLoader,
+      attributeKeyTranslationLoader,
+      attributeKeyAllTranslationsLoader,
+      productVariantAttributeTranslationLoader,
+      productVariantAttributeAllTranslationsLoader,
+      productAllImagesLoader,
+      productVariantAllImagesLoader,
+      attributesByKeyLoader,
+    };
   }
 
-  private _createLoader(loader: keyof IDataLoaders) {
-    switch (loader) {
-      case 'subcategoriesLoader':
-        return this._createSubcategoriesLoader();
-      default:
-        throw new Error(`Loader ${loader as string} not found`);
-    }
+  private createCategoryProductsCountLoader() {
+    return new DataLoader<number, number>(async (categoryIds: number[]) => {
+      const counts = await this.db.product.groupBy({
+        by: ['categoryId'],
+        where: {
+          categoryId: {
+            in: categoryIds,
+          },
+        },
+        _count: true,
+      });
+
+      return categoryIds.map((id) => {
+        const countRecord = counts.find((c) => c.categoryId === id);
+        return countRecord ? countRecord._count : 0;
+      });
+    });
   }
 
-  private _createSubcategoriesLoader() {
-    return new DataLoader<string, Category[]>(async (categoryIds: string[]) => {
+  private createSubcategoriesLoader() {
+    return new DataLoader<number, Category[]>(async (categoryIds: number[]) => {
       const subcategories = await this.db.category.findMany({
         where: {
           parentCategoryId: {
@@ -45,6 +111,138 @@ export class DataloaderService {
 
       return categoryIds.map((id) =>
         subcategories.filter((subc) => subc.parentCategoryId === id),
+      );
+    });
+  }
+
+  private createCategoryTranslationLoader(lang: string) {
+    return new DataLoader<number, CategoryTranslation | null>(
+      async (categoryIds: number[]) => {
+        return await this.categoriesService.getAllTranslationsByBatch(
+          lang,
+          categoryIds,
+        );
+      },
+    );
+  }
+
+  private createProductTranslationLoader(lang: string) {
+    return new DataLoader<number, ProductTranslation | null>(
+      async (productIds: number[]) => {
+        return await this.productsService.getAllTranslationsByBatch(
+          lang,
+          productIds,
+        );
+      },
+    );
+  }
+
+  private createProductAllTranslationsLoader() {
+    return new DataLoader<number, ProductTranslation[]>(
+      async (productIds: number[]) => {
+        return await this.productsService.getAllTranslationsForProductsByBatch(
+          productIds,
+        );
+      },
+    );
+  }
+
+  private createProductAllVariantsLoader() {
+    return new DataLoader<number, ProductVariant[]>(
+      async (productIds: number[]) => {
+        return await this.productsService.getAllVariantsForProductsByBatch(
+          productIds,
+        );
+      },
+    );
+  }
+
+  private createProductVariantAllAttributesLoader() {
+    return new DataLoader<number, Attribute[]>(
+      async (productVariantIds: number[]) => {
+        return await this.productVariantsService.getAllAttributesForVariantsByBatch(
+          productVariantIds,
+        );
+      },
+    );
+  }
+
+  private createAttributeKeyByIdLoader() {
+    return new DataLoader<number, AttributeKey | null>(
+      async (attributeIds: number[]) => {
+        return await this.productVariantAttributesService.getAttributeKeysByBatch(
+          attributeIds,
+        );
+      },
+    );
+  }
+
+  private createAttributeKeyTranslationLoader(lang: string) {
+    return new DataLoader<number, AttributeKeyTranslation | null>(
+      async (attributeKeyIds: number[]) => {
+        return await this.productVariantAttributeKeysService.getTranslationsByBatch(
+          lang,
+          attributeKeyIds,
+        );
+      },
+    );
+  }
+
+  private createAttributeKeyAllTranslationsLoader() {
+    return new DataLoader<number, AttributeKeyTranslation[]>(
+      async (attributeKeyIds: number[]) => {
+        return await this.productVariantAttributeKeysService.getAllTranslationsByBatch(
+          attributeKeyIds,
+        );
+      },
+    );
+  }
+
+  private createProductVariantAttributeTranslationLoader(lang: string) {
+    return new DataLoader<number, AttributeTranslation | null>(
+      async (attributeIds: number[]) => {
+        return await this.productVariantAttributesService.getTranslationsByBatch(
+          lang,
+          attributeIds,
+        );
+      },
+    );
+  }
+
+  private createProductVariantAttributeAllTranslationsLoader() {
+    return new DataLoader<number, AttributeTranslation[]>(
+      async (attributeIds: number[]) => {
+        return await this.productVariantAttributesService.getAllTranslationsByBatch(
+          attributeIds,
+        );
+      },
+    );
+  }
+
+  private createProductAllImagesLoader() {
+    return new DataLoader<number, ProductImage[]>(
+      async (productIds: number[]) => {
+        return await this.productsService.getAllImagesForProductsByBatch(
+          productIds,
+        );
+      },
+    );
+  }
+
+  private createProductVariantAllImagesLoader() {
+    return new DataLoader<number, ProductImage[]>(
+      async (productVariantIds: number[]) => {
+        return await this.productVariantsService.getAllImagesForVariantsByBatch(
+          productVariantIds,
+        );
+      },
+    );
+  }
+
+  private createAttributesByKeyLoader() {
+    return new DataLoader<number, Attribute[]>(async (keyIds: number[]) => {
+      return await this.productVariantAttributeKeysService.getAllAttributesByBatch(
+        keyIds,
       );
     });
   }

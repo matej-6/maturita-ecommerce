@@ -1,6 +1,26 @@
 {
+  "form": {
+    "invalidEmail": "Invalid email address",
+    "invalidPassword": "Invalid password",
+    "minLengthPassword": "Password must be at least {minLength, plural, =1 {# character} other {# characters}} long",
+    "required": "{fieldName} is required",
+    "maxLength": "{fieldName} can be at most {value, plural, =1 {# character} other {# characters}} long",
+    "minLength": "{fieldName} must be at least {value, plural, =1 {# character} other {# characters}} long",
+    "min": "{fieldName} must be at least {value}",
+    "max": "{fieldName} must be at most {value}",
+    "passwordsMustMatch": "Password and Confirm Password must match",
+    "uuid": "Invalid UUID",
+    "id": "Invalid ID",
+    "newCategoryFormSchema": {
+      "translations": {
+        "atLeastEnRequired": "An English translation is required"
+      }
+    },
+    "never": "No value is available for this field",
+    "positive": "{fieldName} must be a positive number"
+  },
   "LocaleLayout": {
-    "title": "GRABLY",
+    "title": "GoFitShop",
     "description": "Best online store for all your needs"
   },
   "header": {
@@ -19,7 +39,7 @@
     "locale": "{locale, select, en {🇺🇸 English} sk {🇸🇰 Slovenský} other {Unknown}}"
   },
   "footer": {
-    "copyright": "© 2025 GRABLY. All rights reserved.",
+    "copyright": "© 2025 GoFitShop. All rights reserved.",
     "dark-mode": {
       "light": "Light",
       "dark": "Dark",
@@ -61,5 +81,129 @@
     "home-button": "Homepage",
     "back-button": "Go to previous page",
     "back-button-admin": "Go back to admin dashboard"
+  },
+  "error": {
+    "unknownError": "An unknown error ocurred",
+    "INTERNAL_SERVER_ERROR": "An unknown error ocurred"
+  },
+  "admin": {
+    "productVariant": {
+      "attributeKey": {
+        "form": {
+          "submitButton": "Submit"
+        }
+      },
+      "form": {
+        "submitButton": "Submit"
+      }
+    },
+    "products": {
+      "newProduct": {
+        "page": {
+          "title": "Add a New Product"
+        },
+        "form": {
+          "submitButtonCreate": "Create product",
+          "submitButtonUpdate": "Save changes",
+          "categoryId": {
+            "combobox": {
+              "noResultsFoundText": "No results found.",
+              "filterPlaceholderText": "Filter categories",
+              "emptyValueLabel": "Select category"
+            }
+          }
+        }
+      },
+      "productDetail": {
+        "page": {
+          "setupWarning": {
+            "title": "This product has not been setup completely",
+            "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
+            "englishTranslation": "Ensure an english translation exists",
+            "atLeastOneVisibleVariant": "Make sure it has at least one visible variant"
+          }
+        }
+      }
+    },
+    "categories": {
+      "newCategory": {
+        "page": {
+          "title": "Add a New Category"
+        },
+        "form": {
+          "submitButton": "Create category",
+          "parentCategoryId": {
+            "combobox": {
+              "noResultsFoundText": "No results found.",
+              "filterPlaceholderText": "Filter categories",
+              "emptyValueLabel": "Select category"
+            }
+          }
+        }
+      },
+      "editCategory": {
+        "form": {
+          "submitButton": "Save changes",
+          "parentCategoryId": {
+            "combobox": {
+              "noResultsFoundText": "No results found.",
+              "filterPlaceholderText": "Filter categories",
+              "emptyValueLabel": "Select category"
+            }
+          },
+          "toastSuccess": "Saved changes"
+        },
+        "page": {
+          "setupWarning": {
+            "title": "This category has not been setup completely",
+            "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
+            "englishTranslation": "Ensure an english translation exists",
+            "atLeastOneVisibleProduct": "Make sure at least one visible product is sold in this category"
+          }
+        }
+      }
+    }
+  },
+  "fields": {
+    "category": {
+      "slug": "Slug",
+      "parentCategoryId": "Parent Category Id",
+      "name": "Name",
+      "description": "Description"
+    },
+    "locale": {
+      "code": "Locale code"
+    },
+    "categoryTranslation": {
+      "name": "Name",
+      "description": "Description"
+    },
+    "product": {
+      "slug": "Slug",
+      "categoryId": "Category Id",
+      "isPublic": "Is Public",
+      "isSetup": "Is Setup",
+      "id": "ID"
+    },
+    "productTranslation": {
+      "title": "Title",
+      "description": "Description",
+      "content": "Content"
+    },
+    "productVariant": {
+      "sku": "SKU",
+      "price": "Price",
+      "priceInCents": "Price in Cents",
+      "isPublic": "Is Public",
+      "stock": "Stock",
+      "attribute": {
+        "key": "Attribute Key",
+        "keyTranslation": "Attribute Key Translation",
+        "value": "Attribute Value",
+        "valueTranslation": "Attribute Value Translation"
+      },
+      "attributes": "Attributes",
+      "selectAttribute": "Select Attribute"
+    }
   }
 }

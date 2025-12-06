@@ -1,0 +1,16 @@
+{
+  "service": {
+    "update": {
+      "categoryNotFound": "Kategóriu, ktorú sa snažíte aktualizovať, sa nepodarilo nájst."
+    },
+    "slugAlreadyInUse": "Tento slug už používa iná kategória",
+    "invalidLocaleCode": "Neplatný kód lokality",
+    "editTranslation": {
+      "notFound": "Preklad kategórie s týmto ID neexistuje. Skúste obnoviť stránku aby ste mali čerstvé dáta.",
+      "translationWithThisLocaleAlreadyExists": "Preklad s jazykom, ktorý chcete nastaviť, už existuje."
+    },
+    "removeTranslation": {
+      "notFound": "Preklad kategórie, ktorý chcete vymazať, nebol nájdený. Prosím obnovte stránku a skúste znova."
+    }
+  }
+}

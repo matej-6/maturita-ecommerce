@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { type CategoryTranslation as DbCategoryTranslation } from '@prisma/client';
+import { type CategoryTranslation as DbCategoryTranslation } from 'generated/prisma/client';
 import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 

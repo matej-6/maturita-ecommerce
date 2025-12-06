@@ -1,31 +1,24 @@
-import type { ExecutionResult } from "graphql";
+import "server-only";
+
 import type { TypedDocumentString } from "./graphql";
-
-export async function executeWithHeaders<TResult, TVariables>(
-  additionalHeaders: HeadersInit,
-  query: TypedDocumentString<TResult, TVariables>,
-  ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
-) {
-  const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL!, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/graphql-response+json",
-      ...additionalHeaders,
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-    credentials: "include",
-  });
-
-  return response.json() as ExecutionResult<TResult>;
-}
+import { executeWithHeaders } from "./executeWithHeaders";
+import { getLocale } from "next-intl/server";
+import { cookies } from "next/headers";
+import { AUTHENTICATION_COOKIE_NAME } from "@/app/lib/auth.constants";
 
 export async function execute<TResult, TVariables>(
   query: TypedDocumentString<TResult, TVariables>,
   ...variables: TVariables extends Record<string, never> ? [] : [TVariables]
 ) {
-  return executeWithHeaders({}, query, ...variables);
+  const locale = await getLocale();
+  const authToken = (await cookies()).get(AUTHENTICATION_COOKIE_NAME)?.value;
+
+  const headers: HeadersInit = {
+    "x-custom-lang": locale,
+  };
+  if (authToken) {
+    headers["Authorization"] = "Bearer " + authToken;
+  }
+
+  return executeWithHeaders(headers, query, ...variables);
 }

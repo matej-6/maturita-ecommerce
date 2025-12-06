@@ -1,13 +1,8 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "../ui/button";
 import { MenuIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
-import {
-  CURRENT_SESSION_QUERY_KEY,
-  currentSessionQueryOptions,
-} from "@/queries/current-session-query-options";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,47 +12,20 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { Role } from "@/graphql/graphql";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
-import { getQueryClient } from "@/providers/queryProvider";
-import { toast } from "sonner";
+// import { getCurrentSessionOrAuthenticate } from "@/app/data-access-layer/auth/queries";
 import { useTranslations } from "next-intl";
+import { useMutation } from "@tanstack/react-query";
+import { authLogoutAction } from "@/app/data-access-layer/auth/actions";
+import { useSession } from "@/lib/tanstack-query/queries";
 
 export function HeaderRightNav() {
+  const { data: currentSession } = useSession();
+
   const t = useTranslations("header");
-
-  const queryClient = getQueryClient();
-
-  const { data: currentSession, isPending } = useQuery(
-    currentSessionQueryOptions
-  );
 
   const { mutate: logout, isPending: isLoggingOut } = useMutation({
     mutationFn: async () => {
-      const res = await fetchWithRetry(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Error logging out");
-      }
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-    // onSettled: () => {
-    //   queryClient.resetQueries({ queryKey: CURRENT_SESSION_QUERY_KEY });
-    // },
-
-    onSuccess: () => {
-      queryClient.resetQueries({ queryKey: CURRENT_SESSION_QUERY_KEY });
-      toast.success("Logged out successfully");
+      await authLogoutAction();
     },
   });
 
@@ -79,7 +47,7 @@ export function HeaderRightNav() {
                       <UserIcon className="size-6 text-secondary-foreground" />
                     </NavigationMenuTrigger>
                   </Button>
-                  <NavigationMenuContent className="font-secondary">
+                  <NavigationMenuContent>
                     <ul className="grid w-44 gap-4">
                       <li>
                         {currentSession.role === Role.Admin && (
@@ -96,7 +64,7 @@ export function HeaderRightNav() {
                             onClick={() => logout()}
                             variant={"ghost"}
                             size={"sm"}
-                            className="text-sm w-full items-start font-normal"
+                            className="text-sm w-full items-start font-normal hover:cursor-pointer"
                           >
                             <span>
                               {isLoggingOut ? t("logging-out") : t("logout")}
