@@ -1,20 +1,4 @@
 services:
-  redis:
-    image: redis:7.4.1-alpine
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    # volumes:
-    # - redis_data:/data
-    # command: redis-server --appendonly yes # only for prod
-    command: ["redis-server", "--loglevel", "debug"]
-    environment:
-      - REDIS_PASSWORD=password
-      - REDIS_HOST=localhost
-      - REDIS_PORT=6379
-      - REDIS_USER=default
-      - REDIS_DB=0
-      - REDIS_TLS_ENABLED=false
   database:
     image: mariadb:12.0.2
     restart: unless-stopped
@@ -25,15 +9,7 @@ services:
       - MYSQL_ROOT_PASSWORD=password
     ports:
       - "3306:3306"
-  garage:
-    image: dxflrs/garage:v2.1.0
-    restart: unless-stopped
-    environment:
-      - GARAGE_ADMIN_TOKEN=test_admin_token
-    ports:
-      - "3900:3900"
-      - "3901:3901"
-      - "3902:3902"
-      - "3903:3903"
-    volumes:
-      - ./garage.toml:/etc/garage.toml
+
+
+
+
