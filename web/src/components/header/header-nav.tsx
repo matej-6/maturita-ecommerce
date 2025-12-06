@@ -12,9 +12,9 @@ import {
 import { useTranslations } from "next-intl";
 import { FragmentType, getFragmentData, graphql } from "@/graphql";
 import { getCategoryLink } from "@/app/lib/navigation";
-import { use } from "react";
+import { use, useState } from "react";
 import { ExecutionResult } from "graphql";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 
 const HeaderNav_QueryFragment = graphql(`
   fragment HeaderNav_QueryFragment on Query {
@@ -42,6 +42,10 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
   const query = use(queryPromise);
   const data = getFragmentData(HeaderNav_QueryFragment, query.data);
   const t = useTranslations("header");
+
+  const router = useRouter();
+
+  const [searchValue, setSearchValue] = useState("");
 
   return (
     <nav className="flex items-center">
@@ -93,10 +97,23 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
           </NavigationMenu>
         </div>
 
-        <Input
-          placeholder={t("search")}
-          className="w-full max-w-[360px] text-sm font-secondary placeholder:text-sm placeholder:font-secondary"
-        />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const searchParams = new URLSearchParams();
+            if (searchValue.trim().length > 0) {
+              searchParams.append("q", searchValue.trim());
+              router.push(`/search?${searchParams.toString()}`);
+            }
+          }}
+        >
+          <Input
+            placeholder={t("search")}
+            className="w-full max-w-[360px] text-sm placeholder:text-sm"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+        </form>
       </div>
     </nav>
   );

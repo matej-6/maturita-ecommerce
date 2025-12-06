@@ -6,6 +6,7 @@ import {
   ResolveField,
   Parent,
   Context,
+  Query,
 } from '@nestjs/graphql';
 import { ProductVariantAttributesService } from './product-variant-attributes.service';
 import { ProductVariantAttribute } from './entities/product-variant-attribute.entity';
@@ -22,6 +23,19 @@ export class ProductVariantAttributesResolver {
   constructor(
     private readonly productVariantAttributesService: ProductVariantAttributesService,
   ) {}
+
+  @Query(() => [ProductVariantAttribute], { name: 'productVariantAttributes' })
+  productVariantAttributes(
+    @Args('forCategoryIds', { type: () => [Int], nullable: true })
+    forCategoryIds?: number[],
+  ) {
+    return this.productVariantAttributesService.findAll(forCategoryIds);
+  }
+
+  @Query(() => ProductVariantAttribute, { nullable: true })
+  findOneProductVariantAttribute(@Args('id', { type: () => Int }) id: number) {
+    return this.productVariantAttributesService.findOne(id);
+  }
 
   @UseGuards(AdminGuard)
   @Mutation(() => ProductVariantAttribute)

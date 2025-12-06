@@ -51,12 +51,30 @@ export class ProductVariantAttributesService {
     });
   }
 
-  findAll() {
-    return `This action returns all productVariantAttributes`;
+  async findAll(forCategoryIds?: number[]) {
+    return await this.prisma.attribute.findMany({
+      where: forCategoryIds
+        ? {
+            ProductVariants: {
+              some: {
+                Product: {
+                  Category: {
+                    id: {
+                      in: forCategoryIds,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        : undefined,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} productVariantAttribute`;
+  async findOne(id: number) {
+    return await this.prisma.attribute.findUnique({
+      where: { id },
+    });
   }
 
   async update(

@@ -339,6 +339,7 @@ type Query {
     sortBy: String
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
+  findOneProductVariantAttribute(id: Int!): ProductVariantAttribute
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: MeResponse!
@@ -369,6 +370,7 @@ type Query {
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
+  productVariantAttributes(forCategoryIds: [Int!]): [ProductVariantAttribute!]!
   products(
     ascending: Boolean
 
