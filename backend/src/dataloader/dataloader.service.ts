@@ -21,6 +21,7 @@ import { ProductVariantsService } from 'src/product-variants/product-variants.se
 import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
 
 import { ProductVariantAttributeKeysService } from 'src/product-variant-attribute-keys/product-variant-attribute-keys.service';
+import { Product } from 'src/products/entities/product.entity';
 
 @Injectable()
 export class DataloaderService {
@@ -61,6 +62,8 @@ export class DataloaderService {
     const productVariantAllImagesLoader =
       this.createProductVariantAllImagesLoader();
     const attributesByKeyLoader = this.createAttributesByKeyLoader();
+    const productVariantProductLoader =
+      this.createProductVariantProductLoader();
     return {
       subcategoriesLoader,
       categoryTranslationLoader,
@@ -77,6 +80,7 @@ export class DataloaderService {
       productAllImagesLoader,
       productVariantAllImagesLoader,
       attributesByKeyLoader,
+      productVariantProductLoader,
     };
   }
 
@@ -245,5 +249,15 @@ export class DataloaderService {
         keyIds,
       );
     });
+  }
+
+  private createProductVariantProductLoader() {
+    return new DataLoader<number, Product>(
+      async (productVariantIds: number[]) => {
+        return await this.productVariantsService.getProductsForVariantsByBatch(
+          productVariantIds,
+        );
+      },
+    );
   }
 }

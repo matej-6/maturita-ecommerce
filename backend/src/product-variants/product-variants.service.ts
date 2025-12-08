@@ -4,6 +4,13 @@ import { UpdateProductVariantInput } from './dto/update-product-variant.input';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LocalesService } from 'src/locales/locales.service';
 import { ProductVariantImage } from 'src/entities/product-variant.image.entity';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import { PaginatedProductVariant } from './entities/product-variant.entity';
+import { ProductFindAllQueryArgs } from 'src/products/products.resolver.args';
+import { SortingArgs } from 'src/args/sorting-args';
+import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { Product } from 'src/products/entities/product.entity';
+import { ProductsService } from 'src/products/products.service';
 
 @Injectable()
 export class ProductVariantsService {
@@ -12,6 +19,7 @@ export class ProductVariantsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly localesService: LocalesService,
+    private readonly productsService: ProductsService,
   ) {}
 
   async create(createProductVariantInput: CreateProductVariantInput) {
@@ -284,6 +292,462 @@ export class ProductVariantsService {
     };
   }
 
+  private validatePaginationArgs(args: PaginationArgs) {
+    if (args.cursor != null) {
+      args.cursor = Math.abs(args.cursor);
+    }
+    args.pageSize = Math.min(Math.abs(args.pageSize), 25);
+  }
+
+  private async extractAttributeFilters(args: string[][]) {
+    const validFilterKeys = (
+      await this.prisma.attributeKey.findMany({
+        select: {
+          key: true,
+        },
+      })
+    ).map((ak) => ak.key);
+
+    const res: Record<string, string[]> = {};
+
+    for (const [key, value] of args) {
+      if (!validFilterKeys.includes(key)) {
+        continue;
+      }
+      if (!res[key]) {
+        res[key] = [];
+      }
+      res[key].push(value);
+    }
+    return res;
+  }
+
+  private validateProductFindAllQueryArgs(
+    queryArgs: ProductFindAllQueryArgs,
+    role?: AuthenticatedUserDto['role'],
+  ) {
+    queryArgs.isPublic = role === 'ADMIN' ? queryArgs.isPublic : true;
+    queryArgs.isSetup = role === 'ADMIN' ? queryArgs.isSetup : true;
+    queryArgs.categoryId =
+      queryArgs.categoryId === null ? null : Math.abs(queryArgs.categoryId);
+  }
+
+  private validateSortingArgs(args: SortingArgs) {
+    const validSortByFields = ['priceInCents', null];
+    if (!validSortByFields.includes(args.sortBy)) {
+      args.sortBy = null;
+    }
+  }
+
+  async searchProductVariants(
+    searchTerm: string,
+    paginationArgs: PaginationArgs,
+    sortingArgs: SortingArgs,
+    attributeFilters?: string[][],
+  ): Promise<PaginatedProductVariant> {
+    this.validatePaginationArgs(paginationArgs);
+    this.validateSortingArgs(sortingArgs);
+    const filters = attributeFilters
+      ? await this.extractAttributeFilters(attributeFilters)
+      : {};
+
+    const productVariants = await this.prisma.productVariant.findMany({
+      where: {
+        Product: {
+          isPublic: true,
+          ProductTranslations: {
+            some: {
+              locale: {
+                equals: this.localesService.getDefaultLocale().code,
+              },
+            },
+          },
+        },
+        isPublic: true,
+        AND: Object.keys(filters).length
+          ? Object.entries(filters).map(([key, values]) => ({
+              Attributes: {
+                some: {
+                  AttributeKey: {
+                    key: key,
+                  },
+                  value: {
+                    in: values,
+                  },
+                },
+              },
+            }))
+          : undefined,
+        OR: [
+          {
+            sku: {
+              contains: searchTerm,
+            },
+          },
+          {
+            Product: {
+              ProductTranslations: {
+                some: {
+                  name: {
+                    search: searchTerm,
+                  },
+                  description: {
+                    search: searchTerm,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      orderBy: [
+        { productId: 'asc' },
+        { id: 'asc' },
+        sortingArgs.sortBy
+          ? {
+              [sortingArgs.sortBy]:
+                sortingArgs.ascending === false ? 'desc' : 'asc',
+            }
+          : {},
+      ],
+      cursor:
+        paginationArgs.cursor == null
+          ? undefined
+          : {
+              id: paginationArgs.cursor,
+            },
+      take: paginationArgs.pageSize + 1,
+    });
+
+    const hasNextPage = productVariants.length === paginationArgs.pageSize + 1;
+    if (hasNextPage) {
+      productVariants.pop();
+    }
+
+    return {
+      hasNextPage: hasNextPage,
+      totalCount: productVariants.length,
+      edges: productVariants.map((pv) => ({
+        cursor: pv.id,
+        node: {
+          id: pv.id,
+          createdAt: pv.createdAt,
+          isPublic: pv.isPublic,
+          priceInCents: pv.priceInCents,
+          productId: pv.productId,
+          sku: pv.sku,
+          stock: pv.stock,
+          updatedAt: pv.updatedAt,
+        },
+      })),
+    };
+  }
+
+  async findAll(
+    paginationArgs: PaginationArgs,
+    productQueryArgs: ProductFindAllQueryArgs,
+    sortingArgs: SortingArgs,
+    role?: AuthenticatedUserDto['role'],
+  ): Promise<PaginatedProductVariant> {
+    this.validatePaginationArgs(paginationArgs);
+    this.validateProductFindAllQueryArgs(productQueryArgs, role);
+    this.validateSortingArgs(sortingArgs);
+
+    if (productQueryArgs.isSetup == null) {
+      const productVariants = await this.prisma.productVariant.findMany({
+        where: {
+          Product: {
+            isPublic:
+              productQueryArgs.isPublic == null
+                ? undefined
+                : productQueryArgs.isPublic,
+            categoryId:
+              productQueryArgs.categoryId == null
+                ? undefined
+                : productQueryArgs.categoryId === 0
+                  ? null
+                  : productQueryArgs.categoryId,
+            slug:
+              productQueryArgs.slug == null
+                ? undefined
+                : {
+                    contains: productQueryArgs.slug,
+                  },
+          },
+        },
+        select: {
+          id: true,
+          isPublic: true,
+          sku: true,
+          priceInCents: true,
+          productId: true,
+          stock: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        cursor:
+          paginationArgs.cursor == null
+            ? undefined
+            : {
+                id: paginationArgs.cursor,
+              },
+        take: paginationArgs.pageSize + 1,
+        orderBy: [
+          { productId: 'asc' },
+          { id: 'asc' },
+          sortingArgs.sortBy === null
+            ? {}
+            : {
+                [sortingArgs.sortBy]:
+                  sortingArgs.ascending === false ? 'desc' : 'asc',
+              },
+        ],
+      });
+      const hasNextPage =
+        productVariants.length === paginationArgs.pageSize + 1;
+      if (hasNextPage) {
+        productVariants.pop();
+      }
+
+      return {
+        hasNextPage: hasNextPage,
+        totalCount: productVariants.length,
+        edges: productVariants.map((pv) => ({
+          cursor: pv.id,
+          node: {
+            id: pv.id,
+            isPublic: pv.isPublic,
+            priceInCents: pv.priceInCents,
+            productId: pv.productId,
+            sku: pv.sku,
+            stock: pv.stock,
+            createdAt: pv.createdAt,
+            updatedAt: pv.updatedAt,
+          },
+        })),
+      };
+    } else {
+      const productVariants =
+        productQueryArgs.isSetup === true
+          ? await this.prisma.productVariant.findMany({
+              where: {
+                Product: {
+                  isPublic:
+                    productQueryArgs.isPublic == null
+                      ? undefined
+                      : productQueryArgs.isPublic,
+                  categoryId:
+                    productQueryArgs.categoryId == null
+                      ? undefined
+                      : productQueryArgs.categoryId === 0
+                        ? null
+                        : productQueryArgs.categoryId,
+                  slug:
+                    productQueryArgs.slug == null
+                      ? undefined
+                      : {
+                          contains: productQueryArgs.slug,
+                        },
+                  ProductTranslations: {
+                    some: {
+                      locale: {
+                        equals: this.localesService.getDefaultLocale().code,
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          : await this.prisma.productVariant.findMany({
+              where: {
+                Product: {
+                  isPublic:
+                    productQueryArgs.isPublic == null
+                      ? undefined
+                      : productQueryArgs.isPublic,
+                  categoryId:
+                    productQueryArgs.categoryId == null
+                      ? undefined
+                      : productQueryArgs.categoryId === 0
+                        ? null
+                        : productQueryArgs.categoryId,
+                  slug:
+                    productQueryArgs.slug == null
+                      ? undefined
+                      : {
+                          contains: productQueryArgs.slug,
+                        },
+                  ProductTranslations: {
+                    none: {
+                      locale: {
+                        equals: this.localesService.getDefaultLocale().code,
+                      },
+                    },
+                  },
+                },
+              },
+            });
+
+      const hasNextPage =
+        productVariants.length === paginationArgs.pageSize + 1;
+      if (hasNextPage) {
+        productVariants.pop();
+      }
+
+      return {
+        hasNextPage: hasNextPage,
+        totalCount: productVariants.length,
+        edges: productVariants.map((pv) => ({
+          cursor: pv.id,
+          node: {
+            id: pv.id,
+            isPublic: pv.isPublic,
+            priceInCents: pv.priceInCents,
+            productId: pv.productId,
+            sku: pv.sku,
+            stock: pv.stock,
+            createdAt: pv.createdAt,
+            updatedAt: pv.updatedAt,
+          },
+        })),
+      };
+    }
+  }
+
+  async findAllForCategory(
+    categoryId: number,
+    paginationArgs: PaginationArgs,
+    attributeFilters?: string[][],
+  ): Promise<PaginatedProductVariant> {
+    this.validatePaginationArgs(paginationArgs);
+    const filters = attributeFilters
+      ? await this.extractAttributeFilters(attributeFilters)
+      : {};
+    const allCategories = await this.prisma.$transaction(async (tx) => {
+      const res: number[] = [];
+      const categoriesToProcess = [categoryId];
+      while (categoriesToProcess.length > 0) {
+        const currentCategoryId = categoriesToProcess.pop()!;
+        res.push(currentCategoryId);
+        const childCategories = await tx.category.findMany({
+          where: {
+            parentCategoryId: currentCategoryId,
+          },
+          select: {
+            id: true,
+          },
+        });
+        categoriesToProcess.push(...childCategories.map((c) => c.id));
+      }
+      return res;
+    });
+
+    if (allCategories.length === 0) {
+      return {
+        hasNextPage: false,
+        totalCount: 0,
+        edges: [],
+      };
+    }
+
+    const productVariants = await this.prisma.productVariant.findMany({
+      where: {
+        Product: {
+          categoryId: {
+            in: allCategories,
+          },
+          ProductTranslations: {
+            some: {
+              locale: {
+                equals: this.localesService.getDefaultLocale().code,
+              },
+            },
+          },
+          isPublic: true,
+        },
+        ...(Object.keys(filters).length > 0
+          ? {
+              AND: Object.entries(filters).map(([key, values]) => ({
+                Attributes: {
+                  some: {
+                    AttributeKey: {
+                      key: key,
+                    },
+                    value: {
+                      in: values,
+                    },
+                  },
+                },
+              })),
+            }
+          : {}),
+      },
+      select: {
+        id: true,
+        stock: true,
+        sku: true,
+        priceInCents: true,
+        productId: true,
+        isPublic: true,
+        createdAt: true,
+        updatedAt: true,
+        Product: {
+          select: {
+            _count: {
+              select: {
+                ProductTranslations: {
+                  where: {
+                    locale: {
+                      equals: this.localesService.locales().english.code,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      cursor:
+        paginationArgs.cursor == null
+          ? undefined
+          : {
+              id: paginationArgs.cursor,
+            },
+      take: paginationArgs.pageSize + 1,
+      orderBy: [
+        {
+          productId: 'asc',
+        },
+        {
+          id: 'asc',
+        },
+      ],
+    });
+
+    const hasNextPage = productVariants.length === paginationArgs.pageSize + 1;
+    if (hasNextPage) {
+      productVariants.pop();
+    }
+
+    return {
+      hasNextPage: hasNextPage,
+      totalCount: productVariants.length,
+      edges: productVariants.map((pv) => ({
+        cursor: pv.id,
+        node: {
+          id: pv.id,
+          isPublic: pv.isPublic,
+          priceInCents: pv.priceInCents,
+          productId: pv.productId,
+          sku: pv.sku,
+          stock: pv.stock,
+          createdAt: pv.createdAt,
+          updatedAt: pv.updatedAt,
+        },
+      })),
+    };
+  }
+
   async getAllAttributesForVariantsByBatch(productVariantIds: number[]) {
     const atributes = await this.prisma.attribute.findMany({
       where: {
@@ -326,5 +790,53 @@ export class ProductVariantsService {
     return productVariantIds.map((id) =>
       images.filter((img) => img.productVariantId === id),
     );
+  }
+
+  async getProductsForVariantsByBatch(
+    productVariantIds: number[],
+  ): Promise<Product[]> {
+    const products = await this.prisma.productVariant.findMany({
+      where: {
+        id: {
+          in: productVariantIds,
+        },
+      },
+      select: {
+        id: true,
+        Product: {
+          select: {
+            id: true,
+            isPublic: true,
+            categoryId: true,
+            createdAt: true,
+            updatedAt: true,
+            slug: true,
+            _count: {
+              select: {
+                ProductTranslations: {
+                  where: {
+                    locale: {
+                      equals: this.localesService.getDefaultLocale().code,
+                    },
+                  },
+                },
+                ProductVariants: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return productVariantIds.map((pv) => {
+      const found = products.find((p) => p.id === pv)!;
+      return {
+        ...found.Product,
+        isSetup: this.productsService.getIsSetup(
+          found.Product._count.ProductTranslations > 0,
+          found.Product._count.ProductVariants,
+        ),
+      };
+    });
   }
 }

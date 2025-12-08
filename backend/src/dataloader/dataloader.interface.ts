@@ -10,6 +10,7 @@ import {
   ProductVariant,
 } from 'generated/prisma/client';
 import DataLoader from 'dataloader';
+import { Product } from 'src/products/entities/product.entity';
 
 export interface IDataLoaders {
   subcategoriesLoader: DataLoader<number, Category[]>;
@@ -39,4 +40,5 @@ export interface IDataLoaders {
     AttributeKeyTranslation[]
   >;
   attributesByKeyLoader: DataLoader<number, Attribute[]>;
+  productVariantProductLoader: DataLoader<number, Product>;
 }

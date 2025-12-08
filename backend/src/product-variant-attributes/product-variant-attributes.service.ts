@@ -51,23 +51,9 @@ export class ProductVariantAttributesService {
     });
   }
 
-  async findAll(forCategoryIds?: number[]) {
+  async findAll() {
     return await this.prisma.attribute.findMany({
-      where: forCategoryIds
-        ? {
-            ProductVariants: {
-              some: {
-                Product: {
-                  Category: {
-                    id: {
-                      in: forCategoryIds,
-                    },
-                  },
-                },
-              },
-            },
-          }
-        : undefined,
+      orderBy: { id: 'asc' },
     });
   }
 
@@ -164,5 +150,44 @@ export class ProductVariantAttributesService {
     return attributeIds.map((id) =>
       translations.filter((t) => t.attributeId === id),
     );
+  }
+
+  async findAllUsedInCategory(categoryId: number) {
+    const allCategories = await this.prisma.$transaction(async (tx) => {
+      const res: number[] = [];
+      const categoriesToProcess = [categoryId];
+      while (categoriesToProcess.length > 0) {
+        const currentCategoryId = categoriesToProcess.pop()!;
+        res.push(currentCategoryId);
+        const childCategories = await tx.category.findMany({
+          where: {
+            parentCategoryId: currentCategoryId,
+          },
+          select: {
+            id: true,
+          },
+        });
+        categoriesToProcess.push(...childCategories.map((c) => c.id));
+      }
+      return res;
+    });
+
+    if (allCategories.length === 0) {
+      return [];
+    }
+
+    return await this.prisma.attribute.findMany({
+      where: {
+        ProductVariants: {
+          some: {
+            Product: {
+              categoryId: {
+                in: allCategories,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 }

@@ -22,7 +22,7 @@ export type Scalars = {
 
 export type Category = {
   __typename?: 'Category';
-  categoryProducts: PaginatedProduct;
+  categoryProductVariants: PaginatedProductVariant;
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   id: Scalars['Int']['output'];
@@ -35,10 +35,12 @@ export type Category = {
   subcategories: Array<Category>;
   translations: Array<CategoryTranslation>;
   updatedAt: Scalars['DateTime']['output'];
+  usedProductVariantAttributes: Array<ProductVariantAttribute>;
 };
 
 
-export type CategoryCategoryProductsArgs = {
+export type CategoryCategoryProductVariantsArgs = {
+  attributeFilters?: InputMaybe<Array<Array<Scalars['String']['input']>>>;
   cursor?: InputMaybe<Scalars['Int']['input']>;
   includeSubcategories?: InputMaybe<Scalars['Boolean']['input']>;
   pageSize?: InputMaybe<Scalars['Int']['input']>;
@@ -388,6 +390,13 @@ export type PaginatedProduct = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type PaginatedProductVariant = {
+  __typename?: 'PaginatedProductVariant';
+  edges?: Maybe<Array<ProductVariantEdge>>;
+  hasNextPage: Scalars['Boolean']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
 export type Product = {
   __typename?: 'Product';
   categoryId?: Maybe<Scalars['Int']['output']>;
@@ -446,6 +455,7 @@ export type ProductVariant = {
   images: Array<ProductVariantImage>;
   isPublic: Scalars['Boolean']['output'];
   priceInCents: Scalars['Int']['output'];
+  product: Product;
   productId: Scalars['Int']['output'];
   sku: Scalars['String']['output'];
   stock: Scalars['Int']['output'];
@@ -489,6 +499,12 @@ export type ProductVariantAttributeTranslation = {
   value: Scalars['String']['output'];
 };
 
+export type ProductVariantEdge = {
+  __typename?: 'ProductVariantEdge';
+  cursor: Scalars['Int']['output'];
+  node: ProductVariant;
+};
+
 export type ProductVariantImage = {
   __typename?: 'ProductVariantImage';
   base64: Scalars['String']['output'];
@@ -502,6 +518,7 @@ export type Query = {
   __typename?: 'Query';
   categories: Array<Category>;
   category: Category;
+  findOneProductVariantAttribute?: Maybe<ProductVariantAttribute>;
   locale: Locale;
   locales: Array<Locale>;
   me: MeResponse;
@@ -509,7 +526,9 @@ export type Query = {
   product?: Maybe<Product>;
   productVariantAttributeKey: ProductVariantAttributeKey;
   productVariantAttributeKeys: Array<ProductVariantAttributeKey>;
+  productVariantAttributes: Array<ProductVariantAttribute>;
   products: PaginatedProduct;
+  searchProductVariants: PaginatedProductVariant;
   user: User;
   users: Array<User>;
 };
@@ -531,6 +550,11 @@ export type QueryCategoryArgs = {
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryFindOneProductVariantAttributeArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -577,6 +601,16 @@ export type QueryProductsArgs = {
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
   pageSize?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySearchProductVariantsArgs = {
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  attributeFilters?: InputMaybe<Array<Array<Scalars['String']['input']>>>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  searchTerm?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -943,7 +977,7 @@ export type CategoryQueryQueryVariables = Exact<{
 }>;
 
 
-export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProducts: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null, variants: Array<{ __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> }> } }> | null } } };
+export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
 
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
@@ -1465,7 +1499,7 @@ export const CategoryQueryDocument = new TypedDocumentString(`
       name
       description
     }
-    categoryProducts(
+    categoryProductVariants(
       cursor: $productsCursor
       pageSize: $productsPageSize
       includeSubcategories: true
@@ -1474,31 +1508,36 @@ export const CategoryQueryDocument = new TypedDocumentString(`
       edges {
         cursor
         node {
-          slug
-          thumbnailImage {
-            base64
-            mimeType
-          }
-          name
-          description
-          variants {
-            sku
+          product {
+            slug
             thumbnailImage {
               base64
               mimeType
             }
-            priceInCents
-            stock
-            attributes {
-              key {
-                key
-                translatedKey
-              }
-              value
-              translatedValue
-            }
+            name
+            description
+          }
+          sku
+          thumbnailImage {
+            base64
+            mimeType
+          }
+          priceInCents
+          stock
+          attributes {
+            value
+            translatedValue
           }
         }
+      }
+    }
+    usedProductVariantAttributes {
+      id
+      value
+      translatedValue
+      key {
+        key
+        translatedKey
       }
     }
   }

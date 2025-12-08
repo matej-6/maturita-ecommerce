@@ -10,12 +10,13 @@ import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { PrevButton } from "@/components/prev-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ProductFilters } from "@/components/product-filters";
 
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
-
+// este dokoncit pageSize
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
@@ -38,6 +39,17 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     return notFound();
   }
 
+  const attributes: Record<string, string[]> = {};
+  Object.entries(sp).forEach(([key, value]) => {
+    if (
+      key !== "cursor" &&
+      key !== "pageSize" &&
+      typeof value !== "undefined"
+    ) {
+      attributes[key] = typeof value === "string" ? [value] : value;
+    }
+  });
+
   const queryRes = await getCategoryQueryData(slug, cursor, pageSize);
   if (!queryRes.success) {
     return <div>{queryRes.message}</div>;
@@ -50,10 +62,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const category = queryRes.data.category;
 
   let nextPageLink = null;
-  if (category.categoryProducts.hasNextPage) {
+  if (category.categoryProductVariants.hasNextPage) {
     const nextCursor =
-      category.categoryProducts.edges![
-        category.categoryProducts.edges!.length - 1
+      category.categoryProductVariants.edges![
+        category.categoryProductVariants.edges!.length - 1
       ].cursor;
     const params = new URLSearchParams();
     params.append("cursor", nextCursor.toString());
@@ -65,24 +77,30 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     string,
     {
       keyTranslation?: string;
-      values: Set<{ value: string; translatedValue?: string }>;
+      values: Set<{
+        value: string;
+        translatedValue?: string;
+        isSet: boolean;
+      }>;
     }
   > = new Map();
 
-  category.categoryProducts.edges?.forEach((edge) => {
-    edge.node.variants.forEach((variant) => {
-      variant.attributes.forEach((attr) => {
-        if (!groupedAttributes.has(attr.key!.key)) {
-          groupedAttributes.set(attr.key!.key, {
-            values: new Set(),
-            keyTranslation: attr.key!.translatedKey || undefined,
-          });
-        }
-        groupedAttributes.get(attr.key!.key)!.values!.add({
-          value: attr.value,
-          translatedValue: attr.translatedValue || undefined,
-        });
+  category.usedProductVariantAttributes.forEach((attr) => {
+    const setAttributesForKey =
+      typeof sp[attr.key!.key] === "string"
+        ? [sp[attr.key!.key]]
+        : sp[attr.key!.key] ?? [];
+
+    if (!groupedAttributes.has(attr.key!.key)) {
+      groupedAttributes.set(attr.key!.key, {
+        values: new Set(),
+        keyTranslation: attr.key!.translatedKey || undefined,
       });
+    }
+    groupedAttributes.get(attr.key!.key)!.values!.add({
+      value: attr.value,
+      translatedValue: attr.translatedValue || undefined,
+      isSet: setAttributesForKey.includes(attr.value),
     });
   });
 
@@ -94,68 +112,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <CardTitle className="font-medium text-center">Filters</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-y-6">
-            {Array.from(groupedAttributes.entries()).map(([key, value]) => {
-              const selectedValues = new Set<string>();
-              if (typeof sp[key] === "string") {
-                selectedValues.add(sp[key] as string);
-              } else if (Array.isArray(sp[key])) {
-                sp[key].forEach((v) => selectedValues.add(v));
-              }
-
-              return (
-                <div key={key} className="flex flex-col gap-y-2">
-                  <h3 className="font-medium text-secondary-foreground capitalize">
-                    {value.keyTranslation || key}
-                  </h3>
-                  <div className="flex flex-col gap-y-1">
-                    {Array.from(value.values).map((v) => (
-                      <div key={v.value} className="flex items-center gap-x-2">
-                        <input
-                          id={`${key}-${v.value}`}
-                          className="justify-start text-sm"
-                          type="checkbox"
-                          defaultChecked={selectedValues.has(v.value)}
-                          onChange={() => {
-                            if (selectedValues.has(v.value)) {
-                              selectedValues.delete(v.value);
-                            } else {
-                              selectedValues.add(v.value);
-                            }
-                            const params = new URLSearchParams();
-                            for (const key of Object.keys(sp)) {
-                              if (typeof sp[key] === "string") {
-                                params.append(key, sp[key] as string);
-                              } else if (Array.isArray(sp[key])) {
-                                sp[key].forEach((v) => params.append(key, v));
-                              }
-                            }
-
-                            params.delete("cursor");
-                            params.delete("pageSize");
-                            params.delete(key);
-                            selectedValues.forEach((val) => {
-                              params.append(key, val);
-                            });
-
-                            router.push(
-                              `/category/${slug}?${params.toString()}`
-                            );
-
-                            // osamostatnit do komponentu a 'use client'
-                          }}
-                        />
-                        <Label
-                          htmlFor={`${key}-${v.value}`}
-                          className="text-sm"
-                        >
-                          {v.translatedValue || v.value}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+            <ProductFilters
+              baseUrl={`/category/${slug}`}
+              attributes={groupedAttributes}
+            />
           </CardContent>
         </Card>
       </div>
@@ -181,62 +141,62 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       </div>
       <div className="h-0.5 w-full bg-accent my-4" />
       <div className="flex flex-wrap gap-4">
-        {category.categoryProducts.edges &&
-        category.categoryProducts.edges.length > 0 ? (
+        {category.categoryProductVariants.edges &&
+        category.categoryProductVariants.edges.length > 0 ? (
           <div className="flex flex-col gap-y-8">
             <div className="flex flex-wrap gap-4">
-              {category.categoryProducts.edges.map((p) => {
-                const product = p.node;
-                return product.variants.map((pv) => {
-                  const image =
-                    pv.thumbnailImage || product.thumbnailImage || null;
-                  return (
-                    <Card key={pv.sku} className="w-[296px]">
-                      <CardHeader className="flex h-[256px]">
-                        {image ? (
-                          <img
-                            src={getImageSrc(image.mimeType, image.base64)}
-                            alt={pv.sku + " image"}
-                            className="size-full object-cover"
-                          />
-                        ) : (
-                          <div className="bg-accent size-full flex items-center justify-center">
-                            <span className="text-muted-foreground">
-                              No Image
-                            </span>
+              {category.categoryProductVariants.edges.map((pv) => {
+                const productVariant = pv.node;
+                const image =
+                  productVariant.thumbnailImage ||
+                  productVariant.product.thumbnailImage ||
+                  null;
+                return (
+                  <Card key={productVariant.sku} className="w-[296px]">
+                    <CardHeader className="flex h-[256px]">
+                      {image ? (
+                        <img
+                          src={getImageSrc(image.mimeType, image.base64)}
+                          alt={productVariant.sku + " image"}
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        <div className="bg-accent size-full flex items-center justify-center">
+                          <span className="text-muted-foreground">
+                            No Image
+                          </span>
+                        </div>
+                      )}
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-y-4">
+                      <div className="h-[96px]">
+                        <Link
+                          className="group"
+                          href={`/product/${productVariant.product.slug}`}
+                        >
+                          <div className="flex flex-col gap-y-1">
+                            <CardTitle className="group-hover:underline">
+                              {productVariant.product.name}{" "}
+                              {productVariant.attributes
+                                .map((a) => a.translatedValue || a.value)
+                                .sort()
+                                .join(" ")}
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground text-pretty line-clamp-3">
+                              {productVariant.product.description}
+                            </p>
                           </div>
-                        )}
-                      </CardHeader>
-                      <CardContent className="flex flex-col gap-y-4">
-                        <div className="h-[96px]">
-                          <Link
-                            className="group"
-                            href={`/product/${product.slug}`}
-                          >
-                            <div className="flex flex-col gap-y-1">
-                              <CardTitle className="group-hover:underline">
-                                {product.name}{" "}
-                                {pv.attributes
-                                  .map((a) => a.translatedValue || a.value)
-                                  .sort()
-                                  .join(" ")}
-                              </CardTitle>
-                              <p className="text-sm text-muted-foreground text-pretty line-clamp-3">
-                                {product.description}
-                              </p>
-                            </div>
-                          </Link>
-                        </div>
-                        <div className="flex flex-col gap-y-1">
-                          <p className="font-medium text-xl">
-                            {(pv.priceInCents / 100).toFixed(2)}€
-                          </p>
-                        </div>
-                        <Button>Add to Cart</Button>
-                      </CardContent>
-                    </Card>
-                  );
-                });
+                        </Link>
+                      </div>
+                      <div className="flex flex-col gap-y-1">
+                        <p className="font-medium text-xl">
+                          {(productVariant.priceInCents / 100).toFixed(2)}€
+                        </p>
+                      </div>
+                      <Button>Add to Cart</Button>
+                    </CardContent>
+                  </Card>
+                );
               })}
             </div>
             <div className="flex items-center justify-start gap-x-2">

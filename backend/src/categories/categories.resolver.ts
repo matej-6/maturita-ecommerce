@@ -30,14 +30,19 @@ import {
 } from './categories.resolver.args';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 import { PaginationArgs } from 'src/lib/pagination.args';
-import { PaginatedProduct } from 'src/products/entities/product.entity';
 import { ProductsService } from 'src/products/products.service';
+import { ProductVariantAttribute } from 'src/product-variant-attributes/entities/product-variant-attribute.entity';
+import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
+import { PaginatedProductVariant } from 'src/product-variants/entities/product-variant.entity';
+import { ProductVariantsService } from 'src/product-variants/product-variants.service';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
   constructor(
     private readonly categoriesService: CategoriesService,
     private readonly productsService: ProductsService,
+    private readonly productVariantAttributesService: ProductVariantAttributesService,
+    private readonly productVariantsService: ProductVariantsService,
   ) {}
 
   @UseGuards(AdminGuard)
@@ -97,13 +102,18 @@ export class CategoriesResolver {
     );
   }
 
-  @ResolveField(() => PaginatedProduct, { name: 'categoryProducts' })
-  async findCategoryProducts(
+  @ResolveField(() => PaginatedProductVariant, {
+    name: 'categoryProductVariants',
+  })
+  async findCategoryProductVariants(
     @Args('includeSubcategories', { type: () => Boolean, nullable: true })
     includeSubcategories: boolean | null,
-    @Args() paginationArgs: PaginationArgs,
+    @Args('attributeFilters', { type: () => [[String]], nullable: true })
+    attributeFilters: string[][] | null,
+    @Args()
+    paginationArgs: PaginationArgs,
     @Parent() category: Category,
-  ): Promise<PaginatedProduct> {
+  ): Promise<PaginatedProductVariant> {
     if (!category) {
       return {
         edges: [],
@@ -113,13 +123,14 @@ export class CategoriesResolver {
     }
 
     if (includeSubcategories != null && includeSubcategories === true) {
-      return await this.productsService.findAllForCategory(
+      return await this.productVariantsService.findAllForCategory(
         category.id,
         paginationArgs,
+        attributeFilters || undefined,
       );
     }
 
-    return await this.productsService.findAll(
+    return await this.productVariantsService.findAll(
       paginationArgs,
       {
         categoryId: category.id,
@@ -241,5 +252,16 @@ export class CategoriesResolver {
   ) {
     const res = await ctx.loaders.categoryTranslationLoader.load(category.id);
     return res?.description ?? null;
+  }
+
+  @ResolveField(() => [ProductVariantAttribute], {
+    name: 'usedProductVariantAttributes',
+  })
+  async resolveUsedProductVariantAttributes(@Parent() category: Category) {
+    const res =
+      await this.productVariantAttributesService.findAllUsedInCategory(
+        category.id,
+      );
+    return res;
   }
 }

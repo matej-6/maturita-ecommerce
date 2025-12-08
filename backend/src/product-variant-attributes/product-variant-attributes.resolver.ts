@@ -25,11 +25,8 @@ export class ProductVariantAttributesResolver {
   ) {}
 
   @Query(() => [ProductVariantAttribute], { name: 'productVariantAttributes' })
-  productVariantAttributes(
-    @Args('forCategoryIds', { type: () => [Int], nullable: true })
-    forCategoryIds?: number[],
-  ) {
-    return this.productVariantAttributesService.findAll(forCategoryIds);
+  productVariantAttributes() {
+    return this.productVariantAttributesService.findAll();
   }
 
   @Query(() => ProductVariantAttribute, { nullable: true })

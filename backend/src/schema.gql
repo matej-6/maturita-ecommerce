@@ -3,7 +3,7 @@
 # ------------------------------------------------------
 
 type Category {
-  categoryProducts(cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProduct!
+  categoryProductVariants(attributeFilters: [[String!]!], cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProductVariant!
   createdAt: DateTime!
   description: String!
   id: Int!
@@ -21,6 +21,7 @@ type Category {
     locales: [String!]!
   ): [CategoryTranslation!]!
   updatedAt: DateTime!
+  usedProductVariantAttributes: [ProductVariantAttribute!]!
 }
 
 type CategoryEdge {
@@ -218,6 +219,12 @@ type PaginatedProduct {
   totalCount: Int!
 }
 
+type PaginatedProductVariant {
+  edges: [ProductVariantEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
 type Product {
   categoryId: Int
   createdAt: DateTime!
@@ -268,6 +275,7 @@ type ProductVariant {
   images: [ProductVariantImage!]!
   isPublic: Boolean!
   priceInCents: Int!
+  product: Product!
   productId: Int!
   sku: String!
   stock: Int!
@@ -305,6 +313,11 @@ type ProductVariantAttributeTranslation {
   id: Float!
   locale: String!
   value: String!
+}
+
+type ProductVariantEdge {
+  cursor: Int!
+  node: ProductVariant!
 }
 
 type ProductVariantImage {
@@ -370,7 +383,7 @@ type Query {
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
-  productVariantAttributes(forCategoryIds: [Int!]): [ProductVariantAttribute!]!
+  productVariantAttributes: [ProductVariantAttribute!]!
   products(
     ascending: Boolean
 
@@ -385,6 +398,7 @@ type Query {
     slug: String
     sortBy: String
   ): PaginatedProduct!
+  searchProductVariants(ascending: Boolean, attributeFilters: [[String!]!], cursor: Int, pageSize: Int = 10, searchTerm: String, sortBy: String): PaginatedProductVariant!
   user(id: ID!): User!
   users: [User!]!
 }

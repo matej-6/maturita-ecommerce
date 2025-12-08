@@ -33,7 +33,7 @@ const CategoryQueryDocument = graphql(`
         name
         description
       }
-      categoryProducts(
+      categoryProductVariants(
         cursor: $productsCursor
         pageSize: $productsPageSize
         includeSubcategories: true
@@ -42,31 +42,36 @@ const CategoryQueryDocument = graphql(`
         edges {
           cursor
           node {
-            slug
-            thumbnailImage {
-              base64
-              mimeType
-            }
-            name
-            description
-            variants {
-              sku
+            product {
+              slug
               thumbnailImage {
                 base64
                 mimeType
               }
-              priceInCents
-              stock
-              attributes {
-                key {
-                  key
-                  translatedKey
-                }
-                value
-                translatedValue
-              }
+              name
+              description
+            }
+            sku
+            thumbnailImage {
+              base64
+              mimeType
+            }
+            priceInCents
+            stock
+            attributes {
+              value
+              translatedValue
             }
           }
+        }
+      }
+      usedProductVariantAttributes {
+        id
+        value
+        translatedValue
+        key {
+          key
+          translatedKey
         }
       }
     }

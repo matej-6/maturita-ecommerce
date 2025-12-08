@@ -6,9 +6,13 @@ import {
   ResolveField,
   Parent,
   Context,
+  Query,
 } from '@nestjs/graphql';
 import { ProductVariantsService } from './product-variants.service';
-import { ProductVariant } from './entities/product-variant.entity';
+import {
+  PaginatedProductVariant,
+  ProductVariant,
+} from './entities/product-variant.entity';
 import { CreateProductVariantInput } from './dto/create-product-variant.input';
 import { UpdateProductVariantInput } from './dto/update-product-variant.input';
 import { ProductVariantAttribute } from '../product-variant-attributes/entities/product-variant-attribute.entity';
@@ -16,12 +20,40 @@ import { GraphqlAppContext } from 'src/app.module';
 import { ProductVariantImage } from 'src/entities/product-variant.image.entity';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import { SortingArgs } from 'src/args/sorting-args';
+import { Product } from 'src/products/entities/product.entity';
 
 @Resolver(() => ProductVariant)
 export class ProductVariantsResolver {
   constructor(
     private readonly productVariantsService: ProductVariantsService,
   ) {}
+
+  @Query(() => PaginatedProductVariant, { name: 'searchProductVariants' })
+  async querySearchProductVariants(
+    @Args('searchTerm', { type: () => String, nullable: true })
+    searchTerm: string | null,
+    @Args() paginationArgs: PaginationArgs,
+    @Args() sortingArgs: SortingArgs,
+    @Args('attributeFilters', { type: () => [[String]], nullable: true })
+    attributeFilters: string[][] | null,
+  ): Promise<PaginatedProductVariant> {
+    if (!searchTerm || searchTerm.trim() === '') {
+      return {
+        edges: [],
+        hasNextPage: false,
+        totalCount: 0,
+      };
+    }
+
+    return this.productVariantsService.searchProductVariants(
+      searchTerm,
+      paginationArgs,
+      sortingArgs,
+      attributeFilters || undefined,
+    );
+  }
 
   @UseGuards(AdminGuard)
   @Mutation(() => ProductVariant)
@@ -55,6 +87,14 @@ export class ProductVariantsResolver {
     return ctx.loaders.productVariantAllAttributesLoader.load(
       productVariant.id,
     );
+  }
+
+  @ResolveField(() => Product, { name: 'product' })
+  async resolveProductVariantProduct(
+    @Parent() productVariant: ProductVariant,
+    @Context() ctx: GraphqlAppContext,
+  ): Promise<Product> {
+    return ctx.loaders.productVariantProductLoader.load(productVariant.id);
   }
 
   @ResolveField(() => [ProductVariantImage], { name: 'images' })
