@@ -6,5 +6,6 @@
     "src/i18n",
     "src/app/data-access-layer/admin/locale"
   ],
-  "i18n-ally.keystyle": "nested"
+  "i18n-ally.keystyle": "nested",
+  "java.project.sourcePaths": ["src/app/data-access-layer"]
 }

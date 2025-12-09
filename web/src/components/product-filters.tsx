@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 
-type Props = {
+export type ProductFiltersProps = {
   attributes: Map<
     string,
     {
@@ -17,7 +17,16 @@ type Props = {
   searchParams?: URLSearchParams;
 };
 
-export function ProductFilters({ attributes, baseUrl, searchParams }: Props) {
+type Props = ProductFiltersProps & {
+  onApplyFilters?: () => void;
+};
+
+export function ProductFilters({
+  attributes,
+  baseUrl,
+  searchParams,
+  onApplyFilters,
+}: Props) {
   const [selectedAttributes, setSelectedAttributes] = useState<
     Map<string, Set<string>>
   >(new Map());
@@ -43,13 +52,17 @@ export function ProductFilters({ attributes, baseUrl, searchParams }: Props) {
   const router = useRouter();
 
   function applyFilters() {
-    const sp = searchParams ?? new URLSearchParams();
+    const sp = searchParams
+      ? new URLSearchParams(searchParams)
+      : new URLSearchParams();
     selectedAttributes.forEach((values, key) => {
       values.forEach((v) => {
         sp.append(key, v);
       });
     });
-
+    if (onApplyFilters !== undefined) {
+      onApplyFilters();
+    }
     router.push(`${baseUrl}?${sp.toString()}`);
   }
 
@@ -111,6 +124,17 @@ export function ProductFilters({ attributes, baseUrl, searchParams }: Props) {
       >
         Apply filters
       </Button>
+      {selectedAttributes.size > 0 && (
+        <Button
+          onClick={() => {
+            setSelectedAttributes(new Map());
+            setIsFormChanged(true);
+          }}
+          variant={"outline"}
+        >
+          Reset
+        </Button>
+      )}
     </div>
   );
 }

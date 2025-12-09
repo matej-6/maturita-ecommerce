@@ -9,7 +9,7 @@ export async function Header() {
   const headerQueryDataPromise = getHeaderQueryData();
 
   return (
-    <header className="w-full border-b-2">
+    <header className="w-full border-b-2 z-50">
       <div className="max-width-container grid grid-cols-5 items-center py-4 gap-4">
         <div className="col-span-1 flex justify-start">
           <Link

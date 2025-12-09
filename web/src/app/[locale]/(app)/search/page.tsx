@@ -1,26 +1,19 @@
 "use server";
 
-import { getCategoryQueryData } from "@/app/data-access-layer/category.queries";
+import { getSearchProductsQueryData } from "@/app/data-access-layer/search.queries";
 import { getImageSrc } from "@/app/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { notFound } from "next/navigation";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { PrevButton } from "@/components/prev-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ProductFilters } from "@/components/product-filters";
-import { group } from "console";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 type Props = {
-  params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
-// este dokoncit pageSize
-export default async function CategoryPage({ params, searchParams }: Props) {
-  const { slug } = await params;
+
+export default async function SearchPage({ searchParams }: Props) {
   const sp = await searchParams;
   let cursor: number | null = null;
   if (typeof sp.cursor === "string") {
@@ -36,9 +29,6 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     if (!isNaN(parsedPageSize)) {
       pageSize = parsedPageSize;
     }
-  }
-  if (!slug) {
-    return notFound();
   }
 
   const attributes: string[][] = [];
@@ -58,33 +48,22 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     }
   });
 
-  const queryRes = await getCategoryQueryData(
-    slug,
+  const query = sp.q;
+  if (typeof query !== "string" || query.trim() === "") {
+    return <div>No products found</div>;
+  }
+
+  const res = await getSearchProductsQueryData(
+    query,
     cursor,
     pageSize,
-    attributes.length > 0 ? attributes : undefined
+    attributes
   );
-  if (!queryRes.success) {
-    return <div>{queryRes.message}</div>;
+  if (!res.success) {
+    return <div>Unable to fetch products.</div>;
   }
 
-  if (queryRes.data?.category == null) {
-    return notFound();
-  }
-
-  const category = queryRes.data.category;
-
-  let nextPageLink = null;
-  if (category.categoryProductVariants.hasNextPage) {
-    const nextCursor =
-      category.categoryProductVariants.edges![
-        category.categoryProductVariants.edges!.length - 1
-      ].cursor;
-    const params = new URLSearchParams();
-    params.append("cursor", nextCursor.toString());
-    params.append("pageSize", pageSize.toString());
-    nextPageLink = `/category/${slug}?${params.toString()}`;
-  }
+  const productVariants = res.data?.searchProductVariants;
 
   const groupedAttributes: Map<
     string,
@@ -98,79 +77,57 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     }
   > = new Map();
 
-  category.usedProductVariantAttributes.forEach((attr) => {
-    const setAttributesForKey =
-      typeof sp[attr.key!.key] === "string"
-        ? [sp[attr.key!.key]]
-        : sp[attr.key!.key] ?? [];
-
-    if (!groupedAttributes.has(attr.key!.key)) {
-      groupedAttributes.set(attr.key!.key, {
+  res.data?.productVariantAttributes.forEach((pva) => {
+    if (!groupedAttributes.has(pva.key!.key)) {
+      groupedAttributes.set(pva.key!.key, {
+        keyTranslation: pva.key!.translatedKey || undefined,
         values: new Set(),
-        keyTranslation: attr.key!.translatedKey || undefined,
       });
     }
-    groupedAttributes.get(attr.key!.key)!.values!.add({
-      value: attr.value,
-      translatedValue: attr.translatedValue || undefined,
-      isSet: setAttributesForKey.includes(attr.value),
+
+    groupedAttributes.get(pva.key!.key)?.values.add({
+      value: pva.value,
+      translatedValue: pva.translatedValue || undefined,
+      isSet: attributes.some(
+        (a) => a[0] === pva.key!.key && a[1] === pva.value
+      ),
     });
   });
 
+  let nextPageLink = null;
+  if (productVariants?.hasNextPage) {
+    const nextCursor =
+      productVariants.edges![productVariants.edges!.length - 1].cursor;
+    const params = new URLSearchParams();
+    params.append("q", query);
+    params.append("cursor", nextCursor.toString());
+    params.append("pageSize", pageSize.toString());
+    nextPageLink = `/search?${params.toString()}`;
+  }
+
   return (
     <div className="max-width-container bg-base/50 w-full mx-auto mt-8 gap-y-8 flex flex-col relative">
-      {/* {groupedAttributes.size > 0 && (
-        <div className="absolute -left-12 -translate-x-full hidden min-[1920px]:block">
-          <Card className="w-[216px]">
-            <CardHeader>
-              <CardTitle className="font-medium text-center">Filters</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-y-6">
-              <ProductFilters
-                baseUrl={`/category/${slug}`}
-                attributes={groupedAttributes}
-              />
-            </CardContent>
-          </Card>
+      <h1 className="text-4xl font-bold">
+        Showing search results for: "{query}"
+      </h1>
+      {groupedAttributes.size > 0 && (
+        <div className="">
+          <ProductFiltersSheet
+            productFilterProps={{
+              attributes: groupedAttributes,
+              baseUrl: `/search`,
+              searchParams: new URLSearchParams({ q: query }),
+            }}
+          />
         </div>
-      )} */}
-      <div className="flex flex-col gap-y-6">
-        <div className="flex flex-col gap-y-4">
-          <h1 className="text-3xl font-bold">{category.name}</h1>
-          <p className="text-secondary-foreground">{category.description}</p>
-        </div>
-        {category.subcategories.length > 0 && (
-          <div className="flex flex-col gap-y-2">
-            <h2 className="font-medium text-secondary-foreground">
-              Subcategories
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {category.subcategories.map((s) => (
-                <Link key={s.slug} href={`/category/${s.slug}`}>
-                  <Button variant={"secondary"}>{s.name || s.slug}</Button>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="h-0.5 w-full bg-accent my-4" />
+      )}
       <div className="flex flex-wrap gap-4">
-        {category.categoryProductVariants.edges &&
-        category.categoryProductVariants.edges.length > 0 ? (
+        {productVariants &&
+        productVariants.edges &&
+        productVariants.edges.length > 0 ? (
           <div className="flex flex-col gap-y-8">
-            {groupedAttributes.size > 0 && (
-              <div className="">
-                <ProductFiltersSheet
-                  productFilterProps={{
-                    attributes: groupedAttributes,
-                    baseUrl: `/category/${slug}`,
-                  }}
-                />
-              </div>
-            )}
             <div className="flex flex-wrap gap-4">
-              {category.categoryProductVariants.edges.map((pv) => {
+              {productVariants.edges.map((pv) => {
                 const productVariant = pv.node;
                 const image =
                   productVariant.thumbnailImage ||
@@ -197,7 +154,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                       <div className="h-[96px]">
                         <Link
                           className="group"
-                          href={`/product/${productVariant.product.slug}`}
+                          href={`/product/${productVariant.product.slug}?variant=${productVariant.sku}`}
                         >
                           <div className="flex flex-col gap-y-1">
                             <CardTitle className="group-hover:underline">
@@ -250,7 +207,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           </div>
         ) : (
           <div className="text-muted-foreground">
-            No products found in this category.
+            No products found for this search.
           </div>
         )}
       </div>

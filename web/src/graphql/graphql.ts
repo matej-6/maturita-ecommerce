@@ -974,10 +974,21 @@ export type CategoryQueryQueryVariables = Exact<{
   slug: Scalars['String']['input'];
   productsCursor?: InputMaybe<Scalars['Int']['input']>;
   productsPageSize?: InputMaybe<Scalars['Int']['input']>;
+  attributeFilters?: InputMaybe<Array<Array<Scalars['String']['input']> | Scalars['String']['input']> | Array<Scalars['String']['input']> | Scalars['String']['input']>;
 }>;
 
 
 export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
+
+export type SearchProductsQueryQueryVariables = Exact<{
+  searchTerm: Scalars['String']['input'];
+  productsCursor?: InputMaybe<Scalars['Int']['input']>;
+  productsPageSize?: InputMaybe<Scalars['Int']['input']>;
+  attributeFilters?: InputMaybe<Array<Array<Scalars['String']['input']> | Scalars['String']['input']> | Array<Scalars['String']['input']> | Scalars['String']['input']>;
+}>;
+
+
+export type SearchProductsQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, stock: number, productId: number, sku: string, priceInCents: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null }, productVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', translatedValue?: string | null, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translatedKey?: string | null } | null }> };
 
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
@@ -1488,7 +1499,7 @@ export const HeaderQueryDocument = new TypedDocumentString(`
   }
 }`) as unknown as TypedDocumentString<HeaderQueryQuery, HeaderQueryQueryVariables>;
 export const CategoryQueryDocument = new TypedDocumentString(`
-    query CategoryQuery($slug: String!, $productsCursor: Int, $productsPageSize: Int) {
+    query CategoryQuery($slug: String!, $productsCursor: Int, $productsPageSize: Int, $attributeFilters: [[String!]!]) {
   category(slug: $slug) {
     id
     name
@@ -1503,6 +1514,7 @@ export const CategoryQueryDocument = new TypedDocumentString(`
       cursor: $productsCursor
       pageSize: $productsPageSize
       includeSubcategories: true
+      attributeFilters: $attributeFilters
     ) {
       hasNextPage
       edges {
@@ -1543,3 +1555,52 @@ export const CategoryQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CategoryQueryQuery, CategoryQueryQueryVariables>;
+export const SearchProductsQueryDocument = new TypedDocumentString(`
+    query SearchProductsQuery($searchTerm: String!, $productsCursor: Int, $productsPageSize: Int, $attributeFilters: [[String!]!]) {
+  searchProductVariants(
+    attributeFilters: $attributeFilters
+    cursor: $productsCursor
+    pageSize: $productsPageSize
+    searchTerm: $searchTerm
+  ) {
+    hasNextPage
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        stock
+        productId
+        sku
+        priceInCents
+        thumbnailImage {
+          base64
+          mimeType
+        }
+        attributes {
+          value
+          translatedValue
+        }
+        product {
+          slug
+          name
+          thumbnailImage {
+            base64
+            mimeType
+          }
+          description
+        }
+      }
+    }
+  }
+  productVariantAttributes {
+    key {
+      id
+      key
+      translatedKey
+    }
+    translatedValue
+    value
+  }
+}
+    `) as unknown as TypedDocumentString<SearchProductsQueryQuery, SearchProductsQueryQueryVariables>;

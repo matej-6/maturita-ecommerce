@@ -106,8 +106,7 @@ model ProductTranslation {
   markdownContent String? @db.LongText
 
   @@unique([productId, locale])
-  @@fulltext([name, description])
-  @@fulltext([markdownContent])
+  @@fulltext([description, markdownContent])
   @@map("product_translations")
 }
 

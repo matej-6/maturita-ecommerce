@@ -22,6 +22,7 @@ const CategoryQueryDocument = graphql(`
     $slug: String!
     $productsCursor: Int
     $productsPageSize: Int
+    $attributeFilters: [[String!]!]
   ) {
     category(slug: $slug) {
       id
@@ -37,6 +38,7 @@ const CategoryQueryDocument = graphql(`
         cursor: $productsCursor
         pageSize: $productsPageSize
         includeSubcategories: true
+        attributeFilters: $attributeFilters
       ) {
         hasNextPage
         edges {
@@ -81,12 +83,14 @@ const CategoryQueryDocument = graphql(`
 export async function getCategoryQueryData(
   slug: string,
   productsCursor: number | null,
-  productsPageSize: number | null
+  productsPageSize: number | null,
+  attributes?: string[][]
 ): Promise<ActionResponse<ExecutionResult<CategoryQueryQuery>["data"]>> {
   const res = await execute(CategoryQueryDocument, {
     slug,
     productsCursor,
     productsPageSize,
+    attributeFilters: attributes,
   });
 
   if (res.errors) {

@@ -380,6 +380,13 @@ export class ProductVariantsService {
           : undefined,
         OR: [
           {
+            Product: {
+              slug: {
+                contains: searchTerm,
+              },
+            },
+          },
+          {
             sku: {
               contains: searchTerm,
             },
@@ -389,9 +396,20 @@ export class ProductVariantsService {
               ProductTranslations: {
                 some: {
                   name: {
+                    contains: searchTerm,
+                  },
+                },
+              },
+            },
+          },
+          {
+            Product: {
+              ProductTranslations: {
+                some: {
+                  description: {
                     search: searchTerm,
                   },
-                  description: {
+                  markdownContent: {
                     search: searchTerm,
                   },
                 },

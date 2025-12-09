@@ -12,9 +12,10 @@ import {
 import { useTranslations } from "next-intl";
 import { FragmentType, getFragmentData, graphql } from "@/graphql";
 import { getCategoryLink } from "@/app/lib/navigation";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { ExecutionResult } from "graphql";
 import { Link, useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 
 const HeaderNav_QueryFragment = graphql(`
   fragment HeaderNav_QueryFragment on Query {
@@ -47,8 +48,17 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
 
   const [searchValue, setSearchValue] = useState("");
 
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) {
+      setSearchValue(q);
+    }
+  }, [searchParams]);
+
   return (
-    <nav className="flex items-center">
+    <nav className="flex items-center z-50">
       <div className="relative mx-auto">
         <div className="absolute -left-2 -translate-x-[100%] top-1/2 -translate-y-1/2">
           <NavigationMenu>
