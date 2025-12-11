@@ -50,7 +50,11 @@ export default async function SearchPage({ searchParams }: Props) {
 
   const query = sp.q;
   if (typeof query !== "string" || query.trim() === "") {
-    return <div>No products found</div>;
+    return (
+      <div className="max-width-container bg-base/50 w-full mx-auto mt-8">
+        No products found
+      </div>
+    );
   }
 
   const res = await getSearchProductsQueryData(
@@ -60,7 +64,11 @@ export default async function SearchPage({ searchParams }: Props) {
     attributes
   );
   if (!res.success) {
-    return <div>Unable to fetch products.</div>;
+    return (
+      <div className="max-width-container bg-base/50 w-full mx-auto mt-8 gap-y-8">
+        Unable to fetch products.
+      </div>
+    );
   }
 
   const productVariants = res.data?.searchProductVariants;

@@ -491,6 +491,51 @@ export class ProductsService {
     };
   }
 
+  async findOneBySlug(slug: string): Promise<Product | null> {
+    const product = await this.prisma.product.findFirst({
+      where: {
+        slug: slug,
+        isPublic: true,
+      },
+      select: {
+        _count: {
+          select: {
+            ProductTranslations: {
+              where: {
+                locale: this.localesService.locales().english.code,
+              },
+            },
+            ProductVariants: true,
+          },
+        },
+        id: true,
+        isPublic: true,
+        slug: true,
+        categoryId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!product) {
+      this.logger.warn(`findOneBySlug(slug=${slug}) did not find any product`);
+      return null;
+    }
+    const isSetup = this.getIsSetup(
+      product._count.ProductTranslations > 0,
+      product._count.ProductVariants,
+    );
+
+    if (!isSetup) {
+      return null;
+    }
+
+    return {
+      ...product,
+      isSetup: isSetup,
+    };
+  }
+
   async removeCategoryFromProducts(categoryId: number) {
     await this.prisma.product.updateMany({
       where: {

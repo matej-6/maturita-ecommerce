@@ -123,6 +123,11 @@ export class ProductsResolver {
     return this.productsService.findOne(args, user?.role);
   }
 
+  @Query(() => Product, { name: 'productBySlug', nullable: true })
+  findOneBySlug(@Args('slug') slug: string) {
+    return this.productsService.findOneBySlug(slug);
+  }
+
   @ResolveField(() => String, { name: 'name', nullable: true })
   async resolveProductName(
     @Parent() product: Product,

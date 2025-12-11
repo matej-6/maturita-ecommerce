@@ -2,26 +2,11 @@
 import "server-only";
 
 import { graphql } from "@/graphql";
-import { cache } from "react";
 import "server-only";
-import { fetchGraphql } from "./fetch-graphql";
 import { execute } from "@/graphql/execute";
 import { ActionResponse } from "./formActionResponse";
 import { ExecutionResult } from "graphql";
-import {
-  CategoryQueryQuery,
-  SearchProductsQueryQuery,
-} from "@/graphql/graphql";
-
-const HeaderQueryDocument = graphql(`
-  query HeaderQuery {
-    ...HeaderNav_QueryFragment
-  }
-`);
-
-export const getHeaderQueryData = cache(async () => {
-  return await fetchGraphql(HeaderQueryDocument);
-});
+import { SearchProductsQueryQuery } from "@/graphql/graphql";
 
 const SearchQueryDocument = graphql(`
   query SearchProductsQuery(

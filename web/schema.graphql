@@ -354,6 +354,7 @@ type Query {
     sortBy: String
   ): PaginatedCategory!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
+  productBySlug(slug: String!): Product
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
   productVariantAttributes: [ProductVariantAttribute!]!

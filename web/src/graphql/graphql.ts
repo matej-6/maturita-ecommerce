@@ -524,6 +524,7 @@ export type Query = {
   me: MeResponse;
   paginatedCategories: PaginatedCategory;
   product?: Maybe<Product>;
+  productBySlug?: Maybe<Product>;
   productVariantAttributeKey: ProductVariantAttributeKey;
   productVariantAttributeKeys: Array<ProductVariantAttributeKey>;
   productVariantAttributes: Array<ProductVariantAttribute>;
@@ -580,6 +581,11 @@ export type QueryProductArgs = {
   id: Scalars['Int']['input'];
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type QueryProductBySlugArgs = {
+  slug: Scalars['String']['input'];
 };
 
 
@@ -979,6 +985,13 @@ export type CategoryQueryQueryVariables = Exact<{
 
 
 export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
+
+export type ProductPageQueryQueryVariables = Exact<{
+  slug: Scalars['String']['input'];
+}>;
+
+
+export type ProductPageQueryQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number, name?: string | null, description?: string | null, markdownContent?: string | null, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', sku: string, stock: number, priceInCents: number, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string } | null }> }> } | null };
 
 export type SearchProductsQueryQueryVariables = Exact<{
   searchTerm: Scalars['String']['input'];
@@ -1555,6 +1568,40 @@ export const CategoryQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CategoryQueryQuery, CategoryQueryQueryVariables>;
+export const ProductPageQueryDocument = new TypedDocumentString(`
+    query ProductPageQuery($slug: String!) {
+  productBySlug(slug: $slug) {
+    id
+    name
+    description
+    markdownContent
+    images {
+      id
+      base64
+      mimeType
+      isThumbnail
+    }
+    variants {
+      sku
+      stock
+      priceInCents
+      images {
+        id
+        base64
+        mimeType
+        isThumbnail
+      }
+      attributes {
+        value
+        translatedValue
+        key {
+          key
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductPageQueryQuery, ProductPageQueryQueryVariables>;
 export const SearchProductsQueryDocument = new TypedDocumentString(`
     query SearchProductsQuery($searchTerm: String!, $productsCursor: Int, $productsPageSize: Int, $attributeFilters: [[String!]!]) {
   searchProductVariants(

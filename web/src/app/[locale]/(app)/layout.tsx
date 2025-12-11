@@ -9,7 +9,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <>
       <Header />
-      <div className="h-screen">{children}</div>
+      <div className="min-h-screen">{children}</div>
       <Footer />
     </>
   );

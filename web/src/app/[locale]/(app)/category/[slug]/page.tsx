@@ -197,7 +197,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                       <div className="h-[96px]">
                         <Link
                           className="group"
-                          href={`/product/${productVariant.product.slug}`}
+                          href={`/product/${productVariant.product.slug}?variant=${productVariant.sku}`}
                         >
                           <div className="flex flex-col gap-y-1">
                             <CardTitle className="group-hover:underline">
