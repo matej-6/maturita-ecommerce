@@ -2,9 +2,11 @@
 
 import { getProductPageData } from "@/app/data-access-layer/product.queries";
 import { getImageSrc } from "@/app/lib/utils";
+import { ProductImages } from "@/components/product-images";
 import { Button } from "@/components/ui/button";
-import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Link, redirect } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
 
@@ -32,6 +34,8 @@ export default async function ProductPage({ params, searchParams }: Props) {
   }
 
   const locale = await getLocale();
+
+  const t = await getTranslations("productPage");
 
   if (variant === null) {
     const newSearchParams = new URLSearchParams();
@@ -63,7 +67,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const allImages = [
     ...selectedVariant.images,
     ...data.data.productBySlug.images,
-  ];
+  ].map((image) => ({
+    url: getImageSrc(image.mimeType, image.base64),
+    altText: data.data!.productBySlug?.name || slug,
+    id: image.id,
+  }));
 
   const variantName = selectedVariant.attributes
     .sort((a, b) => a.key!.key.localeCompare(b.key!.key))
@@ -71,53 +79,100 @@ export default async function ProductPage({ params, searchParams }: Props) {
     .join(", ");
   return (
     <div className="max-width-container bg-base/50 w-full mx-auto mt-8 gap-y-8 flex flex-col relative items-center">
-      <div className="flex flex-col gap-y-1 ">
-        <div className="w-72 h-72 flex items-center justify-center">
-          {thumbnailImage ? (
-            <img
-              src={getImageSrc(thumbnailImage.mimeType, thumbnailImage.base64)}
-              alt="Product variant image"
-              className="size-full object-cover"
+      <div className="flex flex-col gap-y-8 items-start px-4">
+        <div className="flex flex-col md:flex-row gap-y-8 items-start px-4 w-full md:w-fit">
+          <div className="w-full flex justify-center">
+            <ProductImages
+              images={allImages}
+              thumbnailImage={
+                thumbnailImage
+                  ? {
+                      url: getImageSrc(
+                        thumbnailImage.mimeType,
+                        thumbnailImage.base64
+                      ),
+                      altText: data.data!.productBySlug?.name || slug,
+                      id: thumbnailImage.id,
+                    }
+                  : undefined
+              }
             />
-          ) : (
-            <p>No image available</p>
-          )}
+          </div>
+          <div className="flex flex-col gap-y-4">
+            <h1 className="text-2xl font-bold">
+              {data.data.productBySlug.name ?? slug} {variantName}
+            </h1>
+            <p className="text-secondary-foreground">
+              {data.data.productBySlug.description}
+            </p>
+            <h2 className="text-3xl font-semibold">
+              {(selectedVariant.priceInCents / 100).toFixed(2)} €
+            </h2>
+            <Button size={"lg"}>{t("addToCartButton")}</Button>
+          </div>
         </div>
-        {allImages.length > 0 && (
-          <div className="w-72 overflow-x-auto gap-x-1 flex items-center justify-start">
-            {allImages.map((image, index) => (
-              <div key={index} className="w-16 h-16">
-                <img
-                  src={getImageSrc(image.mimeType, image.base64)}
-                  alt={`Product image ${index + 1}`}
-                  className="size-full object-cover"
-                />
-              </div>
-            ))}
+        <div className="h-px w-full bg-accent-foreground" />
+        {data.data.productBySlug.variants.length > 1 && (
+          <div className="flex flex-col gap-y-4">
+            <h3 className="text-2xl">{t("moreVariants")}</h3>
+            <div className="flex gap-4 max-w-full overflow-x-scroll">
+              {data.data.productBySlug.variants
+                .filter((v) => v.sku !== selectedVariant.sku)
+                .map((variant) => {
+                  const variantName = variant.attributes
+                    .sort((a, b) => a.key!.key.localeCompare(b.key!.key))
+                    .map((attr) => attr.value)
+                    .join(", ");
+                  const variantThumbnailImage =
+                    variant.images.find((i) => i.isThumbnail) || thumbnailImage;
+                  return (
+                    <Link
+                      href={`/product/${slug}?variant=${variant.sku}`}
+                      key={variant.sku}
+                    >
+                      <Card className="w-[200px]">
+                        <CardHeader>
+                          <div className="size-full">
+                            {variantThumbnailImage ? (
+                              <img
+                                src={getImageSrc(
+                                  variantThumbnailImage.mimeType,
+                                  variantThumbnailImage.base64
+                                )}
+                                alt="Variant image"
+                                className="size-full object-cover"
+                              />
+                            ) : (
+                              <p>{t("noImageAvailable")}</p>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-col gap-y-2">
+                            <h4 className="text-lg font-medium">
+                              {data.data!.productBySlug?.name || slug}{" "}
+                              {variantName}
+                            </h4>
+                            <p className="text-secondary-foreground">
+                              {(variant.priceInCents / 100).toFixed(2)} €
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+        <div className="h-px w-full bg-accent-foreground" />
+        {data.data.productBySlug.markdownContent && (
+          <div className="flex flex-col gap-y-4">
+            <h3 className="text-2xl">{t("additionalInformation")}</h3>
+            <Markdown>{data.data.productBySlug.markdownContent}</Markdown>
           </div>
         )}
       </div>
-      <div>
-        <h1 className="text-3xl font-bold text-center">
-          {data.data.productBySlug.name ?? slug} {variantName}
-        </h1>
-      </div>
-      <p className="text-secondary-foreground text-center">
-        {data.data.productBySlug.description}
-      </p>
-      <div className="flex flex-col">
-        <h2 className="text-2xl">
-          {(selectedVariant.priceInCents / 100).toFixed(2)} €
-        </h2>
-        <Button size={"lg"}>Add to Cart</Button>
-      </div>
-      <div className="h-px w-full bg-accent-foreground" />
-      {data.data.productBySlug.markdownContent && (
-        <div className="flex flex-col gap-y-4">
-          <h3 className="text-2xl">Additional Information</h3>
-          <Markdown>{data.data.productBySlug.markdownContent}</Markdown>
-        </div>
-      )}
     </div>
   );
 }

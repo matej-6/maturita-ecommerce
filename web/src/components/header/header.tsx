@@ -20,7 +20,7 @@ export async function Header() {
           </Link>
         </div>
         <div className="col-span-3 flex justify-center">
-          <div className="hidden sm:block">
+          <div className="hidden lg:block">
             <Suspense fallback={null}>
               <HeaderNav queryPromise={headerQueryDataPromise} />
             </Suspense>
