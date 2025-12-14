@@ -20,7 +20,7 @@ export function ProductImages({ images, thumbnailImage }: Props) {
 
   return (
     <div className="flex flex-col gap-y-1">
-      <div className="w-72 h-72 md:w-[400px] md:h-[400px] lg:w-[600px] lg:h-[600px] flex items-center justify-center border">
+      <div className="w-72 h-72 md:w-[400px] md:h-[400px] xl:w-[600px] xl:h-[600px] flex items-center justify-center border">
         {thumbnailImage ? (
           <img
             src={thumbnailImage.url}

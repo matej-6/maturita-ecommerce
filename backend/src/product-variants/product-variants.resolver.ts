@@ -55,6 +55,13 @@ export class ProductVariantsResolver {
     );
   }
 
+  @Query(() => [ProductVariant], { name: 'productVariantsByIds' })
+  async queryProductVariantsByIds(
+    @Args('ids', { type: () => [Int] }) ids: number[],
+  ): Promise<ProductVariant[]> {
+    return await this.productVariantsService.getProductVariantsByIds(ids);
+  }
+
   @UseGuards(AdminGuard)
   @Mutation(() => ProductVariant)
   createProductVariant(

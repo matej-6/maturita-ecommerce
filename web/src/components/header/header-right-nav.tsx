@@ -17,6 +17,14 @@ import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { authLogoutAction } from "@/app/data-access-layer/auth/actions";
 import { useSession } from "@/lib/tanstack-query/queries";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet";
+import { Cart } from "../cart";
 
 export function HeaderRightNav() {
   const { data: currentSession } = useSession();
@@ -77,6 +85,21 @@ export function HeaderRightNav() {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant={"ghost"} size={"icon"}>
+                  <ShoppingCartIcon className="size-6 text-secondary-foreground" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="min-w-[496px]">
+                <SheetHeader>
+                  <SheetTitle>Cart</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 m-2">
+                  <Cart />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         ) : (
           <div className="flex items-center gap-4">
@@ -88,9 +111,6 @@ export function HeaderRightNav() {
             </Button>
           </div>
         )}
-        <Button variant={"ghost"} size={"icon"}>
-          <ShoppingCartIcon className="size-6 text-secondary-foreground" />
-        </Button>
       </div>
     </>
   );

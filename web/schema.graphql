@@ -3,6 +3,24 @@ schema {
   mutation: Mutation
 }
 
+type Cart {
+  createdAt: DateTime!
+  id: Int!
+  items: [CartItem!]!
+  updatedAt: DateTime!
+  userId: Int!
+}
+
+type CartItem {
+  cartId: Int!
+  createdAt: DateTime!
+  id: Int!
+  productVariant: ProductVariant!
+  productVariantId: Int!
+  quantity: Int!
+  updatedAt: DateTime!
+}
+
 type Category {
   categoryProductVariants(attributeFilters: [[String!]!], cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProductVariant!
   createdAt: DateTime!
@@ -155,6 +173,7 @@ type MeResponse {
 }
 
 type Mutation {
+  addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
   addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -180,6 +199,7 @@ type Mutation {
   requestEmailVerification: Void!
   setProductThumbnailImage(productImageId: Int!): ProductImage!
   setProductVariantThumbnailImage(id: Int!): ProductVariantImage!
+  updateCartItemQuantity(cartItemId: Int!, quantity: Int!): Cart!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
@@ -310,6 +330,7 @@ type ProductVariantImage {
 }
 
 type Query {
+  cart: Cart!
   categories(
     """
     If true, sort in ascending order, else descending. If null, default sorting order is used
@@ -358,6 +379,7 @@ type Query {
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
   productVariantAttributes: [ProductVariantAttribute!]!
+  productVariantsByIds(ids: [Int!]!): [ProductVariant!]!
   products(
     ascending: Boolean
     """

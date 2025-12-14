@@ -53,6 +53,7 @@ const CategoryQueryDocument = graphql(`
               name
               description
             }
+            id
             sku
             thumbnailImage {
               base64

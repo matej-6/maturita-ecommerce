@@ -60,7 +60,7 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
   return (
     <nav className="flex items-center z-50">
       <div className="relative mx-auto">
-        <div className="absolute -left-2 -translate-x-[100%] top-1/2 -translate-y-1/2">
+        <div className="absolute -left-2 -translate-x-[100%] top-1/2 -translate-y-1/2 z-50">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -68,7 +68,7 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
                   {t("browse-categories")}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-2 w-[800px] grid-cols-3">
+                  <ul className="grid gap-2 w-[800px] grid-cols-3 z-50">
                     {data?.categories.map((category) => (
                       <NavigationMenuLink key={category.id} asChild>
                         <div className="flex flex-col gap-4">

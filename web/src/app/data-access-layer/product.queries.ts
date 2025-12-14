@@ -22,6 +22,7 @@ const ProductPageDocument = graphql(`
         isThumbnail
       }
       variants {
+        id
         sku
         stock
         priceInCents

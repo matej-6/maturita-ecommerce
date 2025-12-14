@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { ProductFilters } from "@/components/product-filters";
 import { group } from "console";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -218,7 +219,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                           {(productVariant.priceInCents / 100).toFixed(2)}€
                         </p>
                       </div>
-                      <Button>Add to Cart</Button>
+                      <AddToCartButton productVariantId={productVariant.id}>
+                        Add to Cart
+                      </AddToCartButton>
                     </CardContent>
                   </Card>
                 );

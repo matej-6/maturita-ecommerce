@@ -74,7 +74,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   const queryClient = getQueryClient();
-  queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: SESSION_QUERY_KEY,
     queryFn: async () => {
       const session = await getCurrentSessionAction();

@@ -27,6 +27,8 @@ import { ProductsModule } from './products/products.module';
 import { ProductVariantsModule } from './product-variants/product-variants.module';
 import { ProductVariantAttributesModule } from './product-variant-attributes/product-variant-attributes.module';
 import { ProductVariantAttributeKeysModule } from './product-variant-attribute-keys/product-variant-attribute-keys.module';
+import { CartsModule } from './carts/carts.module';
+import { CartItemsModule } from './cart-items/cart-items.module';
 
 @Module({
   imports: [
@@ -94,6 +96,8 @@ import { ProductVariantAttributeKeysModule } from './product-variant-attribute-k
     ProductVariantsModule,
     ProductVariantAttributesModule,
     ProductVariantAttributeKeysModule,
+    CartsModule,
+    CartItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

@@ -2,6 +2,7 @@
 
 import { getSearchProductsQueryData } from "@/app/data-access-layer/search.queries";
 import { getImageSrc } from "@/app/lib/utils";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 import { PrevButton } from "@/components/prev-button";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
 import { Button } from "@/components/ui/button";
@@ -183,7 +184,9 @@ export default async function SearchPage({ searchParams }: Props) {
                           {(productVariant.priceInCents / 100).toFixed(2)}€
                         </p>
                       </div>
-                      <Button>Add to Cart</Button>
+                      <AddToCartButton productVariantId={productVariant.id}>
+                        Add to Cart
+                      </AddToCartButton>
                     </CardContent>
                   </Card>
                 );

@@ -20,6 +20,26 @@ export type Scalars = {
   Void: { input: any; output: any; }
 };
 
+export type Cart = {
+  __typename?: 'Cart';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  items: Array<CartItem>;
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['Int']['output'];
+};
+
+export type CartItem = {
+  __typename?: 'CartItem';
+  cartId: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  productVariant: ProductVariant;
+  productVariantId: Scalars['Int']['output'];
+  quantity: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type Category = {
   __typename?: 'Category';
   categoryProductVariants: PaginatedProductVariant;
@@ -181,6 +201,7 @@ export type MeResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addItemToCart: Cart;
   addProductImage: ProductImage;
   addProductVariantImage: ProductVariantImage;
   createCategory: Category;
@@ -206,6 +227,7 @@ export type Mutation = {
   requestEmailVerification: Scalars['Void']['output'];
   setProductThumbnailImage: ProductImage;
   setProductVariantThumbnailImage: ProductVariantImage;
+  updateCartItemQuantity: Cart;
   updateCategory: Category;
   updateCategoryTranslation: CategoryTranslation;
   updateProduct: Product;
@@ -214,6 +236,12 @@ export type Mutation = {
   updateProductVariantAttributeKey: ProductVariantAttributeKey;
   updateUser: User;
   verifyEmail: Scalars['Void']['output'];
+};
+
+
+export type MutationAddItemToCartArgs = {
+  productVariantId: Scalars['Int']['input'];
+  quantity: Scalars['Int']['input'];
 };
 
 
@@ -334,6 +362,12 @@ export type MutationSetProductThumbnailImageArgs = {
 
 export type MutationSetProductVariantThumbnailImageArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdateCartItemQuantityArgs = {
+  cartItemId: Scalars['Int']['input'];
+  quantity: Scalars['Int']['input'];
 };
 
 
@@ -516,6 +550,7 @@ export type ProductVariantImage = {
 
 export type Query = {
   __typename?: 'Query';
+  cart: Cart;
   categories: Array<Category>;
   category: Category;
   findOneProductVariantAttribute?: Maybe<ProductVariantAttribute>;
@@ -528,6 +563,7 @@ export type Query = {
   productVariantAttributeKey: ProductVariantAttributeKey;
   productVariantAttributeKeys: Array<ProductVariantAttributeKey>;
   productVariantAttributes: Array<ProductVariantAttribute>;
+  productVariantsByIds: Array<ProductVariant>;
   products: PaginatedProduct;
   searchProductVariants: PaginatedProductVariant;
   user: User;
@@ -596,6 +632,11 @@ export type QueryProductVariantAttributeKeyArgs = {
 
 export type QueryProductVariantAttributeKeysArgs = {
   productId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryProductVariantsByIdsArgs = {
+  ids: Array<Scalars['Int']['input']>;
 };
 
 
@@ -968,6 +1009,38 @@ export type MeQuery = { __typename?: 'Query', me: (
     & { ' $fragmentRefs'?: { 'MeFragmentFragment': MeFragmentFragment } }
   ) };
 
+export type CartFragmentFragment = { __typename?: 'Cart', id: number, items: Array<{ __typename?: 'CartItem', id: number, quantity: number, productVariant: { __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, id: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', translatedValue?: string | null, value: string, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }>, product: { __typename?: 'Product', name?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> } & { ' $fragmentName'?: 'CartFragmentFragment' };
+
+export type UpdateCartItemQuantityMutationMutationVariables = Exact<{
+  cartItemId: Scalars['Int']['input'];
+  quantity: Scalars['Int']['input'];
+}>;
+
+
+export type UpdateCartItemQuantityMutationMutation = { __typename?: 'Mutation', updateCartItemQuantity: (
+    { __typename?: 'Cart' }
+    & { ' $fragmentRefs'?: { 'CartFragmentFragment': CartFragmentFragment } }
+  ) };
+
+export type AddItemToCartMutationMutationVariables = Exact<{
+  productVariantId: Scalars['Int']['input'];
+  quantity: Scalars['Int']['input'];
+}>;
+
+
+export type AddItemToCartMutationMutation = { __typename?: 'Mutation', addItemToCart: (
+    { __typename?: 'Cart' }
+    & { ' $fragmentRefs'?: { 'CartFragmentFragment': CartFragmentFragment } }
+  ) };
+
+export type CartQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CartQueryQuery = { __typename?: 'Query', cart: (
+    { __typename?: 'Cart' }
+    & { ' $fragmentRefs'?: { 'CartFragmentFragment': CartFragmentFragment } }
+  ) };
+
 export type HeaderQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -984,14 +1057,14 @@ export type CategoryQueryQueryVariables = Exact<{
 }>;
 
 
-export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
+export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
 
 export type ProductPageQueryQueryVariables = Exact<{
   slug: Scalars['String']['input'];
 }>;
 
 
-export type ProductPageQueryQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number, name?: string | null, description?: string | null, markdownContent?: string | null, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', sku: string, stock: number, priceInCents: number, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string } | null }> }> } | null };
+export type ProductPageQueryQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number, name?: string | null, description?: string | null, markdownContent?: string | null, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, stock: number, priceInCents: number, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string } | null }> }> } | null };
 
 export type SearchProductsQueryQueryVariables = Exact<{
   searchTerm: Scalars['String']['input'];
@@ -1057,6 +1130,40 @@ export const MeFragmentFragmentDoc = new TypedDocumentString(`
   email
 }
     `, {"fragmentName":"MeFragment"}) as unknown as TypedDocumentString<MeFragmentFragment, unknown>;
+export const CartFragmentFragmentDoc = new TypedDocumentString(`
+    fragment CartFragment on Cart {
+  id
+  items {
+    id
+    productVariant {
+      sku
+      priceInCents
+      stock
+      id
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      attributes {
+        key {
+          key
+          translatedKey
+        }
+        translatedValue
+        value
+      }
+      product {
+        name
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+    }
+    quantity
+  }
+}
+    `, {"fragmentName":"CartFragment"}) as unknown as TypedDocumentString<CartFragmentFragment, unknown>;
 export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
     fragment HeaderNav_QueryFragment on Query {
   categories(parentCategoryId: null) {
@@ -1494,6 +1601,120 @@ export const MeDocument = new TypedDocumentString(`
   role
   email
 }`) as unknown as TypedDocumentString<MeQuery, MeQueryVariables>;
+export const UpdateCartItemQuantityMutationDocument = new TypedDocumentString(`
+    mutation UpdateCartItemQuantityMutation($cartItemId: Int!, $quantity: Int!) {
+  updateCartItemQuantity(cartItemId: $cartItemId, quantity: $quantity) {
+    ...CartFragment
+  }
+}
+    fragment CartFragment on Cart {
+  id
+  items {
+    id
+    productVariant {
+      sku
+      priceInCents
+      stock
+      id
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      attributes {
+        key {
+          key
+          translatedKey
+        }
+        translatedValue
+        value
+      }
+      product {
+        name
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+    }
+    quantity
+  }
+}`) as unknown as TypedDocumentString<UpdateCartItemQuantityMutationMutation, UpdateCartItemQuantityMutationMutationVariables>;
+export const AddItemToCartMutationDocument = new TypedDocumentString(`
+    mutation AddItemToCartMutation($productVariantId: Int!, $quantity: Int!) {
+  addItemToCart(productVariantId: $productVariantId, quantity: $quantity) {
+    ...CartFragment
+  }
+}
+    fragment CartFragment on Cart {
+  id
+  items {
+    id
+    productVariant {
+      sku
+      priceInCents
+      stock
+      id
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      attributes {
+        key {
+          key
+          translatedKey
+        }
+        translatedValue
+        value
+      }
+      product {
+        name
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+    }
+    quantity
+  }
+}`) as unknown as TypedDocumentString<AddItemToCartMutationMutation, AddItemToCartMutationMutationVariables>;
+export const CartQueryDocument = new TypedDocumentString(`
+    query CartQuery {
+  cart {
+    ...CartFragment
+  }
+}
+    fragment CartFragment on Cart {
+  id
+  items {
+    id
+    productVariant {
+      sku
+      priceInCents
+      stock
+      id
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      attributes {
+        key {
+          key
+          translatedKey
+        }
+        translatedValue
+        value
+      }
+      product {
+        name
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+    }
+    quantity
+  }
+}`) as unknown as TypedDocumentString<CartQueryQuery, CartQueryQueryVariables>;
 export const HeaderQueryDocument = new TypedDocumentString(`
     query HeaderQuery {
   ...HeaderNav_QueryFragment
@@ -1542,6 +1763,7 @@ export const CategoryQueryDocument = new TypedDocumentString(`
             name
             description
           }
+          id
           sku
           thumbnailImage {
             base64
@@ -1582,6 +1804,7 @@ export const ProductPageQueryDocument = new TypedDocumentString(`
       isThumbnail
     }
     variants {
+      id
       sku
       stock
       priceInCents

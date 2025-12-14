@@ -32,6 +32,7 @@ model User {
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   Session        RefreshTokenSession[]
+  carts          Cart[]
 
   @@index([email])
   @@map("users")
@@ -122,6 +123,7 @@ model ProductVariant {
   isPublic     Boolean        @default(true)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  cartItems    CartItem[]
 
   @@map("product_variants")
 }
@@ -178,4 +180,31 @@ model AttributeKeyTranslation {
   attributeKeyId Int
 
   @@index([locale, attributeKeyId])
+}
+
+model CartItem {
+  id               Int            @id @default(autoincrement())
+  cartId           Int
+  Cart             Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productVariantId Int
+  ProductVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity         Int            @default(1)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([cartId])
+  @@index([productVariantId])
+  @@map("cart_items")
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  User      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  CartItems CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+  @@map("carts")
 }

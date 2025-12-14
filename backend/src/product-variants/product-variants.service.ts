@@ -5,7 +5,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { LocalesService } from 'src/locales/locales.service';
 import { ProductVariantImage } from 'src/entities/product-variant.image.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
-import { PaginatedProductVariant } from './entities/product-variant.entity';
+import {
+  PaginatedProductVariant,
+  ProductVariant,
+} from './entities/product-variant.entity';
 import { ProductFindAllQueryArgs } from 'src/products/products.resolver.args';
 import { SortingArgs } from 'src/args/sorting-args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
@@ -808,6 +811,18 @@ export class ProductVariantsService {
     return productVariantIds.map((id) =>
       images.filter((img) => img.productVariantId === id),
     );
+  }
+
+  async getProductVariantsByIds(ids: number[]): Promise<ProductVariant[]> {
+    const productVariants = await this.prisma.productVariant.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    return ids.map((id) => productVariants.find((pv) => pv.id === id)!);
   }
 
   async getProductsForVariantsByBatch(

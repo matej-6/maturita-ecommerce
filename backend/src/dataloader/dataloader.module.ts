@@ -13,6 +13,8 @@ import { ProductVariantAttributesModule } from 'src/product-variant-attributes/p
 import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
 import { ProductVariantAttributeKeysModule } from 'src/product-variant-attribute-keys/product-variant-attribute-keys.module';
 import { ProductVariantAttributeKeysService } from 'src/product-variant-attribute-keys/product-variant-attribute-keys.service';
+import { CartItemsModule } from 'src/cart-items/cart-items.module';
+import { CartItemsService } from 'src/cart-items/cart-items.service';
 
 @Global()
 @Module({
@@ -24,6 +26,7 @@ import { ProductVariantAttributeKeysService } from 'src/product-variant-attribut
     ProductVariantsModule,
     ProductVariantAttributesModule,
     ProductVariantAttributeKeysModule,
+    CartItemsModule,
   ],
   providers: [
     DataloaderService,
@@ -33,6 +36,7 @@ import { ProductVariantAttributeKeysService } from 'src/product-variant-attribut
     ProductVariantsService,
     ProductVariantAttributesService,
     ProductVariantAttributeKeysService,
+    CartItemsService,
   ],
   exports: [DataloaderService],
 })
