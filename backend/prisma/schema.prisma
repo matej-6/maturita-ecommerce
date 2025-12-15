@@ -33,6 +33,7 @@ model User {
   updatedAt      DateTime              @updatedAt
   Session        RefreshTokenSession[]
   carts          Cart[]
+  orders         Order[]
 
   @@index([email])
   @@map("users")
@@ -124,6 +125,7 @@ model ProductVariant {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   cartItems    CartItem[]
+  orderItems   OrderItem[]
 
   @@map("product_variants")
 }
@@ -207,4 +209,43 @@ model Cart {
 
   @@index([userId])
   @@map("carts")
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  userId       Int
+  User         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalInCents Int
+  status       OrderStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  orderItems   OrderItem[]
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id               Int             @id @default(autoincrement())
+  orderId          Int
+  Order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariantId Int?
+  sku              String
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  quantity         Int             @default(1)
+  unitPriceInCents Int
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([orderId])
+  @@index([productVariantId])
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
 }

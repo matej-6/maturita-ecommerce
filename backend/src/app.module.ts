@@ -29,6 +29,7 @@ import { ProductVariantAttributesModule } from './product-variant-attributes/pro
 import { ProductVariantAttributeKeysModule } from './product-variant-attribute-keys/product-variant-attribute-keys.module';
 import { CartsModule } from './carts/carts.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { CartItemsModule } from './cart-items/cart-items.module';
     ProductVariantAttributeKeysModule,
     CartsModule,
     CartItemsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
