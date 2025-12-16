@@ -15,6 +15,9 @@ const envSchema = z.object({
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
   REDIS_DATABASE: z.coerce.number().optional(),
+  STRIPE_API_KEY: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
+  NEXTJS_URL: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;

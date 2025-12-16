@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import Stripe from 'stripe';
 
@@ -6,27 +8,31 @@ import Stripe from 'stripe';
 export class OrdersService {
   private stripe: Stripe;
   private nextjsUrl: string;
-  private stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  private stripeWebhookSecret: string;
 
-  constructor(private readonly prisma: PrismaService) {
-    const stripeApiKey = process.env.STRIPE_API_KEY;
-    if (!stripeApiKey) {
-      throw new Error('STRIPE_API_KEY is not defined in environment variables');
-    }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService<Env>,
+  ) {
+    const stripeApiKey = this.configService.get<string>('STRIPE_API_KEY')!;
     this.stripe = new Stripe(stripeApiKey);
-    this.nextjsUrl = process.env.NEXTJS_URL!;
-    if (!this.nextjsUrl) {
-      throw new Error('NEXTJS_URL is not defined in environment variables');
-    }
-
-    if (!this.stripeWebhookSecret) {
-      throw new Error(
-        'STRIPE_WEBHOOK_SECRET is not defined in environment variables',
-      );
-    }
+    this.nextjsUrl = this.configService.get<string>('NEXTJS_URL')!;
+    this.stripeWebhookSecret = this.configService.get<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    )!;
   }
 
   async createCheckoutSession(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     const cart = await this.prisma.cart.findFirst({
       where: {
         userId: userId,
@@ -91,6 +97,19 @@ export class OrdersService {
 
     const session = await this.stripe.checkout.sessions.create({
       client_reference_id: order.id.toString(),
+      payment_method_types: ['card', 'link'],
+      phone_number_collection: {
+        enabled: true,
+      },
+      automatic_tax: {
+        enabled: true,
+      },
+      shipping_address_collection: {
+        allowed_countries: ['SK', 'CZ', 'PL', 'HU', 'AT', 'DE'],
+      },
+      payment_method_collection: 'always',
+      billing_address_collection: 'required',
+      customer_email: user.email,
       line_items: cart.CartItems.map((item) => ({
         price_data: {
           currency: 'eur',
@@ -101,21 +120,43 @@ export class OrdersService {
         },
       })),
       mode: 'payment',
-      success_url: `${this.nextjsUrl}/checkout/success`,
+      success_url: `${this.nextjsUrl}/checkout/success?orderId=${order.id}`,
     });
 
     return session.url;
   }
 
-  async fulfillCheckout(orderId: number) {
-    const order = await this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: 'PROCESSING',
-      },
-    });
+  async fulfillCheckout(sessionId: string) {
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+    const orderId = parseInt(session.client_reference_id || '', 10);
+    if (isNaN(orderId)) {
+      throw new Error('Invalid order ID in client_reference_id');
+    }
+    if (session.payment_status !== 'unpaid') {
+      const shippingDetails = session.collected_information?.shipping_details;
 
-    return order;
+      const order = await this.prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: shippingDetails ? 'PROCESSING' : 'FAILED',
+          shippingDetails: shippingDetails
+            ? {
+                create: {
+                  city: shippingDetails.address.city,
+                  country: shippingDetails.address.country!,
+                  line1: shippingDetails.address.line1!,
+                  name: shippingDetails.name,
+                  postalCode: shippingDetails.address.postal_code!,
+                  state: shippingDetails.address.state,
+                  line2: shippingDetails.address.line2,
+                },
+              }
+            : undefined,
+        },
+      });
+
+      return order;
+    }
   }
 
   async cancelOrder(orderId: number) {

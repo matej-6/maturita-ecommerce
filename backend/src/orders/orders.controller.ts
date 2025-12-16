@@ -12,7 +12,11 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @Post('/create-checkout-session')
   createCheckoutSession(@CurrentUser() user: AuthenticatedUserDto) {
-    return this.ordersService.createCheckoutSession(user.id);
+    const url = this.ordersService.createCheckoutSession(user.id);
+
+    return {
+      url: url,
+    };
   }
 
   @Post()
@@ -41,14 +45,14 @@ export class OrdersController {
       event.type === 'checkout.session.completed' ||
       event.type === 'checkout.session.async_payment_succeeded'
     ) {
-      const orderId = event.data.object.client_reference_id || null;
-      if (!orderId) {
+      await this.ordersService.fulfillCheckout(event.data.object.id);
+    } else if (event.type === 'checkout.session.expired') {
+      const orderId = parseInt(event.data.object.client_reference_id!, 10);
+      if (isNaN(orderId)) {
         res.status(400).end();
         return;
       }
-      await this.ordersService.fulfillCheckout(parseInt(orderId, 10));
-    } else if (event.type === 'checkout.session.async_payment_failed') {
-      // await this.ordersService.handleFailedPayment(event.data.object.id);
+      await this.ordersService.cancelOrder(orderId);
     }
 
     res.status(200).end();

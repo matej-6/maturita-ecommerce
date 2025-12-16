@@ -212,17 +212,37 @@ model Cart {
 }
 
 model Order {
-  id           Int         @id @default(autoincrement())
-  userId       Int
-  User         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  totalInCents Int
-  status       OrderStatus @default(PENDING)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  orderItems   OrderItem[]
+  id                Int                   @id @default(autoincrement())
+  userId            Int
+  User              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalInCents      Int
+  status            OrderStatus           @default(PENDING)
+  shippingDetailsId Int?
+  shippingDetails   OrderShippingDetails?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  orderItems        OrderItem[]
 
   @@index([userId])
   @@map("orders")
+}
+
+model OrderShippingDetails {
+  id         Int      @id @default(autoincrement())
+  orderId    Int      @unique
+  Order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  line1      String
+  line2      String?
+  state      String?
+  postalCode String
+  country    String
+  city       String?
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([orderId])
+  @@map("order_shipping_details")
 }
 
 model OrderItem {
@@ -248,4 +268,5 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELED
+  FAILED
 }
