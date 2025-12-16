@@ -10,6 +10,7 @@ import { CurrentUser } from './current-user.decorator';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { MeResponse } from './dto/me.response';
 import { GqlJwtAuthGuard } from './guards/gql-jwt-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Resolver()
 export class AuthResolver {
@@ -48,7 +49,7 @@ export class AuthResolver {
     res.clearCookie('Refresh');
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Query(() => MeResponse, { name: 'me' })
   async me(@CurrentUser() user: AuthenticatedUserDto): Promise<MeResponse> {
     const foundUser = await this.usersService.findOne(user.id);

@@ -6,9 +6,12 @@ import { AllExceptionsFilter } from './exception/all-exceptions.filter';
 import { ValidationFilter } from './validation/validation.filter';
 import { ErrorFilter } from './exception/error.filter';
 import { json } from 'express';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
   app.enableCors({
     origin: process.env.ORIGIN || [
       'http://localhost:3000',
@@ -19,7 +22,8 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.use(I18nMiddleware);
-  app.use(json({ limit: '10mb' }));
+  app.useBodyParser('json', { limit: '10mb' });
+  // app.use(json({ limit: '10mb' }));
 
   app.useGlobalFilters(
     new ErrorFilter(),

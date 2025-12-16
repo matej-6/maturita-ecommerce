@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -6,6 +6,7 @@ import Stripe from 'stripe';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
   private stripe: Stripe;
   private nextjsUrl: string;
   private stripeWebhookSecret: string;
@@ -77,6 +78,13 @@ export class OrdersService {
           },
         });
       }
+
+      await tx.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
+      await tx.cart.delete({
+        where: { id: cart.id },
+      });
       return await tx.order.create({
         data: {
           totalInCents: total,
@@ -107,10 +115,10 @@ export class OrdersService {
       shipping_address_collection: {
         allowed_countries: ['SK', 'CZ', 'PL', 'HU', 'AT', 'DE'],
       },
-      payment_method_collection: 'always',
       billing_address_collection: 'required',
       customer_email: user.email,
       line_items: cart.CartItems.map((item) => ({
+        quantity: item.quantity,
         price_data: {
           currency: 'eur',
           unit_amount: item.ProductVariant.priceInCents,
@@ -188,9 +196,12 @@ export class OrdersService {
     });
   }
 
-  async constructStripeEvent(payload: unknown, signature: string) {
+  async constructStripeEvent(payload: any, signature: string) {
+    this.logger.log('Constructing Stripe event from webhook payload');
+    this.logger.log(`Payload: ${payload}`);
+
     return this.stripe.webhooks.constructEventAsync(
-      payload as string | Buffer,
+      payload,
       signature,
       this.stripeWebhookSecret,
     );

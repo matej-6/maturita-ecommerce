@@ -9,6 +9,7 @@ import {
   useUpdateCartItemQuantityMutation,
 } from "@/lib/tanstack-query/mutations";
 import { Link } from "@/i18n/navigation";
+import { CheckoutButton } from "./checkout-button";
 
 export function Cart() {
   const { data: cartItems, isLoading } = useCartQuery();
@@ -143,14 +144,10 @@ export function Cart() {
             €
           </span>
         </div>
-        <Link href="/checkout">
-          {/* https://docs.stripe.com/checkout/quickstart?client=react&lang=node */}
-          {/* https://docs.stripe.com/checkout/quickstart */}
-          {/* https://docs.stripe.com/checkout/fulfillment */}
-          <Button className="w-full" size={"lg"}>
-            Checkout
-          </Button>
-        </Link>
+        {/* https://docs.stripe.com/checkout/quickstart?client=react&lang=node */}
+        {/* https://docs.stripe.com/checkout/quickstart */}
+        {/* https://docs.stripe.com/checkout/fulfillment */}
+        <CheckoutButton />
       </div>
     </div>
   );
