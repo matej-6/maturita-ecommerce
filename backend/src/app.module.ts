@@ -30,6 +30,9 @@ import { ProductVariantAttributeKeysModule } from './product-variant-attribute-k
 import { CartsModule } from './carts/carts.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrdersModule } from './orders/orders.module';
+import { TaskService } from './tasks/task.service';
+import { TasksModule } from './tasks/tasks.module';
+import { LlmTasksModule } from './llm-tasks/llm-tasks.module';
 
 @Module({
   imports: [
@@ -100,9 +103,11 @@ import { OrdersModule } from './orders/orders.module';
     CartsModule,
     CartItemsModule,
     OrdersModule,
+    TasksModule,
+    LlmTasksModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [AppService, AuthService, TaskService],
 })
 export class AppModule {}
 

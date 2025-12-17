@@ -18,6 +18,9 @@ const envSchema = z.object({
   STRIPE_API_KEY: z.string(),
   STRIPE_WEBHOOK_SECRET: z.string(),
   NEXTJS_URL: z.string(),
+  OLLAMA_BASE_URL: z.string().optional(),
+  OLLAMA_LLM_MODEL: z.string().optional(),
+  OLLAMA_EMBEDDING_MODEL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -34,6 +34,7 @@ model User {
   Session        RefreshTokenSession[]
   carts          Cart[]
   orders         Order[]
+  LLMTasks       LLMTask[]
 
   @@index([email])
   @@map("users")
@@ -113,19 +114,20 @@ model ProductTranslation {
 }
 
 model ProductVariant {
-  id           Int            @id @default(autoincrement())
-  sku          String         @unique
-  stock        Int
-  priceInCents Int
-  Attributes   Attribute[]
-  Product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
-  Images       ProductImage[]
-  productId    Int
-  isPublic     Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  cartItems    CartItem[]
-  orderItems   OrderItem[]
+  id            Int            @id @default(autoincrement())
+  sku           String         @unique
+  stock         Int
+  priceInCents  Int
+  Attributes    Attribute[]
+  Product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Images        ProductImage[]
+  productId     Int
+  isPublic      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  EmbeddingTask EmbeddingTask?
 
   @@map("product_variants")
 }
@@ -268,5 +270,40 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELED
+  FAILED
+}
+
+model EmbeddingTask {
+  id               Int                 @id @default(autoincrement())
+  productVariantId Int                 @unique
+  ProductVariant   ProductVariant      @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  status           EmbeddingTaskStatus @default(PENDING)
+  createdAt        DateTime            @default(now())
+}
+
+enum EmbeddingTaskStatus {
+  PENDING
+  IN_PROGRESS
+  FAILED
+}
+
+model LLMTask {
+  id       Int           @id @default(autoincrement())
+  userId   Int
+  User     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt   String        @db.LongText
+  response String?       @db.LongText
+  status   LLMTaskStatus @default(PENDING)
+  date     DateTime      @default(now())
+
+  @@index([userId])
+  @@index([userId, date])
+  @@map("llm_tasks")
+}
+
+enum LLMTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
   FAILED
 }

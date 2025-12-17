@@ -5,7 +5,6 @@ import { I18nMiddleware, I18nValidationPipe } from 'nestjs-i18n';
 import { AllExceptionsFilter } from './exception/all-exceptions.filter';
 import { ValidationFilter } from './validation/validation.filter';
 import { ErrorFilter } from './exception/error.filter';
-import { json } from 'express';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
