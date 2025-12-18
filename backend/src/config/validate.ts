@@ -21,6 +21,8 @@ const envSchema = z.object({
   OLLAMA_BASE_URL: z.string().optional(),
   OLLAMA_LLM_MODEL: z.string().optional(),
   OLLAMA_EMBEDDING_MODEL: z.string().optional(),
+  QDRANT_HOST: z.string().optional(),
+  QDRANT_PORT: z.coerce.number().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -93,6 +93,7 @@ model Product {
   ProductVariants     ProductVariant[]
   Images              ProductImage[]
   ProductTranslations ProductTranslation[]
+  EmbeddingTask       EmbeddingTask?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
@@ -114,20 +115,19 @@ model ProductTranslation {
 }
 
 model ProductVariant {
-  id            Int            @id @default(autoincrement())
-  sku           String         @unique
-  stock         Int
-  priceInCents  Int
-  Attributes    Attribute[]
-  Product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
-  Images        ProductImage[]
-  productId     Int
-  isPublic      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  cartItems     CartItem[]
-  orderItems    OrderItem[]
-  EmbeddingTask EmbeddingTask?
+  id           Int            @id @default(autoincrement())
+  sku          String         @unique
+  stock        Int
+  priceInCents Int
+  Attributes   Attribute[]
+  Product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Images       ProductImage[]
+  productId    Int
+  isPublic     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
 
   @@map("product_variants")
 }
@@ -274,11 +274,11 @@ enum OrderStatus {
 }
 
 model EmbeddingTask {
-  id               Int                 @id @default(autoincrement())
-  productVariantId Int                 @unique
-  ProductVariant   ProductVariant      @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
-  status           EmbeddingTaskStatus @default(PENDING)
-  createdAt        DateTime            @default(now())
+  id        Int                 @id @default(autoincrement())
+  productId Int                 @unique
+  Product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  status    EmbeddingTaskStatus @default(PENDING)
+  createdAt DateTime            @default(now())
 }
 
 enum EmbeddingTaskStatus {

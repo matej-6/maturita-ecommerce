@@ -1,28 +1,47 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { LLMTask } from './entities/llm-task.entity';
-import { CreateLLMTaskInput } from './dto/create-llm-task.input';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { LLMTaskStatus } from 'generated/prisma/enums';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Job } from 'bullmq';
+import { LLMTaskStatus } from 'generated/prisma/enums';
 import { Env } from 'src/config/validate';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { LocalesService } from 'src/locales/locales.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { QdrantService } from 'src/qdrant/qdrant.service';
 
-@Injectable()
-export class LlmTasksService implements OnModuleInit {
-  private readonly logger = new Logger(LlmTasksService.name);
+export enum LLMTaskJobType {
+  USER_PROMPT = 'user-prompt',
+  EMBEDDING = 'embedding',
+}
 
-  private readonly DAILY_USER_TASK_LIMIT = 20;
+export type UserPromptJob = {
+  id: number;
+  prompt: string;
+  productId?: number;
+};
+
+export type EmbeddingJob = {
+  id: number;
+  productId: number;
+};
+
+type LLMTaskJob = UserPromptJob | EmbeddingJob;
+
+@Processor('llm-tasks')
+export class LLMTaskConsumer extends WorkerHost {
+  private readonly logger = new Logger(LLMTaskConsumer.name);
+
   private readonly LLM_BASE_URL: string;
   private readonly LLM_MODEL: string;
   private readonly EMBEDDING_MODEL: string;
   constructor(
+    private readonly llmTasksService: LLMPromptsService,
     private readonly prisma: PrismaService,
+    private readonly qdrantService: QdrantService,
     private readonly configService: ConfigService<Env>,
     private readonly localesService: LocalesService,
-    @InjectQueue('llm-tasks') private readonly llmTasksQueue: Queue,
   ) {
+    super();
     this.LLM_BASE_URL = this.configService.getOrThrow('OLLAMA_BASE_URL');
     this.LLM_MODEL = this.configService.getOrThrow('OLLAMA_LLM_MODEL');
     this.EMBEDDING_MODEL = this.configService.getOrThrow(
@@ -30,11 +49,22 @@ export class LlmTasksService implements OnModuleInit {
     );
   }
 
-  async onModuleInit() {
-    await this.llmTasksQueue.drain(true);
+  async process(job: Job<LLMTaskJob, any, string>): Promise<any> {
+    switch (job.name as keyof typeof LLMTaskJobType) {
+      case 'USER_PROMPT':
+        await this.processUserPromptJob(job.data as UserPromptJob);
+        break;
+      case 'EMBEDDING':
+        await this.llmTasksService.consumeEmbeddingTask(
+          job.data as EmbeddingJob,
+        );
+        break;
+      default:
+        throw new Error(`Unknown job type: ${job.name}`);
+    }
   }
 
-  private async promptLLM<T>(system: string, prompt: string): Promise<T> {
+  private async fetchLLM<T>(system: string, prompt: string): Promise<T> {
     const res = await fetch(`${this.LLM_BASE_URL}/api/generate`, {
       method: 'POST',
       headers: {
@@ -63,6 +93,26 @@ export class LlmTasksService implements OnModuleInit {
     }
   }
 
+  private async fetchEmbedding(text: string): Promise<number[]> {
+    const res = await fetch(`${this.LLM_BASE_URL}/api/embed`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.EMBEDDING_MODEL,
+        text: text,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Embedding request failed with status ${res.status}`);
+    }
+
+    const data = (await res.json()) as { embedding: number[] };
+    return data.embedding;
+  }
+
   private async categorizePrompt(
     prompt: string,
   ): Promise<
@@ -77,7 +127,7 @@ export class LlmTasksService implements OnModuleInit {
 
     Analyze the following prompt and determine the most appropriate category.
     Respond with this JSON FORMAT, NOTHING ELSE: { "category": "your_chosen_category" }`;
-    const response = await this.promptLLM<{ category: string }>(system, prompt);
+    const response = await this.fetchLLM<{ category: string }>(system, prompt);
     const category = response.category;
     if (
       category !== 'similiarProducts' &&
@@ -98,20 +148,86 @@ export class LlmTasksService implements OnModuleInit {
     const system = `You are an AI assistant that translates user prompts into English.
     Translate the following prompt into English. If the prompt is already in English, return it unchanged.
     Also detect the original language of the prompt and include it in your response in the 'original_language' field in ISO 639-1 format.
-    Respond with this JSON FORMAT, NOTHING ELSE: { "translation": "translated_prompt_in_english", "original_language": "language_code" }`;
-    const response = await this.promptLLM<{
+    If you are unsure of the original language, respond with original language as 'unknown' and with the translation unchanged.
+    Respond with this JSON FORMAT, NOTHING ELSE: { "translation": "translated_prompt_in_english", "original_language": "en" }`;
+    const response = await this.fetchLLM<{
       translation: string;
       original_language: string;
     }>(system, prompt);
     return response;
   }
 
-  async consumeLlmTask(task: {
-    id: number;
-    prompt: string;
-    productId?: number;
-  }) {
-    const translationResult = await this.translateToEnglish(task.prompt);
+  async processProductEmbeddingJob(job: EmbeddingJob): Promise<void> {
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id: job.productId,
+      },
+      include: {
+        ProductTranslations: {
+          where: {
+            locale: this.localesService.getDefaultLocale().code,
+          },
+        },
+        Category: {
+          include: {
+            CategoryTranslation: {
+              where: {
+                locale: this.localesService.getDefaultLocale().code,
+              },
+            },
+          },
+        },
+        ProductVariants: {
+          include: {
+            Attributes: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      this.logger.error(
+        `Product with ID ${job.productId} not found for embedding job`,
+      );
+      return;
+    }
+
+    // embed the product content for questions about this product
+    const chunkedContent = this.chunkProductContentForEmbedding(
+      product.ProductTranslations[0]?.markdownContent || '',
+    );
+
+    for (let i = 0; i < chunkedContent.length; i++) {
+      const embeddingResponse = await this.fetchEmbedding(chunkedContent[i]);
+      await this.qdrantService.qdrantClient.upsert('product_chunks', {
+        points: [
+          {
+            id: `${product.id}_content_${i}`,
+            vector: embeddingResponse,
+            payload: {
+              productId: product.id,
+              text: chunkedContent[i],
+            },
+          },
+        ],
+      });
+    }
+  }
+
+  private chunkProductContentForEmbedding(content: string): string[] {
+    const chunks: string[] = [];
+    const paragraphs = content.split('\n');
+    for (const paragraph of paragraphs) {
+      if (paragraph.trim().length > 0) {
+        chunks.push(paragraph.trim());
+      }
+    }
+
+    return chunks;
+  }
+
+  async processUserPromptJob(job: UserPromptJob): Promise<void> {
+    const translationResult = await this.translateToEnglish(job.prompt);
 
     this.logger.log(
       `Original prompt language: ${translationResult.original_language}`,
@@ -122,7 +238,7 @@ export class LlmTasksService implements OnModuleInit {
 
     if (category === 'none') {
       await this.prisma.lLMTask.update({
-        where: { id: task.id },
+        where: { id: job.id },
         data: {
           status: LLMTaskStatus.FAILED,
           response: 'I can not help with that prompt.',
@@ -133,10 +249,10 @@ export class LlmTasksService implements OnModuleInit {
 
     if (
       (category === 'productInformation' || category === 'similiarProducts') &&
-      !task.productId
+      !job.productId
     ) {
       await this.prisma.lLMTask.update({
-        where: { id: task.id },
+        where: { id: job.id },
         data: {
           status: LLMTaskStatus.FAILED,
           response: 'Product ID is required for product information requests.',
@@ -148,13 +264,13 @@ export class LlmTasksService implements OnModuleInit {
     try {
       const response = await this.generateProductInformationResponse(
         translationResult.translation,
-        task.productId!,
+        job.productId!,
       );
 
       this.logger.log(`Generated LLM task response: ${response}`);
 
       await this.prisma.lLMTask.update({
-        where: { id: task.id },
+        where: { id: job.id },
         data: {
           status: LLMTaskStatus.COMPLETED,
           response: response,
@@ -163,7 +279,7 @@ export class LlmTasksService implements OnModuleInit {
     } catch (error) {
       this.logger.error('Error generating LLM task response', error);
       await this.prisma.lLMTask.update({
-        where: { id: task.id },
+        where: { id: job.id },
         data: {
           status: LLMTaskStatus.FAILED,
           response: 'Failed to generate response for the prompt.',
@@ -217,51 +333,7 @@ export class LlmTasksService implements OnModuleInit {
     Respond with this JSON FORMAT, NOTHING ELSE: { "answer": "your_detailed_answer" }
     `;
 
-    const response = await this.promptLLM<{ answer: string }>(system, prompt);
+    const response = await this.fetchLLM<{ answer: string }>(system, prompt);
     return response.answer;
-  }
-
-  async createTask(
-    input: CreateLLMTaskInput,
-    userId: number,
-  ): Promise<LLMTask> {
-    const todayUsage = await this.prisma.lLMTask.count({
-      where: {
-        userId: userId,
-        date: new Date(),
-      },
-    });
-
-    if (todayUsage >= this.DAILY_USER_TASK_LIMIT) {
-      throw new Error(
-        `Daily limit of ${this.DAILY_USER_TASK_LIMIT} LLM tasks reached.`,
-      );
-    }
-
-    if (input.prompt.trim().length === 0) {
-      throw new Error('Prompt cannot be empty');
-    }
-
-    const llmTask = await this.prisma.lLMTask.create({
-      data: {
-        prompt: input.prompt,
-        userId: userId,
-        status: LLMTaskStatus.PENDING,
-      },
-    });
-
-    await this.llmTasksQueue.add('llm-task', {
-      id: llmTask.id,
-      prompt: llmTask.prompt,
-      productId: input.productId,
-    });
-    return llmTask;
-  }
-
-  async getTaskById(id: number, userId: number): Promise<LLMTask | null> {
-    const llmTask = await this.prisma.lLMTask.findUnique({
-      where: { id, userId },
-    });
-    return llmTask ?? null;
   }
 }

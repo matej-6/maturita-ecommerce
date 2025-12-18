@@ -32,8 +32,11 @@ import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrdersModule } from './orders/orders.module';
 import { TaskService } from './tasks/task.service';
 import { TasksModule } from './tasks/tasks.module';
-import { LlmTasksModule } from './llm-tasks/llm-tasks.module';
+import { LLMPromptsModule } from './llm-prompts/llm-prompts.module';
 import { BullModule } from '@nestjs/bullmq';
+import { ConsumersModule } from './consumers/consumers.module';
+import { LlmModule } from './llm/llm.module';
+import { QdrantModule } from './qdrant/qdrant.module';
 
 @Module({
   imports: [
@@ -119,7 +122,10 @@ import { BullModule } from '@nestjs/bullmq';
     CartItemsModule,
     OrdersModule,
     TasksModule,
-    LlmTasksModule,
+    LLMPromptsModule,
+    ConsumersModule,
+    LlmModule,
+    QdrantModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService, TaskService],

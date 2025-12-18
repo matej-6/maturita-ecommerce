@@ -1,25 +1,26 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { LlmTasksService } from './llm-tasks.service';
+import { LLMPromptsService } from './llm-prompts.service';
 import { Logger, UseGuards } from '@nestjs/common';
 import { LLMTask } from './entities/llm-task.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CreateLLMTaskInput } from './dto/create-llm-task.input';
+import { CreateLLMPromptInput } from './dto/create-llm-prompt.input';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 
 @Resolver()
-export class LlmTasksResolver {
-  private readonly logger = new Logger(LlmTasksResolver.name);
+export class LLMPromptsResolver {
+  private readonly logger = new Logger(LLMPromptsResolver.name);
 
-  constructor(private readonly llmTasksService: LlmTasksService) {}
+  constructor(private readonly llmTasksService: LLMPromptsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Mutation(() => LLMTask)
   async createLlmTask(
-    @Args('input') input: CreateLLMTaskInput,
-    @CurrentUser() user: AuthenticatedUserDto,
+    @Args('input') input: CreateLLMPromptInput,
+    // @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<LLMTask> {
-    return await this.llmTasksService.createTask(input, user.id);
+    // return await this.llmTasksService.createTask(input, user.id);
+    return await this.llmTasksService.createTask(input, 1);
   }
 
   @UseGuards(JwtAuthGuard)
