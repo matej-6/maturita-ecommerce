@@ -77,6 +77,11 @@ input CreateCategoryTranslationInput {
   name: String!
 }
 
+input CreateLLMTaskInput {
+  productId: Int
+  prompt: String!
+}
+
 input CreateProductInput {
   """Parent category id"""
   categoryId: Int
@@ -168,6 +173,22 @@ input EditProductTranslationInput {
   productTranslationId: Int!
 }
 
+type LLMTask {
+  date: DateTime!
+  id: Int!
+  prompt: String!
+  response: String
+  status: LLMTaskStatus!
+  userId: Int!
+}
+
+enum LLMTaskStatus {
+  COMPLETED
+  FAILED
+  IN_PROGRESS
+  PENDING
+}
+
 type Locale {
   """Locale code"""
   code: String!
@@ -195,6 +216,7 @@ type Mutation {
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
+  createLlmTask(input: CreateLLMTaskInput!): LLMTask!
   createProduct(createProductInput: CreateProductInput!): Product!
   createProductTranslation(createProductTranslationInput: CreateProductTranslationInput!, productId: Int!): ProductTranslation!
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
@@ -374,6 +396,7 @@ type Query {
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
   findOneProductVariantAttribute(id: Int!): ProductVariantAttribute
+  getUserLLMTaskById(id: Float!): LLMTask
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: MeResponse!

@@ -9,6 +9,22 @@ services:
       - MYSQL_ROOT_PASSWORD=password
     ports:
       - "3306:3306"
+  redis:
+    image: redis:7.4.1-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    # volumes:
+    # - redis_data:/data
+    # command: redis-server --appendonly yes # only for prod
+    command: ["redis-server", "--loglevel", "debug"]
+    environment:
+      - REDIS_PASSWORD=password
+      - REDIS_HOST=localhost
+      - REDIS_PORT=6379
+      - REDIS_USER=default
+      - REDIS_DB=0
+      - REDIS_TLS_ENABLED=false
   ollama:
     image: ollama/ollama:latest
     ports:
@@ -33,4 +49,4 @@ services:
   #   environment:
   #     - OLLAMA_BASE_URL=http://ollama:11434
   #     - OLLAMA_LLM_MODEL=mistral:7b
-  #     - OLLAMA_EMBED_MODEL=qwen3-embedding:4b
+  #     - OLLAMA_EMBEDDING_MODEL=qwen3-embedding:4b

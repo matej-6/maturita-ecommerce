@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { validateEnv } from './config/validate';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Env, validateEnv } from './config/validate';
 import { PrismaService } from './prisma/prisma.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -33,6 +33,7 @@ import { OrdersModule } from './orders/orders.module';
 import { TaskService } from './tasks/task.service';
 import { TasksModule } from './tasks/tasks.module';
 import { LlmTasksModule } from './llm-tasks/llm-tasks.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -88,6 +89,20 @@ import { LlmTasksModule } from './llm-tasks/llm-tasks.module';
       isGlobal: true,
       envFilePath: ['.env.production', '.env.development', '.env'],
       validate: validateEnv,
+    }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory(configService: ConfigService<Env>) {
+        return {
+          connection: {
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
+            username: configService.get('REDIS_USERNAME'),
+            password: configService.get('REDIS_PASSWORD'),
+          },
+        };
+      },
     }),
     PrismaModule,
     CategoriesModule,
