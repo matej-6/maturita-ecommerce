@@ -85,17 +85,18 @@ model CategoryTranslation {
 }
 
 model Product {
-  id                  Int                  @id @default(autoincrement())
-  slug                String               @unique
-  Category            Category?            @relation(fields: [categoryId], references: [id])
-  categoryId          Int?
-  isPublic            Boolean              @default(true)
-  ProductVariants     ProductVariant[]
-  Images              ProductImage[]
-  ProductTranslations ProductTranslation[]
-  EmbeddingTask       EmbeddingTask?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id                   Int                          @id @default(autoincrement())
+  slug                 String                       @unique
+  Category             Category?                    @relation(fields: [categoryId], references: [id])
+  categoryId           Int?
+  isPublic             Boolean                      @default(true)
+  ProductVariants      ProductVariant[]
+  Images               ProductImage[]
+  ProductTranslations  ProductTranslation[]
+  EmbeddingTask        EmbeddingTask?
+  ContentEmbeddingTask ProductContentEmbeddingTask?
+  createdAt            DateTime                     @default(now())
+  updatedAt            DateTime                     @updatedAt
 
   @@map("products")
 }
@@ -281,9 +282,18 @@ model EmbeddingTask {
   createdAt DateTime            @default(now())
 }
 
+model ProductContentEmbeddingTask {
+  id        Int                 @id @default(autoincrement())
+  productId Int                 @unique
+  Product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  status    EmbeddingTaskStatus @default(PENDING)
+  createdAt DateTime            @default(now())
+}
+
 enum EmbeddingTaskStatus {
   PENDING
   IN_PROGRESS
+  COMPLETED
   FAILED
 }
 

@@ -15,6 +15,7 @@ import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { ProductTranslation } from 'generated/prisma/client';
 import { CreateProductTranslationInput } from './dto/create-product-translation.input';
 import { EditProductTranslationInput } from './dto/edit-product-translation.input';
+import { LlmService } from 'src/llm/llm.service';
 
 @Injectable()
 export class ProductsService {
@@ -23,6 +24,7 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly localesService: LocalesService,
+    private readonly llmService: LlmService,
   ) {}
 
   async create(input: CreateProductInput) {
@@ -184,6 +186,12 @@ export class ProductsService {
         markdownContent: input.markdownContent || null,
       },
     });
+
+    if (updatedTranslation.locale === 'en') {
+      await this.llmService.addProductEmbeddingTask({
+        id:
+      })
+    }
 
     return updatedTranslation;
   }

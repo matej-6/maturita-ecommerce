@@ -9,27 +9,18 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { LocalesService } from 'src/locales/locales.service';
 import { LLMTaskJobType, UserPromptJob } from 'src/llm/llm-task.consumer';
+import { LlmService } from 'src/llm/llm.service';
 
 @Injectable()
 export class LLMPromptsService implements OnModuleInit {
   private readonly logger = new Logger(LLMPromptsService.name);
 
   private readonly DAILY_USER_TASK_LIMIT = 20;
-  private readonly LLM_BASE_URL: string;
-  private readonly LLM_MODEL: string;
-  private readonly EMBEDDING_MODEL: string;
   constructor(
     private readonly prisma: PrismaService,
-    private readonly configService: ConfigService<Env>,
-    private readonly localesService: LocalesService,
+    private readonly llmService: LlmService,
     @InjectQueue('llm-tasks') private readonly llmTasksQueue: Queue,
-  ) {
-    this.LLM_BASE_URL = this.configService.getOrThrow('OLLAMA_BASE_URL');
-    this.LLM_MODEL = this.configService.getOrThrow('OLLAMA_LLM_MODEL');
-    this.EMBEDDING_MODEL = this.configService.getOrThrow(
-      'OLLAMA_EMBEDDING_MODEL',
-    );
-  }
+  ) {}
 
   async onModuleInit() {
     await this.llmTasksQueue.drain(true);
@@ -64,11 +55,12 @@ export class LLMPromptsService implements OnModuleInit {
       },
     });
 
-    await this.llmTasksQueue.add(LLMTaskJobType.USER_PROMPT, {
+    await this.llmService.addUserPromptTask({
       id: llmTask.id,
       prompt: llmTask.prompt,
       productId: input.productId,
-    } as UserPromptJob);
+    });
+
     return llmTask;
   }
 
@@ -77,5 +69,44 @@ export class LLMPromptsService implements OnModuleInit {
       where: { id, userId },
     });
     return llmTask ?? null;
+  }
+
+  async markTaskAsFailed(id: number, errorMessage: string) {
+    await this.prisma.lLMTask.update({
+      where: { id },
+      data: {
+        status: LLMTaskStatus.FAILED,
+        response: errorMessage,
+      },
+    });
+  }
+
+  async markTaskAsCompleted(id: number, response: string) {
+    await this.prisma.lLMTask.update({
+      where: { id },
+      data: {
+        status: LLMTaskStatus.COMPLETED,
+        response: response,
+      },
+    });
+  }
+
+  async cancelPrompt(id: number, userId: number): Promise<boolean> {
+    const llmTask = await this.prisma.lLMTask.findUnique({
+      where: { id, userId },
+    });
+    if (!llmTask) {
+      return false;
+    }
+    if (llmTask.status !== LLMTaskStatus.PENDING) {
+      return false;
+    }
+    await this.prisma.lLMTask.delete({
+      where: { id },
+    });
+
+    await this.llmService.removeTaskById(id);
+
+    return true;
   }
 }

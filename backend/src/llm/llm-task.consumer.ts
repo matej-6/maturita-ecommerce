@@ -2,16 +2,16 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
-import { LLMTaskStatus } from 'generated/prisma/enums';
+import { EmbeddingTaskStatus } from 'generated/prisma/enums';
 import { Env } from 'src/config/validate';
 import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { LocalesService } from 'src/locales/locales.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { QdrantService } from 'src/qdrant/qdrant.service';
+import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
 
 export enum LLMTaskJobType {
   USER_PROMPT = 'user-prompt',
-  EMBEDDING = 'embedding',
+  PRODUCT_EMBEDDING = 'product-embedding',
 }
 
 export type UserPromptJob = {
@@ -21,7 +21,6 @@ export type UserPromptJob = {
 };
 
 export type EmbeddingJob = {
-  id: number;
   productId: number;
 };
 
@@ -35,7 +34,7 @@ export class LLMTaskConsumer extends WorkerHost {
   private readonly LLM_MODEL: string;
   private readonly EMBEDDING_MODEL: string;
   constructor(
-    private readonly llmTasksService: LLMPromptsService,
+    private readonly llmPromptsService: LLMPromptsService,
     private readonly prisma: PrismaService,
     private readonly qdrantService: QdrantService,
     private readonly configService: ConfigService<Env>,
@@ -51,14 +50,29 @@ export class LLMTaskConsumer extends WorkerHost {
 
   async process(job: Job<LLMTaskJob, any, string>): Promise<any> {
     switch (job.name as keyof typeof LLMTaskJobType) {
-      case 'USER_PROMPT':
-        await this.processUserPromptJob(job.data as UserPromptJob);
+      case 'USER_PROMPT': {
+        const jobData = job.data as UserPromptJob;
+        try {
+          const response = await this.processUserPromptJob(jobData);
+          await this.llmPromptsService.markTaskAsCompleted(
+            jobData.id,
+            response,
+          );
+        } catch (error) {
+          this.logger.error('Error processing USER_PROMPT job', error);
+          await this.llmPromptsService.markTaskAsFailed(
+            jobData.id,
+            (error as Error).message,
+          );
+        }
         break;
-      case 'EMBEDDING':
-        await this.llmTasksService.consumeEmbeddingTask(
-          job.data as EmbeddingJob,
-        );
+      }
+      case 'PRODUCT_EMBEDDING': {
+        const jobData = job.data as EmbeddingJob;
+        await this.processProductEmbeddingJob(jobData);
+        await this.processProductContentEmbeddingJob(jobData);
         break;
+      }
       default:
         throw new Error(`Unknown job type: ${job.name}`);
     }
@@ -79,7 +93,8 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     if (!res.ok) {
-      throw new Error(`LLM request failed with status ${res.status}`);
+      this.logger.error(`LLM request failed with status ${res.status}`);
+      throw new Error('An unexpected error ocurred. Please try again.');
     }
 
     try {
@@ -89,11 +104,11 @@ export class LLMTaskConsumer extends WorkerHost {
       return output;
     } catch (error) {
       this.logger.error('Error parsing LLM response as JSON', error);
-      throw new Error('Failed to parse LLM response as JSON');
+      throw new Error('An unexpected error ocurred. Please try again.');
     }
   }
 
-  private async fetchEmbedding(text: string): Promise<number[]> {
+  private async fetchEmbedding(input: string): Promise<number[]> {
     const res = await fetch(`${this.LLM_BASE_URL}/api/embed`, {
       method: 'POST',
       headers: {
@@ -101,7 +116,7 @@ export class LLMTaskConsumer extends WorkerHost {
       },
       body: JSON.stringify({
         model: this.EMBEDDING_MODEL,
-        text: text,
+        input: input,
       }),
     });
 
@@ -118,15 +133,14 @@ export class LLMTaskConsumer extends WorkerHost {
   ): Promise<
     'similiarProducts' | 'productSearch' | 'productInformation' | 'none'
   > {
-    const system = `You are an AI assistant that categorizes user prompts into one of 4 categories: 'similiarProducts', 'productSearch', 'productInformation', or 'none'.
-    Here's a brief description of each category:
-    1. similiarProducts: The user is looking for products similar to a given product
-    2. productSearch: The user is searching for products based on certain criteria or keywords
-    3. productInformation: The user is seeking specific information about a particular product
-    4. none: The prompt does not fit into any of the above categories.
+    const system = `Classify the user prompt into ONE category:
+- similiarProducts: asks for products similar to a specific product
+- productSearch: searches for products by features, filters, or keywords
+- productInformation: asks for details about a specific product
+- none: does not fit the above
 
-    Analyze the following prompt and determine the most appropriate category.
-    Respond with this JSON FORMAT, NOTHING ELSE: { "category": "your_chosen_category" }`;
+Return ONLY this JSON:
+{ "category": "similiarProducts | productSearch | productInformation | none" }`;
     const response = await this.fetchLLM<{ category: string }>(system, prompt);
     const category = response.category;
     if (
@@ -136,7 +150,7 @@ export class LLMTaskConsumer extends WorkerHost {
       category !== 'none'
     ) {
       this.logger.error('Invalid category returned from LLM', category);
-      throw new Error('Invalid category returned from LLM');
+      throw new Error('Something went wrong.');
     }
     return category;
   }
@@ -145,19 +159,119 @@ export class LLMTaskConsumer extends WorkerHost {
     translation: string;
     original_language: string;
   }> {
-    const system = `You are an AI assistant that translates user prompts into English.
-    Translate the following prompt into English. If the prompt is already in English, return it unchanged.
-    Also detect the original language of the prompt and include it in your response in the 'original_language' field in ISO 639-1 format.
-    If you are unsure of the original language, respond with original language as 'unknown' and with the translation unchanged.
-    Respond with this JSON FORMAT, NOTHING ELSE: { "translation": "translated_prompt_in_english", "original_language": "en" }`;
+    const system = `Translate the user prompt to English.
+If it is already English, return it unchanged.
+Detect the original language and include its ISO 639-1 code.
+If unsure, set original_language to "unknown" and do not change the text.
+Respond ONLY in this JSON format:
+{ "translation": "...", "original_language": "..." }`;
     const response = await this.fetchLLM<{
       translation: string;
       original_language: string;
     }>(system, prompt);
+    if (
+      !response.translation ||
+      !response.original_language ||
+      response.original_language === 'unknown'
+    ) {
+      throw new Error('I cannot determine the language of the prompt.');
+    }
     return response;
   }
 
   async processProductEmbeddingJob(job: EmbeddingJob): Promise<void> {
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id: job.productId,
+      },
+      select: {
+        id: true,
+        Category: {
+          select: {
+            slug: true,
+            CategoryTranslation: {
+              where: {
+                locale: this.localesService.getDefaultLocale().code,
+              },
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        slug: true,
+        ProductTranslations: {
+          where: {
+            locale: this.localesService.getDefaultLocale().code,
+          },
+          select: {
+            name: true,
+            description: true,
+          },
+        },
+        ProductVariants: {
+          select: {
+            sku: true,
+            priceInCents: true,
+            Attributes: {
+              select: {
+                AttributeKey: {
+                  select: {
+                    key: true,
+                  },
+                },
+                value: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    const input = {
+      product: {
+        slug: product.slug,
+        name: product.ProductTranslations[0]?.name || '',
+        description: product.ProductTranslations[0]?.description || '',
+        category: {
+          slug: product.Category?.slug || '',
+          name: product.Category?.CategoryTranslation[0]?.name || '',
+        },
+        variants: product.ProductVariants.map((variant) => ({
+          sku: variant.sku,
+          priceInCents: variant.priceInCents,
+          attributes: variant.Attributes.map((attr) => ({
+            key: attr.AttributeKey.key,
+            value: attr.value,
+          })),
+        })),
+      },
+    };
+
+    const res = await this.fetchEmbedding(JSON.stringify(input));
+
+    await this.qdrantService.qdrantClient.upsert(QdrantCollections.PRODUCTS, {
+      points: [
+        {
+          id: product.id,
+          vector: res,
+        },
+      ],
+    });
+
+    await this.prisma.embeddingTask.update({
+      where: { productId: job.productId },
+      data: {
+        status: EmbeddingTaskStatus.COMPLETED,
+      },
+    });
+  }
+
+  async processProductContentEmbeddingJob(job: EmbeddingJob): Promise<void> {
     const product = await this.prisma.product.findUnique({
       where: {
         id: job.productId,
@@ -186,32 +300,83 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     if (!product) {
-      this.logger.error(
-        `Product with ID ${job.productId} not found for embedding job`,
-      );
-      return;
+      throw new Error('Product not found');
     }
 
-    // embed the product content for questions about this product
     const chunkedContent = this.chunkProductContentForEmbedding(
       product.ProductTranslations[0]?.markdownContent || '',
     );
 
     for (let i = 0; i < chunkedContent.length; i++) {
       const embeddingResponse = await this.fetchEmbedding(chunkedContent[i]);
-      await this.qdrantService.qdrantClient.upsert('product_chunks', {
-        points: [
-          {
-            id: `${product.id}_content_${i}`,
-            vector: embeddingResponse,
-            payload: {
-              productId: product.id,
-              text: chunkedContent[i],
+      await this.qdrantService.qdrantClient.upsert(
+        QdrantCollections.PRODUCT_CHUNKS,
+        {
+          points: [
+            {
+              id: `${product.id}_chunk_${i}`,
+              vector: embeddingResponse,
+              payload: {
+                productId: product.id,
+                text: chunkedContent[i],
+              },
             },
-          },
-        ],
-      });
+          ],
+        },
+      );
     }
+
+    await this.prisma.productContentEmbeddingTask.update({
+      where: {
+        productId: job.productId,
+      },
+      data: {
+        status: EmbeddingTaskStatus.COMPLETED,
+      },
+    });
+  }
+
+  async deleteProductEmbeddings(productId: number): Promise<void> {
+    await this.qdrantService.qdrantClient.delete(QdrantCollections.PRODUCTS, {
+      points: [productId],
+    });
+
+    await this.prisma.embeddingTask.delete({
+      where: {
+        productId: productId,
+      },
+    });
+
+    await this.qdrantService.qdrantClient.delete(
+      QdrantCollections.PRODUCT_CHUNKS,
+      {
+        filter: {
+          must: [
+            {
+              key: 'productId',
+              match: {
+                value: productId,
+              },
+            },
+          ],
+        },
+      },
+    );
+
+    await this.prisma.productContentEmbeddingTask.delete({
+      where: {
+        productId: productId,
+      },
+    });
+  }
+
+  private async translateResponseToOriginalLanguage(
+    englishResponse: string,
+    originalLanguageCode: string,
+  ) {
+    const system = `Translate the following text from English to this language code: ${originalLanguageCode}. Respond ONLY with the translated text.`;
+    const response = await this.fetchLLM<string>(system, englishResponse);
+    return response;
   }
 
   private chunkProductContentForEmbedding(content: string): string[] {
@@ -226,7 +391,7 @@ export class LLMTaskConsumer extends WorkerHost {
     return chunks;
   }
 
-  async processUserPromptJob(job: UserPromptJob): Promise<void> {
+  async processUserPromptJob(job: UserPromptJob): Promise<string> {
     const translationResult = await this.translateToEnglish(job.prompt);
 
     this.logger.log(
@@ -237,55 +402,34 @@ export class LLMTaskConsumer extends WorkerHost {
     const category = await this.categorizePrompt(translationResult.translation);
 
     if (category === 'none') {
-      await this.prisma.lLMTask.update({
-        where: { id: job.id },
-        data: {
-          status: LLMTaskStatus.FAILED,
-          response: 'I can not help with that prompt.',
-        },
-      });
-      return;
+      throw new Error("I can't assist with that request.");
     }
 
     if (
       (category === 'productInformation' || category === 'similiarProducts') &&
       !job.productId
     ) {
-      await this.prisma.lLMTask.update({
-        where: { id: job.id },
-        data: {
-          status: LLMTaskStatus.FAILED,
-          response: 'Product ID is required for product information requests.',
-        },
-      });
-      return;
+      throw new Error("I can't provide that information without a product.");
     }
 
-    try {
-      const response = await this.generateProductInformationResponse(
-        translationResult.translation,
-        job.productId!,
+    let response = await this.generateProductInformationResponse(
+      translationResult.translation,
+      job.productId!,
+    );
+
+    this.logger.log(`Generated LLM task response: ${response}`);
+
+    if (translationResult.original_language !== 'en') {
+      response = await this.translateResponseToOriginalLanguage(
+        response,
+        translationResult.original_language,
       );
-
-      this.logger.log(`Generated LLM task response: ${response}`);
-
-      await this.prisma.lLMTask.update({
-        where: { id: job.id },
-        data: {
-          status: LLMTaskStatus.COMPLETED,
-          response: response,
-        },
-      });
-    } catch (error) {
-      this.logger.error('Error generating LLM task response', error);
-      await this.prisma.lLMTask.update({
-        where: { id: job.id },
-        data: {
-          status: LLMTaskStatus.FAILED,
-          response: 'Failed to generate response for the prompt.',
-        },
-      });
+      this.logger.log(
+        `Translated response to original language (${translationResult.original_language}): ${response}`,
+      );
     }
+
+    return response;
   }
 
   private async generateProductInformationResponse(

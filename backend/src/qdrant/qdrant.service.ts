@@ -22,16 +22,24 @@ export class QdrantService implements OnModuleInit {
       port: qdrantPort,
     });
     const collections = await this.client.getCollections();
-    if (!collections.collections.find((c) => c.name === 'product_chunks')) {
-      await this.client.createCollection('product_chunks', {
+    if (
+      !collections.collections.find(
+        (c) => c.name === QdrantCollections.PRODUCT_CHUNKS,
+      )
+    ) {
+      await this.client.createCollection(QdrantCollections.PRODUCT_CHUNKS, {
         vectors: {
           size: 2560, // https://github.com/QwenLM/Qwen3-Embedding?tab=readme-ov-file#qwen3-embedding-series-model-list
           distance: 'Cosine',
         },
       });
     }
-    if (!collections.collections.find((c) => c.name === 'products')) {
-      await this.client.createCollection('products', {
+    if (
+      !collections.collections.find(
+        (c) => c.name === QdrantCollections.PRODUCTS,
+      )
+    ) {
+      await this.client.createCollection(QdrantCollections.PRODUCTS, {
         vectors: {
           size: 2560, //https://github.com/QwenLM/Qwen3-Embedding?tab=readme-ov-file#qwen3-embedding-series-model-list
           distance: 'Cosine',
@@ -40,3 +48,8 @@ export class QdrantService implements OnModuleInit {
     }
   }
 }
+
+export const QdrantCollections = {
+  PRODUCT_CHUNKS: 'product_chunks',
+  PRODUCTS: 'products',
+};
