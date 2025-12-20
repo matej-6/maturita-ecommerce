@@ -3,6 +3,7 @@ import { forwardRef, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
 import { EmbeddingTaskStatus } from 'generated/prisma/enums';
+import { randomUUID } from 'node:crypto';
 import { Env } from 'src/config/validate';
 import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { LocalesService } from 'src/locales/locales.service';
@@ -12,6 +13,7 @@ import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
 export enum LLMTaskJobType {
   USER_PROMPT = 'user-prompt',
   PRODUCT_EMBEDDING = 'product-embedding',
+  PRODUCT_CONTENT_EMBEDDING = 'product-content-embedding',
 }
 
 export type UserPromptJob = {
@@ -50,6 +52,7 @@ export class LLMTaskConsumer extends WorkerHost {
   }
 
   async process(job: Job<LLMTaskJob, any, string>): Promise<any> {
+    console.log('Processing job:', job);
     switch (job.name as LLMTaskJobType) {
       case LLMTaskJobType.USER_PROMPT: {
         this.logger.log(`Processing USER_PROMPT job id ${job.id}`);
@@ -60,21 +63,80 @@ export class LLMTaskConsumer extends WorkerHost {
             jobData.id,
             response,
           );
+          return {};
         } catch (error) {
           this.logger.error('Error processing USER_PROMPT job', error);
           await this.llmPromptsService.markTaskAsFailed(
             jobData.id,
             (error as Error).message,
           );
+          throw error;
         }
-        break;
       }
       case LLMTaskJobType.PRODUCT_EMBEDDING: {
         this.logger.log(`Processing PRODUCT_EMBEDDING job id ${job.id}`);
         const jobData = job.data as EmbeddingJob;
-        await this.processProductEmbeddingJob(jobData);
-        await this.processProductContentEmbeddingJob(jobData);
-        break;
+        try {
+          const dbEmbeddingTask = await this.prisma.embeddingTask.findUnique({
+            where: { productId: jobData.productId },
+          });
+          if (!dbEmbeddingTask) {
+            await this.prisma.embeddingTask.create({
+              data: {
+                productId: jobData.productId,
+                status: EmbeddingTaskStatus.PENDING,
+              },
+            });
+          }
+          await this.processProductEmbeddingJob(jobData);
+          await this.prisma.embeddingTask.update({
+            where: { productId: jobData.productId },
+            data: {
+              status: EmbeddingTaskStatus.COMPLETED,
+            },
+          });
+          return {};
+        } catch (error) {
+          this.logger.error('Error processing PRODUCT_EMBEDDING job', error);
+          await this.prisma.embeddingTask.update({
+            where: { productId: jobData.productId },
+            data: {
+              status: EmbeddingTaskStatus.FAILED,
+            },
+          });
+          throw error;
+        }
+      }
+      case LLMTaskJobType.PRODUCT_CONTENT_EMBEDDING: {
+        const jobData = job.data as EmbeddingJob;
+        try {
+          const dbEmbeddingTask =
+            await this.prisma.productContentEmbeddingTask.findUnique({
+              where: { productId: jobData.productId },
+            });
+          if (!dbEmbeddingTask) {
+            await this.prisma.productContentEmbeddingTask.create({
+              data: {
+                productId: jobData.productId,
+                status: EmbeddingTaskStatus.PENDING,
+              },
+            });
+          }
+          await this.processProductContentEmbeddingJob(jobData);
+          return {};
+        } catch (error) {
+          this.logger.error(
+            'Error processing PRODUCT_CONTENT_EMBEDDING job',
+            error,
+          );
+          await this.prisma.productContentEmbeddingTask.update({
+            where: { productId: jobData.productId },
+            data: {
+              status: EmbeddingTaskStatus.FAILED,
+            },
+          });
+          throw error;
+        }
       }
       default:
         throw new Error(`Unknown job type: ${job.name}`);
@@ -111,7 +173,7 @@ export class LLMTaskConsumer extends WorkerHost {
     }
   }
 
-  private async fetchEmbedding(input: string): Promise<number[]> {
+  private async fetchEmbedding(input: string): Promise<number[][]> {
     const res = await fetch(`${this.LLM_BASE_URL}/api/embed`, {
       method: 'POST',
       headers: {
@@ -127,8 +189,9 @@ export class LLMTaskConsumer extends WorkerHost {
       throw new Error(`Embedding request failed with status ${res.status}`);
     }
 
-    const data = (await res.json()) as { embedding: number[] };
-    return data.embedding;
+    const data = (await res.json()) as { embeddings: number[][] };
+    this.logger.log('Embedding response data:', data);
+    return data.embeddings;
   }
 
   private async categorizePrompt(
@@ -257,20 +320,21 @@ Respond ONLY in this JSON format:
 
     const res = await this.fetchEmbedding(JSON.stringify(input));
 
+    this.logger.log(`Generated embedding for product ID ${product.id}`);
+    this.logger.log(`Embedding vector length: ${res.length}`);
+
     await this.qdrantService.qdrantClient.upsert(QdrantCollections.PRODUCTS, {
       points: [
         {
           id: product.id,
-          vector: res,
+          vector: res[0],
+          payload: {
+            productId: product.id,
+            ...input,
+          },
         },
       ],
-    });
-
-    await this.prisma.embeddingTask.update({
-      where: { productId: job.productId },
-      data: {
-        status: EmbeddingTaskStatus.COMPLETED,
-      },
+      wait: true,
     });
   }
 
@@ -312,13 +376,19 @@ Respond ONLY in this JSON format:
 
     for (let i = 0; i < chunkedContent.length; i++) {
       const embeddingResponse = await this.fetchEmbedding(chunkedContent[i]);
+      this.logger.log(
+        `Generated embedding for product ID ${product.id}, chunk ${i}`,
+      );
+      this.logger.log(
+        `Embedding vector length: ${embeddingResponse[0].length}`,
+      );
       await this.qdrantService.qdrantClient.upsert(
         QdrantCollections.PRODUCT_CHUNKS,
         {
           points: [
             {
-              id: `${product.id}_chunk_${i}`,
-              vector: embeddingResponse,
+              id: randomUUID(),
+              vector: embeddingResponse[0],
               payload: {
                 productId: product.id,
                 text: chunkedContent[i],
@@ -348,13 +418,28 @@ Respond ONLY in this JSON format:
     return response;
   }
 
-  private chunkProductContentForEmbedding(content: string): string[] {
+  private chunkProductContentForEmbedding(
+    content: string,
+    chunkSize: number = 500,
+  ): string[] {
     const chunks: string[] = [];
-    const paragraphs = content.split('\n');
-    for (const paragraph of paragraphs) {
-      if (paragraph.trim().length > 0) {
-        chunks.push(paragraph.trim());
+
+    const words = content.split(' ');
+    let currentChunk = [];
+    let currentLength = 0;
+
+    for (const word of words) {
+      currentChunk.push(word);
+      currentLength += word.length + 1;
+      if (currentLength >= chunkSize) {
+        chunks.push(currentChunk.join(' '));
+        currentChunk = [];
+        currentLength = 0;
       }
+    }
+
+    if (currentChunk.length > 0) {
+      chunks.push(currentChunk.join(' '));
     }
 
     return chunks;
@@ -405,30 +490,25 @@ Respond ONLY in this JSON format:
     prompt: string,
     productId: number,
   ): Promise<string> {
+    const embedding = (await this.fetchEmbedding(prompt))[0];
+
     const productContent = await this.prisma.product.findUnique({
       where: { id: productId },
       select: {
-        Category: {
-          select: {
-            CategoryTranslation: {
-              where: {
-                locale: this.localesService.getDefaultLocale().code,
-              },
-              select: {
-                name: true,
-                description: true,
-              },
-            },
-          },
-        },
         ProductTranslations: {
           where: {
             locale: this.localesService.getDefaultLocale().code,
           },
           select: {
-            markdownContent: true,
             name: true,
             description: true,
+          },
+        },
+        ProductVariants: {
+          select: {
+            sku: true,
+            priceInCents: true,
+            stock: true,
           },
         },
       },
@@ -438,9 +518,38 @@ Respond ONLY in this JSON format:
       throw new Error('Product not found');
     }
 
+    const similarChunks = await this.qdrantService.qdrantClient.search(
+      QdrantCollections.PRODUCT_CHUNKS,
+      {
+        vector: embedding,
+        limit: 2,
+        filter: {
+          must: [
+            {
+              key: 'productId',
+              match: { value: productId },
+            },
+          ],
+        },
+      },
+    );
+
+    const productInfo = {
+      name: productContent.ProductTranslations[0]?.name || '',
+      description: productContent.ProductTranslations[0]?.description || '',
+      variants: productContent.ProductVariants.map((variant) => ({
+        sku: variant.sku,
+        priceInCents: variant.priceInCents,
+        stock: variant.stock,
+      })),
+      contentChunks: similarChunks.map(
+        (chunk) => JSON.stringify(chunk.payload) || '',
+      ),
+    };
+
     const system = `You are an AI assistant that provides detailed information about products based on their descriptions and categories.
     Use the following product information to answer the user's prompt:
-    ${JSON.stringify(productContent)}
+    ${JSON.stringify(productInfo)}
 
     Answer the user's prompt in detail using the provided product information. If the information is insufficient, respond accordingly.
     Respond with this JSON FORMAT, NOTHING ELSE: { "answer": "your_detailed_answer" }

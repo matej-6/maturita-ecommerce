@@ -13,14 +13,14 @@ export class LLMPromptsResolver {
 
   constructor(private readonly llmTasksService: LLMPromptsService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => LLMTask)
   async createLlmTask(
     @Args('input') input: CreateLLMPromptInput,
-    // @CurrentUser() user: AuthenticatedUserDto,
+    @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<LLMTask> {
-    // return await this.llmTasksService.createTask(input, user.id);
-    return await this.llmTasksService.createTask(input, 1);
+    return await this.llmTasksService.createTask(input, user.id);
+    // return await this.llmTasksService.createTask(input, 26);
   }
 
   @UseGuards(JwtAuthGuard)

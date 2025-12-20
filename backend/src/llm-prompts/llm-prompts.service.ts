@@ -118,13 +118,47 @@ export class LLMPromptsService {
   }
 
   async addProductEmbeddingTask(data: EmbeddingJob): Promise<void> {
+    const newEmbeddingTask = await this.prisma.embeddingTask.create({
+      data: {
+        productId: data.productId,
+        status: LLMTaskStatus.PENDING,
+      },
+    });
+
     await this.llmTasksQueue.add(LLMTaskJobType.PRODUCT_EMBEDDING, data, {
       removeOnComplete: true,
       removeOnFail: true,
       attempts: 3,
       priority: 5,
-      jobId: this.getProductEmbeddingTaskJobId(data.productId),
+      jobId: this.getProductEmbeddingTaskJobId(newEmbeddingTask.id),
     });
+  }
+
+  async addProductContentEmbeddingTask(data: EmbeddingJob): Promise<void> {
+    const newContentTask = await this.prisma.productContentEmbeddingTask.create(
+      {
+        data: {
+          productId: data.productId,
+          status: LLMTaskStatus.PENDING,
+        },
+      },
+    );
+
+    await this.llmTasksQueue.add(
+      LLMTaskJobType.PRODUCT_CONTENT_EMBEDDING,
+      data,
+      {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+        priority: 5,
+        jobId: this.getProductContentEmbeddingTaskJobId(newContentTask.id),
+      },
+    );
+  }
+
+  private getProductContentEmbeddingTaskJobId(taskId: number): string {
+    return `product-content-embedding-${taskId}`;
   }
 
   private getProductEmbeddingTaskJobId(productId: number): string {
@@ -136,8 +170,27 @@ export class LLMPromptsService {
   }
 
   async removeProductEmbeddingTask(productId: number): Promise<void> {
+    const task = await this.prisma.embeddingTask.findUnique({
+      where: { productId: productId },
+    });
+
+    if (!task) {
+      return;
+    }
+
+    await this.llmTasksQueue.remove(this.getProductEmbeddingTaskJobId(task.id));
+  }
+
+  async removeProductContentEmbeddingTask(productId: number): Promise<void> {
+    const task = await this.prisma.productContentEmbeddingTask.findUnique({
+      where: { productId: productId },
+    });
+
+    if (!task) {
+      return;
+    }
     await this.llmTasksQueue.remove(
-      this.getProductEmbeddingTaskJobId(productId),
+      this.getProductContentEmbeddingTaskJobId(task.id),
     );
   }
 

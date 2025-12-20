@@ -45,7 +45,7 @@ export class SeedService implements OnModuleInit {
     await this.prismaService.category.deleteMany();
     await this.prismaService.user.deleteMany();
     await this.llmService.clearLlmTasksQueue();
-    // await this.qdrantService.clearProductCollections();
+    await this.qdrantService.clearProductCollections();
     this.logger.log('Database cleared.');
   }
 

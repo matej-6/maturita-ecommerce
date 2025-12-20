@@ -194,12 +194,17 @@ export class ProductsService {
 
   async generateProductEmbeddings(productId: number): Promise<void> {
     await this.llmService.removeProductEmbeddingTask(productId);
+    await this.llmService.removeProductContentEmbeddingTask(productId);
     await this.deleteProductEmbeddings(productId);
     await this.llmService.addProductEmbeddingTask({ productId: productId });
+    await this.llmService.addProductContentEmbeddingTask({
+      productId: productId,
+    });
   }
 
   async removeProductEmbeddings(productId: number): Promise<void> {
     await this.llmService.removeProductEmbeddingTask(productId);
+    await this.llmService.removeProductContentEmbeddingTask(productId);
     await this.deleteProductEmbeddings(productId);
   }
 
