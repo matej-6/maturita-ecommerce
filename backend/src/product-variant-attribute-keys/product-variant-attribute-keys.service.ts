@@ -3,6 +3,8 @@ import { CreateProductVariantAttributeKeyInput } from './dto/create-product-vari
 import { UpdateProductVariantAttributeKeyInput } from './dto/update-product-variant-attribute-key.input';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LocalesService } from 'src/locales/locales.service';
+import { CreateProductVariantAttributeKeyTranslationInput } from './dto/create-product-variant-attribute-key-translation.input';
+import { UpdateProductVariantAttributeKeyTranslationInput } from './dto/update-product-variant-attribute-key-translation.input';
 
 @Injectable()
 export class ProductVariantAttributeKeysService {
@@ -144,5 +146,92 @@ export class ProductVariantAttributeKeysService {
     return keyIds.map((id) =>
       attributes.filter((a) => a.attributeKeyId === id),
     );
+  }
+
+  async createTranslation(
+    input: CreateProductVariantAttributeKeyTranslationInput,
+  ) {
+    const locale = this.localesService.findOne(input.localeCode);
+    if (!locale) {
+      throw new Error('locales.service.localeNotFound');
+    }
+
+    const existingTranslation =
+      await this.prisma.attributeKeyTranslation.findFirst({
+        where: {
+          attributeKeyId: input.keyId,
+          locale: input.localeCode,
+        },
+      });
+
+    if (existingTranslation) {
+      throw new Error(
+        'product-variant-attribute-keys.service.translationAlreadyExists',
+      );
+    }
+
+    return this.prisma.attributeKeyTranslation.create({
+      data: {
+        attributeKeyId: input.keyId,
+        locale: input.localeCode,
+        keyTranslation: input.keyTranslation,
+      },
+    });
+  }
+
+  async updateTranslation(
+    input: UpdateProductVariantAttributeKeyTranslationInput,
+  ) {
+    const translationToUpdate =
+      await this.prisma.attributeKeyTranslation.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+
+    if (!translationToUpdate) {
+      throw new Error(
+        'product-variant-attribute-keys.service.translationNotFound',
+      );
+    }
+
+    if (input.localeCode !== translationToUpdate.locale) {
+      const locale = this.localesService.findOne(input.localeCode);
+      if (!locale) {
+        throw new Error('locales.service.localeNotFound');
+      }
+
+      const existingTranslation =
+        await this.prisma.attributeKeyTranslation.findFirst({
+          where: {
+            attributeKeyId: translationToUpdate.attributeKeyId,
+            locale: input.localeCode,
+          },
+        });
+
+      if (existingTranslation) {
+        throw new Error(
+          'product-variant-attribute-keys.service.translationAlreadyExists',
+        );
+      }
+    }
+
+    return this.prisma.attributeKeyTranslation.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        locale: input.localeCode,
+        keyTranslation: input.keyTranslation,
+      },
+    });
+  }
+
+  async deleteTranslation(id: number) {
+    return this.prisma.attributeKeyTranslation.delete({
+      where: {
+        id: id,
+      },
+    });
   }
 }

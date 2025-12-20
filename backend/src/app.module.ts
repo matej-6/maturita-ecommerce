@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Env, validateEnv } from './config/validate';
+import { ConfigModule } from '@nestjs/config';
+import { validateEnv } from './config/validate';
 import { PrismaService } from './prisma/prisma.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -30,13 +30,10 @@ import { ProductVariantAttributeKeysModule } from './product-variant-attribute-k
 import { CartsModule } from './carts/carts.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrdersModule } from './orders/orders.module';
-import { TaskService } from './tasks/task.service';
-import { TasksModule } from './tasks/tasks.module';
 import { LLMPromptsModule } from './llm-prompts/llm-prompts.module';
-import { BullModule } from '@nestjs/bullmq';
-import { ConsumersModule } from './consumers/consumers.module';
-import { LlmModule } from './llm/llm.module';
 import { QdrantModule } from './qdrant/qdrant.module';
+import { BullConfigModule } from './bull-config/bull-config.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -93,20 +90,6 @@ import { QdrantModule } from './qdrant/qdrant.module';
       envFilePath: ['.env.production', '.env.development', '.env'],
       validate: validateEnv,
     }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory(configService: ConfigService<Env>) {
-        return {
-          connection: {
-            host: configService.get('REDIS_HOST'),
-            port: configService.get('REDIS_PORT'),
-            username: configService.get('REDIS_USERNAME'),
-            password: configService.get('REDIS_PASSWORD'),
-          },
-        };
-      },
-    }),
     PrismaModule,
     CategoriesModule,
     UsersModule,
@@ -121,14 +104,13 @@ import { QdrantModule } from './qdrant/qdrant.module';
     CartsModule,
     CartItemsModule,
     OrdersModule,
-    TasksModule,
     LLMPromptsModule,
-    ConsumersModule,
-    LlmModule,
     QdrantModule,
+    BullConfigModule,
+    SeedModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService, TaskService],
+  providers: [AppService, AuthService],
 })
 export class AppModule {}
 

@@ -15,7 +15,8 @@ import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { ProductTranslation } from 'generated/prisma/client';
 import { CreateProductTranslationInput } from './dto/create-product-translation.input';
 import { EditProductTranslationInput } from './dto/edit-product-translation.input';
-import { LlmService } from 'src/llm/llm.service';
+import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
+import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 
 @Injectable()
 export class ProductsService {
@@ -24,7 +25,8 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly localesService: LocalesService,
-    private readonly llmService: LlmService,
+    private readonly qdrantService: QdrantService,
+    private readonly llmService: LLMPromptsService,
   ) {}
 
   async create(input: CreateProductInput) {
@@ -187,13 +189,18 @@ export class ProductsService {
       },
     });
 
-    if (updatedTranslation.locale === 'en') {
-      await this.llmService.addProductEmbeddingTask({
-        id:
-      })
-    }
-
     return updatedTranslation;
+  }
+
+  async generateProductEmbeddings(productId: number): Promise<void> {
+    await this.llmService.removeProductEmbeddingTask(productId);
+    await this.deleteProductEmbeddings(productId);
+    await this.llmService.addProductEmbeddingTask({ productId: productId });
+  }
+
+  async removeProductEmbeddings(productId: number): Promise<void> {
+    await this.llmService.removeProductEmbeddingTask(productId);
+    await this.deleteProductEmbeddings(productId);
   }
 
   private validatePaginationArgs(args: PaginationArgs) {
@@ -545,6 +552,14 @@ export class ProductsService {
   }
 
   async removeCategoryFromProducts(categoryId: number) {
+    const affected = await this.prisma.product.findMany({
+      where: {
+        categoryId: categoryId,
+      },
+      select: {
+        id: true,
+      },
+    });
     await this.prisma.product.updateMany({
       where: {
         categoryId: categoryId,
@@ -553,6 +568,16 @@ export class ProductsService {
         categoryId: null,
       },
     });
+
+    await Promise.all(
+      affected.map(async (product) => {
+        await this.llmService.removeProductEmbeddingTask(product.id);
+        await this.deleteProductEmbeddings(product.id);
+        await this.llmService.addProductEmbeddingTask({
+          productId: product.id,
+        });
+      }),
+    );
   }
 
   async update(id: number, input: UpdateProductInput): Promise<Product> {
@@ -620,7 +645,6 @@ export class ProductsService {
     };
   }
 
-  // otestovat este...
   async remove(id: number) {
     const deletedProductId = await this.prisma.$transaction(async (tx) => {
       await tx.productImage.deleteMany({
@@ -662,7 +686,49 @@ export class ProductsService {
 
       return deletedProduct.id;
     });
+
+    await this.llmService.removeProductEmbeddingTask(id);
+    await this.deleteProductEmbeddings(id);
+
     return deletedProductId;
+  }
+
+  async deleteProductEmbeddings(productId: number): Promise<void> {
+    await this.qdrantService.qdrantClient.delete(QdrantCollections.PRODUCTS, {
+      points: [productId],
+    });
+
+    try {
+      await this.prisma.embeddingTask.delete({
+        where: {
+          productId: productId,
+        },
+      });
+    } catch (e) {}
+
+    await this.qdrantService.qdrantClient.delete(
+      QdrantCollections.PRODUCT_CHUNKS,
+      {
+        filter: {
+          must: [
+            {
+              key: 'productId',
+              match: {
+                value: productId,
+              },
+            },
+          ],
+        },
+      },
+    );
+
+    try {
+      await this.prisma.productContentEmbeddingTask.delete({
+        where: {
+          productId: productId,
+        },
+      });
+    } catch (e) {}
   }
 
   async getAllTranslationsForProductsByBatch(productIds: number[]) {
@@ -710,11 +776,12 @@ export class ProductsService {
   async deleteProductTranslation(
     productTranslationId: number,
   ): Promise<number> {
-    await this.prisma.productTranslation.delete({
-      where: {
-        id: productTranslationId,
-      },
-    });
+    const deletedProductTranslation =
+      await this.prisma.productTranslation.delete({
+        where: {
+          id: productTranslationId,
+        },
+      });
 
     return productTranslationId;
   }
@@ -769,6 +836,7 @@ export class ProductsService {
         markdownContent: input.markdownContent || null,
       },
     });
+
     return newTranslation;
   }
 

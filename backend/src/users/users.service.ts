@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserDto } from './dto/user.dto';
@@ -22,7 +22,7 @@ export class UsersService {
     try {
       hashedPassword = await bcrypt.hash(createUserInput.password, 10);
     } catch (err) {
-      this.logger.error('Failed to hash password: ', err);
+      this.logger.error('Failed to hash password: ', err.message);
       throw new InternalServerErrorException('Failed to hash password');
     }
 

@@ -3,6 +3,8 @@ import { CreateProductVariantAttributeInput } from './dto/create-product-variant
 import { UpdateProductVariantAttributeInput } from './dto/update-product-variant-attribute.input';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LocalesService } from 'src/locales/locales.service';
+import { CreateProductVariantAttributeTranslationInput } from './dto/create-product-variant-attribute-translation.input';
+import { UpdateProductVariantAttributeTranslationInput } from './dto/update-product-variant-attribute-translation.input';
 
 @Injectable()
 export class ProductVariantAttributesService {
@@ -187,6 +189,87 @@ export class ProductVariantAttributesService {
             },
           },
         },
+      },
+    });
+  }
+
+  async createTranslation(
+    input: CreateProductVariantAttributeTranslationInput,
+  ) {
+    const locale = this.localesService.findOne(input.locale);
+
+    if (!locale) {
+      throw new BadRequestException('locales.service.localeNotFound');
+    }
+
+    const existingTranslation =
+      await this.prisma.attributeTranslation.findFirst({
+        where: {
+          attributeId: input.attributeId,
+          locale: locale.code,
+        },
+      });
+
+    if (existingTranslation) {
+      throw new BadRequestException(
+        'product-variant-attributes.service.translationAlreadyExists',
+      );
+    }
+
+    return this.prisma.attributeTranslation.create({
+      data: {
+        attributeId: input.attributeId,
+        locale: locale.code,
+        value: input.valueTranslation,
+      },
+    });
+  }
+
+  async updateTranslation(
+    input: UpdateProductVariantAttributeTranslationInput,
+  ) {
+    const locale = this.localesService.findOne(input.locale);
+
+    if (!locale) {
+      throw new BadRequestException('locales.service.localeNotFound');
+    }
+
+    const translationToUpdate =
+      await this.prisma.attributeTranslation.findUnique({
+        where: { id: input.id },
+      });
+
+    if (!translationToUpdate) {
+      throw new BadRequestException(
+        'product-variant-attributes.service.translationNotFound',
+      );
+    }
+
+    if (translationToUpdate.locale !== locale.code) {
+      if (!locale) {
+        throw new BadRequestException('locales.service.localeNotFound');
+      }
+
+      const existingTranslation =
+        await this.prisma.attributeTranslation.findFirst({
+          where: {
+            attributeId: translationToUpdate.attributeId,
+            locale: locale.code,
+          },
+        });
+
+      if (existingTranslation) {
+        throw new BadRequestException(
+          'product-variant-attributes.service.translationAlreadyExists',
+        );
+      }
+    }
+
+    return this.prisma.attributeTranslation.update({
+      where: { id: input.id },
+      data: {
+        locale: locale.code,
+        value: input.valueTranslation,
       },
     });
   }

@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { forwardRef, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
 import { EmbeddingTaskStatus } from 'generated/prisma/enums';
@@ -34,6 +34,7 @@ export class LLMTaskConsumer extends WorkerHost {
   private readonly LLM_MODEL: string;
   private readonly EMBEDDING_MODEL: string;
   constructor(
+    @Inject(forwardRef(() => LLMPromptsService))
     private readonly llmPromptsService: LLMPromptsService,
     private readonly prisma: PrismaService,
     private readonly qdrantService: QdrantService,
@@ -49,8 +50,9 @@ export class LLMTaskConsumer extends WorkerHost {
   }
 
   async process(job: Job<LLMTaskJob, any, string>): Promise<any> {
-    switch (job.name as keyof typeof LLMTaskJobType) {
-      case 'USER_PROMPT': {
+    switch (job.name as LLMTaskJobType) {
+      case LLMTaskJobType.USER_PROMPT: {
+        this.logger.log(`Processing USER_PROMPT job id ${job.id}`);
         const jobData = job.data as UserPromptJob;
         try {
           const response = await this.processUserPromptJob(jobData);
@@ -67,7 +69,8 @@ export class LLMTaskConsumer extends WorkerHost {
         }
         break;
       }
-      case 'PRODUCT_EMBEDDING': {
+      case LLMTaskJobType.PRODUCT_EMBEDDING: {
+        this.logger.log(`Processing PRODUCT_EMBEDDING job id ${job.id}`);
         const jobData = job.data as EmbeddingJob;
         await this.processProductEmbeddingJob(jobData);
         await this.processProductContentEmbeddingJob(jobData);
@@ -332,40 +335,6 @@ Respond ONLY in this JSON format:
       },
       data: {
         status: EmbeddingTaskStatus.COMPLETED,
-      },
-    });
-  }
-
-  async deleteProductEmbeddings(productId: number): Promise<void> {
-    await this.qdrantService.qdrantClient.delete(QdrantCollections.PRODUCTS, {
-      points: [productId],
-    });
-
-    await this.prisma.embeddingTask.delete({
-      where: {
-        productId: productId,
-      },
-    });
-
-    await this.qdrantService.qdrantClient.delete(
-      QdrantCollections.PRODUCT_CHUNKS,
-      {
-        filter: {
-          must: [
-            {
-              key: 'productId',
-              match: {
-                value: productId,
-              },
-            },
-          ],
-        },
-      },
-    );
-
-    await this.prisma.productContentEmbeddingTask.delete({
-      where: {
-        productId: productId,
       },
     });
   }

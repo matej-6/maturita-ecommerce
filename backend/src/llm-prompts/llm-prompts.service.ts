@@ -1,30 +1,25 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { LLMTask } from './entities/llm-task.entity';
 import { CreateLLMPromptInput } from './dto/create-llm-prompt.input';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LLMTaskStatus } from 'generated/prisma/enums';
-import { ConfigService } from '@nestjs/config';
-import { Env } from 'src/config/validate';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { LocalesService } from 'src/locales/locales.service';
-import { LLMTaskJobType, UserPromptJob } from 'src/llm/llm-task.consumer';
-import { LlmService } from 'src/llm/llm.service';
+import {
+  EmbeddingJob,
+  LLMTaskJobType,
+  UserPromptJob,
+} from './llm-task.consumer';
 
 @Injectable()
-export class LLMPromptsService implements OnModuleInit {
+export class LLMPromptsService {
   private readonly logger = new Logger(LLMPromptsService.name);
 
   private readonly DAILY_USER_TASK_LIMIT = 20;
   constructor(
     private readonly prisma: PrismaService,
-    private readonly llmService: LlmService,
     @InjectQueue('llm-tasks') private readonly llmTasksQueue: Queue,
   ) {}
-
-  async onModuleInit() {
-    await this.llmTasksQueue.drain(true);
-  }
 
   async createTask(
     input: CreateLLMPromptInput,
@@ -55,7 +50,7 @@ export class LLMPromptsService implements OnModuleInit {
       },
     });
 
-    await this.llmService.addUserPromptTask({
+    await this.addUserPromptTask({
       id: llmTask.id,
       prompt: llmTask.prompt,
       productId: input.productId,
@@ -105,8 +100,48 @@ export class LLMPromptsService implements OnModuleInit {
       where: { id },
     });
 
-    await this.llmService.removeTaskById(id);
+    await this.removeUserPromptTaskById(id);
 
     return true;
+  }
+
+  async clearLlmTasksQueue(): Promise<void> {
+    await this.llmTasksQueue.drain(true);
+  }
+
+  async addUserPromptTask(data: UserPromptJob): Promise<void> {
+    await this.llmTasksQueue.add(LLMTaskJobType.USER_PROMPT, data, {
+      removeOnComplete: true,
+      removeOnFail: true,
+      jobId: this.getUserPromptTaskJobId(data.id),
+    });
+  }
+
+  async addProductEmbeddingTask(data: EmbeddingJob): Promise<void> {
+    await this.llmTasksQueue.add(LLMTaskJobType.PRODUCT_EMBEDDING, data, {
+      removeOnComplete: true,
+      removeOnFail: true,
+      attempts: 3,
+      priority: 5,
+      jobId: this.getProductEmbeddingTaskJobId(data.productId),
+    });
+  }
+
+  private getProductEmbeddingTaskJobId(productId: number): string {
+    return `product-embedding-${productId}`;
+  }
+
+  private getUserPromptTaskJobId(taskId: number): string {
+    return `user-prompt-${taskId}`;
+  }
+
+  async removeProductEmbeddingTask(productId: number): Promise<void> {
+    await this.llmTasksQueue.remove(
+      this.getProductEmbeddingTaskJobId(productId),
+    );
+  }
+
+  async removeUserPromptTaskById(id: number): Promise<void> {
+    await this.llmTasksQueue.remove(this.getUserPromptTaskJobId(id));
   }
 }

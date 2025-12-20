@@ -77,7 +77,7 @@ input CreateCategoryTranslationInput {
   name: String!
 }
 
-input CreateLLMTaskInput {
+input CreateLLMPromptInput {
   productId: Int
   prompt: String!
 }
@@ -216,7 +216,7 @@ type Mutation {
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
-  createLlmTask(input: CreateLLMTaskInput!): LLMTask!
+  createLlmTask(input: CreateLLMPromptInput!): LLMTask!
   createProduct(createProductInput: CreateProductInput!): Product!
   createProductTranslation(createProductTranslationInput: CreateProductTranslationInput!, productId: Int!): ProductTranslation!
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
