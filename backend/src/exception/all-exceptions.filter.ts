@@ -17,10 +17,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exc: HttpException, host: ArgumentsHost) {
     const i18n = I18nContext.current();
 
-    const message: string =
-      i18n?.t(exc.message, { defaultValue: undefined }) ||
-      i18n?.t('error.' + exc.message, { defaultValue: undefined }) ||
-      exc.message;
+    let message = 'An unknown error occurred.';
+
+    if (i18n) {
+      const key1 = `error.${exc.message}`;
+      const key2 = exc.message;
+      const t1: string = i18n.t(key1);
+      const t2: string = i18n.t(key2);
+
+      if (t1 !== key1) {
+        message = t1;
+      } else if (t2 !== key2) {
+        message = t2;
+      }
+    }
 
     this.logger.debug(`
       response: {

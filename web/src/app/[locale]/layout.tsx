@@ -92,7 +92,8 @@ export default async function LocaleLayout({
       <body
         id="root"
         className={cn(
-          inter.variable,
+          geistSans.variable,
+          geistMono.variable,
           bricolage.variable,
           "antialiased font-primary overflow-y-scroll!"
         )}

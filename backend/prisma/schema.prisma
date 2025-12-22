@@ -23,7 +23,6 @@ enum Role {
 model User {
   id             Int                   @id @default(autoincrement())
   email          String                @unique
-  emailVerified  Boolean               @default(false)
   hashedPassword String?
   firstName      String?
   lastName       String?
@@ -32,12 +31,24 @@ model User {
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   Session        RefreshTokenSession[]
-  carts          Cart[]
+  Cart           Cart?
   orders         Order[]
   LLMTasks       LLMTask[]
+  UserAvatar     UserAvatar?
 
   @@index([email])
   @@map("users")
+}
+
+model UserAvatar {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  base64   String @db.LongText
+  mimeType String
+
+  @@index([userId])
+  @@map("user_avatars")
 }
 
 model RefreshTokenSession {
@@ -204,7 +215,7 @@ model CartItem {
 
 model Cart {
   id        Int        @id @default(autoincrement())
-  userId    Int
+  userId    Int        @unique
   User      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   CartItems CartItem[]
   createdAt DateTime   @default(now())
@@ -215,18 +226,21 @@ model Cart {
 }
 
 model Order {
-  id                Int                   @id @default(autoincrement())
-  userId            Int
-  User              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  totalInCents      Int
-  status            OrderStatus           @default(PENDING)
-  shippingDetailsId Int?
-  shippingDetails   OrderShippingDetails?
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
-  orderItems        OrderItem[]
+  id                    Int                   @id @default(autoincrement())
+  userId                Int
+  User                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalInCents          Int
+  status                OrderStatus           @default(PENDING)
+  shippingDetailsId     Int?
+  shippingDetails       OrderShippingDetails?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  orderItems            OrderItem[]
+  StripeSessionId       String?
+  StripePaymentIntentId String?
 
   @@index([userId])
+  @@index([StripeSessionId])
   @@map("orders")
 }
 

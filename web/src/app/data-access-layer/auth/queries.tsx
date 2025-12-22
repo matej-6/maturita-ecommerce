@@ -9,10 +9,8 @@ export const isAdmin = cache(async () => {
 });
 
 const MeFragment = graphql(`
-  fragment MeFragment on MeResponse {
+  fragment MeFragment on User {
     id
-    avatar
-    emailVerified
     firstName
     lastName
     role

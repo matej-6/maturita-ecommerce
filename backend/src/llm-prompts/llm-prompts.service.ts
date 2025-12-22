@@ -42,6 +42,12 @@ export class LLMPromptsService {
       throw new Error('Prompt cannot be empty');
     }
 
+    const existingJob = await this.llmTasksQueue.getJob(
+      this.getUserPromptTaskJobIdByUserId(userId),
+    );
+    if (existingJob) {
+      throw new Error('Please wait for your previous prompt to finish.');
+    }
     const llmTask = await this.prisma.lLMTask.create({
       data: {
         prompt: input.prompt,
@@ -50,13 +56,28 @@ export class LLMPromptsService {
       },
     });
 
-    await this.addUserPromptTask({
-      id: llmTask.id,
-      prompt: llmTask.prompt,
-      productId: input.productId,
-    });
+    try {
+      await this.addUserPromptTask({
+        id: llmTask.id,
+        prompt: llmTask.prompt,
+        productId: input.productId,
+        userId: userId,
+      });
 
-    return llmTask;
+      return llmTask;
+    } catch (error) {
+      this.logger.error(error.message);
+      const res = await this.prisma.lLMTask.update({
+        where: {
+          id: llmTask.id,
+        },
+        data: {
+          status: LLMTaskStatus.FAILED,
+          response: 'Something went wrong. Please try again.',
+        },
+      });
+      return res;
+    }
   }
 
   async getTaskById(id: number, userId: number): Promise<LLMTask | null> {
@@ -100,7 +121,7 @@ export class LLMPromptsService {
       where: { id },
     });
 
-    await this.removeUserPromptTaskById(id);
+    await this.removeUserPromptTaskByUserId(userId);
 
     return true;
   }
@@ -113,7 +134,7 @@ export class LLMPromptsService {
     await this.llmTasksQueue.add(LLMTaskJobType.USER_PROMPT, data, {
       removeOnComplete: true,
       removeOnFail: true,
-      jobId: this.getUserPromptTaskJobId(data.id),
+      jobId: this.getUserPromptTaskJobIdByUserId(data.userId),
     });
   }
 
@@ -165,7 +186,7 @@ export class LLMPromptsService {
     return `product-embedding-${productId}`;
   }
 
-  private getUserPromptTaskJobId(taskId: number): string {
+  private getUserPromptTaskJobIdByUserId(taskId: number): string {
     return `user-prompt-${taskId}`;
   }
 
@@ -194,7 +215,7 @@ export class LLMPromptsService {
     );
   }
 
-  async removeUserPromptTaskById(id: number): Promise<void> {
-    await this.llmTasksQueue.remove(this.getUserPromptTaskJobId(id));
+  async removeUserPromptTaskByUserId(id: number): Promise<void> {
+    await this.llmTasksQueue.remove(this.getUserPromptTaskJobIdByUserId(id));
   }
 }

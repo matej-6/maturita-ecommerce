@@ -11,8 +11,6 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RedisService } from 'src/redis/redis.service';
-import * as crypto from 'crypto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Response } from 'express';
 import { Role } from 'generated/prisma/client';
@@ -20,10 +18,6 @@ import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 import { ERROR } from 'src/errors';
-
-const EMAIL_VERIFICATION_KEY = 'email-verification';
-const EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS = 60 * 5;
-
 @Injectable()
 export class AuthService {
   private readonly accessTokenExpirationInSeconds: number;
@@ -39,7 +33,6 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly redisService: RedisService,
   ) {
     this.accessTokenExpirationInSeconds = this.configService.getOrThrow<
       Env['JWT_ACCESS_EXPIRATION_IN_SECONDS']
@@ -274,106 +267,6 @@ export class AuthService {
     }
   }
 
-  getEmailVerificationKey(email: string) {
-    return `${EMAIL_VERIFICATION_KEY}:${email}`;
-  }
-
-  async validateEmail(email: string, code: string) {
-    const key = this.getEmailVerificationKey(email);
-    const redisClient = this.redisService.client;
-
-    const value = await redisClient.get(key);
-
-    if (!value || value !== code) {
-      throw new BadRequestException(ERROR.emailInvalidVerificationCode);
-    }
-
-    redisClient.del(key).catch((error: any) => {
-      this.logger.error('Failed to delete email verification code.', error);
-    });
-
-    try {
-      await this.prismaService.user.update({
-        data: {
-          emailVerified: true,
-        },
-        where: {
-          email: email,
-        },
-      });
-    } catch (error) {
-      this.logger.error(
-        'Failed to update user email verification status.',
-        error,
-      );
-      throw new InternalServerErrorException(ERROR.unknownError);
-    }
-  }
-
-  async sendEmailVerification(email: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email,
-      },
-      select: {
-        emailVerified: true,
-      },
-    });
-
-    if (!user) {
-      this.logger.warn(`Nonexistent user tried to verify email: ${email}`);
-      throw new BadRequestException(ERROR.badRequest);
-    }
-
-    if (user.emailVerified) {
-      this.logger.warn(
-        `User with already verified email tried to verify email: ${email}`,
-      );
-      throw new BadRequestException(ERROR.emailAlreadyVerified);
-    }
-
-    let code: string;
-
-    try {
-      code = this.generateEmailVerificationCode(6);
-    } catch (error) {
-      this.logger.error('Failed to generate email verification code.', error);
-      throw new InternalServerErrorException(ERROR.unknownError);
-    }
-
-    const key = this.getEmailVerificationKey(email);
-
-    const redisClient = this.redisService.client;
-
-    try {
-      await redisClient.set(key, code, {
-        expiration: {
-          type: 'EX',
-          value: EMAIL_VERIFICATION_EXPIRATION_IN_SECONDS,
-        },
-      });
-      this.logger.debug(`Verification code for email ${email} is ${code}.`);
-    } catch (error) {
-      this.logger.error('Failed to set email verification code.', error);
-      throw new InternalServerErrorException(ERROR.unknownError);
-    }
-
-    // TODO: Send email with code
-  }
-
-  private generateEmailVerificationCode(length: number = 6) {
-    const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-
-    const resultArray = new Array(length).fill(0);
-    const clen = characters.length;
-
-    for (let i = 0; i < length; i++) {
-      resultArray[i] = characters[crypto.randomInt(0, clen)];
-    }
-
-    return resultArray.join('');
-  }
-
   async signOutAll(userId: number) {
     try {
       await this.prismaService.refreshTokenSession.deleteMany({
@@ -448,5 +341,26 @@ export class AuthService {
       this.logger.error('Failed to register user.', error);
       throw new InternalServerErrorException(ERROR.unknownError);
     }
+  }
+
+  async deleteAccount(userId: number) {
+    const pendingOrders = await this.prismaService.order.findMany({
+      where: {
+        userId: userId,
+        status: {
+          in: ['PENDING', 'PROCESSING', 'SHIPPED'],
+        },
+      },
+    });
+
+    if (pendingOrders.length > 0) {
+      throw new BadRequestException('auth.service.deleteAccount.pendingOrders');
+    }
+
+    await this.prismaService.user.delete({
+      where: {
+        id: userId,
+      },
+    });
   }
 }

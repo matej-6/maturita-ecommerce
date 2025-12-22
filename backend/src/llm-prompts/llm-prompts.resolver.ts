@@ -20,7 +20,7 @@ export class LLMPromptsResolver {
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<LLMTask> {
     return await this.llmTasksService.createTask(input, user.id);
-    // return await this.llmTasksService.createTask(input, 26);
+    // return await this.llmTasksService.createTask(input, 33);
   }
 
   @UseGuards(JwtAuthGuard)

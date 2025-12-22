@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Order } from 'generated/prisma/client';
 import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import Stripe from 'stripe';
@@ -23,7 +24,63 @@ export class OrdersService {
     )!;
   }
 
-  async createCheckoutSession(userId: number) {
+  async findAllOrdersByUserId(userId: number): Promise<Order[]> {
+    return this.prisma.order.findMany({
+      where: { userId: userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findOrderByIdAndUserId(
+    id: number,
+    userId: number,
+  ): Promise<Order | null> {
+    return this.prisma.order.findFirst({
+      where: { id: id, userId: userId },
+    });
+  }
+
+  private async syncOrderStatusWithStripe(orderId: number) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) {
+      throw new Error('Order not found or missing session ID');
+    }
+
+    if (!order.StripePaymentIntentId) {
+      throw new Error('Order does not have a Stripe Payment Intent ID');
+    }
+
+    const paymentIntent = await this.stripe.paymentIntents.retrieve(
+      order.StripePaymentIntentId,
+    );
+
+    if (
+      paymentIntent.status === 'succeeded' &&
+      (order.status === 'PENDING' || order.status === 'FAILED')
+    ) {
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: 'PROCESSING',
+          shippingDetails: {
+            create: {
+              city: paymentIntent.shipping?.address?.city || '',
+              country: paymentIntent.shipping?.address?.country || '',
+              line1: paymentIntent.shipping?.address?.line1 || '',
+              name: paymentIntent.shipping?.name || '',
+              postalCode: paymentIntent.shipping?.address?.postal_code || '',
+              state: paymentIntent.shipping?.address?.state || '',
+              line2: paymentIntent.shipping?.address?.line2 || '',
+            },
+          },
+        },
+      });
+    }
+  }
+
+  async createOrderAndCheckoutSession(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
@@ -100,6 +157,13 @@ export class OrdersService {
             },
           },
         },
+        include: {
+          orderItems: {
+            include: {
+              ProductVariant: true,
+            },
+          },
+        },
       });
     });
 
@@ -117,18 +181,27 @@ export class OrdersService {
       },
       billing_address_collection: 'required',
       customer_email: user.email,
-      line_items: cart.CartItems.map((item) => ({
+      line_items: order.orderItems.map((item) => ({
         quantity: item.quantity,
         price_data: {
           currency: 'eur',
-          unit_amount: item.ProductVariant.priceInCents,
+          unit_amount: item.ProductVariant!.priceInCents,
           product_data: {
-            name: item.ProductVariant.sku,
+            name: item.ProductVariant!.sku,
           },
         },
       })),
       mode: 'payment',
-      success_url: `${this.nextjsUrl}/checkout/success?orderId=${order.id}`,
+      success_url: `${this.nextjsUrl}/orders/${order.id}`,
+      cancel_url: `${this.nextjsUrl}/orders/${order.id}`,
+    });
+
+    await this.prisma.order.update({
+      where: { id: order.id },
+      data: {
+        StripeSessionId: session.id,
+        StripePaymentIntentId: session.payment_intent as string,
+      },
     });
 
     return session.url;
@@ -167,39 +240,172 @@ export class OrdersService {
     }
   }
 
-  async cancelOrder(orderId: number) {
-    await this.prisma.$transaction(async (tx) => {
-      const order = await tx.order.update({
+  async retryPendingCheckout(orderId: number, userId: number) {
+    try {
+      await this.syncOrderStatusWithStripe(orderId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to sync order status with Stripe for order ID ${orderId}: ${error}`,
+      );
+      throw new Error('Something went wrong. Please contact support.');
+    }
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId, userId: userId },
+      include: {
+        orderItems: true,
+      },
+    });
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    if (order.status !== 'PENDING') {
+      throw new Error('Only PENDING orders can be retried');
+    }
+
+    const session = await this.stripe.checkout.sessions.retrieve(
+      order.StripeSessionId!,
+    );
+
+    if (session.status === 'expired') {
+      await this.prisma.order.update({
         where: { id: orderId },
         data: {
-          status: 'CANCELED',
-        },
-        include: {
-          orderItems: true,
+          status: 'FAILED',
         },
       });
+      throw new Error(
+        'The checkout session has expired. Please create a new order.',
+      );
+    }
 
-      for (const item of order.orderItems.filter(
-        (oi) => oi.productVariantId != null,
-      )) {
-        await tx.productVariant.update({
-          where: { id: item.productVariantId! },
+    return session.url;
+  }
+
+  async handleSessionExpired(orderId: number) {
+    await this.syncOrderStatusWithStripe(orderId);
+
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order || !order.StripeSessionId) {
+      throw new Error('Order not found or missing session ID');
+    }
+
+    if (order.status === 'PENDING') {
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: 'FAILED',
+        },
+      });
+    }
+  }
+
+  async cancelOrder(orderId: number, userId: number): Promise<Order> {
+    try {
+      await this.syncOrderStatusWithStripe(orderId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to sync order status with Stripe for order ID ${orderId}: ${error}`,
+      );
+      throw new Error('Something went wrong. Please contact support.');
+    }
+
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, userId: userId },
+    });
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    if (order.status !== 'PENDING' && order.status !== 'PROCESSING') {
+      throw new Error('Only PENDING or PROCESSING orders can be canceled');
+    }
+
+    const session = await this.stripe.checkout.sessions.retrieve(
+      order.StripeSessionId!,
+    );
+
+    if (session.payment_status === 'paid') {
+      const res = await this.prisma.$transaction(async (tx) => {
+        const order = await tx.order.update({
+          where: { id: orderId },
           data: {
-            stock: {
-              increment: item.quantity,
-            },
+            status: 'CANCELED',
+          },
+          include: {
+            orderItems: true,
           },
         });
-      }
 
-      return order;
-    });
+        for (const item of order.orderItems.filter(
+          (oi) => oi.productVariantId != null,
+        )) {
+          try {
+            await tx.productVariant.update({
+              where: { id: item.productVariantId! },
+              data: {
+                stock: {
+                  increment: item.quantity,
+                },
+              },
+            });
+          } catch (error) {
+            this.logger.error(
+              `Failed to restock product variant ID ${item.productVariantId} for order ID ${orderId}: ${error}`,
+            );
+          }
+        }
+
+        return order;
+      });
+      await this.stripe.refunds.create({
+        payment_intent: order.StripePaymentIntentId!,
+      });
+      return res;
+    } else {
+      await this.stripe.checkout.sessions.expire(order.StripeSessionId!);
+      const res = await this.prisma.$transaction(async (tx) => {
+        const order = await tx.order.update({
+          where: { id: orderId },
+          data: {
+            status: 'CANCELED',
+          },
+          include: {
+            orderItems: true,
+          },
+        });
+
+        for (const item of order.orderItems.filter(
+          (oi) => oi.productVariantId != null,
+        )) {
+          try {
+            await tx.productVariant.update({
+              where: { id: item.productVariantId! },
+              data: {
+                stock: {
+                  increment: item.quantity,
+                },
+              },
+            });
+          } catch (error) {
+            this.logger.error(
+              `Failed to restock product variant ID ${item.productVariantId} for order ID ${orderId}: ${error}`,
+            );
+          }
+        }
+
+        return order;
+      });
+      return res;
+    }
   }
 
   async constructStripeEvent(payload: any, signature: string) {
-    this.logger.log('Constructing Stripe event from webhook payload');
-    this.logger.log(`Payload: ${payload}`);
-
     return this.stripe.webhooks.constructEventAsync(
       payload,
       signature,

@@ -9,6 +9,7 @@ import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { LocalesService } from 'src/locales/locales.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
+import { translate } from '@vitalets/google-translate-api';
 
 export enum LLMTaskJobType {
   USER_PROMPT = 'user-prompt',
@@ -18,6 +19,7 @@ export enum LLMTaskJobType {
 
 export type UserPromptJob = {
   id: number;
+  userId: number;
   prompt: string;
   productId?: number;
 };
@@ -143,7 +145,11 @@ export class LLMTaskConsumer extends WorkerHost {
     }
   }
 
-  private async fetchLLM<T>(system: string, prompt: string): Promise<T> {
+  private async fetchLLM<T = string>(
+    system: string,
+    prompt: string,
+    parseJson: boolean = true,
+  ): Promise<T> {
     const res = await fetch(`${this.LLM_BASE_URL}/api/generate`, {
       method: 'POST',
       headers: {
@@ -165,6 +171,9 @@ export class LLMTaskConsumer extends WorkerHost {
     try {
       const data = (await res.json()) as { response: string };
       this.logger.log('LLM response data:', data);
+      if (!parseJson) {
+        return data.response as T;
+      }
       const output = (await JSON.parse(data.response)) as T;
       return output;
     } catch (error) {
@@ -199,14 +208,14 @@ export class LLMTaskConsumer extends WorkerHost {
   ): Promise<
     'similiarProducts' | 'productSearch' | 'productInformation' | 'none'
   > {
-    const system = `Classify the user prompt into ONE category:
-- similiarProducts: asks for products similar to a specific product
-- productSearch: searches for products by features, filters, or keywords
-- productInformation: asks for details about a specific product
-- none: does not fit the above
-
-Return ONLY this JSON:
-{ "category": "similiarProducts | productSearch | productInformation | none" }`;
+    const system = `You are an AI assistant that categorizes user prompts into one of 4 categories: 'similiarProducts', 'productSearch', 'productInformation', or 'none'.
+        Here's a brief description of each category:
+        1. similiarProducts: The user is looking for products similar to a given product
+        2. productSearch: The user is searching for products based on certain criteria or keywords
+        3. productInformation: The user is seeking specific information about a particular product
+        4. none: The prompt does not fit into any of the above categories.
+        Analyze the following prompt and determine the most appropriate category.
+        Respond with this JSON FORMAT, NOTHING ELSE: { "category": "your_chosen_category" }`;
     const response = await this.fetchLLM<{ category: string }>(system, prompt);
     const category = response.category;
     if (
@@ -221,28 +230,23 @@ Return ONLY this JSON:
     return category;
   }
 
-  private async translateToEnglish(prompt: string): Promise<{
+  private async translate(
+    textToTranslate: string,
+    from: string = 'auto',
+    to: string = 'en',
+  ): Promise<{
     translation: string;
     original_language: string;
   }> {
-    const system = `Translate the user prompt to English.
-If it is already English, return it unchanged.
-Detect the original language and include its ISO 639-1 code.
-If unsure, set original_language to "unknown" and do not change the text.
-Respond ONLY in this JSON format:
-{ "translation": "...", "original_language": "..." }`;
-    const response = await this.fetchLLM<{
-      translation: string;
-      original_language: string;
-    }>(system, prompt);
-    if (
-      !response.translation ||
-      !response.original_language ||
-      response.original_language === 'unknown'
-    ) {
-      throw new Error('I cannot determine the language of the prompt.');
-    }
-    return response;
+    const { raw, text } = await translate(textToTranslate, {
+      from: from,
+      to: to,
+    });
+
+    return {
+      original_language: raw.src,
+      translation: text,
+    };
   }
 
   async processProductEmbeddingJob(job: EmbeddingJob): Promise<void> {
@@ -414,7 +418,11 @@ Respond ONLY in this JSON format:
     originalLanguageCode: string,
   ) {
     const system = `Translate the following text from English to this language code: ${originalLanguageCode}. Respond ONLY with the translated text.`;
-    const response = await this.fetchLLM<string>(system, englishResponse);
+    const response = await this.fetchLLM<string>(
+      system,
+      englishResponse,
+      false,
+    );
     return response;
   }
 
@@ -446,14 +454,18 @@ Respond ONLY in this JSON format:
   }
 
   async processUserPromptJob(job: UserPromptJob): Promise<string> {
-    const translationResult = await this.translateToEnglish(job.prompt);
+    let userPrompt = job.prompt;
+    let originalLanguage = 'en';
 
-    this.logger.log(
-      `Original prompt language: ${translationResult.original_language}`,
-    );
-    this.logger.log(`Translated prompt: ${translationResult.translation}`);
+    try {
+      const translationResult = await this.translate(job.prompt);
+      userPrompt = translationResult.translation;
+      originalLanguage = translationResult.original_language;
+    } catch (error) {
+      this.logger.error('Translate API failed: ' + error.message);
+    }
 
-    const category = await this.categorizePrompt(translationResult.translation);
+    const category = await this.categorizePrompt(userPrompt);
 
     if (category === 'none') {
       throw new Error("I can't assist with that request.");
@@ -467,20 +479,23 @@ Respond ONLY in this JSON format:
     }
 
     let response = await this.generateProductInformationResponse(
-      translationResult.translation,
+      userPrompt,
       job.productId!,
     );
 
     this.logger.log(`Generated LLM task response: ${response}`);
 
-    if (translationResult.original_language !== 'en') {
-      response = await this.translateResponseToOriginalLanguage(
-        response,
-        translationResult.original_language,
-      );
-      this.logger.log(
-        `Translated response to original language (${translationResult.original_language}): ${response}`,
-      );
+    if (originalLanguage !== 'en') {
+      try {
+        const responseTranslationResult = await this.translate(
+          response,
+          originalLanguage,
+          'en',
+        );
+        response = responseTranslationResult.translation;
+      } catch (error) {
+        this.logger.error('Translation API failed: ' + error.message);
+      }
     }
 
     return response;
@@ -534,6 +549,8 @@ Respond ONLY in this JSON format:
       },
     );
 
+    similarChunks.forEach((c) => this.logger.log(c.payload));
+
     const productInfo = {
       name: productContent.ProductTranslations[0]?.name || '',
       description: productContent.ProductTranslations[0]?.description || '',
@@ -547,15 +564,13 @@ Respond ONLY in this JSON format:
       ),
     };
 
-    const system = `You are an AI assistant that provides detailed information about products based on their descriptions and categories.
+    const system = `You are an AI assistant that provides detailed information about products based on their name, description, variants and content chunks.
     Use the following product information to answer the user's prompt:
     ${JSON.stringify(productInfo)}
 
-    Answer the user's prompt in detail using the provided product information. If the information is insufficient, respond accordingly.
-    Respond with this JSON FORMAT, NOTHING ELSE: { "answer": "your_detailed_answer" }
+    Answer the user's prompt using the provided product information. If the information is insufficient, respond accordingly.
     `;
 
-    const response = await this.fetchLLM<{ answer: string }>(system, prompt);
-    return response.answer;
+    return await this.fetchLLM<string>(system, prompt, false);
   }
 }

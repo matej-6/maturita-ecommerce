@@ -24,7 +24,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @Post('/create-checkout-session')
   async createCheckoutSession(@CurrentUser() user: AuthenticatedUserDto) {
-    const url = await this.ordersService.createCheckoutSession(user.id);
+    const url = await this.ordersService.createOrderAndCheckoutSession(user.id);
 
     return {
       url: url,
@@ -69,7 +69,7 @@ export class OrdersController {
         res.status(400).end();
         return;
       }
-      await this.ordersService.cancelOrder(orderId);
+      await this.ordersService.handleSessionExpired(orderId);
     }
 
     res.status(200).end();

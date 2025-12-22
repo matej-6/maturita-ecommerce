@@ -29,7 +29,7 @@
     "login": "Sign in",
     "register": "Register",
     "cart": "Cart",
-    "profile": "Profile",
+    "account-details": "Account Details",
     "logout": "Logout",
     "logging-out": "Logging out...",
     "admin-dashboard": "Admin Dashboard"

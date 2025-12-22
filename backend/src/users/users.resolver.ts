@@ -1,10 +1,22 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { UserAvatar } from './entities/user-avatar.entity';
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { GraphQLVoid } from 'graphql-scalars';
+import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -30,13 +42,38 @@ export class UsersResolver {
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => User)
-  updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
-    return this.usersService.update(updateUserInput.id, updateUserInput);
+  removeUser(@Args('id', { type: () => ID }) id: number) {
+    return this.usersService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ResolveField(() => UserAvatar, { name: 'avatar', nullable: true })
+  async getAvatar(@Parent() user: User): Promise<UserAvatar | null> {
+    return this.usersService.getAvatar(user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => User)
-  removeUser(@Args('id', { type: () => ID }) id: number) {
-    return this.usersService.remove(id);
+  async updateUser(
+    @Args('input') input: UpdateUserInput,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<User> {
+    return this.usersService.update(user.id, input);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async uploadAvatar(
+    @Args('base64') base64: string,
+    @Args('mimeType') mimeType: string,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<void> {
+    await this.usersService.uploadAvatar(user.id, base64, mimeType);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async deleteAvatar(@CurrentUser() user: AuthenticatedUserDto): Promise<void> {
+    await this.usersService.deleteAvatar(user.id);
   }
 }

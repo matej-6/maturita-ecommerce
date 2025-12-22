@@ -3,14 +3,12 @@ import { AuthService } from './auth.service';
 import { Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { GraphqlAppContext } from 'src/app.module';
-import { ConfigService } from '@nestjs/config';
-import { VerifyEmailInput } from './dto/verifyEmail.input';
 import { GraphQLVoid } from 'graphql-scalars';
 import { CurrentUser } from './current-user.decorator';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { MeResponse } from './dto/me.response';
-import { GqlJwtAuthGuard } from './guards/gql-jwt-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { User } from 'src/users/entities/user.entity';
 
 @Resolver()
 export class AuthResolver {
@@ -19,26 +17,9 @@ export class AuthResolver {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
-    private readonly configService: ConfigService,
   ) {}
 
-  @Mutation(() => GraphQLVoid)
-  async verifyEmail(
-    @Args('verifyEmailInput') verifyEmailInput: VerifyEmailInput,
-  ) {
-    await this.authService.validateEmail(
-      verifyEmailInput.email,
-      verifyEmailInput.code,
-    );
-  }
-
-  @UseGuards(GqlJwtAuthGuard)
-  @Mutation(() => GraphQLVoid)
-  async requestEmailVerification(@CurrentUser() user: AuthenticatedUserDto) {
-    await this.authService.sendEmailVerification(user.email);
-  }
-
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => GraphQLVoid)
   async logoutAll(
     @Context() { res }: GraphqlAppContext,
@@ -50,12 +31,38 @@ export class AuthResolver {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Query(() => MeResponse, { name: 'me' })
-  async me(@CurrentUser() user: AuthenticatedUserDto): Promise<MeResponse> {
+  @Query(() => User, { name: 'me' })
+  async me(@CurrentUser() user: AuthenticatedUserDto): Promise<User> {
     const foundUser = await this.usersService.findOne(user.id);
     if (!foundUser) {
       throw new NotFoundException();
     }
-    return MeResponse.fromUser(foundUser);
+    return foundUser;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async changePassword(
+    @Args('currentPassword') currentPassword: string,
+    @Args('newPassword') newPassword: string,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ) {
+    await this.usersService.changePassword(
+      user.id,
+      currentPassword,
+      newPassword,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async deleteAccount(
+    @Context() { res }: GraphqlAppContext,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<void> {
+    await this.authService.deleteAccount(user.id);
+    await this.authService.signOutAll(user.id);
+    res.clearCookie('Authentication');
+    res.clearCookie('Refresh');
   }
 }

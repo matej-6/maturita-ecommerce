@@ -104,6 +104,11 @@ export type CreateCategoryTranslationInput = {
   name: Scalars['String']['input'];
 };
 
+export type CreateLlmPromptInput = {
+  productId?: InputMaybe<Scalars['Int']['input']>;
+  prompt: Scalars['String']['input'];
+};
+
 export type CreateProductInput = {
   /** Parent category id */
   categoryId?: InputMaybe<Scalars['Int']['input']>;
@@ -177,6 +182,23 @@ export type EditProductTranslationInput = {
   productTranslationId: Scalars['Int']['input'];
 };
 
+export type LlmTask = {
+  __typename?: 'LLMTask';
+  date: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  prompt: Scalars['String']['output'];
+  response?: Maybe<Scalars['String']['output']>;
+  status: LlmTaskStatus;
+  userId: Scalars['Int']['output'];
+};
+
+export enum LlmTaskStatus {
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
+
 export type Locale = {
   __typename?: 'Locale';
   /** Locale code */
@@ -186,32 +208,23 @@ export type Locale = {
   name: Scalars['String']['output'];
 };
 
-export type MeResponse = {
-  __typename?: 'MeResponse';
-  avatar?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  email: Scalars['String']['output'];
-  emailVerified: Scalars['Boolean']['output'];
-  firstName?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  lastName?: Maybe<Scalars['String']['output']>;
-  role: Role;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   addItemToCart: Cart;
   addProductImage: ProductImage;
   addProductVariantImage: ProductVariantImage;
+  changePassword: Scalars['Void']['output'];
   createCategory: Category;
   createCategoryTranslation: CategoryTranslation;
+  createLlmTask: LlmTask;
   createProduct: Product;
   createProductTranslation: ProductTranslation;
   createProductVariant: ProductVariant;
   createProductVariantAttribute: ProductVariantAttribute;
   createProductVariantAttributeKey: ProductVariantAttributeKey;
   createUser: User;
+  deleteAccount: Scalars['Void']['output'];
+  deleteAvatar: Scalars['Void']['output'];
   deleteCategoryTranslation: Scalars['Int']['output'];
   deleteProductImage: Scalars['Int']['output'];
   deleteProductTranslation: Scalars['Int']['output'];
@@ -224,7 +237,6 @@ export type Mutation = {
   removeProductVariantAttributeKey: ProductVariantAttributeKey;
   removeProductVariantImage: Scalars['Int']['output'];
   removeUser: User;
-  requestEmailVerification: Scalars['Void']['output'];
   setProductThumbnailImage: ProductImage;
   setProductVariantThumbnailImage: ProductVariantImage;
   updateCartItemQuantity: Cart;
@@ -235,7 +247,7 @@ export type Mutation = {
   updateProductVariantAttribute: ProductVariantAttribute;
   updateProductVariantAttributeKey: ProductVariantAttributeKey;
   updateUser: User;
-  verifyEmail: Scalars['Void']['output'];
+  uploadAvatar: Scalars['Void']['output'];
 };
 
 
@@ -259,6 +271,12 @@ export type MutationAddProductVariantImageArgs = {
 };
 
 
+export type MutationChangePasswordArgs = {
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+};
+
+
 export type MutationCreateCategoryArgs = {
   createCategoryInput: CreateCategoryInput;
 };
@@ -266,6 +284,11 @@ export type MutationCreateCategoryArgs = {
 
 export type MutationCreateCategoryTranslationArgs = {
   newTranslationinput: CreateCategoryTranslationInput;
+};
+
+
+export type MutationCreateLlmTaskArgs = {
+  input: CreateLlmPromptInput;
 };
 
 
@@ -402,12 +425,13 @@ export type MutationUpdateProductVariantAttributeKeyArgs = {
 
 
 export type MutationUpdateUserArgs = {
-  updateUserInput: UpdateUserInput;
+  input: UpdateUserInput;
 };
 
 
-export type MutationVerifyEmailArgs = {
-  verifyEmailInput: VerifyEmailInput;
+export type MutationUploadAvatarArgs = {
+  base64: Scalars['String']['input'];
+  mimeType: Scalars['String']['input'];
 };
 
 export type PaginatedCategory = {
@@ -554,9 +578,10 @@ export type Query = {
   categories: Array<Category>;
   category: Category;
   findOneProductVariantAttribute?: Maybe<ProductVariantAttribute>;
+  getUserLLMTaskById?: Maybe<LlmTask>;
   locale: Locale;
   locales: Array<Locale>;
-  me: MeResponse;
+  me: User;
   paginatedCategories: PaginatedCategory;
   product?: Maybe<Product>;
   productBySlug?: Maybe<Product>;
@@ -592,6 +617,11 @@ export type QueryCategoryArgs = {
 
 export type QueryFindOneProductVariantAttributeArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type QueryGetUserLlmTaskByIdArgs = {
+  id: Scalars['Float']['input'];
 };
 
 
@@ -716,20 +746,28 @@ export type UpdateProductVariantInput = {
 
 export type UpdateUserInput = {
   email: Scalars['String']['input'];
-  firstName: Scalars['String']['input'];
-  id: Scalars['Int']['input'];
   lastName: Scalars['String']['input'];
+  name: Scalars['String']['input'];
 };
 
 export type User = {
   __typename?: 'User';
-  /** Example field (placeholder) */
-  exampleField: Scalars['Int']['output'];
+  avatar?: Maybe<UserAvatar>;
+  createdAt: Scalars['DateTime']['output'];
+  email: Scalars['String']['output'];
+  firstName?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  lastName?: Maybe<Scalars['String']['output']>;
+  role: Role;
+  updatedAt: Scalars['DateTime']['output'];
 };
 
-export type VerifyEmailInput = {
-  code: Scalars['String']['input'];
-  email: Scalars['String']['input'];
+export type UserAvatar = {
+  __typename?: 'UserAvatar';
+  base64: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  mimeType: Scalars['String']['output'];
+  userId: Scalars['Int']['output'];
 };
 
 export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category', id: number, slug: string } & { ' $fragmentName'?: 'CategoryParentSelectDataFragmentFragment' };
@@ -999,13 +1037,13 @@ export type ProductsPage_QueryDocumentQueryVariables = Exact<{
 
 export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null } };
 
-export type MeFragmentFragment = { __typename?: 'MeResponse', id: string, avatar?: string | null, emailVerified: boolean, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
+export type MeFragmentFragment = { __typename?: 'User', id: number, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MeQuery = { __typename?: 'Query', me: (
-    { __typename?: 'MeResponse' }
+    { __typename?: 'User' }
     & { ' $fragmentRefs'?: { 'MeFragmentFragment': MeFragmentFragment } }
   ) };
 
@@ -1076,6 +1114,11 @@ export type SearchProductsQueryQueryVariables = Exact<{
 
 export type SearchProductsQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, stock: number, productId: number, sku: string, priceInCents: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null }, productVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', translatedValue?: string | null, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translatedKey?: string | null } | null }> };
 
+export type AccountDetailsPageQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null } };
+
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
 export class TypedDocumentString<TResult, TVariables>
@@ -1120,10 +1163,8 @@ export const Locales_QueryFragmentFragmentDoc = new TypedDocumentString(`
 }
     `, {"fragmentName":"Locales_QueryFragment"}) as unknown as TypedDocumentString<Locales_QueryFragmentFragment, unknown>;
 export const MeFragmentFragmentDoc = new TypedDocumentString(`
-    fragment MeFragment on MeResponse {
+    fragment MeFragment on User {
   id
-  avatar
-  emailVerified
   firstName
   lastName
   role
@@ -1592,10 +1633,8 @@ export const MeDocument = new TypedDocumentString(`
     ...MeFragment
   }
 }
-    fragment MeFragment on MeResponse {
+    fragment MeFragment on User {
   id
-  avatar
-  emailVerified
   firstName
   lastName
   role
@@ -1874,3 +1913,18 @@ export const SearchProductsQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SearchProductsQueryQuery, SearchProductsQueryQueryVariables>;
+export const AccountDetailsPageQueryDocument = new TypedDocumentString(`
+    query AccountDetailsPageQuery {
+  me {
+    firstName
+    lastName
+    email
+    avatar {
+      base64
+      mimeType
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `) as unknown as TypedDocumentString<AccountDetailsPageQueryQuery, AccountDetailsPageQueryQueryVariables>;

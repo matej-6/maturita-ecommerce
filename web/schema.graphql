@@ -74,6 +74,11 @@ input CreateCategoryTranslationInput {
   name: String!
 }
 
+input CreateLLMPromptInput {
+  productId: Int
+  prompt: String!
+}
+
 input CreateProductInput {
   """Parent category id"""
   categoryId: Int
@@ -152,6 +157,22 @@ input EditProductTranslationInput {
   productTranslationId: Int!
 }
 
+type LLMTask {
+  date: DateTime!
+  id: Int!
+  prompt: String!
+  response: String
+  status: LLMTaskStatus!
+  userId: Int!
+}
+
+enum LLMTaskStatus {
+  COMPLETED
+  FAILED
+  IN_PROGRESS
+  PENDING
+}
+
 type Locale {
   """Locale code"""
   code: String!
@@ -160,30 +181,22 @@ type Locale {
   name: String!
 }
 
-type MeResponse {
-  avatar: String
-  createdAt: DateTime!
-  email: String!
-  emailVerified: Boolean!
-  firstName: String
-  id: ID!
-  lastName: String
-  role: Role!
-  updatedAt: DateTime!
-}
-
 type Mutation {
   addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
   addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
+  changePassword(currentPassword: String!, newPassword: String!): Void!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
+  createLlmTask(input: CreateLLMPromptInput!): LLMTask!
   createProduct(createProductInput: CreateProductInput!): Product!
   createProductTranslation(createProductTranslationInput: CreateProductTranslationInput!, productId: Int!): ProductTranslation!
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
   createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
   createProductVariantAttributeKey(createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   createUser(createUserInput: CreateUserInput!): User!
+  deleteAccount: Void!
+  deleteAvatar: Void!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
   deleteProductImage(productImageId: Int!): Int!
   deleteProductTranslation(productTranslationId: Int!): Int!
@@ -196,7 +209,6 @@ type Mutation {
   removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   removeProductVariantImage(id: Int!): Int!
   removeUser(id: ID!): User!
-  requestEmailVerification: Void!
   setProductThumbnailImage(productImageId: Int!): ProductImage!
   setProductVariantThumbnailImage(id: Int!): ProductVariantImage!
   updateCartItemQuantity(cartItemId: Int!, quantity: Int!): Cart!
@@ -206,8 +218,8 @@ type Mutation {
   updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
   updateProductVariantAttribute(updateProductVariantAttributeInput: UpdateProductVariantAttributeInput!): ProductVariantAttribute!
   updateProductVariantAttributeKey(updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
-  updateUser(updateUserInput: UpdateUserInput!): User!
-  verifyEmail(verifyEmailInput: VerifyEmailInput!): Void!
+  updateUser(input: UpdateUserInput!): User!
+  uploadAvatar(base64: String!, mimeType: String!): Void!
 }
 
 type PaginatedCategory {
@@ -351,9 +363,10 @@ type Query {
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
   findOneProductVariantAttribute(id: Int!): ProductVariantAttribute
+  getUserLLMTaskById(id: Float!): LLMTask
   locale(id: String!): Locale!
   locales: [Locale!]!
-  me: MeResponse!
+  me: User!
   paginatedCategories(
     """
     If true, sort in ascending order, else descending. If null, default sorting order is used
@@ -448,19 +461,26 @@ input UpdateProductVariantInput {
 
 input UpdateUserInput {
   email: String!
-  firstName: String!
-  id: Int!
   lastName: String!
+  name: String!
 }
 
 type User {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  avatar: UserAvatar
+  createdAt: DateTime!
+  email: String!
+  firstName: String
+  id: Int!
+  lastName: String
+  role: Role!
+  updatedAt: DateTime!
 }
 
-input VerifyEmailInput {
-  code: String!
-  email: String!
+type UserAvatar {
+  base64: String!
+  id: Int!
+  mimeType: String!
+  userId: Int!
 }
 
 """Represents NULL values"""

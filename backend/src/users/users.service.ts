@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserDto } from './dto/user.dto';
-import { User } from 'generated/prisma/client';
+import { User, UserAvatar } from 'generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -64,16 +64,19 @@ export class UsersService {
     }
   }
 
-  async update(id: number, updateUserInput: UpdateUserInput): Promise<UserDto> {
+  async update(id: number, input: UpdateUserInput): Promise<UserDto> {
     try {
       const user = await this.prisma.user.update({
         where: { id },
-        data: updateUserInput,
+        data: {
+          email: input.email,
+          firstName: input.name,
+          lastName: input.lastName,
+        },
         omit: {
           hashedPassword: true,
         },
       });
-      this.logger.log(`User updated: ${user.id}`);
       return user;
     } catch (err) {
       if (
@@ -132,5 +135,69 @@ export class UsersService {
         'Something went wrong. Please try again.',
       );
     }
+  }
+
+  async uploadAvatar(
+    userId: number,
+    base64: string,
+    mimeType: string,
+  ): Promise<void> {
+    await this.prisma.userAvatar.upsert({
+      where: {
+        userId: userId,
+      },
+      create: {
+        userId: userId,
+        base64: base64,
+        mimeType: mimeType,
+      },
+      update: {
+        base64: base64,
+        mimeType: mimeType,
+      },
+    });
+  }
+
+  async deleteAvatar(userId: number): Promise<void> {
+    await this.prisma.userAvatar.deleteMany({
+      where: {
+        userId: userId,
+      },
+    });
+  }
+
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.hashedPassword!,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { hashedPassword: newHashedPassword },
+    });
+  }
+
+  async getAvatar(userId: number): Promise<UserAvatar | null> {
+    return (
+      (await this.prisma.userAvatar.findFirst({
+        where: { userId },
+      })) ?? null
+    );
   }
 }

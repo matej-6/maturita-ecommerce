@@ -64,7 +64,7 @@ export function HeaderRightNav() {
                           </NavigationMenuLink>
                         )}
                         <NavigationMenuLink asChild>
-                          <Link href="/profile">{t("profile")}</Link>
+                          <Link href="/account-details">{t("account-details")}</Link>
                         </NavigationMenuLink>
                         <NavigationMenuLink asChild>
                           <Button
