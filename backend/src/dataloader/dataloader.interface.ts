@@ -42,4 +42,5 @@ export interface IDataLoaders {
   attributesByKeyLoader: DataLoader<number, Attribute[]>;
   productVariantProductLoader: DataLoader<number, Product>;
   cartItemProductVariantLoader: DataLoader<number, ProductVariant | null>;
+  orderItemProductVariantLoader: DataLoader<number, ProductVariant | null>;
 }

@@ -213,6 +213,7 @@ export type Mutation = {
   addItemToCart: Cart;
   addProductImage: ProductImage;
   addProductVariantImage: ProductVariantImage;
+  cancelOrder: Order;
   changePassword: Scalars['Void']['output'];
   createCategory: Category;
   createCategoryTranslation: CategoryTranslation;
@@ -434,6 +435,39 @@ export type MutationUploadAvatarArgs = {
   mimeType: Scalars['String']['input'];
 };
 
+export type Order = {
+  __typename?: 'Order';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  items: Array<OrderItem>;
+  status: OrderStatus;
+  totalInCents: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['Int']['output'];
+};
+
+export type OrderItem = {
+  __typename?: 'OrderItem';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  orderId: Scalars['Int']['output'];
+  productVariantId?: Maybe<Scalars['Int']['output']>;
+  quantity: Scalars['Int']['output'];
+  resolveProductVariant?: Maybe<ProductVariant>;
+  sku: Scalars['Int']['output'];
+  unitPriceInCents: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export enum OrderStatus {
+  Canceled = 'CANCELED',
+  Delivered = 'DELIVERED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Processing = 'PROCESSING',
+  Shipped = 'SHIPPED'
+}
+
 export type PaginatedCategory = {
   __typename?: 'PaginatedCategory';
   edges?: Maybe<Array<CategoryEdge>>;
@@ -582,6 +616,8 @@ export type Query = {
   locale: Locale;
   locales: Array<Locale>;
   me: User;
+  order?: Maybe<Order>;
+  orders: Array<Order>;
   paginatedCategories: PaginatedCategory;
   product?: Maybe<Product>;
   productBySlug?: Maybe<Product>;
@@ -758,6 +794,7 @@ export type User = {
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['Int']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
+  orders: Array<Order>;
   role: Role;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -1117,7 +1154,7 @@ export type SearchProductsQueryQuery = { __typename?: 'Query', searchProductVari
 export type AccountDetailsPageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null } };
+export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null, orders: Array<{ __typename?: 'Order', id: number, totalInCents: number, createdAt: any, status: OrderStatus, items: Array<{ __typename?: 'OrderItem', sku: number }> }> } };
 
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
@@ -1925,6 +1962,15 @@ export const AccountDetailsPageQueryDocument = new TypedDocumentString(`
     }
     createdAt
     updatedAt
+    orders {
+      id
+      totalInCents
+      createdAt
+      items {
+        sku
+      }
+      status
+    }
   }
 }
     `) as unknown as TypedDocumentString<AccountDetailsPageQueryQuery, AccountDetailsPageQueryQueryVariables>;

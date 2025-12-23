@@ -23,6 +23,15 @@ const AccountDetailsPageDocument = graphql(`
       }
       createdAt
       updatedAt
+      orders {
+        id
+        totalInCents
+        createdAt
+        items {
+          sku
+        }
+        status
+      }
     }
   }
 `);

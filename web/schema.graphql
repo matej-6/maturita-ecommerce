@@ -185,6 +185,7 @@ type Mutation {
   addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
   addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
+  cancelOrder: Order!
   changePassword(currentPassword: String!, newPassword: String!): Void!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
@@ -220,6 +221,37 @@ type Mutation {
   updateProductVariantAttributeKey(updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   updateUser(input: UpdateUserInput!): User!
   uploadAvatar(base64: String!, mimeType: String!): Void!
+}
+
+type Order {
+  createdAt: DateTime!
+  id: Int!
+  items: [OrderItem!]!
+  status: OrderStatus!
+  totalInCents: Int!
+  updatedAt: DateTime!
+  userId: Int!
+}
+
+type OrderItem {
+  createdAt: DateTime!
+  id: Int!
+  orderId: Int!
+  productVariantId: Int
+  quantity: Int!
+  resolveProductVariant: ProductVariant
+  sku: Int!
+  unitPriceInCents: Int!
+  updatedAt: DateTime!
+}
+
+enum OrderStatus {
+  CANCELED
+  DELIVERED
+  FAILED
+  PENDING
+  PROCESSING
+  SHIPPED
 }
 
 type PaginatedCategory {
@@ -367,6 +399,8 @@ type Query {
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: User!
+  order: Order
+  orders: [Order!]!
   paginatedCategories(
     """
     If true, sort in ascending order, else descending. If null, default sorting order is used
@@ -472,6 +506,7 @@ type User {
   firstName: String
   id: Int!
   lastName: String
+  orders: [Order!]!
   role: Role!
   updatedAt: DateTime!
 }

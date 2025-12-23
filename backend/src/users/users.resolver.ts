@@ -17,10 +17,15 @@ import { UserAvatar } from './entities/user-avatar.entity';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { GraphQLVoid } from 'graphql-scalars';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { Order } from 'src/orders/entities/order.entity';
+import { OrdersService } from 'src/orders/orders.service';
 
 @Resolver(() => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly ordersService: OrdersService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => User)
@@ -75,5 +80,11 @@ export class UsersResolver {
   @Mutation(() => GraphQLVoid)
   async deleteAvatar(@CurrentUser() user: AuthenticatedUserDto): Promise<void> {
     await this.usersService.deleteAvatar(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ResolveField(() => [Order], { name: 'orders' })
+  async getOrdersForUser(@Parent() user: User): Promise<Order[]> {
+    return this.ordersService.findAllOrdersByUserId(user.id);
   }
 }

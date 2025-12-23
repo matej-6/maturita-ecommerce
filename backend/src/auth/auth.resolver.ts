@@ -6,7 +6,6 @@ import { GraphqlAppContext } from 'src/app.module';
 import { GraphQLVoid } from 'graphql-scalars';
 import { CurrentUser } from './current-user.decorator';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
-import { MeResponse } from './dto/me.response';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from 'src/users/entities/user.entity';
 

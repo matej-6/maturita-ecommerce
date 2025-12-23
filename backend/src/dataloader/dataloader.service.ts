@@ -23,6 +23,7 @@ import { ProductVariantAttributesService } from 'src/product-variant-attributes/
 import { ProductVariantAttributeKeysService } from 'src/product-variant-attribute-keys/product-variant-attribute-keys.service';
 import { Product } from 'src/products/entities/product.entity';
 import { CartItemsService } from 'src/cart-items/cart-items.service';
+import { OrderItemsService } from 'src/order-items/order-items.service';
 
 @Injectable()
 export class DataloaderService {
@@ -34,6 +35,7 @@ export class DataloaderService {
     private readonly productVariantAttributesService: ProductVariantAttributesService,
     private readonly productVariantAttributeKeysService: ProductVariantAttributeKeysService,
     private readonly cartItemsService: CartItemsService,
+    private readonly orderItemsService: OrderItemsService,
   ) {}
 
   getLoaders(): IDataLoaders {
@@ -68,6 +70,8 @@ export class DataloaderService {
       this.createProductVariantProductLoader();
     const cartItemProductVariantLoader =
       this.createCartItemProductVariantLoader();
+    const orderItemProductVariantLoader =
+      this.createOrderItemProductVariantLoader();
     return {
       subcategoriesLoader,
       categoryTranslationLoader,
@@ -86,6 +90,7 @@ export class DataloaderService {
       attributesByKeyLoader,
       productVariantProductLoader,
       cartItemProductVariantLoader,
+      orderItemProductVariantLoader,
     };
   }
 
@@ -271,6 +276,16 @@ export class DataloaderService {
       async (cartItemIds: number[]) => {
         return await this.cartItemsService.getProductVariantsByBatch(
           cartItemIds,
+        );
+      },
+    );
+  }
+
+  private createOrderItemProductVariantLoader() {
+    return new DataLoader<number, ProductVariant | null>(
+      async (orderItemIds: number[]) => {
+        return await this.orderItemsService.getProductVariantsByBatch(
+          orderItemIds,
         );
       },
     );

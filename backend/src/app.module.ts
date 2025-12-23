@@ -34,6 +34,7 @@ import { LLMPromptsModule } from './llm-prompts/llm-prompts.module';
 import { QdrantModule } from './qdrant/qdrant.module';
 import { BullConfigModule } from './bull-config/bull-config.module';
 import { SeedModule } from './seed/seed.module';
+import { OrderItemsModule } from './order-items/order-items.module';
 
 @Module({
   imports: [
@@ -108,6 +109,7 @@ import { SeedModule } from './seed/seed.module';
     QdrantModule,
     BullConfigModule,
     SeedModule,
+    OrderItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
