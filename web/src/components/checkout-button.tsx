@@ -28,17 +28,3 @@ export function CheckoutButton() {
     </Button>
   );
 }
-
-// export async function tttt() {
-//   const res = await fetch("http://localhost:11434/api/generate", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       model: "mistral:7b",
-//       system:
-//         "You are a trasnlator. Output only the language code of the language you detect is in prompt.",
-//       prompt: "Chcem produkt na budovanie svalov",
-//       stream: false,
-//     }),
-//   });
-// }

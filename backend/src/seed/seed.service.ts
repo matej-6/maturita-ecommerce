@@ -322,7 +322,47 @@ export class SeedService implements OnModuleInit {
       this.logger.log('Waiting for LLM tasks to complete...');
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
-    this.logger.log('Seeding completed.');
+
+    this.logger.log('Product data embedded into Qdrant vector database.');
+
+    this.logger.log('Seeding orders...');
+    // seed orders
+    const items = await this.prismaService.productVariant.findMany({
+      take: 3,
+    });
+    const users = await this.prismaService.user.findMany();
+    for (const user of users) {
+      await this.prismaService.order.create({
+        data: {
+          userId: user.id,
+          totalInCents: items.reduce((sum, item) => sum + item.priceInCents, 0),
+          orderItems: {
+            createMany: {
+              data: items.map((item) => ({
+                productVariantId: item.id,
+                quantity: 1,
+                sku: item.sku,
+                unitPriceInCents: item.priceInCents,
+              })),
+            },
+          },
+          status: 'DELIVERED',
+          shippingDetails: {
+            create: {
+              country: 'Slovakia',
+              city: 'Bratislava',
+              postalCode: '12312',
+              line1: 'Dunajska 123',
+              line2: '8A',
+              name: `${user.firstName} ${user.lastName}`,
+              phone: '+421123123123',
+              state: null,
+            },
+          },
+        },
+      });
+      this.logger.log('Seeding completed.');
+    }
   }
 
   private encodeToBase64(file: string) {

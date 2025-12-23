@@ -21,13 +21,13 @@ export function setAuthCookies(
 ) {
   cookieStore.set(REFRESH_COOKIE_NAME, data?.refreshToken ?? "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false, //process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: data?.refreshTokenExpirationSeconds ?? 0,
   });
   cookieStore.set(AUTHENTICATION_COOKIE_NAME, data?.accessToken ?? "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false, //process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: data?.accessTokenExpirationSeconds ?? 0,
   });

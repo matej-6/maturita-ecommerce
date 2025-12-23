@@ -257,7 +257,7 @@ type OrderItem {
   productVariantId: Int
   quantity: Int!
   resolveProductVariant: ProductVariant
-  sku: Int!
+  sku: String!
   unitPriceInCents: Int!
   updatedAt: DateTime!
 }

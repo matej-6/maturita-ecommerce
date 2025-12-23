@@ -4,7 +4,7 @@ import { GraphQLError } from "graphql";
 import { notFound } from "next/navigation";
 
 export async function handleGraphqlError(
-  errors: readonly GraphQLError[]
+  errors: readonly GraphQLError[],
 ): Promise<{
   success: false;
   message: string;
@@ -13,6 +13,9 @@ export async function handleGraphqlError(
   const error = errors[0].extensions as GraphQLErrorExtensions;
   if (error.statusCode === 401 || error.statusCode === 403) {
     return notFound();
+  }
+  for (const error of errors) {
+    console.log(error.message);
   }
   return {
     success: false,

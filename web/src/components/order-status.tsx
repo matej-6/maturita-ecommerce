@@ -1,21 +1,13 @@
 import { cn } from "@/lib/utils";
 
 type Props = {
-  status: OrderStatusType;
+  status: string;
 };
 
-export type OrderStatusType =
-  | "pending"
-  | "shipped"
-  | "processing"
-  | "delivered"
-  | "canceled"
-  | "failed";
-
-export function OrderStatus({ status }: Props) {
+export function OrderStatusLabel({ status }: Props) {
   let statusText = "";
 
-  switch (status) {
+  switch (status.toLowerCase()) {
     case "pending":
       statusText = "Pending";
       break;
@@ -39,7 +31,7 @@ export function OrderStatus({ status }: Props) {
   }
 
   function getStyle(status: string) {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "pending":
         return "text-yellow-800 bg-yellow-100 stroke-yellow-200";
       case "processing":
@@ -60,7 +52,7 @@ export function OrderStatus({ status }: Props) {
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-center px-1 py-px sm:px-2 sm:py-1 text-[6px] sm:text-xs font-bold rounded-md stroke-1",
+        "inline-flex items-center justify-center px-1 py-px sm:px-2 sm:py-1 text-[8px] sm:text-xs font-bold rounded-md stroke-1",
         getStyle(status)
       )}
     >

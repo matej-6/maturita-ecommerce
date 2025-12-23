@@ -216,10 +216,22 @@ export class OrdersService {
     if (session.payment_status !== 'unpaid') {
       const shippingDetails = session.collected_information?.shipping_details;
 
+      const o = await this.prisma.order.findUnique({
+        where: { id: orderId },
+      });
+
+      if (
+        o?.status === 'PROCESSING' ||
+        o?.status === 'SHIPPED' ||
+        o?.status === 'DELIVERED'
+      ) {
+        return o;
+      }
+
       const order = await this.prisma.order.update({
         where: { id: orderId },
         data: {
-          status: shippingDetails ? 'PROCESSING' : 'FAILED',
+          status: 'PROCESSING',
           shippingDetails: shippingDetails
             ? {
                 create: {
@@ -230,6 +242,7 @@ export class OrdersService {
                   postalCode: shippingDetails.address.postal_code!,
                   state: shippingDetails.address.state,
                   line2: shippingDetails.address.line2,
+                  phone: session.customer_details?.phone,
                 },
               }
             : undefined,
@@ -311,7 +324,6 @@ export class OrdersService {
       this.logger.error(
         `Failed to sync order status with Stripe for order ID ${orderId}: ${error}`,
       );
-      throw new Error('Something went wrong. Please contact support.');
     }
 
     const order = await this.prisma.order.findFirst({

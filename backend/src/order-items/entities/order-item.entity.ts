@@ -12,7 +12,7 @@ export class OrderItem implements Partial<DbOrderItem> {
   @Field(() => Int)
   quantity: number;
 
-  @Field(() => Int)
+  @Field(() => String)
   sku: string;
 
   @Field(() => Int)

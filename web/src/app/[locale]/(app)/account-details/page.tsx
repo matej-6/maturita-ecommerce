@@ -1,8 +1,9 @@
 "use server";
 
+import { getCurrentSessionAction } from "@/app/data-access-layer/auth/actions";
 import { getAccountDetailsPageData } from "@/app/data-access-layer/user.queries";
 import { getImageSrc } from "@/app/lib/utils";
-import { OrderStatus, OrderStatusType } from "@/components/order-status";
+import { OrderStatusLabel } from "@/components/order-status";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -14,9 +15,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OrderStatus } from "@/graphql/graphql";
+import { notFound } from "next/navigation";
 
 export default async function AccountDetailsPage() {
   const data = await getAccountDetailsPageData();
+  const session = await getCurrentSessionAction();
+
+  if (!session) {
+    notFound();
+  }
 
   if (!data.success || !data.data?.me) {
     return (
@@ -31,7 +39,7 @@ export default async function AccountDetailsPage() {
   const user = data.data.me;
 
   return (
-    <div className="max-width-container mt-6 sm:mt-12 flex flex-col gap-y-6 sm:gap-y-12">
+    <div className="max-width-container my-6 sm:my-12 flex flex-col gap-y-6 sm:gap-y-12">
       <div className="flex flex-col gap-y-3 sm:gap-y-6">
         <h1 className="text-2xl sm:text-5xl font-medium">Account Details</h1>
         <Card className="w-full flex flex-col gap-y-2 sm:gap-y-5 p-3 sm:p-4">
@@ -114,14 +122,14 @@ export default async function AccountDetailsPage() {
               size={"xs"}
               variant={"secondary"}
             >
-              Edit
+              Change Password
             </Button>
             <Button
               className="hidden sm:block"
               size={"default"}
               variant={"secondary"}
             >
-              Edit
+              Change Password
             </Button>
           </div>
           <div className="bg-muted h-0.5 w-full" />
@@ -149,10 +157,10 @@ export default async function AccountDetailsPage() {
       </div>
       <div className="flex flex-col gap-y-3 sm:gap-y-6">
         <h1 className="text-2xl sm:text-5xl font-medium">Orders</h1>
-        <Card className="w-full p-3 sm:p-4">
-          <Table className="w-full flex flex-col gap-y-2 sm:gap-y-5">
-            <TableHeader className="font-mono text-muted text-[8px] sm:text-base font-medium w-full">
-              <TableRow className="w-full grid grid-cols-[1fr_1fr_1fr_1fr_2fr] sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr]">
+        <Card className="w-full py-0 overflow-hidden">
+          <Table className="w-full">
+            <TableHeader className="w-full">
+              <TableRow className="w-full *:h-fit p-3 sm:p-4 *:font-mono *:text-muted-foreground *:font-medium *:text-xs *:sm:text-sm grid grid-cols-[1fr_1fr_1fr_1fr_2fr] sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr] items-center">
                 <TableHead>ID</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Total</TableHead>
@@ -163,12 +171,13 @@ export default async function AccountDetailsPage() {
             </TableHeader>
             <TableBody>
               {user.orders.map((order) => (
-                <TableRow key={order.id}>
+                <TableRow
+                  key={order.id}
+                  className="w-full p-3 sm:p-4 *:text-sm *:sm:text-base grid grid-cols-[1fr_1fr_1fr_1fr_2fr] sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr] items-center"
+                >
                   <TableCell className="font-mono">{order.id}</TableCell>
                   <TableCell>
-                    <OrderStatus
-                      status={order.status.toString() as OrderStatusType}
-                    />
+                    <OrderStatusLabel status={order.status.toString()} />
                   </TableCell>
                   <TableCell>
                     {(order.totalInCents / 100).toFixed(2)}€
@@ -179,15 +188,42 @@ export default async function AccountDetailsPage() {
                   <TableCell>
                     {new Date(order.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="flex flex-col justify-end items-center">
-                    <Button size={"xs"} variant={"secondary"}>
-                      Details
+                  <TableCell className="flex justify-end items-center gap-x-2">
+                    {order.status === OrderStatus.Pending && (
+                      <Button size={"default"}>Pay</Button>
+                    )}
+                    <Button
+                      className="hidden md:block"
+                      size={"default"}
+                      variant={"destructive"}
+                      disabled={
+                        order.status !== OrderStatus.Pending &&
+                        order.status !== OrderStatus.Processing
+                      }
+                    >
+                      Cancel
                     </Button>
+                    <div>
+                      <Button
+                        className="block sm:hidden"
+                        size={"xs"}
+                        variant={"secondary"}
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        className="hidden sm:block"
+                        size={"default"}
+                        variant={"secondary"}
+                      >
+                        Details
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-            <TableCaption className="text-xs sm:text-sm">
+            <TableCaption className="text-xs sm:text-sm mb-2">
               A list of your orders.
             </TableCaption>
           </Table>

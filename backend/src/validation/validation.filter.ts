@@ -24,14 +24,24 @@ export class ValidationFilter implements ExceptionFilter {
 
     this.logger.debug('errors: ', errors);
 
-    const formattedErrors = errors
+    // const formattedErrors = errors
+    //   .filter((e) => e.constraints !== undefined)
+    //   .map((e) => ({
+    //     property: e.property,
+    //     constraints: Array.from(Object.entries(e.constraints!).values()).map(
+    //       (v) => v[1],
+    //     ),
+    //   }));
+
+    const formattedErrors: Record<string, string[]> = {};
+
+    errors
       .filter((e) => e.constraints !== undefined)
-      .map((e) => ({
-        property: e.property,
-        constraints: Array.from(Object.entries(e.constraints!).values()).map(
-          (v) => v[1],
-        ),
-      }));
+      .forEach((e) => {
+        formattedErrors[e.property] = Array.from(
+          Object.entries(e.constraints!).values(),
+        ).map((v) => v[1]);
+      });
 
     this.logger.debug('formatted errors', formattedErrors);
 
@@ -41,7 +51,7 @@ export class ValidationFilter implements ExceptionFilter {
         response.status(exception.getStatus()).send({
           message: exception.getResponse(),
           statusCode: HttpStatus.BAD_REQUEST,
-          errors: formattedErrors,
+          fieldErrors: formattedErrors,
         });
         break;
       }
@@ -49,7 +59,7 @@ export class ValidationFilter implements ExceptionFilter {
         throw new GraphQLError(exception.message, {
           extensions: {
             statusCode: HttpStatus.BAD_REQUEST,
-            errors: formattedErrors,
+            fieldErrors: formattedErrors,
           },
         });
     }

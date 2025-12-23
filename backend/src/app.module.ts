@@ -70,6 +70,7 @@ import { OrderItemsModule } from './order-items/order-items.module';
                   ?.statusCode ||
                 500,
               errors: error.extensions?.errors,
+              fieldErrors: error.extensions?.fieldErrors,
             },
           };
         },
