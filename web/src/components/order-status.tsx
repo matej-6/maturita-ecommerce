@@ -52,7 +52,7 @@ export function OrderStatusLabel({ status }: Props) {
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-center px-1 py-px sm:px-2 sm:py-1 text-[8px] sm:text-xs font-bold rounded-md stroke-1",
+        "inline-flex items-center justify-center px-1 py-px sm:px-2 sm:py-1 text-[10px] sm:text-xs font-bold rounded-md stroke-1",
         getStyle(status)
       )}
     >

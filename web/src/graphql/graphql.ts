@@ -238,6 +238,7 @@ export type Mutation = {
   removeProductVariantAttributeKey: ProductVariantAttributeKey;
   removeProductVariantImage: Scalars['Int']['output'];
   removeUser: User;
+  retryPendingPayment: Scalars['String']['output'];
   setProductThumbnailImage: ProductImage;
   setProductVariantThumbnailImage: ProductVariantImage;
   updateCartItemQuantity: Cart;
@@ -269,6 +270,11 @@ export type MutationAddProductVariantImageArgs = {
   base64: Scalars['String']['input'];
   mimeType: Scalars['String']['input'];
   productVariantId: Scalars['Int']['input'];
+};
+
+
+export type MutationCancelOrderArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -379,6 +385,11 @@ export type MutationRemoveUserArgs = {
 };
 
 
+export type MutationRetryPendingPaymentArgs = {
+  orderId: Scalars['Int']['input'];
+};
+
+
 export type MutationSetProductThumbnailImageArgs = {
   productImageId: Scalars['Int']['input'];
 };
@@ -440,6 +451,7 @@ export type Order = {
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['Int']['output'];
   items: Array<OrderItem>;
+  shippingDetails?: Maybe<OrderShippingDetails>;
   status: OrderStatus;
   totalInCents: Scalars['Int']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -451,11 +463,27 @@ export type OrderItem = {
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['Int']['output'];
   orderId: Scalars['Int']['output'];
+  productVariant?: Maybe<ProductVariant>;
   productVariantId?: Maybe<Scalars['Int']['output']>;
   quantity: Scalars['Int']['output'];
-  resolveProductVariant?: Maybe<ProductVariant>;
-  sku: Scalars['Int']['output'];
+  sku: Scalars['String']['output'];
   unitPriceInCents: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type OrderShippingDetails = {
+  __typename?: 'OrderShippingDetails';
+  city?: Maybe<Scalars['String']['output']>;
+  country: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  line1: Scalars['String']['output'];
+  line2?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  orderId: Scalars['Int']['output'];
+  phone?: Maybe<Scalars['String']['output']>;
+  postalCode: Scalars['String']['output'];
+  state?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -663,6 +691,11 @@ export type QueryGetUserLlmTaskByIdArgs = {
 
 export type QueryLocaleArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type QueryOrderArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1134,6 +1167,27 @@ export type CategoryQueryQueryVariables = Exact<{
 
 export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
 
+export type CancelOrderMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type CancelOrderMutationMutation = { __typename?: 'Mutation', cancelOrder: { __typename?: 'Order', id: number } };
+
+export type RetryPendingOrderMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type RetryPendingOrderMutation = { __typename?: 'Mutation', retryPendingPayment: string };
+
+export type OrderDetailsPageQueryQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type OrderDetailsPageQueryQuery = { __typename?: 'Query', order?: { __typename?: 'Order', id: number, status: OrderStatus, totalInCents: number, createdAt: any, updatedAt: any, shippingDetails?: { __typename?: 'OrderShippingDetails', line1: string, line2?: string | null, state?: string | null, postalCode: string, country: string, city?: string | null, phone?: string | null } | null, items: Array<{ __typename?: 'OrderItem', sku: string, unitPriceInCents: number, quantity: number, productVariant?: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } | null }> } | null };
+
 export type ProductPageQueryQueryVariables = Exact<{
   slug: Scalars['String']['input'];
 }>;
@@ -1154,7 +1208,7 @@ export type SearchProductsQueryQuery = { __typename?: 'Query', searchProductVari
 export type AccountDetailsPageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null, orders: Array<{ __typename?: 'Order', id: number, totalInCents: number, createdAt: any, status: OrderStatus, items: Array<{ __typename?: 'OrderItem', sku: number }> }> } };
+export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null, orders: Array<{ __typename?: 'Order', id: number, totalInCents: number, createdAt: any, status: OrderStatus, items: Array<{ __typename?: 'OrderItem', sku: string }> }> } };
 
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
@@ -1866,6 +1920,58 @@ export const CategoryQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CategoryQueryQuery, CategoryQueryQueryVariables>;
+export const CancelOrderMutationDocument = new TypedDocumentString(`
+    mutation CancelOrderMutation($id: Int!) {
+  cancelOrder(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CancelOrderMutationMutation, CancelOrderMutationMutationVariables>;
+export const RetryPendingOrderDocument = new TypedDocumentString(`
+    mutation RetryPendingOrder($id: Int!) {
+  retryPendingPayment(orderId: $id)
+}
+    `) as unknown as TypedDocumentString<RetryPendingOrderMutation, RetryPendingOrderMutationVariables>;
+export const OrderDetailsPageQueryDocument = new TypedDocumentString(`
+    query OrderDetailsPageQuery($id: Int!) {
+  order(id: $id) {
+    id
+    status
+    totalInCents
+    createdAt
+    updatedAt
+    shippingDetails {
+      line1
+      line2
+      state
+      postalCode
+      country
+      city
+      phone
+    }
+    items {
+      sku
+      unitPriceInCents
+      quantity
+      productVariant {
+        id
+        sku
+        thumbnailImage {
+          base64
+          mimeType
+        }
+        product {
+          slug
+          thumbnailImage {
+            base64
+            mimeType
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<OrderDetailsPageQueryQuery, OrderDetailsPageQueryQueryVariables>;
 export const ProductPageQueryDocument = new TypedDocumentString(`
     query ProductPageQuery($slug: String!) {
   productBySlug(slug: $slug) {

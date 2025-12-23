@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Order } from 'generated/prisma/client';
+import { Order, OrderShippingDetails } from 'generated/prisma/client';
 import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import Stripe from 'stripe';
@@ -260,7 +260,6 @@ export class OrdersService {
       this.logger.error(
         `Failed to sync order status with Stripe for order ID ${orderId}: ${error}`,
       );
-      throw new Error('Something went wrong. Please contact support.');
     }
     const order = await this.prisma.order.findUnique({
       where: { id: orderId, userId: userId },
@@ -291,6 +290,13 @@ export class OrdersService {
       throw new Error(
         'The checkout session has expired. Please create a new order.',
       );
+    }
+
+    if (!session.url) {
+      this.logger.error(
+        `Stripe session for order ID ${orderId} does not have a URL`,
+      );
+      throw new Error('An unexpected error occurred. Please try again later.');
     }
 
     return session.url;
@@ -423,5 +429,15 @@ export class OrdersService {
       signature,
       this.stripeWebhookSecret,
     );
+  }
+
+  async getOrderShippingDetails(
+    id: number,
+  ): Promise<OrderShippingDetails | null> {
+    return this.prisma.orderShippingDetails.findUnique({
+      where: {
+        id: id,
+      },
+    });
   }
 }

@@ -3,10 +3,7 @@
 import "server-only";
 import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
-import {
-  AccountDetailsPageQueryQuery,
-  ProductPageQueryQuery,
-} from "@/graphql/graphql";
+import { AccountDetailsPageQueryQuery } from "@/graphql/graphql";
 import { ExecutionResult } from "graphql";
 import { ActionResponse } from "./formActionResponse";
 import { handleGraphqlError } from "./admin/handleGraphqlFormError";

@@ -1,4 +1,6 @@
 import {
+  Args,
+  Int,
   Mutation,
   Parent,
   Query,
@@ -13,6 +15,7 @@ import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { OrdersService } from './orders.service';
 import { OrderItem } from '../order-items/entities/order-item.entity';
 import { OrderItemsService } from 'src/order-items/order-items.service';
+import { OrderShippingDetails } from './entities/shipping-details.entity';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -32,7 +35,7 @@ export class OrdersResolver {
   @UseGuards(JwtAuthGuard)
   @Query(() => Order, { name: 'order', nullable: true })
   async findOneForUser(
-    id: number,
+    @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<Order | null> {
     return this.ordersService.findOrderByIdAndUserId(id, user.id);
@@ -41,7 +44,7 @@ export class OrdersResolver {
   @Mutation(() => Order)
   @UseGuards(JwtAuthGuard)
   async cancelOrder(
-    id: number,
+    @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<Order> {
     return this.ordersService.cancelOrder(id, user.id);
@@ -51,5 +54,24 @@ export class OrdersResolver {
   @ResolveField(() => [OrderItem], { name: 'items' })
   async resolveOrderItems(@Parent() order: Order) {
     return this.orderItemsService.findAllByOrderId(order.id);
+  }
+
+  @ResolveField(() => OrderShippingDetails, {
+    nullable: true,
+    name: 'shippingDetails',
+  })
+  async resolveShippingDetails(
+    @Parent() order: Order,
+  ): Promise<OrderShippingDetails | null> {
+    return await this.ordersService.getOrderShippingDetails(order.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => String, { name: 'retryPendingPayment' })
+  async retryPendingPayment(
+    @Args('orderId', { type: () => Int }) orderId: number,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<string> {
+    return await this.ordersService.retryPendingCheckout(orderId, user.id);
   }
 }

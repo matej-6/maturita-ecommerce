@@ -5,7 +5,10 @@ import { GraphqlAppContext } from 'src/app.module';
 
 @Resolver(() => OrderItem)
 export class OrderItemsResolver {
-  @ResolveField(() => ProductVariant, { nullable: true })
+  @ResolveField(() => ProductVariant, {
+    nullable: true,
+    name: 'productVariant',
+  })
   async resolveProductVariant(
     @Parent() orderItem: OrderItem,
     @Context() ctx: GraphqlAppContext,

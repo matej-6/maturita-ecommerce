@@ -202,7 +202,7 @@ type Mutation {
   addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
   addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
-  cancelOrder: Order!
+  cancelOrder(id: Int!): Order!
   changePassword(currentPassword: String!, newPassword: String!): Void!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
@@ -227,6 +227,7 @@ type Mutation {
   removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   removeProductVariantImage(id: Int!): Int!
   removeUser(id: ID!): User!
+  retryPendingPayment(orderId: Int!): String!
   setProductThumbnailImage(productImageId: Int!): ProductImage!
   setProductVariantThumbnailImage(id: Int!): ProductVariantImage!
   updateCartItemQuantity(cartItemId: Int!, quantity: Int!): Cart!
@@ -244,6 +245,7 @@ type Order {
   createdAt: DateTime!
   id: Int!
   items: [OrderItem!]!
+  shippingDetails: OrderShippingDetails
   status: OrderStatus!
   totalInCents: Int!
   updatedAt: DateTime!
@@ -254,11 +256,26 @@ type OrderItem {
   createdAt: DateTime!
   id: Int!
   orderId: Int!
+  productVariant: ProductVariant
   productVariantId: Int
   quantity: Int!
-  resolveProductVariant: ProductVariant
   sku: String!
   unitPriceInCents: Int!
+  updatedAt: DateTime!
+}
+
+type OrderShippingDetails {
+  city: String
+  country: String!
+  createdAt: DateTime!
+  id: Int!
+  line1: String!
+  line2: String
+  name: String!
+  orderId: Int!
+  phone: String
+  postalCode: String!
+  state: String
   updatedAt: DateTime!
 }
 
@@ -422,7 +439,7 @@ type Query {
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: User!
-  order: Order
+  order(id: Int!): Order
   orders: [Order!]!
   paginatedCategories(
     """
