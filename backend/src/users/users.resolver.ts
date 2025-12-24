@@ -8,8 +8,7 @@ import {
   Parent,
 } from '@nestjs/graphql';
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
-import { CreateUserInput } from './dto/create-user.input';
+import { PaginatedUser, User } from './entities/user.entity';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -19,6 +18,9 @@ import { GraphQLVoid } from 'graphql-scalars';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { Order } from 'src/orders/entities/order.entity';
 import { OrdersService } from 'src/orders/orders.service';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -27,25 +29,29 @@ export class UsersResolver {
     private readonly ordersService: OrdersService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Mutation(() => User)
-  createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
-    return this.usersService.create(createUserInput);
+  @UseGuards(AdminGuard)
+  @Query(() => PaginatedUser, { name: 'findAllPaginatedUsers' })
+  async findAllPaginated(
+    @Args() paginationArgs: PaginationArgs,
+    @Args() findAllQueryArgs: UserFindAllQueryArgs,
+    @Args() sortByArgs: UserSortingArgs,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<PaginatedUser> {
+    return await this.usersService.findAllPaginated(
+      paginationArgs,
+      findAllQueryArgs,
+      sortByArgs,
+      user,
+    );
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Query(() => [User], { name: 'users' })
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
   @Query(() => User, { name: 'user' })
   findOne(@Args('id', { type: () => ID }) id: number) {
     return this.usersService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
   @Mutation(() => User)
   removeUser(@Args('id', { type: () => ID }) id: number) {
     return this.usersService.remove(id);

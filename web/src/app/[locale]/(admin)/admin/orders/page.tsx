@@ -20,7 +20,7 @@ type Props = {
   };
 };
 
-export default async function ProductsPage({ searchParams }: Props) {
+export default async function OrdersPage({ searchParams }: Props) {
   const sp = await searchParams;
 
   const sortingArgs: SortingArgs = {

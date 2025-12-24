@@ -2,6 +2,7 @@ import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
 
 import { Role } from 'generated/prisma/client';
 import { UserDto } from '../dto/user.dto';
+import { Paginated } from 'src/lib/pagination';
 
 @ObjectType()
 export class User implements Partial<UserDto> {
@@ -31,3 +32,6 @@ registerEnumType(Role, {
   name: 'Role',
   description: 'User role',
 });
+
+@ObjectType()
+export class PaginatedUser extends Paginated(User) {}

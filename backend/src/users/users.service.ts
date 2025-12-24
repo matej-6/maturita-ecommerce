@@ -11,6 +11,10 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserDto } from './dto/user.dto';
 import { User, UserAvatar } from 'generated/prisma/client';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
+import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { PaginatedUser } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -199,5 +203,54 @@ export class UsersService {
         where: { userId },
       })) ?? null
     );
+  }
+
+  async findAllPaginated(
+    paginationArgs: PaginationArgs,
+    findAllQueryArgs: UserFindAllQueryArgs,
+    sortByArgs: UserSortingArgs,
+    user: AuthenticatedUserDto,
+  ): Promise<PaginatedUser> {
+    if (user.role !== 'ADMIN') {
+      throw new BadRequestException('Unauthorized');
+    }
+    paginationArgs.validateFields();
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: findAllQueryArgs.id ? findAllQueryArgs.id : undefined,
+        email: findAllQueryArgs.email
+          ? {
+              contains: findAllQueryArgs.email,
+            }
+          : undefined,
+        role: findAllQueryArgs.role ? findAllQueryArgs.role : undefined,
+      },
+      orderBy: sortByArgs.sortBy
+        ? {
+            [sortByArgs.sortBy]: sortByArgs.ascending ? 'asc' : 'desc',
+          }
+        : {
+            id: 'asc',
+          },
+      omit: {
+        hashedPassword: true,
+      },
+      take: paginationArgs.pageSize + 1,
+      cursor: paginationArgs.cursor ? { id: paginationArgs.cursor } : undefined,
+    });
+
+    const hasNextPage = users.length > paginationArgs.pageSize;
+    if (hasNextPage) {
+      users.pop();
+    }
+
+    return {
+      hasNextPage,
+      totalCount: users.length,
+      edges: users.map((user) => ({
+        cursor: user.id,
+        node: user,
+      })),
+    };
   }
 }

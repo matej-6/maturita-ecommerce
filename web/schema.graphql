@@ -120,14 +120,6 @@ input CreateProductVariantInput {
   stock: Int!
 }
 
-input CreateUserInput {
-  confirmPassword: String!
-  email: String!
-  lastName: String!
-  name: String!
-  password: String!
-}
-
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -195,7 +187,6 @@ type Mutation {
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
   createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
   createProductVariantAttributeKey(createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
-  createUser(createUserInput: CreateUserInput!): User!
   deleteAccount: Void!
   deleteAvatar: Void!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
@@ -296,6 +287,12 @@ type PaginatedProduct {
 
 type PaginatedProductVariant {
   edges: [ProductVariantEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type PaginatedUser {
+  edges: [UserEdge!]
   hasNextPage: Boolean!
   totalCount: Int!
 }
@@ -423,6 +420,7 @@ type Query {
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
   findAllPaginatedOrders(ascending: Boolean, cursor: Int, dateFrom: DateTime, dateTo: DateTime, id: Int, maxPrice: Int, minPrice: Int, pageSize: Int = 10, sortBy: String, status: OrderStatus, userId: Int): PaginatedOrder!
+  findAllPaginatedUsers(ascending: Boolean, cursor: Int, email: String, id: Int, pageSize: Int = 10, role: Role, sortBy: UserSortingField): PaginatedUser!
   findOneProductVariantAttribute(id: Int!): ProductVariantAttribute
   getUserLLMTaskById(id: Float!): LLMTask
   locale(id: String!): Locale!
@@ -471,7 +469,6 @@ type Query {
   ): PaginatedProduct!
   searchProductVariants(ascending: Boolean, attributeFilters: [[String!]!], cursor: Int, pageSize: Int = 10, searchTerm: String, sortBy: String): PaginatedProductVariant!
   user(id: ID!): User!
-  users: [User!]!
 }
 
 """User role"""
@@ -545,6 +542,19 @@ type UserAvatar {
   id: Int!
   mimeType: String!
   userId: Int!
+}
+
+type UserEdge {
+  cursor: Int!
+  node: User!
+}
+
+enum UserSortingField {
+  CREATED_AT
+  EMAIL
+  ID
+  ROLE
+  UPDATED_AT
 }
 
 """Represents NULL values"""

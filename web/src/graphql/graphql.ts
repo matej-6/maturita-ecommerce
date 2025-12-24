@@ -150,14 +150,6 @@ export type CreateProductVariantInput = {
   stock: Scalars['Int']['input'];
 };
 
-export type CreateUserInput = {
-  confirmPassword: Scalars['String']['input'];
-  email: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-};
-
 export type EditCategoryTranslationInput = {
   /** category translation id */
   categoryTranslationId: Scalars['Int']['input'];
@@ -223,7 +215,6 @@ export type Mutation = {
   createProductVariant: ProductVariant;
   createProductVariantAttribute: ProductVariantAttribute;
   createProductVariantAttributeKey: ProductVariantAttributeKey;
-  createUser: User;
   deleteAccount: Scalars['Void']['output'];
   deleteAvatar: Scalars['Void']['output'];
   deleteCategoryTranslation: Scalars['Int']['output'];
@@ -322,11 +313,6 @@ export type MutationCreateProductVariantAttributeArgs = {
 
 export type MutationCreateProductVariantAttributeKeyArgs = {
   createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput;
-};
-
-
-export type MutationCreateUserArgs = {
-  createUserInput: CreateUserInput;
 };
 
 
@@ -530,6 +516,13 @@ export type PaginatedProductVariant = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type PaginatedUser = {
+  __typename?: 'PaginatedUser';
+  edges?: Maybe<Array<UserEdge>>;
+  hasNextPage: Scalars['Boolean']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
 export type Product = {
   __typename?: 'Product';
   categoryId?: Maybe<Scalars['Int']['output']>;
@@ -653,6 +646,7 @@ export type Query = {
   categories: Array<Category>;
   category: Category;
   findAllPaginatedOrders: PaginatedOrder;
+  findAllPaginatedUsers: PaginatedUser;
   findOneProductVariantAttribute?: Maybe<ProductVariantAttribute>;
   getUserLLMTaskById?: Maybe<LlmTask>;
   locale: Locale;
@@ -670,7 +664,6 @@ export type Query = {
   products: PaginatedProduct;
   searchProductVariants: PaginatedProductVariant;
   user: User;
-  users: Array<User>;
 };
 
 
@@ -705,6 +698,17 @@ export type QueryFindAllPaginatedOrdersArgs = {
   sortBy?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<OrderStatus>;
   userId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryFindAllPaginatedUsersArgs = {
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  role?: InputMaybe<Role>;
+  sortBy?: InputMaybe<UserSortingField>;
 };
 
 
@@ -868,6 +872,20 @@ export type UserAvatar = {
   mimeType: Scalars['String']['output'];
   userId: Scalars['Int']['output'];
 };
+
+export type UserEdge = {
+  __typename?: 'UserEdge';
+  cursor: Scalars['Int']['output'];
+  node: User;
+};
+
+export enum UserSortingField {
+  CreatedAt = 'CREATED_AT',
+  Email = 'EMAIL',
+  Id = 'ID',
+  Role = 'ROLE',
+  UpdatedAt = 'UPDATED_AT'
+}
 
 export type CategoryParentSelectDataFragmentFragment = { __typename?: 'Category', id: number, slug: string } & { ' $fragmentName'?: 'CategoryParentSelectDataFragmentFragment' };
 
@@ -1152,6 +1170,19 @@ export type ProductsPage_QueryDocumentQueryVariables = Exact<{
 
 
 export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null } };
+
+export type AdminUsersPageQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['Int']['input']>;
+  role?: InputMaybe<Role>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  sortBy?: InputMaybe<UserSortingField>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type AdminUsersPageQuery = { __typename?: 'Query', findAllPaginatedUsers: { __typename?: 'PaginatedUser', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'UserEdge', cursor: number, node: { __typename?: 'User', id: number, email: string, role: Role, createdAt: any, updatedAt: any } }> | null } };
 
 export type MeFragmentFragment = { __typename?: 'User', id: number, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
@@ -1794,6 +1825,32 @@ export const ProductsPage_QueryDocumentDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductsPage_QueryDocumentQuery, ProductsPage_QueryDocumentQueryVariables>;
+export const AdminUsersPageDocument = new TypedDocumentString(`
+    query AdminUsersPage($id: Int, $role: Role, $email: String, $pageSize: Int, $sortBy: UserSortingField, $cursor: Int, $ascending: Boolean) {
+  findAllPaginatedUsers(
+    id: $id
+    role: $role
+    email: $email
+    pageSize: $pageSize
+    sortBy: $sortBy
+    cursor: $cursor
+    ascending: $ascending
+  ) {
+    hasNextPage
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        email
+        role
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AdminUsersPageQuery, AdminUsersPageQueryVariables>;
 export const MeDocument = new TypedDocumentString(`
     query Me {
   me {
