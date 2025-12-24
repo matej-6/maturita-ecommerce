@@ -1,5 +1,6 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Order as DbOrder, OrderStatus } from 'generated/prisma/client';
+import { Paginated } from 'src/lib/pagination';
 
 @ObjectType()
 export class Order implements Partial<DbOrder> {
@@ -25,3 +26,6 @@ export class Order implements Partial<DbOrder> {
 registerEnumType(OrderStatus, {
   name: 'OrderStatus',
 });
+
+@ObjectType()
+export class PaginatedOrder extends Paginated(Order) {}

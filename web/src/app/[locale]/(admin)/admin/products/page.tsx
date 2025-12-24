@@ -112,7 +112,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       <Link href={"products/new-product"}>
         <Button className="w-fit">Add New Product</Button>
       </Link>
-      <div className="bg-muted/50 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
+      <div className="bg-muted/25 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
         <ProductsTableWithFilters
           initialPagingArgs={pagingArgs}
           initialSortingArgs={sortingArgs}

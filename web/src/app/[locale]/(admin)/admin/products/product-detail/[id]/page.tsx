@@ -75,7 +75,7 @@ export default async function ProductDetailPage({
   const t = await getTranslations("admin.products.productDetail.page");
 
   return (
-    <div className="bg-muted/50 dark:bg-muted/50 flex flex-col flex-1 rounded-xl p-6 gap-y-8 ">
+    <div className="bg-muted/25 dark:bg-muted/50 flex flex-col flex-1 rounded-xl p-6 gap-y-8 ">
       <div className="flex flex-col gap-y-8">
         <div className="flex flex-col gap-y-8">
           <h1 className="font-medium font-secondary">Overview</h1>

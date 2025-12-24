@@ -1,9 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Order, OrderShippingDetails } from 'generated/prisma/client';
+import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { Env } from 'src/config/validate';
+import { PaginationArgs } from 'src/lib/pagination.args';
 import { PrismaService } from 'src/prisma/prisma.service';
 import Stripe from 'stripe';
+import { OrderFindAllQueryArgs } from './order.resolver.args';
+import { SortingArgs } from 'src/args/sorting-args';
+import { PaginatedOrder } from './entities/order.entity';
 
 @Injectable()
 export class OrdersService {
@@ -439,5 +444,86 @@ export class OrdersService {
         id: id,
       },
     });
+  }
+
+  private validatePaginationArgs(args: PaginationArgs) {
+    if (args.cursor != null) {
+      args.cursor = Math.abs(args.cursor);
+    }
+    args.pageSize = Math.min(Math.abs(args.pageSize), 25);
+  }
+
+  private validateFindAllQueryArgs(
+    queryArgs: OrderFindAllQueryArgs,
+    user: AuthenticatedUserDto,
+  ) {
+    if (user.role !== 'ADMIN') {
+      queryArgs.userId = user.id;
+    }
+  }
+
+  private validateSortingArgs(args: SortingArgs) {
+    const validSortByFields = [
+      'createdAt',
+      'updatedAt',
+      'id',
+      'userId',
+      'totalInCents',
+      'status',
+      null,
+    ];
+    if (!validSortByFields.includes(args.sortBy)) {
+      args.sortBy = null;
+    }
+  }
+
+  async findAllPaginated(
+    paginationArgs: PaginationArgs,
+    findAllQueryArgs: OrderFindAllQueryArgs,
+    sortByArgs: SortingArgs,
+    user: AuthenticatedUserDto,
+  ): Promise<PaginatedOrder> {
+    this.validatePaginationArgs(paginationArgs);
+    this.validateFindAllQueryArgs(findAllQueryArgs, user);
+    this.validateSortingArgs(sortByArgs);
+
+    const res = await this.prisma.order.findMany({
+      where: {
+        userId: findAllQueryArgs.userId ?? undefined,
+        status: findAllQueryArgs.status ?? undefined,
+        id: findAllQueryArgs.id ?? undefined,
+        totalInCents: {
+          gte: findAllQueryArgs.minPrice ?? undefined,
+          lte: findAllQueryArgs.maxPrice ?? undefined,
+        },
+        createdAt: {
+          gte: findAllQueryArgs.dateFrom ?? undefined,
+          lte: findAllQueryArgs.dateTo ?? undefined,
+        },
+      },
+      take: paginationArgs.pageSize + 1,
+      cursor:
+        paginationArgs.cursor != null
+          ? { id: paginationArgs.cursor }
+          : undefined,
+      orderBy:
+        sortByArgs.sortBy != null
+          ? { [sortByArgs.sortBy]: sortByArgs.ascending ? 'asc' : 'desc' }
+          : { createdAt: 'desc' },
+    });
+
+    const hasNextPage = res.length > paginationArgs.pageSize;
+    if (hasNextPage) {
+      res.pop();
+    }
+
+    return {
+      hasNextPage,
+      totalCount: res.length,
+      edges: res.map((order) => ({
+        cursor: order.id,
+        node: order,
+      })),
+    };
   }
 }

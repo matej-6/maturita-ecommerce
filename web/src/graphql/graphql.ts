@@ -458,6 +458,12 @@ export type Order = {
   userId: Scalars['Int']['output'];
 };
 
+export type OrderEdge = {
+  __typename?: 'OrderEdge';
+  cursor: Scalars['Int']['output'];
+  node: Order;
+};
+
 export type OrderItem = {
   __typename?: 'OrderItem';
   createdAt: Scalars['DateTime']['output'];
@@ -499,6 +505,13 @@ export enum OrderStatus {
 export type PaginatedCategory = {
   __typename?: 'PaginatedCategory';
   edges?: Maybe<Array<CategoryEdge>>;
+  hasNextPage: Scalars['Boolean']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PaginatedOrder = {
+  __typename?: 'PaginatedOrder';
+  edges?: Maybe<Array<OrderEdge>>;
   hasNextPage: Scalars['Boolean']['output'];
   totalCount: Scalars['Int']['output'];
 };
@@ -639,6 +652,7 @@ export type Query = {
   cart: Cart;
   categories: Array<Category>;
   category: Category;
+  findAllPaginatedOrders: PaginatedOrder;
   findOneProductVariantAttribute?: Maybe<ProductVariantAttribute>;
   getUserLLMTaskById?: Maybe<LlmTask>;
   locale: Locale;
@@ -676,6 +690,21 @@ export type QueryCategoryArgs = {
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   isSetup?: InputMaybe<Scalars['Boolean']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryFindAllPaginatedOrdersArgs = {
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  dateFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  dateTo?: InputMaybe<Scalars['DateTime']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
+  maxPrice?: InputMaybe<Scalars['Int']['input']>;
+  minPrice?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<OrderStatus>;
+  userId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -932,6 +961,23 @@ export type LocalesQueryDocumentQuery = (
   { __typename?: 'Query' }
   & { ' $fragmentRefs'?: { 'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
 );
+
+export type AdminOrdersPage_QueryDocumentQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  pageSize: Scalars['Int']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  status?: InputMaybe<OrderStatus>;
+  id?: InputMaybe<Scalars['Int']['input']>;
+  userId?: InputMaybe<Scalars['Int']['input']>;
+  minPrice?: InputMaybe<Scalars['Int']['input']>;
+  maxPrice?: InputMaybe<Scalars['Int']['input']>;
+  dateFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  dateTo?: InputMaybe<Scalars['DateTime']['input']>;
+}>;
+
+
+export type AdminOrdersPage_QueryDocumentQuery = { __typename?: 'Query', findAllPaginatedOrders: { __typename?: 'PaginatedOrder', hasNextPage: boolean, edges?: Array<{ __typename?: 'OrderEdge', cursor: number, node: { __typename?: 'Order', id: number, totalInCents: number, status: OrderStatus, createdAt: any, updatedAt: any, userId: number } }> | null } };
 
 export type DeleteProductTranslationMutationMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1468,6 +1514,36 @@ export const LocalesQueryDocumentDocument = new TypedDocumentString(`
     name
   }
 }`) as unknown as TypedDocumentString<LocalesQueryDocumentQuery, LocalesQueryDocumentQueryVariables>;
+export const AdminOrdersPage_QueryDocumentDocument = new TypedDocumentString(`
+    query AdminOrdersPage_QueryDocument($cursor: Int, $pageSize: Int!, $sortBy: String, $ascending: Boolean, $status: OrderStatus, $id: Int, $userId: Int, $minPrice: Int, $maxPrice: Int, $dateFrom: DateTime, $dateTo: DateTime) {
+  findAllPaginatedOrders(
+    cursor: $cursor
+    pageSize: $pageSize
+    sortBy: $sortBy
+    ascending: $ascending
+    status: $status
+    id: $id
+    userId: $userId
+    minPrice: $minPrice
+    maxPrice: $maxPrice
+    dateFrom: $dateFrom
+    dateTo: $dateTo
+  ) {
+    hasNextPage
+    edges {
+      node {
+        id
+        totalInCents
+        status
+        createdAt
+        updatedAt
+        userId
+      }
+      cursor
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AdminOrdersPage_QueryDocumentQuery, AdminOrdersPage_QueryDocumentQueryVariables>;
 export const DeleteProductTranslationMutationDocument = new TypedDocumentString(`
     mutation DeleteProductTranslationMutation($id: Int!) {
   deleteProductTranslation(productTranslationId: $id)

@@ -235,6 +235,11 @@ type Order {
   userId: Int!
 }
 
+type OrderEdge {
+  cursor: Int!
+  node: Order!
+}
+
 type OrderItem {
   createdAt: DateTime!
   id: Int!
@@ -273,6 +278,12 @@ enum OrderStatus {
 
 type PaginatedCategory {
   edges: [CategoryEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type PaginatedOrder {
+  edges: [OrderEdge!]
   hasNextPage: Boolean!
   totalCount: Int!
 }
@@ -411,6 +422,7 @@ type Query {
     sortBy: String
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
+  findAllPaginatedOrders(ascending: Boolean, cursor: Int, dateFrom: DateTime, dateTo: DateTime, id: Int, maxPrice: Int, minPrice: Int, pageSize: Int = 10, sortBy: String, status: OrderStatus, userId: Int): PaginatedOrder!
   findOneProductVariantAttribute(id: Int!): ProductVariantAttribute
   getUserLLMTaskById(id: Float!): LLMTask
   locale(id: String!): Locale!

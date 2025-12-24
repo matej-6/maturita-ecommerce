@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { Order } from './entities/order.entity';
+import { Order, PaginatedOrder } from './entities/order.entity';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
@@ -16,6 +16,8 @@ import { OrdersService } from './orders.service';
 import { OrderItem } from '../order-items/entities/order-item.entity';
 import { OrderItemsService } from 'src/order-items/order-items.service';
 import { OrderShippingDetails } from './entities/shipping-details.entity';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import { OrderFindAllQueryArgs, OrderSortingArgs } from './order.resolver.args';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -30,6 +32,22 @@ export class OrdersResolver {
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<Order[]> {
     return this.ordersService.findAllOrdersByUserId(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => PaginatedOrder, { name: 'findAllPaginatedOrders' })
+  findAll(
+    @Args() paginationArgs: PaginationArgs,
+    @Args() findAllQueryArgs: OrderFindAllQueryArgs,
+    @Args() sortByArgs: OrderSortingArgs,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<PaginatedOrder> {
+    return this.ordersService.findAllPaginated(
+      paginationArgs,
+      findAllQueryArgs,
+      sortByArgs,
+      user,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
