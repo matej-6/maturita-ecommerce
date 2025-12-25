@@ -4,7 +4,7 @@ import { GraphQLError } from "graphql";
 import { notFound } from "next/navigation";
 
 export async function handleGraphqlError(
-  errors: readonly GraphQLError[],
+  errors: readonly GraphQLError[]
 ): Promise<{
   success: false;
   message: string;
@@ -14,20 +14,22 @@ export async function handleGraphqlError(
   if (error.statusCode === 401 || error.statusCode === 403) {
     return notFound();
   }
-  for (const error of errors) {
-    console.log(error.message);
-  }
+
+  const fieldErrors = Object.entries(error.fieldErrors || {}).map(
+    ([property, constraints]) => ({
+      property,
+      constraints,
+    })
+  );
+
   return {
     success: false,
     message: errors[0].message,
-    fieldErrors: error.errors,
+    fieldErrors: fieldErrors,
   };
 }
 
 export type GraphQLErrorExtensions = {
   statusCode?: number;
-  errors?: {
-    property: string;
-    constraints: string[];
-  }[];
+  fieldErrors?: Record<string, string[]>;
 };

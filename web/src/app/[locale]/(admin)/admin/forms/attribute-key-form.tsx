@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ export const AttributeKeyForm = ({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -106,7 +106,9 @@ export const AttributeKeyForm = ({
           type="submit"
           variant={"default"}
           className="mt-auto"
-          disabled={!form.formState.isValid || !form.formState.isDirty || isPending}
+          disabled={
+            !form.formState.isValid || !form.formState.isDirty || isPending
+          }
         >
           {cft("submitButton")}
         </Button>

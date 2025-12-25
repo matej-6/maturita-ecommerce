@@ -35,6 +35,7 @@ import { QdrantModule } from './qdrant/qdrant.module';
 import { BullConfigModule } from './bull-config/bull-config.module';
 import { SeedModule } from './seed/seed.module';
 import { OrderItemsModule } from './order-items/order-items.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { OrderItemsModule } from './order-items/order-items.module';
     BullConfigModule,
     SeedModule,
     OrderItemsModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

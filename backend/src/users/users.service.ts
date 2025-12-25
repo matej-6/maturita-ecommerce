@@ -87,7 +87,7 @@ export class UsersService {
         err instanceof PrismaClientKnownRequestError &&
         err.code === 'P2002'
       ) {
-        throw new BadRequestException('Email already in use');
+        throw new BadRequestException('emailAlreadyInUse');
       }
       this.logger.error('Failed to update user: ', err);
       throw new InternalServerErrorException('Failed to update user');

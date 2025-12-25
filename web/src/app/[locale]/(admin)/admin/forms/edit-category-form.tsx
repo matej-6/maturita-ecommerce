@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -174,7 +174,7 @@ export const EditCategoryForm = ({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -199,7 +199,7 @@ export const EditCategoryForm = ({
                 noResultsFoundText="No categories found"
                 filterPlaceholderText="Filter categories"
               />
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />

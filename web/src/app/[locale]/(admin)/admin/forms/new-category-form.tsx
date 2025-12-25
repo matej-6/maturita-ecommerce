@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { use, useState } from "react";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -132,7 +132,7 @@ export const NewCategoryForm = ({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -157,7 +157,7 @@ export const NewCategoryForm = ({
                 noResultsFoundText="No categories found"
                 filterPlaceholderText="Filter categories"
               />
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />

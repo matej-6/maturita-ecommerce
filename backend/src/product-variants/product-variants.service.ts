@@ -343,7 +343,7 @@ export class ProductVariantsService {
   }
 
   async searchProductVariants(
-    searchTerm: string,
+    searchTerm: string | null,
     paginationArgs: PaginationArgs,
     sortingArgs: SortingArgs,
     attributeFilters?: string[][],
@@ -385,13 +385,13 @@ export class ProductVariantsService {
           {
             Product: {
               slug: {
-                contains: searchTerm,
+                contains: searchTerm || undefined,
               },
             },
           },
           {
             sku: {
-              contains: searchTerm,
+              contains: searchTerm || undefined,
             },
           },
           {
@@ -399,7 +399,7 @@ export class ProductVariantsService {
               ProductTranslations: {
                 some: {
                   name: {
-                    contains: searchTerm,
+                    contains: searchTerm || undefined,
                   },
                 },
               },
@@ -410,10 +410,10 @@ export class ProductVariantsService {
               ProductTranslations: {
                 some: {
                   description: {
-                    search: searchTerm,
+                    search: searchTerm || undefined,
                   },
                   markdownContent: {
-                    search: searchTerm,
+                    search: searchTerm || undefined,
                   },
                 },
               },

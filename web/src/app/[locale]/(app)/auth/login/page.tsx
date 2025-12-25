@@ -23,7 +23,7 @@ import {
   getCurrentSessionAction,
 } from "@/app/data-access-layer/auth/actions";
 import { createLoginSchema, loginSchemaType } from "./login-schema";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/lib/tanstack-query/queries";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -113,7 +113,7 @@ export default function LoginPage() {
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormFieldErrorMessage fieldErrors={fieldErrors} />
+                    <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
                   </FormItem>
                 )}
               />
@@ -127,7 +127,7 @@ export default function LoginPage() {
                       <Input type="password" {...field} />
                     </FormControl>
                     <FormMessage />
-                    <FormFieldErrorMessage fieldErrors={fieldErrors} />
+                    <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
                   </FormItem>
                 )}
               />

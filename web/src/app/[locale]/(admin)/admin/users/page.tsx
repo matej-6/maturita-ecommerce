@@ -37,15 +37,15 @@ export default async function UsersPage({ searchParams }: Props) {
 
   function parseSortBy(value: string): UserSortingField | null {
     switch (value.toLowerCase()) {
-      case "id":
+      case UserSortingField.Id.toString().toLowerCase():
         return UserSortingField.Id;
-      case "email":
+      case UserSortingField.Email.toString().toLowerCase():
         return UserSortingField.Email;
-      case "role":
+      case UserSortingField.Role.toString().toLowerCase():
         return UserSortingField.Role;
-      case "createdat":
+      case UserSortingField.CreatedAt.toString().toLowerCase():
         return UserSortingField.CreatedAt;
-      case "updatedat":
+      case UserSortingField.UpdatedAt.toString().toLowerCase():
         return UserSortingField.UpdatedAt;
       default:
         return null;

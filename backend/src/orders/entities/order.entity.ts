@@ -19,8 +19,8 @@ export class Order implements Partial<DbOrder> {
   @Field(() => Date)
   updatedAt: Date;
 
-  @Field(() => Int)
-  userId: number;
+  @Field(() => Int, { nullable: true })
+  userId: number | null;
 }
 
 registerEnumType(OrderStatus, {

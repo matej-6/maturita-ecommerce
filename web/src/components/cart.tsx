@@ -24,7 +24,7 @@ export function Cart() {
   });
 
   return (
-    <div className="flex flex-col gap-y-8 overflow-y-scroll">
+    <div className="flex flex-col gap-y-8 overflow-y-scroll grow">
       <div className="flex flex-col gap-y-4">
         {isLoading && cartItems === undefined ? (
           [...Array(3)].map((_, idx) => <CartItemSkeleton key={idx} />)
@@ -46,75 +46,88 @@ export function Cart() {
             return (
               <div
                 key={item.id}
-                className="flex gap-x-4 p-2 items-start justify-start"
+                className="flex justify-between p-2 items-start"
               >
-                <div className="w-[196px] overflow-hidden bg-accent flex items-center justify-center">
-                  {thumbnailImage && (
-                    <img
-                      src={getImageSrc(
-                        thumbnailImage.mimeType,
-                        thumbnailImage.base64
-                      )}
-                      alt={`Image of ${item.productVariant.sku}`}
-                      className="size-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="flex flex-col gap-y-1">
-                  <div className="flex flex-col gap-y-0.5">
-                    <h3 className="font-medium">{variantName}</h3>
-                    <h4 className="text-sm">{item.productVariant.sku}</h4>
+                <div className="flex gap-x-4 items-start">
+                  <div className="w-[96px] aspect-square overflow-hidden bg-accent flex items-center justify-center">
+                    {thumbnailImage && (
+                      <img
+                        src={getImageSrc(
+                          thumbnailImage.mimeType,
+                          thumbnailImage.base64
+                        )}
+                        alt={`Image of ${item.productVariant.sku}`}
+                        className="size-full object-cover"
+                      />
+                    )}
                   </div>
-                  <div className="flex items-center gap-x-2">
-                    <span>Quantity:</span>
-                    <span>{item.quantity}</span>
-                    <div className="flex items-center gap-x-1">
-                      <Button
-                        size={"xs"}
-                        variant={"ghost"}
-                        onClick={() =>
-                          updateCartItemQuantity({
-                            cartItemId: item.id,
-                            quantity: item.quantity - 1,
-                          })
-                        }
-                        disabled={isUpdating || item.quantity <= 1}
+                  <div className="flex flex-col gap-y-1">
+                    <div className="flex flex-col gap-y-0.5">
+                      <Link
+                        href={`/product/${item.productVariant.product.slug}?variant=${item.productVariant.sku}`}
                       >
-                        <MinusIcon />
-                      </Button>
-                      <Button
-                        variant={"ghost"}
-                        size={"xs"}
-                        onClick={() => {
-                          if (item.quantity >= item.productVariant.stock) {
-                            return;
+                        <h4 className="text-sm font-medium">
+                          {item.productVariant.sku}
+                        </h4>
+                      </Link>
+                    </div>
+                    <div className="flex items-center gap-x-2">
+                      <div className="flex items-center gap-x-1">
+                        <span className="text-sm">Quantity</span>
+                        <span className="text-sm font-medium">
+                          {item.quantity}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-x-1">
+                        <Button
+                          size={"xs"}
+                          variant={"ghost"}
+                          onClick={() =>
+                            updateCartItemQuantity({
+                              cartItemId: item.id,
+                              quantity: item.quantity - 1,
+                            })
                           }
-                          updateCartItemQuantity({
-                            cartItemId: item.id,
-                            quantity: item.quantity + 1,
-                          });
-                        }}
-                        disabled={
-                          isUpdating ||
-                          item.quantity >= item.productVariant.stock
-                        }
-                      >
-                        <PlusIcon />
-                      </Button>
+                          disabled={isUpdating || item.quantity <= 1}
+                        >
+                          <MinusIcon />
+                        </Button>
+                        <Button
+                          variant={"ghost"}
+                          size={"xs"}
+                          onClick={() => {
+                            if (item.quantity >= item.productVariant.stock) {
+                              return;
+                            }
+                            updateCartItemQuantity({
+                              cartItemId: item.id,
+                              quantity: item.quantity + 1,
+                            });
+                          }}
+                          disabled={
+                            isUpdating ||
+                            item.quantity >= item.productVariant.stock
+                          }
+                        >
+                          <PlusIcon />
+                        </Button>
+                      </div>
                     </div>
+                    <h5 className="font-semibold">
+                      {(item.productVariant.priceInCents / 100).toFixed(2)} €
+                      each
+                    </h5>
+                    {item.productVariant.stock < item.quantity && (
+                      <div className="flex items-start gap-x-1">
+                        <AlertTriangleIcon className="text-red-500 size-6" />
+                        <span className="text-sm text-red-500">
+                          Not enough stock, please reduce quantity.
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <h5 className="font-semibold">
-                    {(item.productVariant.priceInCents / 100).toFixed(2)} € each
-                  </h5>
-                  {item.productVariant.stock < item.quantity && (
-                    <div className="flex items-start gap-x-1">
-                      <AlertTriangleIcon className="text-red-500 size-6" />
-                      <span className="text-sm text-red-500">
-                        Not enough stock, please reduce quantity.
-                      </span>
-                    </div>
-                  )}
                 </div>
+
                 <Button
                   variant={"destructive"}
                   size={"xs"}
@@ -128,27 +141,30 @@ export function Cart() {
           })
         )}
       </div>
-      <div className="flex flex-col gap-y-2">
-        <div className="flex flex-col gap-y-0">
-          <h3 className="text-lg font-medium">Total</h3>
-          <span className="text-2xl font-bold">
-            {cartItems
-              ? (
-                  cartItems.reduce((acc, item) => {
-                    const itemTotal =
-                      (item.productVariant.priceInCents / 100) * item.quantity;
-                    return acc + itemTotal;
-                  }, 0) || 0
-                ).toFixed(2)
-              : "0.00"}{" "}
-            €
-          </span>
+      {cartItems && cartItems.length > 0 && (
+        <div className="flex flex-col gap-y-2 mt-auto pb-4">
+          <div className="flex flex-col gap-y-0">
+            <h3 className="text-lg font-medium">Total</h3>
+            <span className="text-2xl font-bold">
+              {cartItems
+                ? (
+                    cartItems.reduce((acc, item) => {
+                      const itemTotal =
+                        (item.productVariant.priceInCents / 100) *
+                        item.quantity;
+                      return acc + itemTotal;
+                    }, 0) || 0
+                  ).toFixed(2)
+                : "0.00"}{" "}
+              €
+            </span>
+          </div>
+          {/* https://docs.stripe.com/checkout/quickstart?client=react&lang=node */}
+          {/* https://docs.stripe.com/checkout/quickstart */}
+          {/* https://docs.stripe.com/checkout/fulfillment */}
+          <CheckoutButton />
         </div>
-        {/* https://docs.stripe.com/checkout/quickstart?client=react&lang=node */}
-        {/* https://docs.stripe.com/checkout/quickstart */}
-        {/* https://docs.stripe.com/checkout/fulfillment */}
-        <CheckoutButton />
-      </div>
+      )}
     </div>
   );
 }

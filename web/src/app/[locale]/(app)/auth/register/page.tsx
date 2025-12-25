@@ -23,7 +23,7 @@ import {
   authRegisterAction,
   getCurrentSessionAction,
 } from "@/app/data-access-layer/auth/actions";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import { useRouter } from "@/i18n/navigation";
 import { getQueryClient } from "@/lib/get-query-client";
 import { SESSION_QUERY_KEY } from "@/lib/tanstack-query/query-keys";
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <FormFieldErrorMessage fieldErrors={fieldErrors} />
+                  <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
                 </FormItem>
               )}
             />
@@ -118,7 +118,7 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <FormFieldErrorMessage fieldErrors={fieldErrors} />
+                  <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
                 </FormItem>
               )}
             />
@@ -131,7 +131,7 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <FormFieldErrorMessage fieldErrors={fieldErrors} />
+                  <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
                 </FormItem>
               )}
             />
@@ -144,7 +144,7 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
-                  <FormFieldErrorMessage fieldErrors={fieldErrors} />
+                  <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
                 </FormItem>
               )}
             />
@@ -157,7 +157,7 @@ export default function RegisterPage() {
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
-                  <FormFieldErrorMessage fieldErrors={fieldErrors} />
+                  <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
                 </FormItem>
               )}
             />

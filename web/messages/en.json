@@ -92,6 +92,66 @@
     "additionalInformation": "Additional Information",
     "noImageAvailable": "No image available"
   },
+  "homePage": {
+    "newArrivals": "New Arrivals",
+    "bestSellers": "Our Best Selling Products",
+    "errorLoadingProducts": "We're having trouble loading products right now. Please try again later."
+  },
+  "productVariantCard": {
+    "addToCartButton": "Add to Cart"
+  },
+  "accountDetailsPage": {
+    "error": "Failed to load account details. Please try again later.",
+    "title": "Account Details",
+    "nameAndLastName": "Name and Last Name",
+    "email": "Email",
+    "avatar": "Avatar",
+    "password": "Password",
+    "createdAt": "Member since",
+    "updatedAt": "Updated At",
+    "buttons": {
+      "updateDetails": "Edit",
+      "changePassword": "Change Password",
+      "changeAvatar": "Change Avatar",
+      "pendingChangeAvatar": "Updating Avatar...",
+      "removeAvatar": "Remove Avatar",
+      "deleteAccount": "Delete Account"
+    },
+    "deleteAccountModal": {
+      "title": "Are you sure you want to delete your account?",
+      "description": "This action is permanent and will delete all of your data, including orders. If you have any orders that have not been fulfilled yet, please contact support or wait for them to be fulfilled before deleting your account.",
+      "cancelButton": "Cancel",
+      "deleteButton": "Delete"
+    },
+    "orders": {
+      "title": "Orders",
+      "id": "ID",
+      "status": "Status",
+      "total": "Total",
+      "date": "Date",
+      "items": "Items",
+      "actions": "Actions",
+      "viewOrder": "View Order",
+      "tableDescription": "A list of your orders.",
+      "errorLoadingOrders": "We're having trouble loading your orders right now. Please try again later."
+    }
+  },
+  "orderPage": {
+    "order": "Order",
+    "basicInformation": "Basic Information",
+    "shippingDetails": "Shipping Details",
+    "items": "Items",
+    "itemsTable": {
+      "image": "Image",
+      "sku": "SKU",
+      "unitPrice": "Unit Price",
+      "quantity": "Quantity"
+    },
+    "buttons": {
+      "cancelOrder": "Cancel Order",
+      "pendingCancelOrder": "Cancelling Order..."
+    }
+  },
   "admin": {
     "productVariant": {
       "attributeKey": {
@@ -210,6 +270,28 @@
       },
       "attributes": "Attributes",
       "selectAttribute": "Select Attribute"
+    },
+    "user": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email"
+    },
+    "order": {
+      "id": "ID",
+      "status": "Status",
+      "total": "Total",
+      "items": "Items",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "shippingDetails": {
+        "line1": "Line 1",
+        "line2": "Line 2",
+        "city": "City",
+        "state": "State",
+        "postalCode": "Postal Code",
+        "country": "Country",
+        "phone": "Phone"
+      }
     }
   }
 }

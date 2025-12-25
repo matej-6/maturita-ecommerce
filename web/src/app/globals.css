@@ -125,3 +125,7 @@
     @apply px-2 md:px-6 2xl:px-0 xl:max-w-[1280px] mx-auto;
   }
 }
+
+@theme {
+  --breakpoint-xs: 30rem;
+}

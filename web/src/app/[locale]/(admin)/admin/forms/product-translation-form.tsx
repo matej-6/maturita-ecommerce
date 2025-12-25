@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import {
   Select,
   SelectContent,
@@ -133,7 +133,7 @@ export const ProductTranslationForm = ({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -148,7 +148,7 @@ export const ProductTranslationForm = ({
               <FormControl>
                 <Textarea cols={8} {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -181,7 +181,7 @@ export const ProductTranslationForm = ({
                   </SelectContent>
                 </Select>
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -200,7 +200,7 @@ export const ProductTranslationForm = ({
                   {...field}
                 />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />

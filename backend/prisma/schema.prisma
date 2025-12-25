@@ -227,8 +227,8 @@ model Cart {
 
 model Order {
   id                    Int                   @id @default(autoincrement())
-  userId                Int
-  User                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                Int?
+  User                  User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
   totalInCents          Int
   status                OrderStatus           @default(PENDING)
   shippingDetailsId     Int?

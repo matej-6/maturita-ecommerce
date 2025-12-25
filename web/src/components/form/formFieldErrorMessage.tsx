@@ -1,26 +1,18 @@
-import { FormMessage, useFormField } from "../ui/form";
-
-type FormFieldErrorMessageProps = {
-  fieldErrors?: Map<string, string[]>;
-};
-
-/**
- * Must be used inside a shadcn form with react-hook-form!!!
- */
 export function FormFieldErrorMessage({
   fieldErrors,
-}: FormFieldErrorMessageProps) {
-  const { name: field } = useFormField();
-
+  fieldName,
+}: {
+  fieldErrors?: Map<string, string[]>;
+  fieldName: string;
+}) {
   let message = "";
   if (
     fieldErrors !== undefined &&
-    fieldErrors.has(field) &&
-    fieldErrors.get(field)!.length > 0
+    fieldErrors.has(fieldName) &&
+    fieldErrors.get(fieldName)!.length > 0
   ) {
-    message = fieldErrors.get(field)!.join(",");
+    message = fieldErrors.get(fieldName)!.join(",");
   }
 
-  if (!message) return <FormMessage />;
   return <p className="text-destructive text-sm">{message}</p>;
 }

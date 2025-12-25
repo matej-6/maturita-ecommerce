@@ -118,10 +118,6 @@ export function UsersTableWithFilters({
     router.push(`?${newParams.toString()}`);
   }
 
-  const sortableColumns = Object.keys(UserSortingField).map((v) =>
-    v.toString().toLowerCase()
-  );
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -232,40 +228,38 @@ export function UsersTableWithFilters({
                   {
                     label: "ID",
                     key: "id",
-                    isSortByPossible: sortableColumns.includes("id"),
+                    sortingKey: UserSortingField.Id,
                   },
                   {
                     label: "Email",
                     key: "email",
-                    isSortByPossible: sortableColumns.includes("email"),
+                    sortingKey: UserSortingField.Email,
                   },
                   {
                     label: "Role",
                     key: "role",
-                    isSortByPossible: sortableColumns.includes("role"),
+                    sortingKey: UserSortingField.Role,
                   },
                   {
                     label: "Created At",
                     key: "createdAt",
-                    isSortByPossible: sortableColumns.includes("createdat"),
+                    sortingKey: UserSortingField.CreatedAt,
                   },
                   {
                     label: "Updated At",
                     key: "updatedAt",
-                    isSortByPossible: sortableColumns.includes("updatedat"),
+                    sortingKey: UserSortingField.UpdatedAt,
                   },
                 ].map((column) => (
                   <TableHead
                     className="p-4"
                     key={column.key}
                     onClick={() => {
-                      if (!column.isSortByPossible) return;
+                      if (!column.sortingKey) return;
                       const nextIsAscending =
                         initialSortingArgs.sortBy === null
                           ? true
-                          : initialSortingArgs.sortBy
-                              .toString()
-                              .toLowerCase() !== column.key.toLowerCase()
+                          : initialSortingArgs.sortBy !== column.sortingKey
                           ? true
                           : initialSortingArgs.ascending === null
                           ? true
@@ -275,7 +269,7 @@ export function UsersTableWithFilters({
                       changeSortingColumn(
                         nextIsAscending === null
                           ? null
-                          : column.key.toLowerCase(),
+                          : column.sortingKey.toString().toLowerCase(),
                         nextIsAscending === null ? true : nextIsAscending
                       );
                     }}
@@ -283,20 +277,16 @@ export function UsersTableWithFilters({
                     <div
                       className={cn("flex gap-x-1 justify-start items-center", {
                         "cursor-pointer hover:underline":
-                          column.isSortByPossible,
+                          column.sortingKey !== undefined,
                       })}
                     >
                       <span>{column.label}</span>
                       <ChevronUpIcon
                         className={cn("size-4 opacity-0", {
                           "opacity-100!":
-                            initialSortingArgs.sortBy
-                              ?.toString()
-                              .toLowerCase() === column.key.toLowerCase(),
+                            initialSortingArgs.sortBy === column.sortingKey,
                           "rotate-180":
-                            initialSortingArgs.sortBy
-                              ?.toString()
-                              .toLowerCase() === column.key.toLowerCase() &&
+                            initialSortingArgs.sortBy === column.sortingKey &&
                             initialSortingArgs.ascending,
                         })}
                       />

@@ -27,6 +27,8 @@ export class AuthResolver {
     await this.authService.signOutAll(user.id);
     res.clearCookie('Authentication');
     res.clearCookie('Refresh');
+
+    return GraphQLVoid;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -51,17 +53,19 @@ export class AuthResolver {
       currentPassword,
       newPassword,
     );
+    return GraphQLVoid;
   }
 
   @UseGuards(JwtAuthGuard)
-  @Mutation(() => GraphQLVoid)
+  @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteAccount(
     @Context() { res }: GraphqlAppContext,
     @CurrentUser() user: AuthenticatedUserDto,
-  ): Promise<void> {
+  ): Promise<typeof GraphQLVoid> {
     await this.authService.deleteAccount(user.id);
     await this.authService.signOutAll(user.id);
     res.clearCookie('Authentication');
     res.clearCookie('Refresh');
+    return GraphQLVoid;
   }
 }

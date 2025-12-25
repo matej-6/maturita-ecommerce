@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCallback, useMemo, useState } from "react";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -169,7 +169,7 @@ export const ProductVariantForm = ({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -182,7 +182,7 @@ export const ProductVariantForm = ({
               <FormControl>
                 <Input {...field} type="number" min={0} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -195,7 +195,7 @@ export const ProductVariantForm = ({
               <FormControl>
                 <Input {...field} type="number" min={0} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -299,7 +299,7 @@ export const ProductVariantForm = ({
                   </div>
                 </div>
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />

@@ -23,7 +23,7 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
 import {
   Select,
   SelectContent,
@@ -142,7 +142,7 @@ export const CategoryTranslationForm = ({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -157,7 +157,7 @@ export const CategoryTranslationForm = ({
               <FormControl>
                 <Textarea cols={8} {...field} />
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />
@@ -190,7 +190,7 @@ export const CategoryTranslationForm = ({
                   </SelectContent>
                 </Select>
               </FormControl>
-              <FormFieldErrorMessage fieldErrors={fieldErrors} />
+              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
             </FormItem>
           )}
         />

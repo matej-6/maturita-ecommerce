@@ -5,7 +5,6 @@ import { getImageSrc } from "@/app/lib/utils";
 import { CancelOrderButton } from "@/components/cancel-order.button";
 import { OrderStatusLabel } from "@/components/order-status";
 import { RetryOrderButton } from "@/components/retry-order-button";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -18,6 +17,7 @@ import {
 import { OrderStatus } from "@/graphql/graphql";
 import { Link } from "@/i18n/navigation";
 import { ArrowUpRightIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 type Props = {
@@ -48,20 +48,25 @@ export default async function OrderPage({ params }: Props) {
 
   const order = data.data.order;
 
+  const t = await getTranslations("orderPage");
+  const ft = await getTranslations("fields.order");
+
   return (
     <div className="max-width-container mt-6 xl:mt-12 flex flex-col gap-y-6 sm:gap-y-12">
-      <h1 className="text-2xl sm:text-4xl font-semibold">Order #{order.id}</h1>
+      <h1 className="text-2xl sm:text-4xl font-semibold">
+        {t("order")} #{order.id}
+      </h1>
       <Card className="w-full flex flex-col gap-y-4 sm:gap-y-6 p-3 sm:p-4">
         <div className="flex flex-col gap-2 sm:gap-4">
-          <h2 className="text-xs sm:text-sm">Basic Information</h2>
+          <h2 className="text-xs sm:text-sm">{t("basicInformation")}</h2>
           <div className="w-full flex items-start justify-start flex-wrap gap-4 sm:gap-6">
             {[
               {
-                label: "ID",
+                label: ft("id"),
                 node: <span className="text-base sm:text-lg">{order.id}</span>,
               },
               {
-                label: "Status",
+                label: ft("status"),
                 node: (
                   <div className="w-fit">
                     <OrderStatusLabel status={order.status} />
@@ -69,7 +74,7 @@ export default async function OrderPage({ params }: Props) {
                 ),
               },
               {
-                label: "Total",
+                label: ft("total"),
                 node: (
                   <span className="text-base sm:text-lg">
                     ${(order.totalInCents / 100).toFixed(2)}
@@ -77,7 +82,7 @@ export default async function OrderPage({ params }: Props) {
                 ),
               },
               {
-                label: "Created At",
+                label: ft("createdAt"),
                 node: (
                   <span className="text-base sm:text-lg">
                     {new Date(order.createdAt).toLocaleDateString()}
@@ -85,7 +90,7 @@ export default async function OrderPage({ params }: Props) {
                 ),
               },
               {
-                label: "Updated At",
+                label: ft("updatedAt"),
                 node: (
                   <span className="text-base sm:text-lg">
                     {new Date(order.updatedAt).toLocaleDateString()}
@@ -106,35 +111,35 @@ export default async function OrderPage({ params }: Props) {
           <>
             <div className="h-0.5 w-full bg-accent" />
             <div className="flex flex-col gap-2 sm:gap-4">
-              <h2 className="text-xs sm:text-sm">Shipping Details</h2>
+              <h2 className="text-xs sm:text-sm">{t("shippingDetails")}</h2>
               <div className="w-full flex items-start justify-start flex-wrap gap-4 sm:gap-6">
                 {[
                   {
-                    label: "Line 1",
+                    label: ft("shippingDetails.line1"),
                     value: order.shippingDetails.line1 ?? "N/A",
                   },
                   {
-                    label: "Line 2",
+                    label: ft("shippingDetails.line2"),
                     value: order.shippingDetails.line2 ?? "N/A",
                   },
                   {
-                    label: "State",
+                    label: ft("shippingDetails.state"),
                     value: order.shippingDetails.state ?? "N/A",
                   },
                   {
-                    label: "Postal Code",
+                    label: ft("shippingDetails.postalCode"),
                     value: order.shippingDetails.postalCode ?? "N/A",
                   },
                   {
-                    label: "Country",
+                    label: ft("shippingDetails.country"),
                     value: order.shippingDetails.country ?? "N/A",
                   },
                   {
-                    label: "City",
+                    label: ft("shippingDetails.city"),
                     value: order.shippingDetails.city ?? "N/A",
                   },
                   {
-                    label: "Phone",
+                    label: ft("shippingDetails.phone"),
                     value: order.shippingDetails.phone ?? "N/A",
                   },
                 ].map(
@@ -159,14 +164,14 @@ export default async function OrderPage({ params }: Props) {
         )}
         <div className="h-0.5 w-full bg-accent" />
         <div className="flex flex-col gap-2 sm:gap-4">
-          <h2 className="font-medium text-base">Items</h2>
+          <h2 className="font-medium text-base">{t("items")}</h2>
           <Table className="w-full">
             <TableHeader className="w-full">
               <TableRow className="w-full *:h-fit p-1 sm:p-2 *:font-mono *:text-muted-foreground *:font-medium *:text-xs *:sm:text-sm grid grid-cols-[48px_196px_1fr_1fr] sm:grid-cols-[64px_256px_1fr_1fr] items-center gap-x-1 sm:gap-x-4">
-                <TableHead>Image</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Unit Price</TableHead>
-                <TableHead>Quantity</TableHead>
+                <TableHead>{t("itemsTable.image")}</TableHead>
+                <TableHead>{t("itemsTable.sku")}</TableHead>
+                <TableHead>{t("itemsTable.unitPrice")}</TableHead>
+                <TableHead>{t("itemsTable.quantity")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

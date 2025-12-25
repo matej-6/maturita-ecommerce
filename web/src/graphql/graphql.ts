@@ -150,6 +150,12 @@ export type CreateProductVariantInput = {
   stock: Scalars['Int']['input'];
 };
 
+export type DataPoint = {
+  __typename?: 'DataPoint';
+  x: Scalars['String']['output'];
+  y: Scalars['String']['output'];
+};
+
 export type EditCategoryTranslationInput = {
   /** category translation id */
   categoryTranslationId: Scalars['Int']['input'];
@@ -215,7 +221,7 @@ export type Mutation = {
   createProductVariant: ProductVariant;
   createProductVariantAttribute: ProductVariantAttribute;
   createProductVariantAttributeKey: ProductVariantAttributeKey;
-  deleteAccount: Scalars['Void']['output'];
+  deleteAccount?: Maybe<Scalars['Void']['output']>;
   deleteAvatar: Scalars['Void']['output'];
   deleteCategoryTranslation: Scalars['Int']['output'];
   deleteProductImage: Scalars['Int']['output'];
@@ -235,6 +241,7 @@ export type Mutation = {
   updateCartItemQuantity: Cart;
   updateCategory: Category;
   updateCategoryTranslation: CategoryTranslation;
+  updatePassword: Scalars['Void']['output'];
   updateProduct: Product;
   updateProductVariant: ProductVariant;
   updateProductVariantAttribute: ProductVariantAttribute;
@@ -402,6 +409,11 @@ export type MutationUpdateCategoryTranslationArgs = {
 };
 
 
+export type MutationUpdatePasswordArgs = {
+  input: UpdatePasswordInput;
+};
+
+
 export type MutationUpdateProductArgs = {
   updateProductInput: UpdateProductInput;
 };
@@ -441,7 +453,7 @@ export type Order = {
   status: OrderStatus;
   totalInCents: Scalars['Int']['output'];
   updatedAt: Scalars['DateTime']['output'];
-  userId: Scalars['Int']['output'];
+  userId?: Maybe<Scalars['Int']['output']>;
 };
 
 export type OrderEdge = {
@@ -487,6 +499,17 @@ export enum OrderStatus {
   Processing = 'PROCESSING',
   Shipped = 'SHIPPED'
 }
+
+export type OverallTrendStatistic = {
+  __typename?: 'OverallTrendStatistic';
+  percentChange: Scalars['Float']['output'];
+  points: Array<DataPoint>;
+  timePeriod: TimePeriod;
+  xMax: Scalars['String']['output'];
+  xMin: Scalars['String']['output'];
+  yMax: Scalars['String']['output'];
+  yMin: Scalars['String']['output'];
+};
 
 export type PaginatedCategory = {
   __typename?: 'PaginatedCategory';
@@ -654,6 +677,7 @@ export type Query = {
   me: User;
   order?: Maybe<Order>;
   orders: Array<Order>;
+  overallSalesStatistic?: Maybe<OverallTrendStatistic>;
   paginatedCategories: PaginatedCategory;
   product?: Maybe<Product>;
   productBySlug?: Maybe<Product>;
@@ -732,6 +756,11 @@ export type QueryOrderArgs = {
 };
 
 
+export type QueryOverallSalesStatisticArgs = {
+  timePeriod: TimePeriod;
+};
+
+
 export type QueryPaginatedCategoriesArgs = {
   ascending?: InputMaybe<Scalars['Boolean']['input']>;
   cursor?: InputMaybe<Scalars['Int']['input']>;
@@ -805,6 +834,12 @@ export enum Role {
   User = 'USER'
 }
 
+export enum TimePeriod {
+  LastNinetyDays = 'LAST_NINETY_DAYS',
+  LastSevenDays = 'LAST_SEVEN_DAYS',
+  LastThirtyDays = 'LAST_THIRTY_DAYS'
+}
+
 export type UpdateCategoryInput = {
   /** Category id */
   id: Scalars['Int']['input'];
@@ -812,6 +847,12 @@ export type UpdateCategoryInput = {
   parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   /** Slug of the category */
   slug: Scalars['String']['input'];
+};
+
+export type UpdatePasswordInput = {
+  confirmNewPassword: Scalars['String']['input'];
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
 };
 
 export type UpdateProductInput = {
@@ -995,7 +1036,7 @@ export type AdminOrdersPage_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type AdminOrdersPage_QueryDocumentQuery = { __typename?: 'Query', findAllPaginatedOrders: { __typename?: 'PaginatedOrder', hasNextPage: boolean, edges?: Array<{ __typename?: 'OrderEdge', cursor: number, node: { __typename?: 'Order', id: number, totalInCents: number, status: OrderStatus, createdAt: any, updatedAt: any, userId: number } }> | null } };
+export type AdminOrdersPage_QueryDocumentQuery = { __typename?: 'Query', findAllPaginatedOrders: { __typename?: 'PaginatedOrder', hasNextPage: boolean, edges?: Array<{ __typename?: 'OrderEdge', cursor: number, node: { __typename?: 'Order', id: number, totalInCents: number, status: OrderStatus, createdAt: any, updatedAt: any, userId?: number | null } }> | null } };
 
 export type DeleteProductTranslationMutationMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1194,7 +1235,7 @@ export type MeQuery = { __typename?: 'Query', me: (
     & { ' $fragmentRefs'?: { 'MeFragmentFragment': MeFragmentFragment } }
   ) };
 
-export type CartFragmentFragment = { __typename?: 'Cart', id: number, items: Array<{ __typename?: 'CartItem', id: number, quantity: number, productVariant: { __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, id: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', translatedValue?: string | null, value: string, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }>, product: { __typename?: 'Product', name?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> } & { ' $fragmentName'?: 'CartFragmentFragment' };
+export type CartFragmentFragment = { __typename?: 'Cart', id: number, items: Array<{ __typename?: 'CartItem', id: number, quantity: number, productVariant: { __typename?: 'ProductVariant', sku: string, priceInCents: number, stock: number, id: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', translatedValue?: string | null, value: string, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }>, product: { __typename?: 'Product', name?: string | null, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> } & { ' $fragmentName'?: 'CartFragmentFragment' };
 
 export type UpdateCartItemQuantityMutationMutationVariables = Exact<{
   cartItemId: Scalars['Int']['input'];
@@ -1244,6 +1285,11 @@ export type CategoryQueryQueryVariables = Exact<{
 
 export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
 
+export type HomepageQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HomepageQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', edges?: Array<{ __typename?: 'ProductVariantEdge', node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', slug: string, name?: string | null, id: number, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null } };
+
 export type CancelOrderMutationMutationVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
@@ -1286,6 +1332,42 @@ export type AccountDetailsPageQueryQueryVariables = Exact<{ [key: string]: never
 
 
 export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null, orders: Array<{ __typename?: 'Order', id: number, totalInCents: number, createdAt: any, status: OrderStatus, items: Array<{ __typename?: 'OrderItem', sku: string }> }> } };
+
+export type DeleteUserAccountMutationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteUserAccountMutationMutation = { __typename?: 'Mutation', deleteAccount?: any | null };
+
+export type UpdateAccountAvatarMutationMutationVariables = Exact<{
+  base64: Scalars['String']['input'];
+  mimeType: Scalars['String']['input'];
+}>;
+
+
+export type UpdateAccountAvatarMutationMutation = { __typename?: 'Mutation', uploadAvatar: any };
+
+export type UpdateUserMutationMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
+  email: Scalars['String']['input'];
+}>;
+
+
+export type UpdateUserMutationMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'User', id: number } };
+
+export type DeleteAccountAvatarMutationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteAccountAvatarMutationMutation = { __typename?: 'Mutation', deleteAvatar: any };
+
+export type UpdateUserPasswordMutationMutationVariables = Exact<{
+  currentPassword: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+  confirmNewPassword: Scalars['String']['input'];
+}>;
+
+
+export type UpdateUserPasswordMutationMutation = { __typename?: 'Mutation', updatePassword: any };
 
 export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
 
@@ -1363,6 +1445,7 @@ export const CartFragmentFragmentDoc = new TypedDocumentString(`
       }
       product {
         name
+        slug
         thumbnailImage {
           base64
           mimeType
@@ -1893,6 +1976,7 @@ export const UpdateCartItemQuantityMutationDocument = new TypedDocumentString(`
       }
       product {
         name
+        slug
         thumbnailImage {
           base64
           mimeType
@@ -1931,6 +2015,7 @@ export const AddItemToCartMutationDocument = new TypedDocumentString(`
       }
       product {
         name
+        slug
         thumbnailImage {
           base64
           mimeType
@@ -1969,6 +2054,7 @@ export const CartQueryDocument = new TypedDocumentString(`
       }
       product {
         name
+        slug
         thumbnailImage {
           base64
           mimeType
@@ -2053,6 +2139,37 @@ export const CategoryQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CategoryQueryQuery, CategoryQueryQueryVariables>;
+export const HomepageQueryDocument = new TypedDocumentString(`
+    query HomepageQuery {
+  searchProductVariants(ascending: false, sortBy: "createdAt", pageSize: 6) {
+    edges {
+      node {
+        id
+        sku
+        priceInCents
+        attributes {
+          value
+          translatedValue
+        }
+        thumbnailImage {
+          base64
+          mimeType
+        }
+        product {
+          slug
+          name
+          id
+          description
+          thumbnailImage {
+            base64
+            mimeType
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<HomepageQueryQuery, HomepageQueryQueryVariables>;
 export const CancelOrderMutationDocument = new TypedDocumentString(`
     mutation CancelOrderMutation($id: Int!) {
   cancelOrder(id: $id) {
@@ -2213,3 +2330,32 @@ export const AccountDetailsPageQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AccountDetailsPageQueryQuery, AccountDetailsPageQueryQueryVariables>;
+export const DeleteUserAccountMutationDocument = new TypedDocumentString(`
+    mutation DeleteUserAccountMutation {
+  deleteAccount
+}
+    `) as unknown as TypedDocumentString<DeleteUserAccountMutationMutation, DeleteUserAccountMutationMutationVariables>;
+export const UpdateAccountAvatarMutationDocument = new TypedDocumentString(`
+    mutation UpdateAccountAvatarMutation($base64: String!, $mimeType: String!) {
+  uploadAvatar(base64: $base64, mimeType: $mimeType)
+}
+    `) as unknown as TypedDocumentString<UpdateAccountAvatarMutationMutation, UpdateAccountAvatarMutationMutationVariables>;
+export const UpdateUserMutationDocument = new TypedDocumentString(`
+    mutation UpdateUserMutation($name: String!, $lastName: String!, $email: String!) {
+  updateUser(input: {email: $email, name: $name, lastName: $lastName}) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserMutationMutation, UpdateUserMutationMutationVariables>;
+export const DeleteAccountAvatarMutationDocument = new TypedDocumentString(`
+    mutation DeleteAccountAvatarMutation {
+  deleteAvatar
+}
+    `) as unknown as TypedDocumentString<DeleteAccountAvatarMutationMutation, DeleteAccountAvatarMutationMutationVariables>;
+export const UpdateUserPasswordMutationDocument = new TypedDocumentString(`
+    mutation UpdateUserPasswordMutation($currentPassword: String!, $newPassword: String!, $confirmNewPassword: String!) {
+  updatePassword(
+    input: {currentPassword: $currentPassword, newPassword: $newPassword, confirmNewPassword: $confirmNewPassword}
+  )
+}
+    `) as unknown as TypedDocumentString<UpdateUserPasswordMutationMutation, UpdateUserPasswordMutationMutationVariables>;

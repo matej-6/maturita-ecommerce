@@ -120,6 +120,11 @@ input CreateProductVariantInput {
   stock: Int!
 }
 
+type DataPoint {
+  x: String!
+  y: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -187,7 +192,7 @@ type Mutation {
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
   createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
   createProductVariantAttributeKey(createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
-  deleteAccount: Void!
+  deleteAccount: Void
   deleteAvatar: Void!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
   deleteProductImage(productImageId: Int!): Int!
@@ -207,6 +212,7 @@ type Mutation {
   updateCartItemQuantity(cartItemId: Int!, quantity: Int!): Cart!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
+  updatePassword(input: UpdatePasswordInput!): Void!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
   updateProductVariantAttribute(updateProductVariantAttributeInput: UpdateProductVariantAttributeInput!): ProductVariantAttribute!
@@ -223,7 +229,7 @@ type Order {
   status: OrderStatus!
   totalInCents: Int!
   updatedAt: DateTime!
-  userId: Int!
+  userId: Int
 }
 
 type OrderEdge {
@@ -265,6 +271,16 @@ enum OrderStatus {
   PENDING
   PROCESSING
   SHIPPED
+}
+
+type OverallTrendStatistic {
+  percentChange: Float!
+  points: [DataPoint!]!
+  timePeriod: TimePeriod!
+  xMax: String!
+  xMin: String!
+  yMax: String!
+  yMin: String!
 }
 
 type PaginatedCategory {
@@ -428,6 +444,7 @@ type Query {
   me: User!
   order(id: Int!): Order
   orders: [Order!]!
+  overallSalesStatistic(timePeriod: TimePeriod!): OverallTrendStatistic
   paginatedCategories(
     """
     If true, sort in ascending order, else descending. If null, default sorting order is used
@@ -478,6 +495,12 @@ enum Role {
   USER
 }
 
+enum TimePeriod {
+  LAST_NINETY_DAYS
+  LAST_SEVEN_DAYS
+  LAST_THIRTY_DAYS
+}
+
 input UpdateCategoryInput {
   """Category id"""
   id: Int!
@@ -485,6 +508,12 @@ input UpdateCategoryInput {
   parentCategoryId: Int
   """Slug of the category"""
   slug: String!
+}
+
+input UpdatePasswordInput {
+  confirmNewPassword: String!
+  currentPassword: String!
+  newPassword: String!
 }
 
 input UpdateProductInput {

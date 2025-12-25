@@ -64,7 +64,9 @@ export function HeaderRightNav() {
                           </NavigationMenuLink>
                         )}
                         <NavigationMenuLink asChild>
-                          <Link href="/account-details">{t("account-details")}</Link>
+                          <Link href="/account-details">
+                            {t("account-details")}
+                          </Link>
                         </NavigationMenuLink>
                         <NavigationMenuLink asChild>
                           <Button
@@ -91,11 +93,11 @@ export function HeaderRightNav() {
                   <ShoppingCartIcon className="size-6 text-secondary-foreground" />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="min-w-[496px]">
+              <SheetContent className="min-w-[300px] grow flex flex-col">
                 <SheetHeader>
                   <SheetTitle>Cart</SheetTitle>
                 </SheetHeader>
-                <div className="mt-4 m-2">
+                <div className="mt-4 m-2 grow flex">
                   <Cart />
                 </div>
               </SheetContent>

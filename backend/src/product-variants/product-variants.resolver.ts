@@ -39,13 +39,6 @@ export class ProductVariantsResolver {
     @Args('attributeFilters', { type: () => [[String]], nullable: true })
     attributeFilters: string[][] | null,
   ): Promise<PaginatedProductVariant> {
-    if (!searchTerm || searchTerm.trim() === '') {
-      return {
-        edges: [],
-        hasNextPage: false,
-        totalCount: 0,
-      };
-    }
 
     return this.productVariantsService.searchProductVariants(
       searchTerm,

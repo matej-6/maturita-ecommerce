@@ -92,6 +92,66 @@
     "additionalInformation": "Dodatočné informácie",
     "noImageAvailable": "Obrázok nie je dostupný"
   },
+  "homePage": {
+    "newArrivals": "Novinky",
+    "bestSellers": "Naše najpredávanejšie produkty",
+    "errorLoadingProducts": "Máme momentálne problém s načítaním produktov. Skúste to prosím neskôr."
+  },
+  "productVariantCard": {
+    "addToCartButton": "Pridať do košíka"
+  },
+  "accountDetailsPage": {
+    "error": "Nepodarilo sa načítať údaje o účte. Skúste to prosím neskôr.",
+    "title": "Môj účet",
+    "nameAndLastName": "Meno a priezvisko",
+    "email": "Email",
+    "avatar": "Avatar",
+    "password": "Heslo",
+    "createdAt": "Dátum vytvorenia",
+    "updatedAt": "Naposledy aktualizované",
+    "buttons": {
+      "updateDetails": "Upraviť",
+      "changePassword": "Zmeniť heslo",
+      "changeAvatar": "Zmeniť avatar",
+      "pendingChangeAvatar": "Aktualizujem avatar...",
+      "removeAvatar": "Odstrániť avatar",
+      "deleteAccount": "Zmazať účet"
+    },
+    "deleteAccountModal": {
+      "title": "Ste si istý, že chcete zmazať svoj účet?",
+      "description": "Táto akcia je trvalá a vymaže všetky vaše údaje vrátane objednávok. Ak máte nevybavené objednávky, kontaktujte podporu alebo počkajte, kým budú vybavené alebo kontaktuje podporu.",
+      "cancelButton": "Zrušiť",
+      "deleteButton": "Zmazať"
+    },
+    "orders": {
+      "title": "Objednávky",
+      "id": "ID",
+      "status": "Status",
+      "total": "Spolu",
+      "date": "Dátum",
+      "items": "Položky",
+      "actions": "Akcie",
+      "viewOrder": "Pozrieť objednávku",
+      "tableDescription": "Zoznam vašich objednávok.",
+      "errorLoadingOrders": "Máme momentálne problém s načítaním vašich objednávok. Skúste to prosím neskôr."
+    }
+  },
+  "orderPage": {
+    "order": "Objednávka",
+    "basicInformation": "Základné informácie",
+    "shippingDetails": "Doručovacie údaje",
+    "items": "Položky",
+    "itemsTable": {
+      "image": "Obrázok",
+      "sku": "SKU",
+      "unitPrice": "Jednotková cena",
+      "quantity": "Množstvo"
+    },
+    "buttons": {
+      "cancelOrder": "Zrušiť objednávku",
+      "pendingCancelOrder": "Zrušovanie objednávky..."
+    }
+  },
   "admin": {
     "productVariant": {
       "attributeKey": {
@@ -210,6 +270,28 @@
       },
       "attributes": "Atribúty",
       "selectAttribute": "Vybrať atribút"
+    },
+    "user": {
+      "firstName": "Meno",
+      "lastName": "Priezvisko",
+      "email": "Email"
+    },
+    "order": {
+      "id": "ID",
+      "status": "Status",
+      "total": "Total",
+      "items": "Items",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "shippingDetails": {
+        "line1": "Line 1",
+        "line2": "Line 2",
+        "city": "City",
+        "state": "State",
+        "postalCode": "Postal Code",
+        "country": "Country",
+        "phone": "Phone"
+      }
     }
   }
 }

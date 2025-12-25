@@ -24,6 +24,7 @@ export const CartFragment = graphql(`
         }
         product {
           name
+          slug
           thumbnailImage {
             base64
             mimeType

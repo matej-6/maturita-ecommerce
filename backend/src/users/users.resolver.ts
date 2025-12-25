@@ -21,6 +21,7 @@ import { OrdersService } from 'src/orders/orders.service';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
+import { UpdatePasswordInput } from './dto/update-password.input';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -78,19 +79,37 @@ export class UsersResolver {
     @Args('base64') base64: string,
     @Args('mimeType') mimeType: string,
     @CurrentUser() user: AuthenticatedUserDto,
-  ): Promise<void> {
+  ): Promise<typeof GraphQLVoid> {
     await this.usersService.uploadAvatar(user.id, base64, mimeType);
+    return GraphQLVoid;
   }
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => GraphQLVoid)
-  async deleteAvatar(@CurrentUser() user: AuthenticatedUserDto): Promise<void> {
+  async deleteAvatar(
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<typeof GraphQLVoid> {
     await this.usersService.deleteAvatar(user.id);
+    return GraphQLVoid;
   }
 
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => [Order], { name: 'orders' })
   async getOrdersForUser(@Parent() user: User): Promise<Order[]> {
     return this.ordersService.findAllOrdersByUserId(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid)
+  async updatePassword(
+    @Args('input') input: UpdatePasswordInput,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<typeof GraphQLVoid> {
+    await this.usersService.changePassword(
+      user.id,
+      input.currentPassword,
+      input.newPassword,
+    );
+    return GraphQLVoid;
   }
 }
