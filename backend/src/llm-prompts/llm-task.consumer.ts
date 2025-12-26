@@ -478,6 +478,17 @@ export class LLMTaskConsumer extends WorkerHost {
       throw new Error("I can't provide that information without a product.");
     }
 
+    if (category === 'similiarProducts') {
+      return await this.processSimiliarProductsPrompt(
+        userPrompt,
+        job.productId!,
+      );
+    }
+
+    if (category === 'productSearch') {
+      return await this.processProductSearchPrompt(userPrompt);
+    }
+
     let response = await this.generateProductInformationResponse(
       userPrompt,
       job.productId!,
@@ -499,6 +510,59 @@ export class LLMTaskConsumer extends WorkerHost {
     }
 
     return response;
+  }
+
+  private async processSimiliarProductsPrompt(
+    prompt: string,
+    productId: number,
+  ): Promise<string> {
+    const embedding = (await this.fetchEmbedding(prompt))[0];
+
+    const similarProducts = await this.qdrantService.qdrantClient.search(
+      QdrantCollections.PRODUCTS,
+      {
+        vector: embedding,
+        limit: 5,
+        filter: {
+          must: [
+            {
+              key: 'productId',
+              match: { value: productId },
+            },
+          ],
+        },
+      },
+    );
+
+    const system = `You are an AI assistant that provides a list of products similar to a given product based on its attributes and description.
+    Use the following similar products to answer the user's prompt:
+    ${JSON.stringify(similarProducts)}
+
+    Answer the user's prompt using the provided similar products. If the information is insufficient, respond accordingly.
+    `;
+
+    return await this.fetchLLM<string>(system, prompt, false);
+  }
+
+  private async processProductSearchPrompt(prompt: string): Promise<string> {
+    const embedding = (await this.fetchEmbedding(prompt))[0];
+
+    const similarProducts = await this.qdrantService.qdrantClient.search(
+      QdrantCollections.PRODUCTS,
+      {
+        vector: embedding,
+        limit: 5,
+      },
+    );
+
+    const system = `You are an AI assistant that provides a list of products based on a user's search criteria.
+    Use the following products to answer the user's prompt:
+    ${JSON.stringify(similarProducts)}
+
+    Answer the user's prompt using the provided products. If the information is insufficient, respond accordingly.
+    `;
+
+    return await this.fetchLLM<string>(system, prompt, false);
   }
 
   private async generateProductInformationResponse(

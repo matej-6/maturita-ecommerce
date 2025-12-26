@@ -87,6 +87,8 @@ export default async function LocaleLayout({
     },
   });
 
+  const state = dehydrate(queryClient);
+
   return (
     <html className="h-full" lang={locale}>
       <body
@@ -100,9 +102,7 @@ export default async function LocaleLayout({
       >
         <Providers>
           <div className="h-screen">
-            <HydrationBoundary state={dehydrate(queryClient)}>
-              {children}
-            </HydrationBoundary>
+            <HydrationBoundary state={state}>{children}</HydrationBoundary>
           </div>
         </Providers>
       </body>

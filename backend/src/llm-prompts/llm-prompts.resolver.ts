@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { LLMPromptsService } from './llm-prompts.service';
 import { Logger, UseGuards } from '@nestjs/common';
 import { LLMTask } from './entities/llm-task.entity';
@@ -26,7 +26,7 @@ export class LLMPromptsResolver {
   @UseGuards(JwtAuthGuard)
   @Query(() => LLMTask, { nullable: true })
   async getUserLLMTaskById(
-    @Args('id') id: number,
+    @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<LLMTask | null> {
     return await this.llmTasksService.getTaskById(id, user.id);

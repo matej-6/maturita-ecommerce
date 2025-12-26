@@ -3,6 +3,17 @@ schema {
   mutation: Mutation
 }
 
+type BestSellingCategory {
+  category: Category!
+  itemsSold: Int!
+  totalRevenueInCents: Float!
+}
+
+type BestSellingProductVariant {
+  productVariant: ProductVariant!
+  quantitySold: Int!
+}
+
 type Cart {
   createdAt: DateTime!
   id: Int!
@@ -121,6 +132,7 @@ input CreateProductVariantInput {
 }
 
 type DataPoint {
+  label: String!
   x: String!
   y: String!
 }
@@ -277,10 +289,6 @@ type OverallTrendStatistic {
   percentChange: Float!
   points: [DataPoint!]!
   timePeriod: TimePeriod!
-  xMax: String!
-  xMin: String!
-  yMax: String!
-  yMin: String!
 }
 
 type PaginatedCategory {
@@ -415,6 +423,8 @@ type ProductVariantImage {
 }
 
 type Query {
+  bestSellingCategoriesStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingCategory!]
+  bestSellingProductVariantsStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingProductVariant!]
   cart: Cart!
   categories(
     """
@@ -438,13 +448,12 @@ type Query {
   findAllPaginatedOrders(ascending: Boolean, cursor: Int, dateFrom: DateTime, dateTo: DateTime, id: Int, maxPrice: Int, minPrice: Int, pageSize: Int = 10, sortBy: String, status: OrderStatus, userId: Int): PaginatedOrder!
   findAllPaginatedUsers(ascending: Boolean, cursor: Int, email: String, id: Int, pageSize: Int = 10, role: Role, sortBy: UserSortingField): PaginatedUser!
   findOneProductVariantAttribute(id: Int!): ProductVariantAttribute
-  getUserLLMTaskById(id: Float!): LLMTask
+  getUserLLMTaskById(id: Int!): LLMTask
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: User!
   order(id: Int!): Order
   orders: [Order!]!
-  overallSalesStatistic(timePeriod: TimePeriod!): OverallTrendStatistic
   paginatedCategories(
     """
     If true, sort in ascending order, else descending. If null, default sorting order is used
@@ -484,6 +493,7 @@ type Query {
     slug: String
     sortBy: String
   ): PaginatedProduct!
+  revenuePerDayStatistic(timePeriod: TimePeriod!): OverallTrendStatistic
   searchProductVariants(ascending: Boolean, attributeFilters: [[String!]!], cursor: Int, pageSize: Int = 10, searchTerm: String, sortBy: String): PaginatedProductVariant!
   user(id: ID!): User!
 }

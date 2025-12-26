@@ -2,11 +2,11 @@ import {
   authRefreshTokenAction,
   getCurrentSessionAction,
 } from "@/app/data-access-layer/auth/actions";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { SESSION_QUERY_KEY } from "./query-keys";
 
 export const useSession = () =>
-  useSuspenseQuery({
+  useQuery({
     queryKey: SESSION_QUERY_KEY,
     queryFn: async () => {
       const refreshTokenRes = await authRefreshTokenAction();

@@ -2,7 +2,7 @@
 
 import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
-import { ProductPageQueryQuery } from "@/graphql/graphql";
+import { ProductIdBySlugQuery, ProductPageQueryQuery } from "@/graphql/graphql";
 import { ExecutionResult } from "graphql";
 import "server-only";
 import { ActionResponse } from "./formActionResponse";
@@ -44,11 +44,33 @@ const ProductPageDocument = graphql(`
   }
 `);
 
+const ProductIdBySlugDocument = graphql(`
+  query ProductIdBySlug($slug: String!) {
+    productBySlug(slug: $slug) {
+      id
+    }
+  }
+`);
+
 export async function getProductPageData(
   slug: string
 ): Promise<ActionResponse<ExecutionResult<ProductPageQueryQuery>["data"]>> {
   const res = await execute(ProductPageDocument, { slug: slug });
 
+  if (res.errors) {
+    return handleGraphqlError(res.errors);
+  }
+
+  return {
+    success: true,
+    data: res.data,
+  };
+}
+
+export async function getProductIdBySlugAction(
+  slug: string
+): Promise<ActionResponse<ExecutionResult<ProductIdBySlugQuery>["data"]>> {
+  const res = await execute(ProductIdBySlugDocument, { slug: slug });
   if (res.errors) {
     return handleGraphqlError(res.errors);
   }

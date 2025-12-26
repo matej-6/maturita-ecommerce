@@ -9,18 +9,6 @@ export class OverallTrendStatistic {
   @Field(() => TimePeriod)
   timePeriod: TimePeriod;
 
-  @Field(() => String)
-  xMin: string;
-
-  @Field(() => String)
-  xMax: string;
-
-  @Field(() => String)
-  yMin: string;
-
-  @Field(() => String)
-  yMax: string;
-
   @Field(() => [DataPoint])
   points: DataPoint[];
 }
@@ -32,4 +20,7 @@ export class DataPoint {
 
   @Field(() => String)
   y: string;
+
+  @Field(() => String)
+  label: string;
 }

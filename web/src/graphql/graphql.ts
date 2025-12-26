@@ -20,6 +20,19 @@ export type Scalars = {
   Void: { input: any; output: any; }
 };
 
+export type BestSellingCategory = {
+  __typename?: 'BestSellingCategory';
+  category: Category;
+  itemsSold: Scalars['Int']['output'];
+  totalRevenueInCents: Scalars['Float']['output'];
+};
+
+export type BestSellingProductVariant = {
+  __typename?: 'BestSellingProductVariant';
+  productVariant: ProductVariant;
+  quantitySold: Scalars['Int']['output'];
+};
+
 export type Cart = {
   __typename?: 'Cart';
   createdAt: Scalars['DateTime']['output'];
@@ -152,6 +165,7 @@ export type CreateProductVariantInput = {
 
 export type DataPoint = {
   __typename?: 'DataPoint';
+  label: Scalars['String']['output'];
   x: Scalars['String']['output'];
   y: Scalars['String']['output'];
 };
@@ -505,10 +519,6 @@ export type OverallTrendStatistic = {
   percentChange: Scalars['Float']['output'];
   points: Array<DataPoint>;
   timePeriod: TimePeriod;
-  xMax: Scalars['String']['output'];
-  xMin: Scalars['String']['output'];
-  yMax: Scalars['String']['output'];
-  yMin: Scalars['String']['output'];
 };
 
 export type PaginatedCategory = {
@@ -665,6 +675,8 @@ export type ProductVariantImage = {
 
 export type Query = {
   __typename?: 'Query';
+  bestSellingCategoriesStatistic?: Maybe<Array<BestSellingCategory>>;
+  bestSellingProductVariantsStatistic?: Maybe<Array<BestSellingProductVariant>>;
   cart: Cart;
   categories: Array<Category>;
   category: Category;
@@ -677,7 +689,6 @@ export type Query = {
   me: User;
   order?: Maybe<Order>;
   orders: Array<Order>;
-  overallSalesStatistic?: Maybe<OverallTrendStatistic>;
   paginatedCategories: PaginatedCategory;
   product?: Maybe<Product>;
   productBySlug?: Maybe<Product>;
@@ -686,8 +697,21 @@ export type Query = {
   productVariantAttributes: Array<ProductVariantAttribute>;
   productVariantsByIds: Array<ProductVariant>;
   products: PaginatedProduct;
+  revenuePerDayStatistic?: Maybe<OverallTrendStatistic>;
   searchProductVariants: PaginatedProductVariant;
   user: User;
+};
+
+
+export type QueryBestSellingCategoriesStatisticArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  timePeriod: TimePeriod;
+};
+
+
+export type QueryBestSellingProductVariantsStatisticArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  timePeriod: TimePeriod;
 };
 
 
@@ -742,7 +766,7 @@ export type QueryFindOneProductVariantAttributeArgs = {
 
 
 export type QueryGetUserLlmTaskByIdArgs = {
-  id: Scalars['Float']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
@@ -753,11 +777,6 @@ export type QueryLocaleArgs = {
 
 export type QueryOrderArgs = {
   id: Scalars['Int']['input'];
-};
-
-
-export type QueryOverallSalesStatisticArgs = {
-  timePeriod: TimePeriod;
 };
 
 
@@ -810,6 +829,11 @@ export type QueryProductsArgs = {
   pageSize?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryRevenuePerDayStatisticArgs = {
+  timePeriod: TimePeriod;
 };
 
 
@@ -1212,6 +1236,27 @@ export type ProductsPage_QueryDocumentQueryVariables = Exact<{
 
 export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null } };
 
+export type RevenuePerDayLastNinetyDaysFragmentFragment = { __typename?: 'Query', revenuePerDayStatistic?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null } & { ' $fragmentName'?: 'RevenuePerDayLastNinetyDaysFragmentFragment' };
+
+export type RevenuePerDayLastSevenDaysFragmentFragment = { __typename?: 'Query', revenuePerDayStatistic?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null } & { ' $fragmentName'?: 'RevenuePerDayLastSevenDaysFragmentFragment' };
+
+export type BestSellingCategoriesStatisticLastSevenDaysFragmentFragment = { __typename?: 'Query', bestSellingCategoriesStatistic?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null } & { ' $fragmentName'?: 'BestSellingCategoriesStatisticLastSevenDaysFragmentFragment' };
+
+export type BestSellingProductVariantsStatisticLastSevenDaysFragmentFragment = { __typename?: 'Query', bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, product: { __typename?: 'Product', id: number, name?: string | null, slug: string } } }> | null } & { ' $fragmentName'?: 'BestSellingProductVariantsStatisticLastSevenDaysFragmentFragment' };
+
+export type BestSellingCategoriesStatisticLastThirtyDaysFragmentFragment = { __typename?: 'Query', bestSellingCategoriesStatistic?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null } & { ' $fragmentName'?: 'BestSellingCategoriesStatisticLastThirtyDaysFragmentFragment' };
+
+export type BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragment = { __typename?: 'Query', bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, product: { __typename?: 'Product', id: number, name?: string | null, slug: string } } }> | null } & { ' $fragmentName'?: 'BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragment' };
+
+export type BestSellingCategoriesStatisticLastNinetyDaysFragmentFragment = { __typename?: 'Query', bestSellingCategoriesStatistic?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null } & { ' $fragmentName'?: 'BestSellingCategoriesStatisticLastNinetyDaysFragmentFragment' };
+
+export type BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragment = { __typename?: 'Query', bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, product: { __typename?: 'Product', id: number, name?: string | null, slug: string } } }> | null } & { ' $fragmentName'?: 'BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragment' };
+
+export type AdminPageStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminPageStatisticsQuery = { __typename?: 'Query', BestSellingCategoriesStatisticLastSevenDays?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, RevenuePerDayLastNinetyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, RevenuePerDayLastSevenDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, RevenuePerDayLastThirtyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, BestSellingProductVariantsStatisticLastSevenDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null };
+
 export type AdminUsersPageQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']['input']>;
   role?: InputMaybe<Role>;
@@ -1290,6 +1335,21 @@ export type HomepageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type HomepageQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', edges?: Array<{ __typename?: 'ProductVariantEdge', node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', slug: string, name?: string | null, id: number, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null } };
 
+export type NewLlmTaskMutationVariables = Exact<{
+  prompt: Scalars['String']['input'];
+  productId?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type NewLlmTaskMutation = { __typename?: 'Mutation', createLlmTask: { __typename?: 'LLMTask', id: number, status: LlmTaskStatus, response?: string | null, date: any } };
+
+export type LlmUserTaskByIdQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type LlmUserTaskByIdQuery = { __typename?: 'Query', getUserLLMTaskById?: { __typename?: 'LLMTask', id: number, response?: string | null, status: LlmTaskStatus, date: any } | null };
+
 export type CancelOrderMutationMutationVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
@@ -1317,6 +1377,13 @@ export type ProductPageQueryQueryVariables = Exact<{
 
 
 export type ProductPageQueryQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number, name?: string | null, description?: string | null, markdownContent?: string | null, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, stock: number, priceInCents: number, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string } | null }> }> } | null };
+
+export type ProductIdBySlugQueryVariables = Exact<{
+  slug: Scalars['String']['input'];
+}>;
+
+
+export type ProductIdBySlugQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number } | null };
 
 export type SearchProductsQueryQueryVariables = Exact<{
   searchTerm: Scalars['String']['input'];
@@ -1412,6 +1479,116 @@ export const Locales_QueryFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"Locales_QueryFragment"}) as unknown as TypedDocumentString<Locales_QueryFragmentFragment, unknown>;
+export const RevenuePerDayLastNinetyDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment RevenuePerDayLastNinetyDaysFragment on Query {
+  revenuePerDayStatistic(timePeriod: LAST_NINETY_DAYS) {
+    percentChange
+    points {
+      x
+      y
+      label
+    }
+    timePeriod
+  }
+}
+    `, {"fragmentName":"RevenuePerDayLastNinetyDaysFragment"}) as unknown as TypedDocumentString<RevenuePerDayLastNinetyDaysFragmentFragment, unknown>;
+export const RevenuePerDayLastSevenDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment RevenuePerDayLastSevenDaysFragment on Query {
+  revenuePerDayStatistic(timePeriod: LAST_SEVEN_DAYS) {
+    percentChange
+    points {
+      x
+      y
+      label
+    }
+    timePeriod
+  }
+}
+    `, {"fragmentName":"RevenuePerDayLastSevenDaysFragment"}) as unknown as TypedDocumentString<RevenuePerDayLastSevenDaysFragmentFragment, unknown>;
+export const BestSellingCategoriesStatisticLastSevenDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment BestSellingCategoriesStatisticLastSevenDaysFragment on Query {
+  bestSellingCategoriesStatistic(limit: 5, timePeriod: LAST_SEVEN_DAYS) {
+    category {
+      id
+      slug
+    }
+    itemsSold
+    totalRevenueInCents
+  }
+}
+    `, {"fragmentName":"BestSellingCategoriesStatisticLastSevenDaysFragment"}) as unknown as TypedDocumentString<BestSellingCategoriesStatisticLastSevenDaysFragmentFragment, unknown>;
+export const BestSellingProductVariantsStatisticLastSevenDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment BestSellingProductVariantsStatisticLastSevenDaysFragment on Query {
+  bestSellingProductVariantsStatistic(limit: 5, timePeriod: LAST_SEVEN_DAYS) {
+    productVariant {
+      id
+      sku
+      product {
+        id
+        name
+        slug
+      }
+    }
+    quantitySold
+  }
+}
+    `, {"fragmentName":"BestSellingProductVariantsStatisticLastSevenDaysFragment"}) as unknown as TypedDocumentString<BestSellingProductVariantsStatisticLastSevenDaysFragmentFragment, unknown>;
+export const BestSellingCategoriesStatisticLastThirtyDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment BestSellingCategoriesStatisticLastThirtyDaysFragment on Query {
+  bestSellingCategoriesStatistic(limit: 5, timePeriod: LAST_THIRTY_DAYS) {
+    category {
+      id
+      slug
+    }
+    itemsSold
+    totalRevenueInCents
+  }
+}
+    `, {"fragmentName":"BestSellingCategoriesStatisticLastThirtyDaysFragment"}) as unknown as TypedDocumentString<BestSellingCategoriesStatisticLastThirtyDaysFragmentFragment, unknown>;
+export const BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment BestSellingProductVariantsStatisticLastThirtyDaysFragment on Query {
+  bestSellingProductVariantsStatistic(limit: 5, timePeriod: LAST_THIRTY_DAYS) {
+    productVariant {
+      id
+      sku
+      product {
+        id
+        name
+        slug
+      }
+    }
+    quantitySold
+  }
+}
+    `, {"fragmentName":"BestSellingProductVariantsStatisticLastThirtyDaysFragment"}) as unknown as TypedDocumentString<BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragment, unknown>;
+export const BestSellingCategoriesStatisticLastNinetyDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment BestSellingCategoriesStatisticLastNinetyDaysFragment on Query {
+  bestSellingCategoriesStatistic(limit: 5, timePeriod: LAST_NINETY_DAYS) {
+    category {
+      id
+      slug
+    }
+    itemsSold
+    totalRevenueInCents
+  }
+}
+    `, {"fragmentName":"BestSellingCategoriesStatisticLastNinetyDaysFragment"}) as unknown as TypedDocumentString<BestSellingCategoriesStatisticLastNinetyDaysFragmentFragment, unknown>;
+export const BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragmentDoc = new TypedDocumentString(`
+    fragment BestSellingProductVariantsStatisticLastNinetyDaysFragment on Query {
+  bestSellingProductVariantsStatistic(limit: 5, timePeriod: LAST_NINETY_DAYS) {
+    productVariant {
+      id
+      sku
+      product {
+        id
+        name
+        slug
+      }
+    }
+    quantitySold
+  }
+}
+    `, {"fragmentName":"BestSellingProductVariantsStatisticLastNinetyDaysFragment"}) as unknown as TypedDocumentString<BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragment, unknown>;
 export const MeFragmentFragmentDoc = new TypedDocumentString(`
     fragment MeFragment on User {
   id
@@ -1908,6 +2085,142 @@ export const ProductsPage_QueryDocumentDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductsPage_QueryDocumentQuery, ProductsPage_QueryDocumentQueryVariables>;
+export const AdminPageStatisticsDocument = new TypedDocumentString(`
+    query AdminPageStatistics {
+  BestSellingCategoriesStatisticLastSevenDays: bestSellingCategoriesStatistic(
+    limit: 5
+    timePeriod: LAST_SEVEN_DAYS
+  ) {
+    category {
+      id
+      slug
+    }
+    itemsSold
+    totalRevenueInCents
+  }
+  BestSellingCategoriesStatisticLastThirtyDaysFragment: bestSellingCategoriesStatistic(
+    limit: 5
+    timePeriod: LAST_THIRTY_DAYS
+  ) {
+    category {
+      id
+      slug
+    }
+    itemsSold
+    totalRevenueInCents
+  }
+  BestSellingCategoriesStatisticLastNinetyDaysFragment: bestSellingCategoriesStatistic(
+    limit: 5
+    timePeriod: LAST_NINETY_DAYS
+  ) {
+    category {
+      id
+      slug
+    }
+    itemsSold
+    totalRevenueInCents
+  }
+  RevenuePerDayLastNinetyDaysFragment: revenuePerDayStatistic(
+    timePeriod: LAST_NINETY_DAYS
+  ) {
+    percentChange
+    points {
+      x
+      y
+      label
+    }
+    timePeriod
+  }
+  RevenuePerDayLastSevenDaysFragment: revenuePerDayStatistic(
+    timePeriod: LAST_SEVEN_DAYS
+  ) {
+    percentChange
+    points {
+      x
+      y
+      label
+    }
+    timePeriod
+  }
+  RevenuePerDayLastThirtyDaysFragment: revenuePerDayStatistic(
+    timePeriod: LAST_THIRTY_DAYS
+  ) {
+    percentChange
+    points {
+      x
+      y
+      label
+    }
+    timePeriod
+  }
+  BestSellingProductVariantsStatisticLastSevenDaysFragment: bestSellingProductVariantsStatistic(
+    limit: 5
+    timePeriod: LAST_SEVEN_DAYS
+  ) {
+    quantitySold
+    productVariant {
+      id
+      sku
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      product {
+        id
+        slug
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+    }
+  }
+  BestSellingProductVariantsStatisticLastThirtyDaysFragment: bestSellingProductVariantsStatistic(
+    limit: 5
+    timePeriod: LAST_THIRTY_DAYS
+  ) {
+    quantitySold
+    productVariant {
+      id
+      sku
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      product {
+        id
+        slug
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+    }
+  }
+  BestSellingProductVariantsStatisticLastNinetyDaysFragment: bestSellingProductVariantsStatistic(
+    limit: 5
+    timePeriod: LAST_NINETY_DAYS
+  ) {
+    quantitySold
+    productVariant {
+      id
+      sku
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      product {
+        id
+        slug
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AdminPageStatisticsQuery, AdminPageStatisticsQueryVariables>;
 export const AdminUsersPageDocument = new TypedDocumentString(`
     query AdminUsersPage($id: Int, $role: Role, $email: String, $pageSize: Int, $sortBy: UserSortingField, $cursor: Int, $ascending: Boolean) {
   findAllPaginatedUsers(
@@ -2170,6 +2483,26 @@ export const HomepageQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<HomepageQueryQuery, HomepageQueryQueryVariables>;
+export const NewLlmTaskDocument = new TypedDocumentString(`
+    mutation newLLMTask($prompt: String!, $productId: Int) {
+  createLlmTask(input: {prompt: $prompt, productId: $productId}) {
+    id
+    status
+    response
+    date
+  }
+}
+    `) as unknown as TypedDocumentString<NewLlmTaskMutation, NewLlmTaskMutationVariables>;
+export const LlmUserTaskByIdDocument = new TypedDocumentString(`
+    query LLMUserTaskById($id: Int!) {
+  getUserLLMTaskById(id: $id) {
+    id
+    response
+    status
+    date
+  }
+}
+    `) as unknown as TypedDocumentString<LlmUserTaskByIdQuery, LlmUserTaskByIdQueryVariables>;
 export const CancelOrderMutationDocument = new TypedDocumentString(`
     mutation CancelOrderMutation($id: Int!) {
   cancelOrder(id: $id) {
@@ -2257,6 +2590,13 @@ export const ProductPageQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductPageQueryQuery, ProductPageQueryQueryVariables>;
+export const ProductIdBySlugDocument = new TypedDocumentString(`
+    query ProductIdBySlug($slug: String!) {
+  productBySlug(slug: $slug) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<ProductIdBySlugQuery, ProductIdBySlugQueryVariables>;
 export const SearchProductsQueryDocument = new TypedDocumentString(`
     query SearchProductsQuery($searchTerm: String!, $productsCursor: Int, $productsPageSize: Int, $attributeFilters: [[String!]!]) {
   searchProductVariants(
