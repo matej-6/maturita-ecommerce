@@ -166,11 +166,18 @@ input EditProductTranslationInput {
   productTranslationId: Int!
 }
 
+enum EmbeddingTaskStatus {
+  COMPLETED
+  FAILED
+  IN_PROGRESS
+  PENDING
+}
+
 type LLMTask {
   date: DateTime!
   id: Int!
   prompt: String!
-  response: String
+  response: UserPromptResponse
   status: LLMTaskStatus!
   userId: Int!
 }
@@ -210,7 +217,11 @@ type Mutation {
   deleteProductImage(productImageId: Int!): Int!
   deleteProductTranslation(productTranslationId: Int!): Int!
   editProductTranslation(editProductTranslationInput: EditProductTranslationInput!): ProductTranslation!
+  generateProductContentEmbedding(lang: String!, productId: Int!): ProductContentEmbedding
+  generateProductEmbedding(lang: String!, productId: Int!): ProductEmbedding
   logoutAll: Void!
+  regenerateAllProductContentEmbeddings: Void!
+  regenerateAllProductEmbeddings: Void!
   removeCategory(id: Int!): Category!
   removeProduct(id: Int!): Product!
   removeProductVariant(id: Int!): Int!
@@ -323,14 +334,18 @@ type PaginatedUser {
 
 type Product {
   categoryId: Int
+  contentEmbeddings: [ProductContentEmbedding!]!
   createdAt: DateTime!
   description: String
+  embeddings: [ProductEmbedding!]!
   """Product ID"""
   id: Int!
   images: [ProductImage!]!
   isPublic: Boolean!
   isSetup: Boolean!
   markdownContent: String
+  missingContentEmbeddingLanguages: [String!]!
+  missingEmbeddingLanguages: [String!]!
   name: String
   """Product slug"""
   slug: String!
@@ -340,9 +355,25 @@ type Product {
   variants(includeHidden: Boolean! = false): [ProductVariant!]!
 }
 
+type ProductContentEmbedding {
+  createdAt: DateTime!
+  id: Int!
+  lang: String!
+  productId: Int!
+  status: EmbeddingTaskStatus!
+}
+
 type ProductEdge {
   cursor: Int!
   node: Product!
+}
+
+type ProductEmbedding {
+  createdAt: DateTime!
+  id: Int!
+  lang: String!
+  productId: Int!
+  status: EmbeddingTaskStatus!
 }
 
 type ProductImage {
@@ -452,6 +483,8 @@ type Query {
   locale(id: String!): Locale!
   locales: [Locale!]!
   me: User!
+  missingProductContentEmbeddingLanguages(productId: Int!): [String!]!
+  missingProductEmbeddingLanguages(productId: Int!): [String!]!
   order(id: Int!): Order
   orders: [Order!]!
   paginatedCategories(
@@ -476,6 +509,10 @@ type Query {
   ): PaginatedCategory!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productBySlug(slug: String!): Product
+  productContentEmbedding(id: Int!): ProductContentEmbedding
+  productContentEmbeddings(productId: Int!): [ProductContentEmbedding!]!
+  productEmbedding(id: Int!): ProductEmbedding
+  productEmbeddings(productId: Int!): [ProductEmbedding!]!
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
   productVariantAttributeKeys(productId: Int): [ProductVariantAttributeKey!]!
   productVariantAttributes: [ProductVariantAttribute!]!
@@ -586,6 +623,12 @@ type UserAvatar {
 type UserEdge {
   cursor: Int!
   node: User!
+}
+
+type UserPromptResponse {
+  id: Int!
+  products: [Product!]
+  text: String!
 }
 
 enum UserSortingField {

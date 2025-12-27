@@ -5,9 +5,6 @@ export const NewLLMTaskMutation = graphql(`
   mutation newLLMTask($prompt: String!, $productId: Int) {
     createLlmTask(input: { prompt: $prompt, productId: $productId }) {
       id
-      status
-      response
-      date
     }
   }
 `);

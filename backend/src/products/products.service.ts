@@ -17,6 +17,8 @@ import { CreateProductTranslationInput } from './dto/create-product-translation.
 import { EditProductTranslationInput } from './dto/edit-product-translation.input';
 import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
 import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
+import { ProductEmbedding } from './entities/product-embedding.entity';
+import { ProductContentEmbedding } from './entities/product-content-embedding.entity';
 
 @Injectable()
 export class ProductsService {
@@ -192,20 +194,79 @@ export class ProductsService {
     return updatedTranslation;
   }
 
-  async generateProductEmbeddings(productId: number): Promise<void> {
-    await this.llmService.removeProductEmbeddingTask(productId);
-    await this.llmService.removeProductContentEmbeddingTask(productId);
-    await this.deleteProductEmbeddings(productId);
-    await this.llmService.addProductEmbeddingTask({ productId: productId });
-    await this.llmService.addProductContentEmbeddingTask({
+  async generateProductEmbedding(
+    productId: number,
+    lang: string,
+  ): Promise<ProductEmbedding> {
+    const isLangSupported = this.localesService
+      .findAll()
+      .some((l) => l.code.toString() === lang);
+    if (!isLangSupported) {
+      throw new BadRequestException('Unsupported language code');
+    }
+
+    await this.llmService.removeProductEmbeddingTask(productId, lang);
+    await this.deleteProductEmbedding(productId, lang);
+    const res = await this.llmService.addProductEmbeddingTask({
       productId: productId,
+      lang: lang,
     });
+    return res;
   }
 
-  async removeProductEmbeddings(productId: number): Promise<void> {
-    await this.llmService.removeProductEmbeddingTask(productId);
-    await this.llmService.removeProductContentEmbeddingTask(productId);
-    await this.deleteProductEmbeddings(productId);
+  async generateProductContentEmbedding(
+    productId: number,
+    lang: string,
+  ): Promise<ProductContentEmbedding> {
+    const isLangSupported = this.localesService
+      .findAll()
+      .some((l) => l.code.toString() === lang);
+    if (!isLangSupported) {
+      throw new BadRequestException('Unsupported language code');
+    }
+
+    await this.llmService.removeProductContentEmbeddingTask(productId, lang);
+    await this.deleteProductContentEmbedding(productId, lang);
+    const res = await this.llmService.addProductContentEmbeddingTask({
+      productId: productId,
+      lang: lang,
+    });
+    return res;
+  }
+
+  async generateProductEmbeddings(
+    productId: number,
+    lang: string,
+  ): Promise<ProductEmbedding> {
+    const isLangSupported = this.localesService
+      .findAll()
+      .some((l) => l.code.toString() === lang);
+    if (!isLangSupported) {
+      throw new BadRequestException('Unsupported language code');
+    }
+
+    await this.llmService.removeProductEmbeddingTask(productId, lang);
+    await this.llmService.removeProductContentEmbeddingTask(productId, lang);
+    await this.deleteProductEmbeddings(productId, lang);
+    await this.llmService.addProductEmbeddingTask({
+      productId: productId,
+      lang: lang,
+    });
+    const res = await this.llmService.addProductContentEmbeddingTask({
+      productId: productId,
+      lang: lang,
+    });
+
+    return res;
+  }
+
+  async removeProductEmbeddings(
+    productId: number,
+    lang: string,
+  ): Promise<void> {
+    await this.llmService.removeProductEmbeddingTask(productId, lang);
+    await this.llmService.removeProductContentEmbeddingTask(productId, lang);
+    await this.deleteProductEmbeddings(productId, lang);
   }
 
   private validatePaginationArgs(args: PaginationArgs) {
@@ -573,16 +634,6 @@ export class ProductsService {
         categoryId: null,
       },
     });
-
-    await Promise.all(
-      affected.map(async (product) => {
-        await this.llmService.removeProductEmbeddingTask(product.id);
-        await this.deleteProductEmbeddings(product.id);
-        await this.llmService.addProductEmbeddingTask({
-          productId: product.id,
-        });
-      }),
-    );
   }
 
   async update(id: number, input: UpdateProductInput): Promise<Product> {
@@ -651,6 +702,38 @@ export class ProductsService {
   }
 
   async remove(id: number) {
+    const productEmbeddings = await this.prisma.embeddingTask.findMany({
+      where: {
+        productId: id,
+      },
+      select: {
+        lang: true,
+      },
+    });
+
+    for (const embedding of productEmbeddings) {
+      await this.llmService.removeProductEmbeddingTask(id, embedding.lang);
+      await this.deleteProductEmbeddings(id, embedding.lang);
+    }
+
+    const productContentEmbeddings =
+      await this.prisma.productContentEmbeddingTask.findMany({
+        where: {
+          productId: id,
+        },
+        select: {
+          lang: true,
+        },
+      });
+
+    for (const embedding of productContentEmbeddings) {
+      await this.llmService.removeProductContentEmbeddingTask(
+        id,
+        embedding.lang,
+      );
+      await this.deleteProductEmbeddings(id, embedding.lang);
+    }
+
     const deletedProductId = await this.prisma.$transaction(async (tx) => {
       await tx.productImage.deleteMany({
         where: {
@@ -692,21 +775,106 @@ export class ProductsService {
       return deletedProduct.id;
     });
 
-    await this.llmService.removeProductEmbeddingTask(id);
-    await this.deleteProductEmbeddings(id);
-
     return deletedProductId;
   }
 
-  async deleteProductEmbeddings(productId: number): Promise<void> {
+  async deleteProductEmbedding(productId: number, lang: string) {
     await this.qdrantService.qdrantClient.delete(QdrantCollections.PRODUCTS, {
-      points: [productId],
+      filter: {
+        must: [
+          {
+            key: 'productId',
+            match: {
+              value: productId,
+            },
+          },
+          {
+            key: 'lang',
+            match: {
+              value: lang,
+            },
+          },
+        ],
+      },
     });
 
     try {
       await this.prisma.embeddingTask.delete({
         where: {
-          productId: productId,
+          productId_lang: {
+            productId: productId,
+            lang: lang,
+          },
+        },
+      });
+    } catch (e) {}
+  }
+
+  async deleteProductContentEmbedding(productId: number, lang: string) {
+    await this.qdrantService.qdrantClient.delete(
+      QdrantCollections.PRODUCT_CHUNKS,
+      {
+        filter: {
+          must: [
+            {
+              key: 'productId',
+              match: {
+                value: productId,
+              },
+            },
+            {
+              key: 'lang',
+              match: {
+                value: lang,
+              },
+            },
+          ],
+        },
+      },
+    );
+
+    try {
+      await this.prisma.productContentEmbeddingTask.delete({
+        where: {
+          productId_lang: {
+            productId: productId,
+            lang: lang,
+          },
+        },
+      });
+    } catch (e) {}
+  }
+
+  async deleteProductEmbeddings(
+    productId: number,
+    lang: string,
+  ): Promise<void> {
+    await this.qdrantService.qdrantClient.delete(QdrantCollections.PRODUCTS, {
+      filter: {
+        must: [
+          {
+            key: 'productId',
+            match: {
+              value: productId,
+            },
+          },
+          {
+            key: 'lang',
+            match: {
+              value: lang,
+            },
+          },
+        ],
+      },
+    });
+
+    try {
+      await this.prisma.embeddingTask.delete({
+        where: {
+          productId_lang: {
+            productId: productId,
+            lang: lang,
+          },
         },
       });
     } catch (e) {}
@@ -722,6 +890,12 @@ export class ProductsService {
                 value: productId,
               },
             },
+            {
+              key: 'lang',
+              match: {
+                value: lang,
+              },
+            },
           ],
         },
       },
@@ -730,10 +904,55 @@ export class ProductsService {
     try {
       await this.prisma.productContentEmbeddingTask.delete({
         where: {
-          productId: productId,
+          productId_lang: {
+            productId: productId,
+            lang: lang,
+          },
         },
       });
     } catch (e) {}
+  }
+
+  async regenerateAllProductEmbeddings(): Promise<void> {
+    const allProductsWithEmbeddings =
+      await this.prisma.embeddingTask.findMany();
+
+    for (const embedding of allProductsWithEmbeddings) {
+      await this.llmService.removeProductEmbeddingTask(
+        embedding.productId,
+        embedding.lang,
+      );
+      await this.prisma.embeddingTask.delete({
+        where: {
+          id: embedding.id,
+        },
+      });
+      await this.llmService.addProductEmbeddingTask({
+        productId: embedding.productId,
+        lang: embedding.lang,
+      });
+    }
+  }
+
+  async regenerateAllProductContentEmbeddings(): Promise<void> {
+    const allProductsWithEmbeddings =
+      await this.prisma.productContentEmbeddingTask.findMany();
+
+    for (const embedding of allProductsWithEmbeddings) {
+      await this.llmService.removeProductContentEmbeddingTask(
+        embedding.productId,
+        embedding.lang,
+      );
+      await this.prisma.productContentEmbeddingTask.delete({
+        where: {
+          id: embedding.id,
+        },
+      });
+      await this.llmService.addProductContentEmbeddingTask({
+        productId: embedding.productId,
+        lang: embedding.lang,
+      });
+    }
   }
 
   async getAllTranslationsForProductsByBatch(productIds: number[]) {
@@ -890,5 +1109,90 @@ export class ProductsService {
     }
 
     return productImageId;
+  }
+
+  async getProductEmbeddings(productId: number): Promise<ProductEmbedding[]> {
+    const embeddings = await this.prisma.embeddingTask.findMany({
+      where: {
+        productId: productId,
+      },
+    });
+
+    return embeddings;
+  }
+
+  async getMissingProductEmbeddings(productId: number): Promise<string[]> {
+    const existingEmbeddings = await this.prisma.embeddingTask.findMany({
+      where: {
+        productId: productId,
+      },
+      select: {
+        lang: true,
+      },
+    });
+
+    const existingLangs = existingEmbeddings.map((e) => e.lang);
+    const missingLangs = this.localesService
+      .findAll()
+      .map((l) => l.code.toString())
+      .filter((code) => !existingLangs.includes(code));
+
+    return missingLangs;
+  }
+
+  async getProductContentEmbeddings(
+    productId: number,
+  ): Promise<ProductEmbedding[]> {
+    const embeddings = await this.prisma.productContentEmbeddingTask.findMany({
+      where: {
+        productId: productId,
+      },
+    });
+
+    return embeddings;
+  }
+
+  async getMissingProductContentEmbeddings(
+    productId: number,
+  ): Promise<string[]> {
+    const existingEmbeddings =
+      await this.prisma.productContentEmbeddingTask.findMany({
+        where: {
+          productId: productId,
+        },
+        select: {
+          lang: true,
+        },
+      });
+
+    const existingLangs = existingEmbeddings.map((e) => e.lang);
+    const missingLangs = this.localesService
+      .findAll()
+      .map((l) => l.code.toString())
+      .filter((code) => !existingLangs.includes(code));
+
+    return missingLangs;
+  }
+
+  async getProductEmbeddingById(id: number): Promise<ProductEmbedding | null> {
+    const embedding = await this.prisma.embeddingTask.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    return embedding;
+  }
+
+  async getProductContentEmbeddingById(
+    id: number,
+  ): Promise<ProductEmbedding | null> {
+    const embedding = await this.prisma.productContentEmbeddingTask.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    return embedding;
   }
 }

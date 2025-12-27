@@ -306,10 +306,14 @@ export class SeedService implements OnModuleInit {
     this.logger.log('Products seeded.');
 
     this.logger.log('Embed product data into Qdrant vector database...');
-    await this.productsService.generateProductEmbeddings(
-      creatineMonohydrate.id,
-    );
-    await this.productsService.generateProductEmbeddings(creatineGummies.id);
+    for (const product of [creatineMonohydrate, creatineGummies]) {
+      for (const locale of this.localesService.findAll()) {
+        await this.productsService.generateProductEmbeddings(
+          product.id,
+          locale.code,
+        );
+      }
+    }
 
     while (
       (await this.llmTasksQueue.getJobCountByTypes(

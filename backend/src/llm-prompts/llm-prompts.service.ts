@@ -24,6 +24,7 @@ export class LLMPromptsService {
   async createTask(
     input: CreateLLMPromptInput,
     userId: number,
+    lang: string,
   ): Promise<LLMTask> {
     const todayUsage = await this.prisma.lLMTask.count({
       where: {
@@ -53,6 +54,7 @@ export class LLMPromptsService {
         prompt: input.prompt,
         userId: userId,
         status: LLMTaskStatus.PENDING,
+        lang: lang,
       },
     });
 
@@ -62,9 +64,13 @@ export class LLMPromptsService {
         prompt: llmTask.prompt,
         productId: input.productId,
         userId: userId,
+        lang: lang,
       });
 
-      return llmTask;
+      return {
+        ...llmTask,
+        response: null,
+      };
     } catch (error) {
       this.logger.error(error.message);
       const res = await this.prisma.lLMTask.update({
@@ -73,18 +79,64 @@ export class LLMPromptsService {
         },
         data: {
           status: LLMTaskStatus.FAILED,
-          response: 'Something went wrong. Please try again.',
+          response: {
+            create: {
+              text: 'Failed to enqueue LLM task.',
+            },
+          },
+        },
+        include: {
+          response: {
+            include: {
+              products: true,
+            },
+          },
         },
       });
-      return res;
+      return {
+        ...res,
+        response: res.response
+          ? {
+              id: res.response.id,
+              text: res.response.text,
+              products:
+                res.response.products.map((p) => ({
+                  ...p,
+                  isSetup: true,
+                })) || null,
+            }
+          : null,
+      };
     }
   }
 
   async getTaskById(id: number, userId: number): Promise<LLMTask | null> {
     const llmTask = await this.prisma.lLMTask.findUnique({
       where: { id, userId },
+      include: {
+        response: {
+          include: {
+            products: true,
+          },
+        },
+      },
     });
-    return llmTask ?? null;
+    return llmTask
+      ? {
+          ...llmTask,
+          response: llmTask.response
+            ? {
+                id: llmTask.response.id,
+                text: llmTask.response.text,
+                products:
+                  llmTask.response.products.map((p) => ({
+                    ...p,
+                    isSetup: true,
+                  })) || null,
+              }
+            : null,
+        }
+      : null;
   }
 
   async markTaskAsFailed(id: number, errorMessage: string) {
@@ -92,17 +144,30 @@ export class LLMPromptsService {
       where: { id },
       data: {
         status: LLMTaskStatus.FAILED,
-        response: errorMessage,
+        response: { create: { text: errorMessage } },
       },
     });
   }
 
-  async markTaskAsCompleted(id: number, response: string) {
+  async markTaskAsCompleted(
+    id: number,
+    response: string,
+    productIds?: number[],
+  ) {
     await this.prisma.lLMTask.update({
       where: { id },
       data: {
         status: LLMTaskStatus.COMPLETED,
-        response: response,
+        response: {
+          create: {
+            text: response,
+            products: productIds
+              ? {
+                  connect: productIds.map((pid) => ({ id: pid })),
+                }
+              : undefined,
+          },
+        },
       },
     });
   }
@@ -138,10 +203,11 @@ export class LLMPromptsService {
     });
   }
 
-  async addProductEmbeddingTask(data: EmbeddingJob): Promise<void> {
+  async addProductEmbeddingTask(data: EmbeddingJob) {
     const newEmbeddingTask = await this.prisma.embeddingTask.create({
       data: {
         productId: data.productId,
+        lang: data.lang,
         status: LLMTaskStatus.PENDING,
       },
     });
@@ -151,15 +217,18 @@ export class LLMPromptsService {
       removeOnFail: true,
       attempts: 3,
       priority: 5,
-      jobId: this.getProductEmbeddingTaskJobId(newEmbeddingTask.id),
+      jobId: this.getProductEmbeddingTaskJobId(newEmbeddingTask.id, data.lang),
     });
+
+    return newEmbeddingTask;
   }
 
-  async addProductContentEmbeddingTask(data: EmbeddingJob): Promise<void> {
+  async addProductContentEmbeddingTask(data: EmbeddingJob) {
     const newContentTask = await this.prisma.productContentEmbeddingTask.create(
       {
         data: {
           productId: data.productId,
+          lang: data.lang,
           status: LLMTaskStatus.PENDING,
         },
       },
@@ -173,45 +242,64 @@ export class LLMPromptsService {
         removeOnFail: true,
         attempts: 3,
         priority: 5,
-        jobId: this.getProductContentEmbeddingTaskJobId(newContentTask.id),
+        jobId: this.getProductContentEmbeddingTaskJobId(
+          newContentTask.id,
+          data.lang,
+        ),
       },
     );
+
+    return newContentTask;
   }
 
-  private getProductContentEmbeddingTaskJobId(taskId: number): string {
-    return `product-content-embedding-${taskId}`;
+  private getProductContentEmbeddingTaskJobId(
+    taskId: number,
+    lang: string,
+  ): string {
+    return `product-content-embedding-${taskId}-${lang}`;
   }
 
-  private getProductEmbeddingTaskJobId(productId: number): string {
-    return `product-embedding-${productId}`;
+  private getProductEmbeddingTaskJobId(
+    productId: number,
+    lang: string,
+  ): string {
+    return `product-embedding-${productId}-${lang}`;
   }
 
   private getUserPromptTaskJobIdByUserId(taskId: number): string {
     return `user-prompt-${taskId}`;
   }
 
-  async removeProductEmbeddingTask(productId: number): Promise<void> {
+  async removeProductEmbeddingTask(
+    productId: number,
+    lang: string,
+  ): Promise<void> {
     const task = await this.prisma.embeddingTask.findUnique({
-      where: { productId: productId },
+      where: { productId_lang: { productId: productId, lang: lang } },
     });
 
     if (!task) {
       return;
     }
 
-    await this.llmTasksQueue.remove(this.getProductEmbeddingTaskJobId(task.id));
+    await this.llmTasksQueue.remove(
+      this.getProductEmbeddingTaskJobId(task.id, lang),
+    );
   }
 
-  async removeProductContentEmbeddingTask(productId: number): Promise<void> {
+  async removeProductContentEmbeddingTask(
+    productId: number,
+    lang: string,
+  ): Promise<void> {
     const task = await this.prisma.productContentEmbeddingTask.findUnique({
-      where: { productId: productId },
+      where: { productId_lang: { productId: productId, lang: lang } },
     });
 
     if (!task) {
       return;
     }
     await this.llmTasksQueue.remove(
-      this.getProductContentEmbeddingTaskJobId(task.id),
+      this.getProductContentEmbeddingTaskJobId(task.id, lang),
     );
   }
 

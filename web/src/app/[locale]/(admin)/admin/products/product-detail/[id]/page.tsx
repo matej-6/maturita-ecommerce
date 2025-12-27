@@ -30,6 +30,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AttributeKeyForm } from "../../../forms/attribute-key-form";
 import { AttributeForm } from "../../../forms/attribute-form";
 import { ProductVariantForm } from "../../../forms/product-variant-form";
+import { GenerateEmbeddingsButton } from "../../../components/products/generate-embeddings-button";
+import { RegenerateAllEmbeddingsButton } from "../../../components/products/regenerate-all-embeddings-button";
 
 export default async function ProductDetailPage({
   params,
@@ -524,6 +526,93 @@ export default async function ProductDetailPage({
             </SheetContent>
           </Sheet>
         </div>
+      </div>
+      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="flex flex-col gap-y-8">
+        <h2 className="font-medium">Embeddings</h2>
+        <RegenerateAllEmbeddingsButton embeddingType="embedding" />
+        <div className="flex flex-wrap gap-8">
+          {product.embeddings.map((embedding) => (
+            <Card key={embedding.id} className="p-2! w-[196px]">
+              <div className="text-lg font-semibold">{embedding.lang}</div>
+              <div className="flex flex-wrap">
+                <div className="-space-y-1">
+                  <span className="text-muted-foreground font-bold text-sm">
+                    Created At
+                  </span>
+                  <div>{new Date(embedding.createdAt).toLocaleString()}</div>
+                </div>
+                <div className="-space-y-1">
+                  <span className="text-muted-foreground font-bold text-sm">
+                    Status
+                  </span>
+                  <div>{embedding.status}</div>
+                </div>
+              </div>
+              <GenerateEmbeddingsButton
+                productId={product.id}
+                lang={embedding.lang}
+                type="regenerate"
+                embeddingType="embedding"
+              />
+            </Card>
+          ))}
+          {product.missingEmbeddingLanguages.map((lang) => (
+            <Card key={lang} className="p-2! w-[196px]">
+              <div className="text-lg font-semibold">{lang}</div>
+              <div>No embedding generated yet.</div>
+              <GenerateEmbeddingsButton
+                productId={product.id}
+                lang={lang}
+                type="generate"
+                embeddingType="embedding"
+              />
+            </Card>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-y-8">
+        <h2 className="font-medium">Content Embeddings</h2>
+        <RegenerateAllEmbeddingsButton embeddingType="contentEmbedding" />
+        <div className="flex flex-wrap gap-8">
+          {product.contentEmbeddings.map((embedding) => (
+            <Card key={embedding.id} className="p-2! w-[196px]">
+              <div className="text-lg font-semibold">{embedding.lang}</div>
+              <div className="flex flex-wrap">
+                <div className="-space-y-1">
+                  <span className="text-muted-foreground font-bold text-sm">
+                    Created At
+                  </span>
+                  <div>{new Date(embedding.createdAt).toLocaleString()}</div>
+                </div>
+                <div className="-space-y-1">
+                  <span className="text-muted-foreground font-bold text-sm">
+                    Status
+                  </span>
+                  <div>{embedding.status}</div>
+                </div>
+              </div>
+              <GenerateEmbeddingsButton
+                productId={product.id}
+                lang={embedding.lang}
+                type="regenerate"
+                embeddingType="contentEmbedding"
+              />
+            </Card>
+          ))}
+        </div>
+        {product.missingContentEmbeddingLanguages.map((lang) => (
+          <Card key={lang} className="p-2! w-[196px]">
+            <div className="text-lg font-semibold">{lang}</div>
+            <div>No embedding generated yet.</div>
+            <GenerateEmbeddingsButton
+              productId={product.id}
+              lang={lang}
+              type="generate"
+              embeddingType="contentEmbedding"
+            />
+          </Card>
+        ))}
       </div>
     </div>
   );

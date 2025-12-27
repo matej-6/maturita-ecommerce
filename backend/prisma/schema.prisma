@@ -96,18 +96,19 @@ model CategoryTranslation {
 }
 
 model Product {
-  id                   Int                          @id @default(autoincrement())
-  slug                 String                       @unique
-  Category             Category?                    @relation(fields: [categoryId], references: [id])
-  categoryId           Int?
-  isPublic             Boolean                      @default(true)
-  ProductVariants      ProductVariant[]
-  Images               ProductImage[]
-  ProductTranslations  ProductTranslation[]
-  EmbeddingTask        EmbeddingTask?
-  ContentEmbeddingTask ProductContentEmbeddingTask?
-  createdAt            DateTime                     @default(now())
-  updatedAt            DateTime                     @updatedAt
+  id                    Int                           @id @default(autoincrement())
+  slug                  String                        @unique
+  Category              Category?                     @relation(fields: [categoryId], references: [id])
+  categoryId            Int?
+  isPublic              Boolean                       @default(true)
+  ProductVariants       ProductVariant[]
+  Images                ProductImage[]
+  ProductTranslations   ProductTranslation[]
+  EmbeddingTasks        EmbeddingTask[]
+  ContentEmbeddingTasks ProductContentEmbeddingTask[]
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+  llmuserPromptResponse LLMUserPromptResponse[]
 
   @@map("products")
 }
@@ -290,18 +291,26 @@ enum OrderStatus {
 
 model EmbeddingTask {
   id        Int                 @id @default(autoincrement())
-  productId Int                 @unique
+  productId Int
   Product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
   status    EmbeddingTaskStatus @default(PENDING)
+  lang      String
   createdAt DateTime            @default(now())
+
+  @@unique([productId, lang])
+  @@index([productId, lang])
 }
 
 model ProductContentEmbeddingTask {
   id        Int                 @id @default(autoincrement())
-  productId Int                 @unique
+  productId Int
   Product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
   status    EmbeddingTaskStatus @default(PENDING)
+  lang      String
   createdAt DateTime            @default(now())
+
+  @@unique([productId, lang])
+  @@index([productId, lang])
 }
 
 enum EmbeddingTaskStatus {
@@ -312,17 +321,29 @@ enum EmbeddingTaskStatus {
 }
 
 model LLMTask {
-  id       Int           @id @default(autoincrement())
+  id       Int                    @id @default(autoincrement())
   userId   Int
-  User     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prompt   String        @db.LongText
-  response String?       @db.LongText
-  status   LLMTaskStatus @default(PENDING)
-  date     DateTime      @default(now())
+  User     User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt   String                 @db.LongText
+  response LLMUserPromptResponse?
+  status   LLMTaskStatus          @default(PENDING)
+  date     DateTime               @default(now())
+  lang     String
 
   @@index([userId])
   @@index([userId, date])
   @@map("llm_tasks")
+}
+
+model LLMUserPromptResponse {
+  id        Int       @id @default(autoincrement())
+  llmTaskId Int       @unique
+  LLMTask   LLMTask   @relation(fields: [llmTaskId], references: [id], onDelete: Cascade)
+  text      String    @db.LongText
+  products  Product[]
+
+  @@index([llmTaskId])
+  @@map("llm_user_prompt_responses")
 }
 
 enum LLMTaskStatus {

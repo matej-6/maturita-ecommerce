@@ -13,6 +13,8 @@ import {
   CreateVariantMutationMutation,
   EditProductMutationMutation,
   EditVariantMutationMutation,
+  GenerateProductContentEmbeddingMutationMutation,
+  GenerateProductEmbeddingMutationMutation,
   NewProductPage_QueryDocumentQuery,
 } from "@/graphql/graphql";
 import {
@@ -24,6 +26,10 @@ import {
   DeleteVariantImageMutation,
   EditProductMutation,
   EditVariantMutation,
+  GenerateProductContentEmbeddingMutation,
+  GenerateProductEmbeddingMutation,
+  RegenerateAllProductContentEmbeddingsMutation,
+  RegenerateAllProductEmbeddingsMutation,
   SetImageThumbnailMutation,
   SetVariantImageThumbnailMutation,
 } from "./mutations";
@@ -398,5 +404,79 @@ export async function editVariantAction(
   return {
     success: true,
     data: res.data.updateProductVariant,
+  };
+}
+
+export async function generateProductEmbeddingAction(
+  productId: number,
+  lang: string
+): Promise<
+  ActionResponse<
+    ExecutionResult<GenerateProductEmbeddingMutationMutation>["data"]
+  >
+> {
+  const res = await execute(GenerateProductEmbeddingMutation, {
+    productId: productId,
+    lang: lang,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  return {
+    success: true,
+    data: res.data,
+  };
+}
+
+export async function generateProdutContentEmbeddingAction(
+  productId: number,
+  lang: string
+): Promise<
+  ActionResponse<
+    ExecutionResult<GenerateProductContentEmbeddingMutationMutation>["data"]
+  >
+> {
+  const res = await execute(GenerateProductContentEmbeddingMutation, {
+    productId: productId,
+    lang: lang,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  return {
+    success: true,
+    data: res.data,
+  };
+}
+
+export async function regenerateAllProductEmbeddingsAction(): Promise<
+  ActionResponse<null>
+> {
+  const res = await execute(RegenerateAllProductEmbeddingsMutation);
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  return {
+    success: true,
+    data: null,
+  };
+}
+
+export async function regenerateProductContentEmeddingsAction(): Promise<
+  ActionResponse<null>
+> {
+  const res = await execute(RegenerateAllProductContentEmbeddingsMutation);
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  return {
+    success: true,
+    data: null,
   };
 }

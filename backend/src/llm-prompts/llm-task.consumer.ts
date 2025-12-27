@@ -21,14 +21,21 @@ export type UserPromptJob = {
   id: number;
   userId: number;
   prompt: string;
+  lang: string;
   productId?: number;
 };
 
 export type EmbeddingJob = {
   productId: number;
+  lang: string;
 };
 
 type LLMTaskJob = UserPromptJob | EmbeddingJob;
+
+type UserPromptResponse = {
+  text: string;
+  productIds: number[];
+};
 
 @Processor('llm-tasks')
 export class LLMTaskConsumer extends WorkerHost {
@@ -59,11 +66,18 @@ export class LLMTaskConsumer extends WorkerHost {
       case LLMTaskJobType.USER_PROMPT: {
         this.logger.log(`Processing USER_PROMPT job id ${job.id}`);
         const jobData = job.data as UserPromptJob;
+        const supportedLanguages = this.localesService
+          .findAll()
+          .map((l) => l.code as string);
+        if (!supportedLanguages.includes(jobData.lang)) {
+          jobData.lang = this.localesService.getDefaultLocale().code;
+        }
         try {
           const response = await this.processUserPromptJob(jobData);
           await this.llmPromptsService.markTaskAsCompleted(
             jobData.id,
-            response,
+            response.text,
+            response.productIds,
           );
           return {};
         } catch (error) {
@@ -78,21 +92,38 @@ export class LLMTaskConsumer extends WorkerHost {
       case LLMTaskJobType.PRODUCT_EMBEDDING: {
         this.logger.log(`Processing PRODUCT_EMBEDDING job id ${job.id}`);
         const jobData = job.data as EmbeddingJob;
+        const supportedLanguages = this.localesService
+          .findAll()
+          .map((l) => l.code as string);
+        if (!supportedLanguages.includes(jobData.lang)) {
+          throw new Error('Unsupported language for embedding task');
+        }
         try {
           const dbEmbeddingTask = await this.prisma.embeddingTask.findUnique({
-            where: { productId: jobData.productId },
+            where: {
+              productId_lang: {
+                productId: jobData.productId,
+                lang: jobData.lang,
+              },
+            },
           });
           if (!dbEmbeddingTask) {
             await this.prisma.embeddingTask.create({
               data: {
                 productId: jobData.productId,
                 status: EmbeddingTaskStatus.PENDING,
+                lang: jobData.lang,
               },
             });
           }
           await this.processProductEmbeddingJob(jobData);
           await this.prisma.embeddingTask.update({
-            where: { productId: jobData.productId },
+            where: {
+              productId_lang: {
+                productId: jobData.productId,
+                lang: jobData.lang,
+              },
+            },
             data: {
               status: EmbeddingTaskStatus.COMPLETED,
             },
@@ -101,7 +132,12 @@ export class LLMTaskConsumer extends WorkerHost {
         } catch (error) {
           this.logger.error('Error processing PRODUCT_EMBEDDING job', error);
           await this.prisma.embeddingTask.update({
-            where: { productId: jobData.productId },
+            where: {
+              productId_lang: {
+                productId: jobData.productId,
+                lang: jobData.lang,
+              },
+            },
             data: {
               status: EmbeddingTaskStatus.FAILED,
             },
@@ -114,13 +150,19 @@ export class LLMTaskConsumer extends WorkerHost {
         try {
           const dbEmbeddingTask =
             await this.prisma.productContentEmbeddingTask.findUnique({
-              where: { productId: jobData.productId },
+              where: {
+                productId_lang: {
+                  productId: jobData.productId,
+                  lang: jobData.lang,
+                },
+              },
             });
           if (!dbEmbeddingTask) {
             await this.prisma.productContentEmbeddingTask.create({
               data: {
                 productId: jobData.productId,
                 status: EmbeddingTaskStatus.PENDING,
+                lang: jobData.lang,
               },
             });
           }
@@ -132,7 +174,12 @@ export class LLMTaskConsumer extends WorkerHost {
             error,
           );
           await this.prisma.productContentEmbeddingTask.update({
-            where: { productId: jobData.productId },
+            where: {
+              productId_lang: {
+                productId: jobData.productId,
+                lang: jobData.lang,
+              },
+            },
             data: {
               status: EmbeddingTaskStatus.FAILED,
             },
@@ -261,7 +308,7 @@ export class LLMTaskConsumer extends WorkerHost {
             slug: true,
             CategoryTranslation: {
               where: {
-                locale: this.localesService.getDefaultLocale().code,
+                locale: job.lang,
               },
               select: {
                 name: true,
@@ -272,7 +319,7 @@ export class LLMTaskConsumer extends WorkerHost {
         slug: true,
         ProductTranslations: {
           where: {
-            locale: this.localesService.getDefaultLocale().code,
+            locale: job.lang,
           },
           select: {
             name: true,
@@ -285,8 +332,18 @@ export class LLMTaskConsumer extends WorkerHost {
             priceInCents: true,
             Attributes: {
               select: {
+                AttributeTranslations: {
+                  where: {
+                    locale: job.lang,
+                  },
+                },
                 AttributeKey: {
                   select: {
+                    Translations: {
+                      where: {
+                        locale: job.lang,
+                      },
+                    },
                     key: true,
                   },
                 },
@@ -302,6 +359,11 @@ export class LLMTaskConsumer extends WorkerHost {
       throw new Error('Product not found');
     }
 
+    if (product.ProductTranslations.length === 0) {
+      throw new Error(
+        'Product translation not found for the specified language',
+      );
+    }
     const input = {
       product: {
         slug: product.slug,
@@ -313,10 +375,12 @@ export class LLMTaskConsumer extends WorkerHost {
         },
         variants: product.ProductVariants.map((variant) => ({
           sku: variant.sku,
-          priceInCents: variant.priceInCents,
+          price: (variant.priceInCents / 100).toFixed(2) + ' €',
           attributes: variant.Attributes.map((attr) => ({
-            key: attr.AttributeKey.key,
-            value: attr.value,
+            key:
+              attr.AttributeKey.Translations[0]?.keyTranslation ||
+              attr.AttributeKey.key,
+            value: attr.AttributeTranslations[0]?.value || attr.value,
           })),
         })),
       },
@@ -333,8 +397,9 @@ export class LLMTaskConsumer extends WorkerHost {
           id: product.id,
           vector: res[0],
           payload: {
-            productId: product.id,
             ...input,
+            productId: product.id,
+            lang: job.lang,
           },
         },
       ],
@@ -350,21 +415,38 @@ export class LLMTaskConsumer extends WorkerHost {
       include: {
         ProductTranslations: {
           where: {
-            locale: this.localesService.getDefaultLocale().code,
+            locale: job.lang,
           },
         },
         Category: {
           include: {
             CategoryTranslation: {
               where: {
-                locale: this.localesService.getDefaultLocale().code,
+                locale: job.lang,
               },
             },
           },
         },
         ProductVariants: {
           include: {
-            Attributes: true,
+            Attributes: {
+              include: {
+                AttributeTranslations: {
+                  where: {
+                    locale: job.lang,
+                  },
+                },
+                AttributeKey: {
+                  include: {
+                    Translations: {
+                      where: {
+                        locale: job.lang,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -372,6 +454,12 @@ export class LLMTaskConsumer extends WorkerHost {
 
     if (!product) {
       throw new Error('Product not found');
+    }
+
+    if (product.ProductTranslations.length === 0) {
+      throw new Error(
+        'Product translation not found for the specified language',
+      );
     }
 
     const chunkedContent = this.chunkProductContentForEmbedding(
@@ -395,6 +483,7 @@ export class LLMTaskConsumer extends WorkerHost {
               vector: embeddingResponse[0],
               payload: {
                 productId: product.id,
+                lang: job.lang,
                 text: chunkedContent[i],
               },
             },
@@ -405,7 +494,10 @@ export class LLMTaskConsumer extends WorkerHost {
 
     await this.prisma.productContentEmbeddingTask.update({
       where: {
-        productId: job.productId,
+        productId_lang: {
+          productId: job.productId,
+          lang: job.lang,
+        },
       },
       data: {
         status: EmbeddingTaskStatus.COMPLETED,
@@ -453,17 +545,9 @@ export class LLMTaskConsumer extends WorkerHost {
     return chunks;
   }
 
-  async processUserPromptJob(job: UserPromptJob): Promise<string> {
-    let userPrompt = job.prompt;
-    let originalLanguage = 'en';
-
-    try {
-      const translationResult = await this.translate(job.prompt);
-      userPrompt = translationResult.translation;
-      originalLanguage = translationResult.original_language;
-    } catch (error) {
-      this.logger.error('Translate API failed: ' + error.message);
-    }
+  async processUserPromptJob(job: UserPromptJob): Promise<UserPromptResponse> {
+    const userPrompt = job.prompt;
+    const lang = job.lang;
 
     const category = await this.categorizePrompt(userPrompt);
 
@@ -482,52 +566,42 @@ export class LLMTaskConsumer extends WorkerHost {
       return await this.processSimiliarProductsPrompt(
         userPrompt,
         job.productId!,
+        lang,
       );
     }
 
     if (category === 'productSearch') {
-      return await this.processProductSearchPrompt(userPrompt);
+      return await this.processProductSearchPrompt(userPrompt, lang);
     }
 
-    let response = await this.generateProductInformationResponse(
+    return await this.generateProductInformationResponse(
       userPrompt,
       job.productId!,
+      lang,
     );
-
-    this.logger.log(`Generated LLM task response: ${response}`);
-
-    if (originalLanguage !== 'en') {
-      try {
-        const responseTranslationResult = await this.translate(
-          response,
-          originalLanguage,
-          'en',
-        );
-        response = responseTranslationResult.translation;
-      } catch (error) {
-        this.logger.error('Translation API failed: ' + error.message);
-      }
-    }
-
-    return response;
   }
 
   private async processSimiliarProductsPrompt(
     prompt: string,
     productId: number,
-  ): Promise<string> {
+    lang: string,
+  ): Promise<UserPromptResponse> {
     const embedding = (await this.fetchEmbedding(prompt))[0];
 
     const similarProducts = await this.qdrantService.qdrantClient.search(
       QdrantCollections.PRODUCTS,
       {
         vector: embedding,
-        limit: 5,
+        limit: 2,
         filter: {
           must: [
             {
               key: 'productId',
               match: { value: productId },
+            },
+            {
+              key: 'lang',
+              match: { value: lang },
             },
           ],
         },
@@ -541,17 +615,32 @@ export class LLMTaskConsumer extends WorkerHost {
     Answer the user's prompt using the provided similar products. If the information is insufficient, respond accordingly.
     `;
 
-    return await this.fetchLLM<string>(system, prompt, false);
+    const text = await this.fetchLLM<string>(system, prompt, false);
+    const productIds = similarProducts.map(
+      (p) => p.payload!.productId as number,
+    );
+    return { text, productIds };
   }
 
-  private async processProductSearchPrompt(prompt: string): Promise<string> {
+  private async processProductSearchPrompt(
+    prompt: string,
+    lang: string,
+  ): Promise<UserPromptResponse> {
     const embedding = (await this.fetchEmbedding(prompt))[0];
 
     const similarProducts = await this.qdrantService.qdrantClient.search(
       QdrantCollections.PRODUCTS,
       {
         vector: embedding,
-        limit: 5,
+        limit: 3,
+        filter: {
+          must: [
+            {
+              key: 'lang',
+              match: { value: lang },
+            },
+          ],
+        },
       },
     );
 
@@ -562,13 +651,18 @@ export class LLMTaskConsumer extends WorkerHost {
     Answer the user's prompt using the provided products. If the information is insufficient, respond accordingly.
     `;
 
-    return await this.fetchLLM<string>(system, prompt, false);
+    const text = await this.fetchLLM<string>(system, prompt, false);
+    const productIds = similarProducts.map(
+      (p) => p.payload!.productId as number,
+    );
+    return { text, productIds };
   }
 
   private async generateProductInformationResponse(
     prompt: string,
     productId: number,
-  ): Promise<string> {
+    lang: string,
+  ): Promise<UserPromptResponse> {
     const embedding = (await this.fetchEmbedding(prompt))[0];
 
     const productContent = await this.prisma.product.findUnique({
@@ -576,7 +670,7 @@ export class LLMTaskConsumer extends WorkerHost {
       select: {
         ProductTranslations: {
           where: {
-            locale: this.localesService.getDefaultLocale().code,
+            locale: lang,
           },
           select: {
             name: true,
@@ -608,6 +702,10 @@ export class LLMTaskConsumer extends WorkerHost {
               key: 'productId',
               match: { value: productId },
             },
+            {
+              key: 'lang',
+              match: { value: lang },
+            },
           ],
         },
       },
@@ -623,18 +721,19 @@ export class LLMTaskConsumer extends WorkerHost {
         priceInCents: variant.priceInCents,
         stock: variant.stock,
       })),
-      contentChunks: similarChunks.map(
+      content: similarChunks.map(
         (chunk) => JSON.stringify(chunk.payload) || '',
       ),
     };
 
-    const system = `You are an AI assistant that provides detailed information about products based on their name, description, variants and content chunks.
+    const system = `You are an AI assistant that provides detailed information about products based on their name, description, variants and content.
     Use the following product information to answer the user's prompt:
     ${JSON.stringify(productInfo)}
 
     Answer the user's prompt using the provided product information. If the information is insufficient, respond accordingly.
     `;
 
-    return await this.fetchLLM<string>(system, prompt, false);
+    const res = await this.fetchLLM<string>(system, prompt, false);
+    return { text: res, productIds: [productId] };
   }
 }

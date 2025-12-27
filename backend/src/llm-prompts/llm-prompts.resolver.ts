@@ -6,12 +6,17 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateLLMPromptInput } from './dto/create-llm-prompt.input';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { I18nContext } from 'nestjs-i18n';
+import { LocalesService } from 'src/locales/locales.service';
 
 @Resolver()
 export class LLMPromptsResolver {
   private readonly logger = new Logger(LLMPromptsResolver.name);
 
-  constructor(private readonly llmTasksService: LLMPromptsService) {}
+  constructor(
+    private readonly llmTasksService: LLMPromptsService,
+    private readonly localesService: LocalesService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => LLMTask)
@@ -19,7 +24,11 @@ export class LLMPromptsResolver {
     @Args('input') input: CreateLLMPromptInput,
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<LLMTask> {
-    return await this.llmTasksService.createTask(input, user.id);
+    const lang =
+      I18nContext.current()?.lang ||
+      this.localesService.getDefaultLocale().code;
+
+    return await this.llmTasksService.createTask(input, user.id, lang);
     // return await this.llmTasksService.createTask(input, 33);
   }
 

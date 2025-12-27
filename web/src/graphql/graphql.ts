@@ -194,12 +194,19 @@ export type EditProductTranslationInput = {
   productTranslationId: Scalars['Int']['input'];
 };
 
+export enum EmbeddingTaskStatus {
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
+
 export type LlmTask = {
   __typename?: 'LLMTask';
   date: Scalars['DateTime']['output'];
   id: Scalars['Int']['output'];
   prompt: Scalars['String']['output'];
-  response?: Maybe<Scalars['String']['output']>;
+  response?: Maybe<UserPromptResponse>;
   status: LlmTaskStatus;
   userId: Scalars['Int']['output'];
 };
@@ -241,7 +248,11 @@ export type Mutation = {
   deleteProductImage: Scalars['Int']['output'];
   deleteProductTranslation: Scalars['Int']['output'];
   editProductTranslation: ProductTranslation;
+  generateProductContentEmbedding?: Maybe<ProductContentEmbedding>;
+  generateProductEmbedding?: Maybe<ProductEmbedding>;
   logoutAll: Scalars['Void']['output'];
+  regenerateAllProductContentEmbeddings: Scalars['Void']['output'];
+  regenerateAllProductEmbeddings: Scalars['Void']['output'];
   removeCategory: Category;
   removeProduct: Product;
   removeProductVariant: Scalars['Int']['output'];
@@ -354,6 +365,18 @@ export type MutationDeleteProductTranslationArgs = {
 
 export type MutationEditProductTranslationArgs = {
   editProductTranslationInput: EditProductTranslationInput;
+};
+
+
+export type MutationGenerateProductContentEmbeddingArgs = {
+  lang: Scalars['String']['input'];
+  productId: Scalars['Int']['input'];
+};
+
+
+export type MutationGenerateProductEmbeddingArgs = {
+  lang: Scalars['String']['input'];
+  productId: Scalars['Int']['input'];
 };
 
 
@@ -559,14 +582,18 @@ export type PaginatedUser = {
 export type Product = {
   __typename?: 'Product';
   categoryId?: Maybe<Scalars['Int']['output']>;
+  contentEmbeddings: Array<ProductContentEmbedding>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  embeddings: Array<ProductEmbedding>;
   /** Product ID */
   id: Scalars['Int']['output'];
   images: Array<ProductImage>;
   isPublic: Scalars['Boolean']['output'];
   isSetup: Scalars['Boolean']['output'];
   markdownContent?: Maybe<Scalars['String']['output']>;
+  missingContentEmbeddingLanguages: Array<Scalars['String']['output']>;
+  missingEmbeddingLanguages: Array<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   /** Product slug */
   slug: Scalars['String']['output'];
@@ -581,10 +608,28 @@ export type ProductVariantsArgs = {
   includeHidden?: Scalars['Boolean']['input'];
 };
 
+export type ProductContentEmbedding = {
+  __typename?: 'ProductContentEmbedding';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  lang: Scalars['String']['output'];
+  productId: Scalars['Int']['output'];
+  status: EmbeddingTaskStatus;
+};
+
 export type ProductEdge = {
   __typename?: 'ProductEdge';
   cursor: Scalars['Int']['output'];
   node: Product;
+};
+
+export type ProductEmbedding = {
+  __typename?: 'ProductEmbedding';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  lang: Scalars['String']['output'];
+  productId: Scalars['Int']['output'];
+  status: EmbeddingTaskStatus;
 };
 
 export type ProductImage = {
@@ -687,11 +732,17 @@ export type Query = {
   locale: Locale;
   locales: Array<Locale>;
   me: User;
+  missingProductContentEmbeddingLanguages: Array<Scalars['String']['output']>;
+  missingProductEmbeddingLanguages: Array<Scalars['String']['output']>;
   order?: Maybe<Order>;
   orders: Array<Order>;
   paginatedCategories: PaginatedCategory;
   product?: Maybe<Product>;
   productBySlug?: Maybe<Product>;
+  productContentEmbedding?: Maybe<ProductContentEmbedding>;
+  productContentEmbeddings: Array<ProductContentEmbedding>;
+  productEmbedding?: Maybe<ProductEmbedding>;
+  productEmbeddings: Array<ProductEmbedding>;
   productVariantAttributeKey: ProductVariantAttributeKey;
   productVariantAttributeKeys: Array<ProductVariantAttributeKey>;
   productVariantAttributes: Array<ProductVariantAttribute>;
@@ -775,6 +826,16 @@ export type QueryLocaleArgs = {
 };
 
 
+export type QueryMissingProductContentEmbeddingLanguagesArgs = {
+  productId: Scalars['Int']['input'];
+};
+
+
+export type QueryMissingProductEmbeddingLanguagesArgs = {
+  productId: Scalars['Int']['input'];
+};
+
+
 export type QueryOrderArgs = {
   id: Scalars['Int']['input'];
 };
@@ -802,6 +863,26 @@ export type QueryProductArgs = {
 
 export type QueryProductBySlugArgs = {
   slug: Scalars['String']['input'];
+};
+
+
+export type QueryProductContentEmbeddingArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryProductContentEmbeddingsArgs = {
+  productId: Scalars['Int']['input'];
+};
+
+
+export type QueryProductEmbeddingArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryProductEmbeddingsArgs = {
+  productId: Scalars['Int']['input'];
 };
 
 
@@ -942,6 +1023,13 @@ export type UserEdge = {
   __typename?: 'UserEdge';
   cursor: Scalars['Int']['output'];
   node: User;
+};
+
+export type UserPromptResponse = {
+  __typename?: 'UserPromptResponse';
+  id: Scalars['Int']['output'];
+  products?: Maybe<Array<Product>>;
+  text: Scalars['String']['output'];
 };
 
 export enum UserSortingField {
@@ -1210,6 +1298,32 @@ export type DeleteVariantMutationMutationVariables = Exact<{
 
 export type DeleteVariantMutationMutation = { __typename?: 'Mutation', removeProductVariant: number };
 
+export type GenerateProductEmbeddingMutationMutationVariables = Exact<{
+  productId: Scalars['Int']['input'];
+  lang: Scalars['String']['input'];
+}>;
+
+
+export type GenerateProductEmbeddingMutationMutation = { __typename?: 'Mutation', generateProductEmbedding?: { __typename?: 'ProductEmbedding', id: number, status: EmbeddingTaskStatus, createdAt: any } | null };
+
+export type GenerateProductContentEmbeddingMutationMutationVariables = Exact<{
+  productId: Scalars['Int']['input'];
+  lang: Scalars['String']['input'];
+}>;
+
+
+export type GenerateProductContentEmbeddingMutationMutation = { __typename?: 'Mutation', generateProductContentEmbedding?: { __typename?: 'ProductContentEmbedding', id: number, status: EmbeddingTaskStatus, createdAt: any } | null };
+
+export type RegenerateAllProductEmbeddingsMutationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RegenerateAllProductEmbeddingsMutationMutation = { __typename?: 'Mutation', regenerateAllProductEmbeddings: any };
+
+export type RegenerateAllProductContentEmbeddingsMutationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RegenerateAllProductContentEmbeddingsMutationMutation = { __typename?: 'Mutation', regenerateAllProductContentEmbeddings: any };
+
 export type NewProductPage_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1220,7 +1334,7 @@ export type ProductDetailPage_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }>, locales: Array<{ __typename?: 'Locale', flag: string, code: string, name: string }>, productVariantAttributeKeys: Array<{ __typename?: 'ProductVariantAttributeKey', id: number, key: string, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string, locale: string }> }> }>, product?: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any, translations: Array<{ __typename?: 'ProductTranslation', id: number, locale: string, name: string, description?: string | null, markdownContent?: string | null }>, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean, stock: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string }> } | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string }> }>, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }> }> } | null };
+export type ProductDetailPage_QueryDocumentQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string }>, locales: Array<{ __typename?: 'Locale', flag: string, code: string, name: string }>, productVariantAttributeKeys: Array<{ __typename?: 'ProductVariantAttributeKey', id: number, key: string, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string, locale: string }> }> }>, product?: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any, missingEmbeddingLanguages: Array<string>, missingContentEmbeddingLanguages: Array<string>, embeddings: Array<{ __typename?: 'ProductEmbedding', id: number, lang: string, createdAt: any, status: EmbeddingTaskStatus }>, contentEmbeddings: Array<{ __typename?: 'ProductContentEmbedding', id: number, lang: string, createdAt: any, status: EmbeddingTaskStatus }>, translations: Array<{ __typename?: 'ProductTranslation', id: number, locale: string, name: string, description?: string | null, markdownContent?: string | null }>, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, isPublic: boolean, stock: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string }> } | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', value: string }> }>, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }> }> } | null };
 
 export type ProductsPage_QueryDocumentQueryVariables = Exact<{
   cursor?: InputMaybe<Scalars['Int']['input']>;
@@ -1341,14 +1455,14 @@ export type NewLlmTaskMutationVariables = Exact<{
 }>;
 
 
-export type NewLlmTaskMutation = { __typename?: 'Mutation', createLlmTask: { __typename?: 'LLMTask', id: number, status: LlmTaskStatus, response?: string | null, date: any } };
+export type NewLlmTaskMutation = { __typename?: 'Mutation', createLlmTask: { __typename?: 'LLMTask', id: number } };
 
 export type LlmUserTaskByIdQueryVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
 
 
-export type LlmUserTaskByIdQuery = { __typename?: 'Query', getUserLLMTaskById?: { __typename?: 'LLMTask', id: number, response?: string | null, status: LlmTaskStatus, date: any } | null };
+export type LlmUserTaskByIdQuery = { __typename?: 'Query', getUserLLMTaskById?: { __typename?: 'LLMTask', id: number, status: LlmTaskStatus, date: any, response?: { __typename?: 'UserPromptResponse', text: string, products?: Array<{ __typename?: 'Product', id: number, slug: string, name?: string | null, thumbnailImage?: { __typename?: 'ProductImage', mimeType: string, base64: string } | null }> | null } | null } | null };
 
 export type CancelOrderMutationMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1975,6 +2089,34 @@ export const DeleteVariantMutationDocument = new TypedDocumentString(`
   removeProductVariant(id: $id)
 }
     `) as unknown as TypedDocumentString<DeleteVariantMutationMutation, DeleteVariantMutationMutationVariables>;
+export const GenerateProductEmbeddingMutationDocument = new TypedDocumentString(`
+    mutation GenerateProductEmbeddingMutation($productId: Int!, $lang: String!) {
+  generateProductEmbedding(productId: $productId, lang: $lang) {
+    id
+    status
+    createdAt
+  }
+}
+    `) as unknown as TypedDocumentString<GenerateProductEmbeddingMutationMutation, GenerateProductEmbeddingMutationMutationVariables>;
+export const GenerateProductContentEmbeddingMutationDocument = new TypedDocumentString(`
+    mutation GenerateProductContentEmbeddingMutation($productId: Int!, $lang: String!) {
+  generateProductContentEmbedding(productId: $productId, lang: $lang) {
+    id
+    status
+    createdAt
+  }
+}
+    `) as unknown as TypedDocumentString<GenerateProductContentEmbeddingMutationMutation, GenerateProductContentEmbeddingMutationMutationVariables>;
+export const RegenerateAllProductEmbeddingsMutationDocument = new TypedDocumentString(`
+    mutation RegenerateAllProductEmbeddingsMutation {
+  regenerateAllProductEmbeddings
+}
+    `) as unknown as TypedDocumentString<RegenerateAllProductEmbeddingsMutationMutation, RegenerateAllProductEmbeddingsMutationMutationVariables>;
+export const RegenerateAllProductContentEmbeddingsMutationDocument = new TypedDocumentString(`
+    mutation RegenerateAllProductContentEmbeddingsMutation {
+  regenerateAllProductContentEmbeddings
+}
+    `) as unknown as TypedDocumentString<RegenerateAllProductContentEmbeddingsMutationMutation, RegenerateAllProductContentEmbeddingsMutationMutationVariables>;
 export const NewProductPage_QueryDocumentDocument = new TypedDocumentString(`
     query NewProductPage_QueryDocument {
   categories(isPublic: null, isSetup: null) {
@@ -2014,6 +2156,20 @@ export const ProductDetailPage_QueryDocumentDocument = new TypedDocumentString(`
     categoryId
     createdAt
     updatedAt
+    embeddings {
+      id
+      lang
+      createdAt
+      status
+    }
+    contentEmbeddings {
+      id
+      lang
+      createdAt
+      status
+    }
+    missingEmbeddingLanguages
+    missingContentEmbeddingLanguages
     translations {
       id
       locale
@@ -2487,9 +2643,6 @@ export const NewLlmTaskDocument = new TypedDocumentString(`
     mutation newLLMTask($prompt: String!, $productId: Int) {
   createLlmTask(input: {prompt: $prompt, productId: $productId}) {
     id
-    status
-    response
-    date
   }
 }
     `) as unknown as TypedDocumentString<NewLlmTaskMutation, NewLlmTaskMutationVariables>;
@@ -2497,7 +2650,18 @@ export const LlmUserTaskByIdDocument = new TypedDocumentString(`
     query LLMUserTaskById($id: Int!) {
   getUserLLMTaskById(id: $id) {
     id
-    response
+    response {
+      text
+      products {
+        id
+        slug
+        name
+        thumbnailImage {
+          mimeType
+          base64
+        }
+      }
+    }
     status
     date
   }

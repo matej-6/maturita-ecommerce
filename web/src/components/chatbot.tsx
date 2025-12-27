@@ -12,6 +12,9 @@ import {
 } from "@/app/data-access-layer/llm/actions";
 import { getProductIdBySlugAction } from "@/app/data-access-layer/product.queries";
 import { LlmTaskStatus } from "@/graphql/graphql";
+import { getImageSrc } from "@/app/lib/utils";
+import { ProductCard } from "./prdouct-cart";
+import { set } from "zod";
 
 export function Chatbot() {
   const session = useSession();
@@ -46,48 +49,28 @@ export function Chatbot() {
       question: string;
       response: {
         text: string;
+        products?: {
+          id: number;
+          slug: string;
+          name: string | null;
+          imageUrl?: string;
+        }[];
         success: boolean;
       };
     }>
-  >([
-    {
-      question: "What can you do?",
-      response: {
-        text: "I can help you with product recommendations, answer questions about products, and assist you with your shopping experience. Just ask me anything!",
-        success: true,
-      },
-    },
-    {
-      question: "Can you recommend a product for me?",
-      response: {
-        text: "Sure! Based on your browsing history, I recommend checking out our latest collection of wireless headphones. They offer great sound quality and comfort for long listening sessions.",
-        success: true,
-      },
-    },
-    {
-      question: "What is the return policy?",
-      response: {
-        text: "Our return policy allows you to return most items within 30 days of purchase for a full refund. Please ensure that the items are in their original condition and packaging. Some restrictions may apply for certain products.",
-        success: true,
-      },
-    },
-  ]);
+  >([]);
 
   const [inputValue, setInputValue] = useState("");
 
   const chatsRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const chatsDiv = chatsRef.current;
-    if (chatsDiv) {
-      chatsDiv.scrollTo({ top: chatsDiv.scrollHeight, behavior: "smooth" });
-    }
-  }, [pastChats]);
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
 
   const { mutate: sendPrompt, isPending: isSendingPrompt } = useMutation({
     mutationFn: async (prompt: string) => {
-      if (!isLoggedIn || prompt.trim() === "") return;
+      if (!isLoggedIn || isWaitingForResponse || prompt.trim() === "") return;
 
+      setIsWaitingForResponse(true);
       let productId: number | null = null;
       if (productSlug) {
         const res = await getProductIdBySlugAction(productSlug);
@@ -102,6 +85,7 @@ export function Chatbot() {
               },
             },
           ]);
+          setIsWaitingForResponse(false);
           return;
         }
         productId = res.data.productBySlug.id;
@@ -119,6 +103,7 @@ export function Chatbot() {
             },
           },
         ]);
+        setIsWaitingForResponse(false);
         return;
       }
 
@@ -128,6 +113,7 @@ export function Chatbot() {
       const interval = setInterval(async () => {
         const res = await getLLMTaskByIdAction(llmTaskId);
         if (res.success && res.data?.getUserLLMTaskById) {
+          setIsWaitingForResponse(false);
           const task = res.data.getUserLLMTaskById;
           if (task.status === LlmTaskStatus.Completed) {
             setPastChats((chats) => [
@@ -135,7 +121,19 @@ export function Chatbot() {
               {
                 question: prompt,
                 response: {
-                  text: task.response || "",
+                  text: task.response?.text || "",
+                  products: task.response?.products
+                    ? task.response?.products.map((p) => ({
+                        ...p,
+                        name: p.name || null,
+                        imageUrl: p.thumbnailImage
+                          ? getImageSrc(
+                              p.thumbnailImage.mimeType,
+                              p.thumbnailImage.base64
+                            )
+                          : undefined,
+                      }))
+                    : undefined,
                   success: true,
                 },
               },
@@ -148,7 +146,7 @@ export function Chatbot() {
                 question: prompt,
                 response: {
                   text:
-                    task.response ||
+                    task.response?.text ||
                     "An error occurred while generating the response.",
                   success: false,
                 },
@@ -156,11 +154,28 @@ export function Chatbot() {
             ]);
             clearInterval(interval);
           }
+        } else {
+          throw new Error("Failed to fetch LLM task status.");
         }
       }, 2000);
     },
+    onSettled: () => {
+      setInputValue("");
+    },
+    onError: () => {
+      setIsWaitingForResponse(false);
+    },
   });
 
+  useEffect(() => {
+    const chatsDiv = chatsRef.current;
+    if (chatsDiv) {
+      chatsDiv.scrollTo({ top: chatsDiv.scrollHeight, behavior: "smooth" });
+    }
+  }, [pastChats, isSendingPrompt, isOpen]);
+  useEffect(() => {
+    console.log("is waiting", isWaitingForResponse);
+  }, [isWaitingForResponse]);
   if (!isOpen) {
     return (
       <button
@@ -173,7 +188,7 @@ export function Chatbot() {
   }
 
   return (
-    <Card className="w-[248px] h-fit flex flex-col gap-y-0 rounded-b-none p-0!">
+    <Card className="w-[360px] h-fit flex flex-col gap-y-0 rounded-b-none p-0!">
       <div className="w-full flex justify-end items-center py-1 px-2">
         <button
           onClick={() => setIsOpen(false)}
@@ -185,28 +200,62 @@ export function Chatbot() {
       <div className="h-px w-full bg-accent" />
       {isLoggedIn ? (
         <div className="py-1 px-2 flex flex-col gap-y-1">
-          <div ref={chatsRef} className="overflow-y-scroll h-[360px]">
-            {pastChats.map((chat, index) => (
-              <div key={index} className="mb-2">
-                <div className="font-bold">You:</div>
-                <div className="mb-1">{chat.question}</div>
-                <div className="font-bold">AI:</div>
-                <div
-                  className={
-                    chat.response.success ? "" : "text-red-600 font-bold"
-                  }
-                >
-                  {chat.response.text}
+          <div
+            ref={chatsRef}
+            className="overflow-y-scroll h-[360px] flex flex-col gap-y-2"
+          >
+            {pastChats.length > 0 ? (
+              pastChats.map((chat, index) => (
+                <div className="flex flex-col gap-y-1" key={index}>
+                  <div>
+                    <div className="font-bold text-muted-foreground text-sm">
+                      You
+                    </div>
+                    <div className="mb-1">{chat.question}</div>
+                  </div>
+                  <div>
+                    <div className="font-bold text-muted-foreground text-sm">
+                      AI
+                    </div>
+                    <div
+                      className={
+                        chat.response.success ? "" : "text-red-600 font-bold"
+                      }
+                    >
+                      {chat.response.text}
+                    </div>
+                    {chat.response.products &&
+                      chat.response.products.length > 0 && (
+                        <div className="mt-2 grid grid-cols-1 gap-2">
+                          {chat.response.products.map((product) => (
+                            <ProductCard
+                              key={product.id}
+                              product={{
+                                ...product,
+                                name: product.name || product.slug,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-muted-foreground text-sm">
+                No past chats available.
               </div>
-            ))}
-            {isSendingPrompt && (
-              <div className="mb-2">
-                <div className="font-bold">AI:</div>
+            )}
+            {isWaitingForResponse && (
+              <div className="flex flex-col gap-y-0 mt-auto">
+                <div className="font-bold text-muted-foreground text-sm">
+                  AI
+                </div>
                 <div>Generating response...</div>
               </div>
             )}
           </div>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -219,11 +268,15 @@ export function Chatbot() {
               placeholder="Ask me anything..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              disabled={isSendingPrompt}
+              disabled={isWaitingForResponse || isSendingPrompt}
             />
             <button
               type="submit"
-              disabled={isSendingPrompt || inputValue.trim() === ""}
+              disabled={
+                isWaitingForResponse ||
+                isSendingPrompt ||
+                inputValue.trim() === ""
+              }
               className="p-2 rounded-full hover:bg-zinc-100 transition-colors"
             >
               <ArrowRightIcon className="size-4" />
@@ -231,7 +284,7 @@ export function Chatbot() {
           </form>
         </div>
       ) : (
-        <div className="py-1 px-2">
+        <div className="py-1 px-2 h-[360px]">
           You must be logged in to use the chatbot.
         </div>
       )}

@@ -152,3 +152,38 @@ export const DeleteVariantMutation = graphql(`
     removeProductVariant(id: $id)
   }
 `);
+
+export const GenerateProductEmbeddingMutation = graphql(`
+  mutation GenerateProductEmbeddingMutation($productId: Int!, $lang: String!) {
+    generateProductEmbedding(productId: $productId, lang: $lang) {
+      id
+      status
+      createdAt
+    }
+  }
+`);
+
+export const GenerateProductContentEmbeddingMutation = graphql(`
+  mutation GenerateProductContentEmbeddingMutation(
+    $productId: Int!
+    $lang: String!
+  ) {
+    generateProductContentEmbedding(productId: $productId, lang: $lang) {
+      id
+      status
+      createdAt
+    }
+  }
+`);
+
+export const RegenerateAllProductEmbeddingsMutation = graphql(`
+  mutation RegenerateAllProductEmbeddingsMutation {
+    regenerateAllProductEmbeddings
+  }
+`);
+
+export const RegenerateAllProductContentEmbeddingsMutation = graphql(`
+  mutation RegenerateAllProductContentEmbeddingsMutation {
+    regenerateAllProductContentEmbeddings
+  }
+`);

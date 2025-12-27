@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { AddToCartButton } from "./add-to-cart-button";
 import { Card } from "./ui/card";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 export type CardVariant = {
   id: number;
@@ -38,9 +39,12 @@ export function ProductVariantCard({
           />
         )}
       </div>
-      <span className="font-medium text-lg sm:text-xl h-14 line-clamp-2">
+      <Link
+        href={`/product/${variant.productSlug}?variant=${variant.sku}`}
+        className="font-medium text-lg sm:text-xl h-14 line-clamp-2"
+      >
         {variant.name}
-      </span>
+      </Link>
       <p className="text-sm sm:text-base font-light text-accent-foreground line-clamp-3 h-14 sm:h-18">
         {variant.description}
       </p>

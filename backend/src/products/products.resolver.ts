@@ -31,6 +31,9 @@ import { ProductVariant } from '../product-variants/entities/product-variant.ent
 import { ProductImage } from 'src/entities/product-image.entity';
 import { CreateProductTranslationInput } from './dto/create-product-translation.input';
 import { EditProductTranslationInput } from './dto/edit-product-translation.input';
+import { ProductEmbedding } from './entities/product-embedding.entity';
+import { ProductContentEmbedding } from './entities/product-content-embedding.entity';
+import { GraphQLVoid } from 'graphql-scalars';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -255,5 +258,135 @@ export class ProductsResolver {
     return await this.productsService.deleteProductTranslation(
       productTranslationId,
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @ResolveField(() => [ProductEmbedding], { name: 'embeddings' })
+  async resolveProductEmbeddings(
+    @Parent() product: Product,
+  ): Promise<ProductEmbedding[]> {
+    return await this.productsService.getProductEmbeddings(product.id);
+  }
+
+  @UseGuards(AdminGuard)
+  @ResolveField(() => [ProductContentEmbedding], { name: 'contentEmbeddings' })
+  async resolveProductContentEmbeddings(
+    @Parent() product: Product,
+  ): Promise<ProductContentEmbedding[]> {
+    return await this.productsService.getProductContentEmbeddings(product.id);
+  }
+
+  @UseGuards(AdminGuard)
+  @ResolveField(() => [String], { name: 'missingEmbeddingLanguages' })
+  async resolveMissingEmbeddingLanguages(
+    @Parent() product: Product,
+  ): Promise<string[]> {
+    return await this.productsService.getMissingProductEmbeddings(product.id);
+  }
+
+  @UseGuards(AdminGuard)
+  @ResolveField(() => [String], { name: 'missingContentEmbeddingLanguages' })
+  async resolveMissingContentEmbeddingLanguages(
+    @Parent() product: Product,
+  ): Promise<string[]> {
+    return await this.productsService.getMissingProductContentEmbeddings(
+      product.id,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => [ProductEmbedding], { name: 'productEmbeddings' })
+  async queryProductEmbeddings(
+    @Args('productId', { type: () => Int }) productId: number,
+  ) {
+    return await this.productsService.getProductEmbeddings(productId);
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => [ProductContentEmbedding], { name: 'productContentEmbeddings' })
+  async queryProductContentEmbeddings(
+    @Args('productId', { type: () => Int }) productId: number,
+  ) {
+    return await this.productsService.getProductContentEmbeddings(productId);
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => [String], { name: 'missingProductEmbeddingLanguages' })
+  async queryMissingProductEmbeddingLanguages(
+    @Args('productId', { type: () => Int }) productId: number,
+  ) {
+    return await this.productsService.getMissingProductEmbeddings(productId);
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => [String], { name: 'missingProductContentEmbeddingLanguages' })
+  async queryMissingProductContentEmbeddingLanguages(
+    @Args('productId', { type: () => Int }) productId: number,
+  ) {
+    return await this.productsService.getMissingProductContentEmbeddings(
+      productId,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => ProductEmbedding, { name: 'productEmbedding', nullable: true })
+  async queryProductEmbedding(@Args('id', { type: () => Int }) id: number) {
+    return await this.productsService.getProductEmbeddingById(id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => ProductContentEmbedding, {
+    name: 'productContentEmbedding',
+    nullable: true,
+  })
+  async queryProductContentEmbedding(
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    return await this.productsService.getProductContentEmbeddingById(id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductEmbedding, {
+    name: 'generateProductEmbedding',
+    nullable: true,
+  })
+  async generateProductEmbedding(
+    @Args('productId', { type: () => Int }) productId: number,
+    @Args('lang', { type: () => String }) lang: string,
+  ) {
+    return await this.productsService.generateProductEmbedding(productId, lang);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductContentEmbedding, {
+    name: 'generateProductContentEmbedding',
+    nullable: true,
+  })
+  async generateProductContentEmbedding(
+    @Args('productId', { type: () => Int }) productId: number,
+    @Args('lang', { type: () => String }) lang: string,
+  ) {
+    return await this.productsService.generateProductContentEmbedding(
+      productId,
+      lang,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => GraphQLVoid, {
+    name: 'regenerateAllProductContentEmbeddings',
+  })
+  async regenerateAllProductContentEmbeddings() {
+    await this.productsService.regenerateAllProductContentEmbeddings();
+    return GraphQLVoid;
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => GraphQLVoid, {
+    name: 'regenerateAllProductEmbeddings',
+  })
+  async regenerateAllProductEmbeddings() {
+    await this.productsService.regenerateAllProductEmbeddings();
+    return GraphQLVoid;
   }
 }

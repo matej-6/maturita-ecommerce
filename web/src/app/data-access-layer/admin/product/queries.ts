@@ -51,6 +51,20 @@ export const ProductDetailPageQueryDocument = graphql(`
       categoryId
       createdAt
       updatedAt
+      embeddings {
+        id
+        lang
+        createdAt
+        status
+      }
+      contentEmbeddings {
+        id
+        lang
+        createdAt
+        status
+      }
+      missingEmbeddingLanguages
+      missingContentEmbeddingLanguages
       translations {
         id
         locale

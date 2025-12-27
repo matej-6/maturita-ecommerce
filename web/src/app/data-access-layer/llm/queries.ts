@@ -5,7 +5,18 @@ export const LLMUserTaskByIdQuery = graphql(`
   query LLMUserTaskById($id: Int!) {
     getUserLLMTaskById(id: $id) {
       id
-      response
+      response {
+        text
+        products {
+          id
+          slug
+          name
+          thumbnailImage {
+            mimeType
+            base64
+          }
+        }
+      }
       status
       date
     }
