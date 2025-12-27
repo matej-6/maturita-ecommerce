@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "./ui/card";
-import { ArrowRightIcon, XCircleIcon, XIcon } from "lucide-react";
+import { ArrowRightIcon, XIcon } from "lucide-react";
 import { useSession } from "@/lib/tanstack-query/queries";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import {
   getLLMTaskByIdAction,
@@ -49,16 +49,44 @@ export function Chatbot() {
         success: boolean;
       };
     }>
-  >([]);
+  >([
+    {
+      question: "What can you do?",
+      response: {
+        text: "I can help you with product recommendations, answer questions about products, and assist you with your shopping experience. Just ask me anything!",
+        success: true,
+      },
+    },
+    {
+      question: "Can you recommend a product for me?",
+      response: {
+        text: "Sure! Based on your browsing history, I recommend checking out our latest collection of wireless headphones. They offer great sound quality and comfort for long listening sessions.",
+        success: true,
+      },
+    },
+    {
+      question: "What is the return policy?",
+      response: {
+        text: "Our return policy allows you to return most items within 30 days of purchase for a full refund. Please ensure that the items are in their original condition and packaging. Some restrictions may apply for certain products.",
+        success: true,
+      },
+    },
+  ]);
 
   const [inputValue, setInputValue] = useState("");
-  const [currentResponseId, setCurrentResponseId] = useState<number | null>(
-    null
-  );
+
+  const chatsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const chatsDiv = chatsRef.current;
+    if (chatsDiv) {
+      chatsDiv.scrollTo({ top: chatsDiv.scrollHeight, behavior: "smooth" });
+    }
+  }, [pastChats]);
 
   const { mutate: sendPrompt, isPending: isSendingPrompt } = useMutation({
     mutationFn: async (prompt: string) => {
-      if (!isLoggedIn || currentResponseId !== null) return;
+      if (!isLoggedIn || prompt.trim() === "") return;
 
       let productId: number | null = null;
       if (productSlug) {
@@ -95,7 +123,6 @@ export function Chatbot() {
       }
 
       const llmTaskId = res.data.createLlmTask.id;
-      setCurrentResponseId(llmTaskId);
 
       // retry every 2 seconds to get the response
       const interval = setInterval(async () => {
@@ -113,7 +140,6 @@ export function Chatbot() {
                 },
               },
             ]);
-            setCurrentResponseId(null);
             clearInterval(interval);
           } else if (task.status === LlmTaskStatus.Failed) {
             setPastChats((chats) => [
@@ -128,14 +154,10 @@ export function Chatbot() {
                 },
               },
             ]);
-            setCurrentResponseId(null);
             clearInterval(interval);
           }
         }
       }, 2000);
-    },
-    onSettled: () => {
-      setInputValue("");
     },
   });
 
@@ -151,7 +173,7 @@ export function Chatbot() {
   }
 
   return (
-    <Card className="w-[248px] h-[400px] flex flex-col gap-y-0 rounded-b-none p-0!">
+    <Card className="w-[248px] h-fit flex flex-col gap-y-0 rounded-b-none p-0!">
       <div className="w-full flex justify-end items-center py-1 px-2">
         <button
           onClick={() => setIsOpen(false)}
@@ -162,8 +184,8 @@ export function Chatbot() {
       </div>
       <div className="h-px w-full bg-accent" />
       {isLoggedIn ? (
-        <div className="py-1 px-2 grow flex flex-col">
-          <div className="grow overflow-y-auto">
+        <div className="py-1 px-2 flex flex-col gap-y-1">
+          <div ref={chatsRef} className="overflow-y-scroll h-[360px]">
             {pastChats.map((chat, index) => (
               <div key={index} className="mb-2">
                 <div className="font-bold">You:</div>
@@ -178,7 +200,7 @@ export function Chatbot() {
                 </div>
               </div>
             ))}
-            {currentResponseId !== null && (
+            {isSendingPrompt && (
               <div className="mb-2">
                 <div className="font-bold">AI:</div>
                 <div>Generating response...</div>
@@ -197,11 +219,11 @@ export function Chatbot() {
               placeholder="Ask me anything..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              disabled={currentResponseId !== null}
+              disabled={isSendingPrompt}
             />
             <button
               type="submit"
-              disabled={currentResponseId !== null || isSendingPrompt}
+              disabled={isSendingPrompt || inputValue.trim() === ""}
               className="p-2 rounded-full hover:bg-zinc-100 transition-colors"
             >
               <ArrowRightIcon className="size-4" />
