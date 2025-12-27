@@ -5,6 +5,12 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { LocalesService } from 'src/locales/locales.service';
 import { CreateProductVariantAttributeKeyTranslationInput } from './dto/create-product-variant-attribute-key-translation.input';
 import { UpdateProductVariantAttributeKeyTranslationInput } from './dto/update-product-variant-attribute-key-translation.input';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import {
+  AttributeKeyFindAllQueryArgs,
+  AttributeKeySortingArgs,
+} from './product-variant-attributes-keys.args';
+import { PaginatedProductVariantAttributeKey } from './entities/product-variant-attribute-key.entity';
 
 @Injectable()
 export class ProductVariantAttributeKeysService {
@@ -233,5 +239,48 @@ export class ProductVariantAttributeKeysService {
         id: id,
       },
     });
+  }
+
+  async findAllPaginated(
+    paginationArgs: PaginationArgs,
+    findAllQueryArgs: AttributeKeyFindAllQueryArgs,
+    sortByArgs: AttributeKeySortingArgs,
+  ): Promise<PaginatedProductVariantAttributeKey> {
+    paginationArgs.validateFields();
+
+    const keys = await this.prisma.attributeKey.findMany({
+      where: {
+        id: findAllQueryArgs.id ?? undefined,
+        key: findAllQueryArgs.key
+          ? {
+              contains: findAllQueryArgs.key,
+            }
+          : undefined,
+      },
+      cursor:
+        paginationArgs.cursor === null
+          ? undefined
+          : { id: paginationArgs.cursor },
+      take: paginationArgs.pageSize + 1,
+      orderBy: sortByArgs.sortBy
+        ? {
+            [sortByArgs.sortBy]: sortByArgs.ascending ? 'asc' : 'desc',
+          }
+        : { id: 'asc' },
+    });
+
+    const hasNextPage = keys.length > paginationArgs.pageSize;
+    if (hasNextPage) {
+      keys.pop();
+    }
+
+    return {
+      hasNextPage: hasNextPage,
+      totalCount: keys.length,
+      edges: keys.map((k) => ({
+        cursor: k.id,
+        node: k,
+      })),
+    };
   }
 }

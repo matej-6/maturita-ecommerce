@@ -20,6 +20,13 @@ export type Scalars = {
   Void: { input: any; output: any; }
 };
 
+export enum AttributeKeySortingField {
+  CreatedAt = 'CREATED_AT',
+  Id = 'ID',
+  Key = 'KEY',
+  UpdatedAt = 'UPDATED_AT'
+}
+
 export type BestSellingCategory = {
   __typename?: 'BestSellingCategory';
   category: Category;
@@ -230,6 +237,7 @@ export type Locale = {
 export type Mutation = {
   __typename?: 'Mutation';
   addItemToCart: Cart;
+  addNoteToOrder: Scalars['Void']['output'];
   addProductImage: ProductImage;
   addProductVariantImage: ProductVariantImage;
   cancelOrder: Order;
@@ -266,12 +274,14 @@ export type Mutation = {
   updateCartItemQuantity: Cart;
   updateCategory: Category;
   updateCategoryTranslation: CategoryTranslation;
+  updateOrder: Scalars['Boolean']['output'];
   updatePassword: Scalars['Void']['output'];
   updateProduct: Product;
   updateProductVariant: ProductVariant;
   updateProductVariantAttribute: ProductVariantAttribute;
   updateProductVariantAttributeKey: ProductVariantAttributeKey;
   updateUser: User;
+  updateUserRole: Scalars['Void']['output'];
   uploadAvatar: Scalars['Void']['output'];
 };
 
@@ -279,6 +289,12 @@ export type Mutation = {
 export type MutationAddItemToCartArgs = {
   productVariantId: Scalars['Int']['input'];
   quantity: Scalars['Int']['input'];
+};
+
+
+export type MutationAddNoteToOrderArgs = {
+  note: Scalars['String']['input'];
+  orderId: Scalars['Int']['input'];
 };
 
 
@@ -446,6 +462,12 @@ export type MutationUpdateCategoryTranslationArgs = {
 };
 
 
+export type MutationUpdateOrderArgs = {
+  input: UpdateOrderDto;
+  orderId: Scalars['Int']['input'];
+};
+
+
 export type MutationUpdatePasswordArgs = {
   input: UpdatePasswordInput;
 };
@@ -476,6 +498,12 @@ export type MutationUpdateUserArgs = {
 };
 
 
+export type MutationUpdateUserRoleArgs = {
+  newRole: Role;
+  userId: Scalars['Int']['input'];
+};
+
+
 export type MutationUploadAvatarArgs = {
   base64: Scalars['String']['input'];
   mimeType: Scalars['String']['input'];
@@ -491,6 +519,7 @@ export type Order = {
   totalInCents: Scalars['Int']['output'];
   updatedAt: Scalars['DateTime']['output'];
   userId?: Maybe<Scalars['Int']['output']>;
+  userNote?: Maybe<Scalars['String']['output']>;
 };
 
 export type OrderEdge = {
@@ -568,6 +597,13 @@ export type PaginatedProduct = {
 export type PaginatedProductVariant = {
   __typename?: 'PaginatedProductVariant';
   edges?: Maybe<Array<ProductVariantEdge>>;
+  hasNextPage: Scalars['Boolean']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
+export type PaginatedProductVariantAttributeKey = {
+  __typename?: 'PaginatedProductVariantAttributeKey';
+  edges?: Maybe<Array<ProductVariantAttributeKeyEdge>>;
   hasNextPage: Scalars['Boolean']['output'];
   totalCount: Scalars['Int']['output'];
 };
@@ -681,10 +717,18 @@ export type ProductVariantAttribute = {
 export type ProductVariantAttributeKey = {
   __typename?: 'ProductVariantAttributeKey';
   attributes: Array<ProductVariantAttribute>;
+  createdAt: Scalars['DateTime']['output'];
   id: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   translatedKey?: Maybe<Scalars['String']['output']>;
   translations: Array<ProductVariantAttributeKeyTranslation>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ProductVariantAttributeKeyEdge = {
+  __typename?: 'ProductVariantAttributeKeyEdge';
+  cursor: Scalars['Int']['output'];
+  node: ProductVariantAttributeKey;
 };
 
 export type ProductVariantAttributeKeyTranslation = {
@@ -726,8 +770,10 @@ export type Query = {
   categories: Array<Category>;
   category: Category;
   findAllPaginatedOrders: PaginatedOrder;
+  findAllPaginatedProductVariantAttributeKeys: PaginatedProductVariantAttributeKey;
   findAllPaginatedUsers: PaginatedUser;
   findOneProductVariantAttribute?: Maybe<ProductVariantAttribute>;
+  findOrderById?: Maybe<Order>;
   getUserLLMTaskById?: Maybe<LlmTask>;
   locale: Locale;
   locales: Array<Locale>;
@@ -800,6 +846,16 @@ export type QueryFindAllPaginatedOrdersArgs = {
 };
 
 
+export type QueryFindAllPaginatedProductVariantAttributeKeysArgs = {
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['Int']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  sortBy?: InputMaybe<AttributeKeySortingField>;
+};
+
+
 export type QueryFindAllPaginatedUsersArgs = {
   ascending?: InputMaybe<Scalars['Boolean']['input']>;
   cursor?: InputMaybe<Scalars['Int']['input']>;
@@ -812,6 +868,11 @@ export type QueryFindAllPaginatedUsersArgs = {
 
 
 export type QueryFindOneProductVariantAttributeArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryFindOrderByIdArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -935,7 +996,6 @@ export type QueryUserArgs = {
 /** User role */
 export enum Role {
   Admin = 'ADMIN',
-  Moderator = 'MODERATOR',
   User = 'USER'
 }
 
@@ -952,6 +1012,10 @@ export type UpdateCategoryInput = {
   parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   /** Slug of the category */
   slug: Scalars['String']['input'];
+};
+
+export type UpdateOrderDto = {
+  status: OrderStatus;
 };
 
 export type UpdatePasswordInput = {
@@ -1133,6 +1197,14 @@ export type LocalesQueryDocumentQuery = (
   & { ' $fragmentRefs'?: { 'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
 );
 
+export type AdminUpdateOrderMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  newStatus: OrderStatus;
+}>;
+
+
+export type AdminUpdateOrderMutation = { __typename?: 'Mutation', updateOrder: boolean };
+
 export type AdminOrdersPage_QueryDocumentQueryVariables = Exact<{
   cursor?: InputMaybe<Scalars['Int']['input']>;
   pageSize: Scalars['Int']['input'];
@@ -1149,6 +1221,13 @@ export type AdminOrdersPage_QueryDocumentQueryVariables = Exact<{
 
 
 export type AdminOrdersPage_QueryDocumentQuery = { __typename?: 'Query', findAllPaginatedOrders: { __typename?: 'PaginatedOrder', hasNextPage: boolean, edges?: Array<{ __typename?: 'OrderEdge', cursor: number, node: { __typename?: 'Order', id: number, totalInCents: number, status: OrderStatus, createdAt: any, updatedAt: any, userId?: number | null } }> | null } };
+
+export type AdminOrderDetailPageQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type AdminOrderDetailPageQuery = { __typename?: 'Query', findOrderById?: { __typename?: 'Order', id: number, updatedAt: any, createdAt: any, status: OrderStatus, totalInCents: number, shippingDetails?: { __typename?: 'OrderShippingDetails', city?: string | null, country: string, state?: string | null, line1: string, line2?: string | null, postalCode: string, phone?: string | null } | null, items: Array<{ __typename?: 'OrderItem', productVariantId?: number | null, sku: string, unitPriceInCents: number, quantity: number, productVariant?: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } | null }> } | null };
 
 export type DeleteProductTranslationMutationMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1201,6 +1280,25 @@ export type CreateAttributeMutationMutationVariables = Exact<{
 
 
 export type CreateAttributeMutationMutation = { __typename?: 'Mutation', createProductVariantAttribute: { __typename?: 'ProductVariantAttribute', id: number } };
+
+export type PagedAttributeKeysQueryQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  pageSize: Scalars['Int']['input'];
+  id?: InputMaybe<Scalars['Int']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  ascending?: InputMaybe<Scalars['Boolean']['input']>;
+  sortBy?: InputMaybe<AttributeKeySortingField>;
+}>;
+
+
+export type PagedAttributeKeysQueryQuery = { __typename?: 'Query', findAllPaginatedProductVariantAttributeKeys: { __typename?: 'PaginatedProductVariantAttributeKey', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'ProductVariantAttributeKeyEdge', cursor: number, node: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, createdAt: any, updatedAt: any, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number }> } }> | null } };
+
+export type AdminAttributeKeyDetailsPageQueryQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type AdminAttributeKeyDetailsPageQueryQuery = { __typename?: 'Query', productVariantAttributeKey: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, createdAt: any, updatedAt: any, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, productVariantId?: number | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', id: number, locale: string, value: string }> }>, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string, locale: string }> } };
 
 export type CreateProductMutationMutationVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -1370,6 +1468,14 @@ export type AdminPageStatisticsQueryVariables = Exact<{ [key: string]: never; }>
 
 
 export type AdminPageStatisticsQuery = { __typename?: 'Query', BestSellingCategoriesStatisticLastSevenDays?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, RevenuePerDayLastNinetyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, RevenuePerDayLastSevenDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, RevenuePerDayLastThirtyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, BestSellingProductVariantsStatisticLastSevenDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null };
+
+export type AdminUpdateUserRoleMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  role: Role;
+}>;
+
+
+export type AdminUpdateUserRoleMutation = { __typename?: 'Mutation', updateUserRole: any };
 
 export type AdminUsersPageQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']['input']>;
@@ -1919,6 +2025,11 @@ export const LocalesQueryDocumentDocument = new TypedDocumentString(`
     name
   }
 }`) as unknown as TypedDocumentString<LocalesQueryDocumentQuery, LocalesQueryDocumentQueryVariables>;
+export const AdminUpdateOrderDocument = new TypedDocumentString(`
+    mutation AdminUpdateOrder($id: Int!, $newStatus: OrderStatus!) {
+  updateOrder(orderId: $id, input: {status: $newStatus})
+}
+    `) as unknown as TypedDocumentString<AdminUpdateOrderMutation, AdminUpdateOrderMutationVariables>;
 export const AdminOrdersPage_QueryDocumentDocument = new TypedDocumentString(`
     query AdminOrdersPage_QueryDocument($cursor: Int, $pageSize: Int!, $sortBy: String, $ascending: Boolean, $status: OrderStatus, $id: Int, $userId: Int, $minPrice: Int, $maxPrice: Int, $dateFrom: DateTime, $dateTo: DateTime) {
   findAllPaginatedOrders(
@@ -1949,6 +2060,49 @@ export const AdminOrdersPage_QueryDocumentDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AdminOrdersPage_QueryDocumentQuery, AdminOrdersPage_QueryDocumentQueryVariables>;
+export const AdminOrderDetailPageDocument = new TypedDocumentString(`
+    query AdminOrderDetailPage($id: Int!) {
+  findOrderById(id: $id) {
+    id
+    updatedAt
+    createdAt
+    status
+    totalInCents
+    shippingDetails {
+      city
+      country
+      state
+      line1
+      line2
+      postalCode
+      phone
+    }
+    items {
+      productVariantId
+      sku
+      unitPriceInCents
+      quantity
+      productVariant {
+        id
+        sku
+        sku
+        thumbnailImage {
+          base64
+          mimeType
+        }
+        product {
+          id
+          slug
+          thumbnailImage {
+            base64
+            mimeType
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AdminOrderDetailPageQuery, AdminOrderDetailPageQueryVariables>;
 export const DeleteProductTranslationMutationDocument = new TypedDocumentString(`
     mutation DeleteProductTranslationMutation($id: Int!) {
   deleteProductTranslation(productTranslationId: $id)
@@ -2006,6 +2160,56 @@ export const CreateAttributeMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CreateAttributeMutationMutation, CreateAttributeMutationMutationVariables>;
+export const PagedAttributeKeysQueryDocument = new TypedDocumentString(`
+    query PagedAttributeKeysQuery($cursor: Int, $pageSize: Int!, $id: Int, $key: String, $ascending: Boolean, $sortBy: AttributeKeySortingField) {
+  findAllPaginatedProductVariantAttributeKeys(
+    cursor: $cursor
+    pageSize: $pageSize
+    ascending: $ascending
+    sortBy: $sortBy
+    id: $id
+    key: $key
+  ) {
+    hasNextPage
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        key
+        createdAt
+        updatedAt
+        attributes {
+          id
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PagedAttributeKeysQueryQuery, PagedAttributeKeysQueryQueryVariables>;
+export const AdminAttributeKeyDetailsPageQueryDocument = new TypedDocumentString(`
+    query AdminAttributeKeyDetailsPageQuery($id: Int!) {
+  productVariantAttributeKey(id: $id) {
+    id
+    key
+    createdAt
+    updatedAt
+    attributes {
+      id
+      productVariantId
+      translations {
+        id
+        locale
+        value
+      }
+    }
+    translations {
+      keyTranslation
+      locale
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AdminAttributeKeyDetailsPageQueryQuery, AdminAttributeKeyDetailsPageQueryQueryVariables>;
 export const CreateProductMutationDocument = new TypedDocumentString(`
     mutation CreateProductMutation($slug: String!, $categoryId: Int, $isPublic: Boolean!) {
   createProduct(
@@ -2377,6 +2581,11 @@ export const AdminPageStatisticsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AdminPageStatisticsQuery, AdminPageStatisticsQueryVariables>;
+export const AdminUpdateUserRoleDocument = new TypedDocumentString(`
+    mutation AdminUpdateUserRole($id: Int!, $role: Role!) {
+  updateUserRole(userId: $id, newRole: $role)
+}
+    `) as unknown as TypedDocumentString<AdminUpdateUserRoleMutation, AdminUpdateUserRoleMutationVariables>;
 export const AdminUsersPageDocument = new TypedDocumentString(`
     query AdminUsersPage($id: Int, $role: Role, $email: String, $pageSize: Int, $sortBy: UserSortingField, $cursor: Int, $ascending: Boolean) {
   findAllPaginatedUsers(

@@ -5,6 +5,7 @@ import "server-only";
 import { ActionResponse } from "../../formActionResponse";
 import { ExecutionResult } from "graphql";
 import {
+  AdminOrderDetailPageQuery,
   AdminOrdersPage_QueryDocumentQuery,
   OrderStatus,
 } from "@/graphql/graphql";
@@ -94,6 +95,66 @@ export async function getAdminOrdersPageDataAction(
     maxPrice: tableArgs.maxPrice,
     dateFrom: tableArgs.dateFrom,
     dateTo: tableArgs.dateTo,
+  });
+
+  if (res.errors) {
+    return handleGraphqlError(res.errors);
+  }
+  return {
+    success: true,
+    data: res.data,
+  };
+}
+
+const AdminOrderDetailPageQueryDocument = graphql(`
+  query AdminOrderDetailPage($id: Int!) {
+    findOrderById(id: $id) {
+      id
+      updatedAt
+      createdAt
+      status
+      totalInCents
+      shippingDetails {
+        city
+        country
+        state
+        line1
+        line2
+        postalCode
+        phone
+      }
+      items {
+        productVariantId
+        sku
+        unitPriceInCents
+        quantity
+        productVariant {
+          id
+          sku
+          sku
+          thumbnailImage {
+            base64
+            mimeType
+          }
+          product {
+            id
+            slug
+            thumbnailImage {
+              base64
+              mimeType
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+export async function getAdminOrderDetailPageDataAction(
+  id: number
+): Promise<ActionResponse<ExecutionResult<AdminOrderDetailPageQuery>["data"]>> {
+  const res = await execute(AdminOrderDetailPageQueryDocument, {
+    id,
   });
 
   if (res.errors) {

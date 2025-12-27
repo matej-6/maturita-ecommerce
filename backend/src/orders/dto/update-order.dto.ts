@@ -1,4 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateOrderDto } from './create-order.dto';
+import { Field, InputType } from '@nestjs/graphql';
+import { OrderStatus } from 'generated/prisma/enums';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+@InputType()
+export class UpdateOrderDto {
+  @Field(() => OrderStatus)
+  status: OrderStatus;
+}

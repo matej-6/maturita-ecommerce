@@ -87,7 +87,7 @@ export default async function LocaleLayout({
     },
   });
 
-  const state = dehydrate(queryClient);
+const state = dehydrate(queryClient);
 
   return (
     <html className="h-full" lang={locale}>

@@ -9,7 +9,10 @@ import {
   Context,
 } from '@nestjs/graphql';
 import { ProductVariantAttributeKeysService } from './product-variant-attribute-keys.service';
-import { ProductVariantAttributeKey } from './entities/product-variant-attribute-key.entity';
+import {
+  PaginatedProductVariantAttributeKey,
+  ProductVariantAttributeKey,
+} from './entities/product-variant-attribute-key.entity';
 import { CreateProductVariantAttributeKeyInput } from './dto/create-product-variant-attribute-key.input';
 import { UpdateProductVariantAttributeKeyInput } from './dto/update-product-variant-attribute-key.input';
 import { GraphqlAppContext } from 'src/app.module';
@@ -17,6 +20,11 @@ import { ProductVariantAttributeKeyTranslation } from './entities/product-varian
 import { ProductVariantAttribute } from 'src/product-variant-attributes/entities/product-variant-attribute.entity';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { PaginationArgs } from 'src/lib/pagination.args';
+import {
+  AttributeKeyFindAllQueryArgs,
+  AttributeKeySortingArgs,
+} from './product-variant-attributes-keys.args';
 
 @Resolver(() => ProductVariantAttributeKey)
 export class ProductVariantAttributeKeysResolver {
@@ -32,6 +40,22 @@ export class ProductVariantAttributeKeysResolver {
   ) {
     return this.productVariantAttributeKeysService.create(
       createProductVariantAttributeKeyInput,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => PaginatedProductVariantAttributeKey, {
+    name: 'findAllPaginatedProductVariantAttributeKeys',
+  })
+  async findAllPaginated(
+    @Args() paginationArgs: PaginationArgs,
+    @Args() findAllQueryArgs: AttributeKeyFindAllQueryArgs,
+    @Args() sortByArgs: AttributeKeySortingArgs,
+  ): Promise<PaginatedProductVariantAttributeKey> {
+    return await this.productVariantAttributeKeysService.findAllPaginated(
+      paginationArgs,
+      findAllQueryArgs,
+      sortByArgs,
     );
   }
 

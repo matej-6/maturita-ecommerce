@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserDto } from './dto/user.dto';
-import { User, UserAvatar } from 'generated/prisma/client';
+import { Role, User, UserAvatar } from 'generated/prisma/client';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
@@ -92,6 +92,13 @@ export class UsersService {
       this.logger.error('Failed to update user: ', err);
       throw new InternalServerErrorException('Failed to update user');
     }
+  }
+
+  async updateUserRole(userId: number, newRole: Role): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole },
+    });
   }
 
   async remove(id: number) {

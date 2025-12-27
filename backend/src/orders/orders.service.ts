@@ -9,6 +9,7 @@ import Stripe from 'stripe';
 import { OrderFindAllQueryArgs } from './order.resolver.args';
 import { SortingArgs } from 'src/args/sorting-args';
 import { PaginatedOrder } from './entities/order.entity';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -30,18 +31,109 @@ export class OrdersService {
   }
 
   async findAllOrdersByUserId(userId: number): Promise<Order[]> {
-    return this.prisma.order.findMany({
+    const res = await this.prisma.order.findMany({
       where: { userId: userId },
       orderBy: { createdAt: 'desc' },
     });
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].status === 'PENDING') {
+        try {
+          const syncedOrder = await this.syncOrderStatusWithStripe(res[i].id);
+          if (syncedOrder) {
+            res[i] = syncedOrder;
+          }
+        } catch (e) {
+          this.logger.error(
+            `Failed to sync order status with Stripe for order ID ${res[i].id}: ${e}`,
+          );
+        }
+      }
+    }
+    return res;
   }
 
   async findOrderByIdAndUserId(
     id: number,
     userId: number,
   ): Promise<Order | null> {
-    return this.prisma.order.findFirst({
+    let res = await this.prisma.order.findFirst({
       where: { id: id, userId: userId },
+    });
+
+    if (res?.status === 'PENDING') {
+      try {
+        const syncedOrder = await this.syncOrderStatusWithStripe(id);
+        if (syncedOrder) {
+          res = syncedOrder;
+        }
+      } catch (e) {
+        this.logger.error(
+          `Failed to sync order status with Stripe for order ID ${id}: ${e}`,
+        );
+      }
+    }
+    return res;
+  }
+
+  async findOrderById(id: number): Promise<Order | null> {
+    let res = await this.prisma.order.findUnique({
+      where: { id: id },
+    });
+
+    if (res?.status === 'PENDING') {
+      try {
+        const syncedOrder = await this.syncOrderStatusWithStripe(id);
+        if (syncedOrder) {
+          res = syncedOrder;
+        }
+      } catch (e) {
+        this.logger.error(
+          `Failed to sync order status with Stripe for order ID ${id}: ${e}`,
+        );
+      }
+    }
+    return res;
+  }
+
+  async updateOrder(orderId: number, input: UpdateOrderDto) {
+    const updatedOrder = await this.prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status: input.status,
+      },
+    });
+
+    return updatedOrder;
+  }
+
+  async addNoteToOrder(
+    orderId: number,
+    note: string | null,
+    userId: number,
+  ): Promise<void> {
+    if (!note || note.trim() === '') {
+      note = null;
+    }
+
+    const order = await this.prisma.order.findFirst({
+      where: {
+        id: orderId,
+        userId: userId,
+      },
+    });
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        userNote: note,
+      },
     });
   }
 
@@ -65,7 +157,7 @@ export class OrdersService {
       paymentIntent.status === 'succeeded' &&
       (order.status === 'PENDING' || order.status === 'FAILED')
     ) {
-      await this.prisma.order.update({
+      const updatedOrder = await this.prisma.order.update({
         where: { id: orderId },
         data: {
           status: 'PROCESSING',
@@ -82,6 +174,8 @@ export class OrdersService {
           },
         },
       });
+
+      return updatedOrder;
     }
   }
 

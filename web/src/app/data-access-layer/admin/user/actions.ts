@@ -6,6 +6,9 @@ import { AdminUsersPageQuery, Role, UserSortingField } from "@/graphql/graphql";
 import { execute } from "@/graphql/execute";
 import { AdminUsersPageDocument } from "./queries";
 import { handleGraphqlError } from "../handleGraphqlFormError";
+import { AdminUpdateUserRoleMutationDocument } from "./mutations";
+import { revalidatePath } from "next/cache";
+import { getLocale } from "next-intl/server";
 
 export type PagingArgs = {
   cursor: number | null;
@@ -44,5 +47,28 @@ export async function getAdminUsersPageData(
   return {
     success: true,
     data: res.data,
+  };
+}
+
+export async function updateUserRoleAction(
+  id: number,
+  newRole: Role
+): Promise<ActionResponse<null>> {
+  const res = await execute(AdminUpdateUserRoleMutationDocument, {
+    id,
+    role: newRole,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+
+  revalidatePath(`/${locale}/admin/users`);
+
+  return {
+    success: true,
+    data: null,
   };
 }

@@ -6,6 +6,7 @@ import {
   ID,
   ResolveField,
   Parent,
+  Int,
 } from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { PaginatedUser, User } from './entities/user.entity';
@@ -22,6 +23,7 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
 import { UpdatePasswordInput } from './dto/update-password.input';
+import { Role } from 'generated/prisma/enums';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -110,6 +112,16 @@ export class UsersResolver {
       input.currentPassword,
       input.newPassword,
     );
+    return GraphQLVoid;
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => GraphQLVoid, { name: 'updateUserRole' })
+  async updateUserRole(
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('newRole', { type: () => Role }) newRole: Role,
+  ): Promise<typeof GraphQLVoid> {
+    await this.usersService.updateUserRole(userId, newRole);
     return GraphQLVoid;
   }
 }

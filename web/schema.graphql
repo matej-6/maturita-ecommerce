@@ -3,6 +3,13 @@ schema {
   mutation: Mutation
 }
 
+enum AttributeKeySortingField {
+  CREATED_AT
+  ID
+  KEY
+  UPDATED_AT
+}
+
 type BestSellingCategory {
   category: Category!
   itemsSold: Int!
@@ -199,6 +206,7 @@ type Locale {
 
 type Mutation {
   addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
+  addNoteToOrder(note: String!, orderId: Int!): Void!
   addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   cancelOrder(id: Int!): Order!
@@ -235,12 +243,14 @@ type Mutation {
   updateCartItemQuantity(cartItemId: Int!, quantity: Int!): Cart!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
+  updateOrder(input: UpdateOrderDto!, orderId: Int!): Boolean!
   updatePassword(input: UpdatePasswordInput!): Void!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
   updateProductVariantAttribute(updateProductVariantAttributeInput: UpdateProductVariantAttributeInput!): ProductVariantAttribute!
   updateProductVariantAttributeKey(updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
   updateUser(input: UpdateUserInput!): User!
+  updateUserRole(newRole: Role!, userId: Int!): Void!
   uploadAvatar(base64: String!, mimeType: String!): Void!
 }
 
@@ -253,6 +263,7 @@ type Order {
   totalInCents: Int!
   updatedAt: DateTime!
   userId: Int
+  userNote: String
 }
 
 type OrderEdge {
@@ -322,6 +333,12 @@ type PaginatedProduct {
 
 type PaginatedProductVariant {
   edges: [ProductVariantEdge!]
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type PaginatedProductVariantAttributeKey {
+  edges: [ProductVariantAttributeKeyEdge!]
   hasNextPage: Boolean!
   totalCount: Int!
 }
@@ -420,10 +437,17 @@ type ProductVariantAttribute {
 
 type ProductVariantAttributeKey {
   attributes: [ProductVariantAttribute!]!
+  createdAt: DateTime!
   id: Int!
   key: String!
   translatedKey: String
   translations: [ProductVariantAttributeKeyTranslation!]!
+  updatedAt: DateTime!
+}
+
+type ProductVariantAttributeKeyEdge {
+  cursor: Int!
+  node: ProductVariantAttributeKey!
 }
 
 type ProductVariantAttributeKeyTranslation {
@@ -477,8 +501,10 @@ type Query {
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
   findAllPaginatedOrders(ascending: Boolean, cursor: Int, dateFrom: DateTime, dateTo: DateTime, id: Int, maxPrice: Int, minPrice: Int, pageSize: Int = 10, sortBy: String, status: OrderStatus, userId: Int): PaginatedOrder!
+  findAllPaginatedProductVariantAttributeKeys(ascending: Boolean, cursor: Int, id: Int, key: String, pageSize: Int = 10, sortBy: AttributeKeySortingField): PaginatedProductVariantAttributeKey!
   findAllPaginatedUsers(ascending: Boolean, cursor: Int, email: String, id: Int, pageSize: Int = 10, role: Role, sortBy: UserSortingField): PaginatedUser!
   findOneProductVariantAttribute(id: Int!): ProductVariantAttribute
+  findOrderById(id: Int!): Order
   getUserLLMTaskById(id: Int!): LLMTask
   locale(id: String!): Locale!
   locales: [Locale!]!
@@ -538,7 +564,6 @@ type Query {
 """User role"""
 enum Role {
   ADMIN
-  MODERATOR
   USER
 }
 
@@ -555,6 +580,10 @@ input UpdateCategoryInput {
   parentCategoryId: Int
   """Slug of the category"""
   slug: String!
+}
+
+input UpdateOrderDto {
+  status: OrderStatus!
 }
 
 input UpdatePasswordInput {

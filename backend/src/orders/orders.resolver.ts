@@ -18,6 +18,9 @@ import { OrderItemsService } from 'src/order-items/order-items.service';
 import { OrderShippingDetails } from './entities/shipping-details.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { OrderFindAllQueryArgs, OrderSortingArgs } from './order.resolver.args';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { GraphQLVoid } from 'graphql-scalars';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -48,6 +51,14 @@ export class OrdersResolver {
       sortByArgs,
       user,
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => Order, { name: 'findOrderById', nullable: true })
+  async findOrderById(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<Order | null> {
+    return this.ordersService.findOrderById(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -91,5 +102,24 @@ export class OrdersResolver {
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<string> {
     return await this.ordersService.retryPendingCheckout(orderId, user.id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => Boolean, { name: 'updateOrder' })
+  async updateOrder(
+    @Args('orderId', { type: () => Int }) orderId: number,
+    @Args('input', { type: () => UpdateOrderDto }) input: UpdateOrderDto,
+  ) {
+    return this.ordersService.updateOrder(orderId, input);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => GraphQLVoid, { name: 'addNoteToOrder' })
+  async addNoteToOrder(
+    @Args('orderId', { type: () => Int }) orderId: number,
+    @Args('note', { type: () => String }) note: string,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ): Promise<void> {
+    await this.ordersService.addNoteToOrder(orderId, note, user.id);
   }
 }

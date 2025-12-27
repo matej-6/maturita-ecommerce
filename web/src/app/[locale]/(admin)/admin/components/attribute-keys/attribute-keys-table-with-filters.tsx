@@ -3,8 +3,8 @@
 import {
   PagingArgs,
   SortingArgs,
-  TableArgs,
-} from "@/app/data-access-layer/admin/order/queries";
+  FilterArgs,
+} from "@/app/data-access-layer/admin/product-variant-attribute/queries";
 import { OrderStatusLabel } from "@/components/order-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,26 +24,22 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { OrderStatus } from "@/graphql/graphql";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronUpIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import z from "zod";
 
 type Props = {
   initialPagingArgs: PagingArgs & {
     nextCursor: number | null;
   };
   initialSortingArgs: SortingArgs;
-  initialTableArgs: TableArgs;
+  initialTableArgs: FilterArgs;
   searchParams: string;
   data:
     | {
         id: number;
-        userId: number;
-        status: OrderStatus;
-        totalInCents: number;
+        key: string;
         createdAt: Date;
         updatedAt: Date;
       }[]
@@ -51,7 +47,7 @@ type Props = {
   sortableColumns: string[];
 };
 
-export function OrdersTableWithFilters({
+export function AttributeKeysTableWithFilters({
   initialPagingArgs,
   initialSortingArgs,
   initialTableArgs,
@@ -69,12 +65,7 @@ export function OrdersTableWithFilters({
   useEffect(() => {
     setIsTableArgsChanged(
       initialTableArgs.id !== tableArgs.id ||
-        initialTableArgs.userId !== tableArgs.userId ||
-        initialTableArgs.status !== tableArgs.status ||
-        initialTableArgs.minPrice !== tableArgs.minPrice ||
-        initialTableArgs.maxPrice !== tableArgs.maxPrice ||
-        initialTableArgs.dateFrom !== tableArgs.dateFrom ||
-        initialTableArgs.dateTo !== tableArgs.dateTo
+        initialTableArgs.key !== tableArgs.key
     );
   }, [tableArgs, initialTableArgs]);
 
@@ -82,30 +73,11 @@ export function OrdersTableWithFilters({
 
   function applyFilters() {
     const id = tableArgs.id && isNaN(tableArgs.id) ? null : tableArgs.id;
-    const userId =
-      tableArgs.userId && isNaN(tableArgs.userId) ? null : tableArgs.userId;
-    const status = tableArgs.status;
-    const minPrice =
-      tableArgs.minPrice && isNaN(tableArgs.minPrice)
-        ? null
-        : tableArgs.minPrice;
-    const maxPrice =
-      tableArgs.maxPrice && isNaN(tableArgs.maxPrice)
-        ? null
-        : tableArgs.maxPrice;
-    const dateFrom = tableArgs.dateFrom;
-    const dateTo = tableArgs.dateTo;
+    const key = tableArgs.key;
     const newParams = new URLSearchParams();
     newParams.set("id", id !== null ? id.toString() : "");
-    newParams.set("userId", userId !== null ? userId.toString() : "");
-    newParams.set(
-      "status",
-      status !== null ? status.toString().toLowerCase() : ""
-    );
-    newParams.set("minPrice", minPrice !== null ? minPrice.toString() : "");
-    newParams.set("maxPrice", maxPrice !== null ? maxPrice.toString() : "");
-    newParams.set("dateFrom", dateFrom !== null ? dateFrom.toUTCString() : "");
-    newParams.set("dateTo", dateTo !== null ? dateTo.toUTCString() : "");
+    newParams.set("key", key !== null ? key.toString() : "");
+
     router.push(`?${newParams.toString()}`);
   }
 
@@ -168,117 +140,20 @@ export function OrdersTableWithFilters({
             />
           </div>
           <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="userId">User ID</Label>
+            <Label htmlFor="key">Key</Label>
             <Input
-              id="userId"
-              value={tableArgs.userId ?? ""}
+              id="key"
+              value={tableArgs.key ?? ""}
               onChange={(e) => {
-                const parsedUserId = parseInt(e.target.value, 10);
-                if (!isNaN(parsedUserId)) {
+                const k = e.target.value;
+                if (k !== null) {
                   setTableArgs((prev) => ({
                     ...prev,
-                    userId: parsedUserId,
+                    key: k,
                   }));
                 }
               }}
-              placeholder="type a slug to filter by"
-            />
-          </div>
-          <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              name="status"
-              onValueChange={(v) => {
-                setTableArgs((prev) => ({
-                  ...prev,
-                  status: v === "null" ? null : (v as OrderStatus),
-                }));
-              }}
-              value={tableArgs.status === null ? "null" : tableArgs.status}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="null">All</SelectItem>
-                {Object.values(OrderStatus).map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="minPrice">Min Price (in cents)</Label>
-            <Input
-              id="minPrice"
-              value={tableArgs.minPrice ?? ""}
-              onChange={(e) => {
-                const parsedMinPrice = parseInt(e.target.value, 10);
-                if (!isNaN(parsedMinPrice)) {
-                  setTableArgs((prev) => ({
-                    ...prev,
-                    minPrice: parsedMinPrice,
-                  }));
-                }
-              }}
-              placeholder="Minimum price"
-            />
-          </div>
-          <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="maxPrice">Max Price (in cents)</Label>
-            <Input
-              id="maxPrice"
-              value={tableArgs.maxPrice ?? ""}
-              onChange={(e) => {
-                const parsedMaxPrice = parseInt(e.target.value, 10);
-                if (!isNaN(parsedMaxPrice)) {
-                  setTableArgs((prev) => ({
-                    ...prev,
-                    maxPrice: parsedMaxPrice,
-                  }));
-                }
-              }}
-              placeholder="Maximum price"
-            />
-          </div>
-          <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="dateFrom">Date From</Label>
-            <Input
-              id="dateFrom"
-              type="date"
-              value={tableArgs.dateFrom ? tableArgs.dateFrom.toUTCString() : ""}
-              onChange={(e) => {
-                const newDate = new Date(e.target.value);
-                try {
-                  const parsedDate = z.date().parse(newDate);
-                  setTableArgs((prev) => ({
-                    ...prev,
-                    dateFrom: parsedDate,
-                  }));
-                } catch {}
-              }}
-              placeholder="Date from"
-            />
-          </div>
-          <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="dateTo">Date To</Label>
-            <Input
-              id="dateTo"
-              type="date"
-              value={tableArgs.dateTo ? tableArgs.dateTo.toUTCString() : ""}
-              onChange={(e) => {
-                const newDate = new Date(e.target.value);
-                try {
-                  const parsedDate = z.date().parse(newDate);
-                  setTableArgs((prev) => ({
-                    ...prev,
-                    dateTo: parsedDate,
-                  }));
-                } catch {}
-              }}
-              placeholder="Date to"
+              placeholder="type a key to filter by"
             />
           </div>
         </div>
@@ -330,40 +205,26 @@ export function OrdersTableWithFilters({
                 {[
                   {
                     label: "ID",
-                    key: "id",
-                    isSortByPossible: sortableColumns.includes("id"),
+                    key: "ID",
                   },
                   {
-                    label: "User ID",
-                    key: "userId",
-                    isSortByPossible: sortableColumns.includes("userId"),
-                  },
-                  {
-                    label: "Status",
-                    key: "status",
-                    isSortByPossible: sortableColumns.includes("status"),
-                  },
-                  {
-                    label: "Total",
-                    key: "totalInCents",
-                    isSortByPossible: sortableColumns.includes("totalInCents"),
+                    label: "Key",
+                    key: "KEY",
                   },
                   {
                     label: "Created At",
-                    key: "createdAt",
-                    isSortByPossible: sortableColumns.includes("createdAt"),
+                    key: "CREATED_AT",
                   },
                   {
                     label: "Updated At",
-                    key: "updatedAt",
-                    isSortByPossible: sortableColumns.includes("updatedAt"),
+                    key: "UPDATED_AT",
                   },
                 ].map((column) => (
                   <TableHead
                     className="p-4"
                     key={column.key}
                     onClick={() => {
-                      if (!column.isSortByPossible) return;
+                      if (!sortableColumns.includes(column.key)) return;
                       const nextIsAscending =
                         initialSortingArgs.sortBy === null
                           ? true
@@ -383,7 +244,7 @@ export function OrdersTableWithFilters({
                     <div
                       className={cn("flex gap-x-1 justify-start items-center", {
                         "cursor-pointer hover:underline":
-                          column.isSortByPossible,
+                          sortableColumns.includes(column.key),
                       })}
                     >
                       <span>{column.label}</span>
@@ -403,24 +264,18 @@ export function OrdersTableWithFilters({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((order) => (
-                <TableRow key={order.id} className="text-left px-2 py-1">
-                  <TableCell className="px-4 py-2">{order.id}</TableCell>
-                  <TableCell className="px-4 py-2">{order.userId}</TableCell>
+              {data.map((keys) => (
+                <TableRow key={keys.id} className="text-left px-2 py-1">
+                  <TableCell className="px-4 py-2">{keys.id}</TableCell>
+                  <TableCell className="px-4 py-2">{keys.key}</TableCell>
                   <TableCell className="px-4 py-2">
-                    {<OrderStatusLabel status={order.status} />}
+                    {new Date(keys.updatedAt).toLocaleString().split(",")[0]}
                   </TableCell>
                   <TableCell className="px-4 py-2">
-                    {(order.totalInCents / 100).toFixed(2)} €
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {new Date(order.updatedAt).toLocaleString().split(",")[0]}
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {new Date(order.createdAt).toLocaleString().split(",")[0]}
+                    {new Date(keys.createdAt).toLocaleString().split(",")[0]}
                   </TableCell>
                   <TableCell className="px-4 py-2 flex justify-end">
-                    <Link href={`/admin/orders/order-detail/${order.id}`}>
+                    <Link href={`/admin/attribute-keys/key-detail/${keys.id}`}>
                       <Button variant="secondary" size="sm">
                         View Details
                       </Button>
@@ -431,7 +286,7 @@ export function OrdersTableWithFilters({
             </TableBody>
           </Table>
         ) : (
-          <div className="py-4">No orders found.</div>
+          <div className="py-4">No attribute keys found.</div>
         )}
       </div>
     </div>

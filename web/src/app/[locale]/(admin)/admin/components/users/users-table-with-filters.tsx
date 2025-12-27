@@ -29,6 +29,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronUpIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { UpdateUserRoleSheetForm } from "./update-user-role-sheet-form";
 
 type Props = {
   initialPagingArgs: PagingArgs;
@@ -309,11 +310,10 @@ export function UsersTableWithFilters({
                     {new Date(user.updatedAt).toLocaleString().split(",")[0]}
                   </TableCell>
                   <TableCell className="px-4 py-2 flex justify-end">
-                    <Link href={`/admin/users/${user.id}`}>
-                      <Button variant="secondary" size="sm">
-                        View Details
-                      </Button>
-                    </Link>
+                    <UpdateUserRoleSheetForm
+                      userId={user.id}
+                      role={user.role}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

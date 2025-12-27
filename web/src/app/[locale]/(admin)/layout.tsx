@@ -22,7 +22,5 @@ export default function AdminLayout({
     }
   }, [session, isError, router, locale, isPending]);
 
-  if (!session) return null;
-
   return <>{children}</>;
 }

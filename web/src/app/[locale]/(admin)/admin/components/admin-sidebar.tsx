@@ -15,6 +15,7 @@ import { Link } from "@/i18n/navigation";
 import { SidebarUser } from "./sidebar-user";
 import {
   BadgeEuroIcon,
+  KeyIcon,
   LanguagesIcon,
   Layers2Icon,
   ShoppingBagIcon,
@@ -44,19 +45,20 @@ const generalNavItems: NavItem[] = [
     href: "/admin/users",
     icon: UserCog2Icon,
   },
-];
-
-const storeNavItems: NavItem[] = [
-  {
-    label: "Products",
-    href: "/admin/products",
-    icon: ShoppingBagIcon,
-  },
   {
     label: "Orders",
     href: "/admin/orders",
     icon: BadgeEuroIcon,
   },
+];
+
+const productsNavItems: NavItem[] = [
+  {
+    label: "Products",
+    href: "/admin/products",
+    icon: ShoppingBagIcon,
+  },
+  { label: "Attributes", href: "/admin/attribute-keys", icon: KeyIcon },
 ];
 
 export async function AdminSidebar() {
@@ -98,9 +100,9 @@ export async function AdminSidebar() {
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Store</SidebarGroupLabel>
+          <SidebarGroupLabel>Products</SidebarGroupLabel>
           <SidebarMenu>
-            {storeNavItems.map((item) => (
+            {productsNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href}>
                   <SidebarMenuButton tooltip={item.label}>

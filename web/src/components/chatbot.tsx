@@ -14,7 +14,6 @@ import { getProductIdBySlugAction } from "@/app/data-access-layer/product.querie
 import { LlmTaskStatus } from "@/graphql/graphql";
 import { getImageSrc } from "@/app/lib/utils";
 import { ProductCard } from "./prdouct-cart";
-import { set } from "zod";
 
 export function Chatbot() {
   const session = useSession();
