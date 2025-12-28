@@ -17,6 +17,10 @@ import { GraphqlAppContext } from 'src/app.module';
 import { ProductVariantAttributeTranslation } from './entities/product-variant-attribute-translation.entity';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { GraphQLVoid } from 'graphql-scalars';
+import { CreateProductVariantAttributeTranslationInput } from './dto/create-product-variant-attribute-translation.input';
+import { UpdateProductVariantAttributeTranslationInput } from './dto/update-product-variant-attribute-translation.input';
+import { ProductVariant } from 'src/product-variants/entities/product-variant.entity';
 
 @Resolver(() => ProductVariantAttribute)
 export class ProductVariantAttributesResolver {
@@ -57,9 +61,12 @@ export class ProductVariantAttributesResolver {
   }
 
   @UseGuards(AdminGuard)
-  @Mutation(() => ProductVariantAttribute)
-  removeProductVariantAttribute(@Args('id', { type: () => Int }) id: number) {
-    return this.productVariantAttributesService.remove(id);
+  @Mutation(() => GraphQLVoid)
+  async removeProductVariantAttribute(
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    await this.productVariantAttributesService.remove(id);
+    return GraphQLVoid;
   }
 
   @ResolveField(() => ProductVariantAttributeKey, {
@@ -97,5 +104,39 @@ export class ProductVariantAttributesResolver {
     return ctx.loaders.productVariantAttributeAllTranslationsLoader.load(
       productVariantAttribute.id,
     );
+  }
+
+  @ResolveField(() => [ProductVariant], { name: 'productVariants' })
+  async resolveProductVariants(
+    @Parent() productVariantAttribute: ProductVariantAttribute,
+    @Context() ctx: GraphqlAppContext,
+  ) {
+    return ctx.loaders.productVariantsByAttributeIdLoader.load(
+      productVariantAttribute.id,
+    );
+  }
+  @UseGuards(AdminGuard)
+  @Mutation(() => GraphQLVoid)
+  async removeProductVariantAttributeTranslation(
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    await this.productVariantAttributesService.deleteTranslation(id);
+    return GraphQLVoid;
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductVariantAttributeTranslation)
+  async createProductVariantAttributeTranslation(
+    @Args('input') input: CreateProductVariantAttributeTranslationInput,
+  ) {
+    return this.productVariantAttributesService.createTranslation(input);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductVariantAttributeTranslation)
+  async updateProductVariantAttributeTranslation(
+    @Args('input') input: UpdateProductVariantAttributeTranslationInput,
+  ) {
+    return this.productVariantAttributesService.updateTranslation(input);
   }
 }

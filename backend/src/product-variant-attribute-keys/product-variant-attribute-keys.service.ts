@@ -93,8 +93,20 @@ export class ProductVariantAttributeKeysService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productVariantAttributeKey`;
+  async remove(id: number) {
+    const attributesWithKey = await this.prisma.attribute.count({
+      where: {
+        attributeKeyId: id,
+      },
+    });
+
+    if (attributesWithKey > 0) {
+      throw new Error('...');
+    }
+
+    return await this.prisma.attributeKey.delete({
+      where: { id: id },
+    });
   }
 
   async getTranslationsByBatch(locale: string, keyIds: number[]) {

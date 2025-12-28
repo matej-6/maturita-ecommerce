@@ -61,7 +61,12 @@ export const AdminAttributeKeyDetailsPageQueryDocument = graphql(`
       updatedAt
       attributes {
         id
-        productVariantId
+        value
+        productVariants {
+          id
+          sku
+          productId
+        }
         translations {
           id
           locale
@@ -69,9 +74,15 @@ export const AdminAttributeKeyDetailsPageQueryDocument = graphql(`
         }
       }
       translations {
+        id
         keyTranslation
         locale
       }
+    }
+    locales {
+      code
+      name
+      flag
     }
   }
 `);

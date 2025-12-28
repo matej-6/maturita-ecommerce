@@ -172,7 +172,7 @@ export default async function OrdersPage({ searchParams }: Props) {
                   totalInCents: p.node.totalInCents,
                   createdAt: new Date(p.node.createdAt),
                   updatedAt: new Date(p.node.updatedAt),
-                  userId: p.node.userId,
+                  userId: p.node.userId ?? undefined,
                 })) || null
               : null
           }

@@ -72,6 +72,8 @@ export class DataloaderService {
       this.createCartItemProductVariantLoader();
     const orderItemProductVariantLoader =
       this.createOrderItemProductVariantLoader();
+    const productVariantsByAttributeIdLoader =
+      this.createProductVariantsByAttributeIdLoader();
     return {
       subcategoriesLoader,
       categoryTranslationLoader,
@@ -91,6 +93,7 @@ export class DataloaderService {
       productVariantProductLoader,
       cartItemProductVariantLoader,
       orderItemProductVariantLoader,
+      productVariantsByAttributeIdLoader,
     };
   }
 
@@ -286,6 +289,16 @@ export class DataloaderService {
       async (orderItemIds: number[]) => {
         return await this.orderItemsService.getProductVariantsByBatch(
           orderItemIds,
+        );
+      },
+    );
+  }
+
+  private createProductVariantsByAttributeIdLoader() {
+    return new DataLoader<number, ProductVariant[]>(
+      async (attributeIds: number[]) => {
+        return await this.productVariantAttributesService.getProductVariantsByBatch(
+          attributeIds,
         );
       },
     );

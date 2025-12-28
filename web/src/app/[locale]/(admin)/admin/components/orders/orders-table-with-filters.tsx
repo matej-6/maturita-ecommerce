@@ -41,7 +41,7 @@ type Props = {
   data:
     | {
         id: number;
-        userId: number;
+        userId?: number;
         status: OrderStatus;
         totalInCents: number;
         createdAt: Date;
@@ -406,7 +406,9 @@ export function OrdersTableWithFilters({
               {data.map((order) => (
                 <TableRow key={order.id} className="text-left px-2 py-1">
                   <TableCell className="px-4 py-2">{order.id}</TableCell>
-                  <TableCell className="px-4 py-2">{order.userId}</TableCell>
+                  <TableCell className="px-4 py-2">
+                    {order.userId ?? "N/A"}
+                  </TableCell>
                   <TableCell className="px-4 py-2">
                     {<OrderStatusLabel status={order.status} />}
                   </TableCell>

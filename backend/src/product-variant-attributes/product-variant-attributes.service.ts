@@ -103,8 +103,24 @@ export class ProductVariantAttributesService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productVariantAttribute`;
+  async remove(id: number) {
+    const productsUsingAttribute = await this.prisma.productVariant.count({
+      where: {
+        Attributes: {
+          some: {
+            id,
+          },
+        },
+      },
+    });
+
+    if (productsUsingAttribute > 0) {
+      throw new BadRequestException('...');
+    }
+
+    return this.prisma.attribute.delete({
+      where: { id },
+    });
   }
 
   async getAttributeKeysByBatch(attributeIds: number[]) {
@@ -152,6 +168,24 @@ export class ProductVariantAttributesService {
     return attributeIds.map((id) =>
       translations.filter((t) => t.attributeId === id),
     );
+  }
+
+  async getProductVariantsByBatch(attributeIds: number[]) {
+    const attributeWithVariants = await this.prisma.attribute.findMany({
+      where: {
+        id: {
+          in: attributeIds,
+        },
+      },
+      include: {
+        ProductVariants: true,
+      },
+    });
+
+    return attributeIds.map((id) => {
+      const attribute = attributeWithVariants.find((a) => a.id === id);
+      return attribute ? attribute.ProductVariants : [];
+    });
   }
 
   async findAllUsedInCategory(categoryId: number) {
@@ -271,6 +305,23 @@ export class ProductVariantAttributesService {
         locale: locale.code,
         value: input.valueTranslation,
       },
+    });
+  }
+
+  async deleteTranslation(id: number) {
+    const translationToDelete =
+      await this.prisma.attributeTranslation.findUnique({
+        where: { id },
+      });
+
+    if (!translationToDelete) {
+      throw new BadRequestException(
+        'product-variant-attributes.service.translationNotFound',
+      );
+    }
+
+    return this.prisma.attributeTranslation.delete({
+      where: { id },
     });
   }
 }

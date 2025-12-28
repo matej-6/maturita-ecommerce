@@ -10,9 +10,6 @@ export class ProductVariantAttribute implements Partial<DbAttribute> {
   @Field(() => Int)
   attributeKeyId: number;
 
-  @Field(() => Int, { nullable: true })
-  productVariantId: number | null;
-
   @Field(() => String)
   value: string;
 }

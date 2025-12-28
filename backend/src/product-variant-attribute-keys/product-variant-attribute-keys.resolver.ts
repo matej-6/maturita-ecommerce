@@ -25,6 +25,9 @@ import {
   AttributeKeyFindAllQueryArgs,
   AttributeKeySortingArgs,
 } from './product-variant-attributes-keys.args';
+import { CreateProductVariantAttributeKeyTranslationInput } from './dto/create-product-variant-attribute-key-translation.input';
+import { UpdateProductVariantAttributeKeyTranslationInput } from './dto/update-product-variant-attribute-key-translation.input';
+import { GraphQLVoid } from 'graphql-scalars';
 
 @Resolver(() => ProductVariantAttributeKey)
 export class ProductVariantAttributeKeysResolver {
@@ -86,11 +89,12 @@ export class ProductVariantAttributeKeysResolver {
     );
   }
 
-  @Mutation(() => ProductVariantAttributeKey)
-  removeProductVariantAttributeKey(
+  @Mutation(() => GraphQLVoid)
+  async removeProductVariantAttributeKey(
     @Args('id', { type: () => Int }) id: number,
   ) {
-    return this.productVariantAttributeKeysService.remove(id);
+    await this.productVariantAttributeKeysService.remove(id);
+    return GraphQLVoid;
   }
 
   @ResolveField(() => String, { name: 'translatedKey', nullable: true })
@@ -124,5 +128,30 @@ export class ProductVariantAttributeKeysResolver {
     return ctx.loaders.attributesByKeyLoader.load(
       productVariantAttributeKey.id,
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductVariantAttributeKeyTranslation)
+  createProductVariantAttributeKeyTranslation(
+    @Args('input') input: CreateProductVariantAttributeKeyTranslationInput,
+  ) {
+    return this.productVariantAttributeKeysService.createTranslation(input);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => ProductVariantAttributeKeyTranslation)
+  updateProductVariantAttributeKeyTranslation(
+    @Args('input') input: UpdateProductVariantAttributeKeyTranslationInput,
+  ) {
+    return this.productVariantAttributeKeysService.updateTranslation(input);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => GraphQLVoid)
+  async removeProductVariantAttributeKeyTranslation(
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    await this.productVariantAttributeKeysService.deleteTranslation(id);
+    return GraphQLVoid;
   }
 }

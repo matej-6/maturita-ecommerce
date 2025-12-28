@@ -473,7 +473,48 @@ export default async function ProductDetailPage({
           })}
         </div>
         <div className="flex items-center justify-start gap-x-2">
-          <Button className="w-fit">Add Variant</Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button className="w-fit">Add Variant</Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Add Variant</SheetTitle>
+              </SheetHeader>
+              <div className="grow flex flex-col">
+                <div className="flex-1 px-4">
+                  <ProductVariantForm
+                    mode="create"
+                    productId={product.id}
+                    allAttributes={attributeKeys.reduce(
+                      (acc, val) => {
+                        val.attributes.forEach((a) =>
+                          acc.push({
+                            id: a.id,
+                            key: val.key,
+                            keyId: val.id,
+                            value: a.value,
+                          })
+                        );
+                        return acc;
+                      },
+                      [] as {
+                        id: number;
+                        key: string;
+                        keyId: number;
+                        value: string;
+                      }[]
+                    )}
+                  />
+                </div>
+                <SheetFooter>
+                  <SheetClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </SheetClose>
+                </SheetFooter>
+              </div>
+            </SheetContent>
+          </Sheet>
           <Sheet>
             <SheetTrigger asChild>
               <Button className="w-fit" variant={"secondary"}>
@@ -530,35 +571,47 @@ export default async function ProductDetailPage({
       <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
       <div className="flex flex-col gap-y-8">
         <h2 className="font-medium">Embeddings</h2>
-        <RegenerateAllEmbeddingsButton embeddingType="embedding" />
+        <div>
+          <RegenerateAllEmbeddingsButton embeddingType="embedding" />
+        </div>
         <div className="flex flex-wrap gap-8">
-          {product.embeddings.map((embedding) => (
-            <Card key={embedding.id} className="p-2! w-[196px]">
-              <div className="text-lg font-semibold">{embedding.lang}</div>
-              <div className="flex flex-wrap">
-                <div className="-space-y-1">
-                  <span className="text-muted-foreground font-bold text-sm">
-                    Created At
+          {product.embeddings.map((embedding) => {
+            const { flag, name } =
+              locales.find((l) => l.code === embedding.lang) || {};
+
+            return (
+              <Card key={embedding.id} className="p-2! w-[196px]">
+                <div>
+                  {flag}{" "}
+                  <span className="text-sm text-muted-foreground">
+                    ({name || embedding.lang})
                   </span>
-                  <div>{new Date(embedding.createdAt).toLocaleString()}</div>
                 </div>
-                <div className="-space-y-1">
-                  <span className="text-muted-foreground font-bold text-sm">
-                    Status
-                  </span>
-                  <div>{embedding.status}</div>
+                <div className="flex flex-wrap">
+                  <div className="-space-y-1">
+                    <span className="text-muted-foreground font-bold text-sm">
+                      Created At
+                    </span>
+                    <div>{new Date(embedding.createdAt).toLocaleString()}</div>
+                  </div>
+                  <div className="-space-y-1">
+                    <span className="text-muted-foreground font-bold text-sm">
+                      Status
+                    </span>
+                    <div>{embedding.status}</div>
+                  </div>
                 </div>
-              </div>
-              <GenerateEmbeddingsButton
-                productId={product.id}
-                lang={embedding.lang}
-                type="regenerate"
-                embeddingType="embedding"
-              />
-            </Card>
-          ))}
+                <GenerateEmbeddingsButton
+                  productId={product.id}
+                  lang={embedding.lang}
+                  type="regenerate"
+                  embeddingType="embedding"
+                />
+              </Card>
+            );
+          })}
           {product.missingEmbeddingLanguages.map((lang) => (
-            <Card key={lang} className="p-2! w-[196px]">
+            <Card key={lang} className="p-2! sm:p-4! w-[196px]">
               <div className="text-lg font-semibold">{lang}</div>
               <div>No embedding generated yet.</div>
               <GenerateEmbeddingsButton
@@ -573,33 +626,45 @@ export default async function ProductDetailPage({
       </div>
       <div className="flex flex-col gap-y-8">
         <h2 className="font-medium">Content Embeddings</h2>
-        <RegenerateAllEmbeddingsButton embeddingType="contentEmbedding" />
+        <div>
+          <RegenerateAllEmbeddingsButton embeddingType="contentEmbedding" />
+        </div>
         <div className="flex flex-wrap gap-8">
-          {product.contentEmbeddings.map((embedding) => (
-            <Card key={embedding.id} className="p-2! w-[196px]">
-              <div className="text-lg font-semibold">{embedding.lang}</div>
-              <div className="flex flex-wrap">
-                <div className="-space-y-1">
-                  <span className="text-muted-foreground font-bold text-sm">
-                    Created At
+          {product.contentEmbeddings.map((embedding) => {
+            const { flag, name } =
+              locales.find((l) => l.code === embedding.lang) || {};
+
+            return (
+              <Card key={embedding.id} className="p-2! sm:p-4! w-[196px]">
+                <div>
+                  {flag}{" "}
+                  <span className="text-sm text-muted-foreground">
+                    ({name || embedding.lang})
                   </span>
-                  <div>{new Date(embedding.createdAt).toLocaleString()}</div>
                 </div>
-                <div className="-space-y-1">
-                  <span className="text-muted-foreground font-bold text-sm">
-                    Status
-                  </span>
-                  <div>{embedding.status}</div>
+                <div className="flex flex-wrap">
+                  <div className="-space-y-1">
+                    <span className="text-muted-foreground font-bold text-sm">
+                      Created At
+                    </span>
+                    <div>{new Date(embedding.createdAt).toLocaleString()}</div>
+                  </div>
+                  <div className="-space-y-1">
+                    <span className="text-muted-foreground font-bold text-sm">
+                      Status
+                    </span>
+                    <div>{embedding.status}</div>
+                  </div>
                 </div>
-              </div>
-              <GenerateEmbeddingsButton
-                productId={product.id}
-                lang={embedding.lang}
-                type="regenerate"
-                embeddingType="contentEmbedding"
-              />
-            </Card>
-          ))}
+                <GenerateEmbeddingsButton
+                  productId={product.id}
+                  lang={embedding.lang}
+                  type="regenerate"
+                  embeddingType="contentEmbedding"
+                />
+              </Card>
+            );
+          })}
         </div>
         {product.missingContentEmbeddingLanguages.map((lang) => (
           <Card key={lang} className="p-2! w-[196px]">

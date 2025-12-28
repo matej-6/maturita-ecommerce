@@ -1,17 +1,11 @@
 "use server";
 
-import { getProductsPageData } from "@/app/data-access-layer/admin/product/queries";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
-import { ProductsTableWithFilters } from "../components/products/product-table-with-filters";
-import { AttributeKeySortingField, OrderStatus } from "@/graphql/graphql";
-import z from "zod";
+import { AttributeKeySortingField } from "@/graphql/graphql";
 import {
   PagingArgs,
   SortingArgs,
   FilterArgs,
 } from "@/app/data-access-layer/admin/product-variant-attribute/queries";
-import { OrdersTableWithFilters } from "../components/orders/orders-table-with-filters";
 import { getPagedAttributeKeysQuery } from "@/app/data-access-layer/admin/product-variant-attribute/actions";
 import { AttributeKeysTableWithFilters } from "../components/attribute-keys/attribute-keys-table-with-filters";
 

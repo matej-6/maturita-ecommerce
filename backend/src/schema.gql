@@ -135,6 +135,18 @@ input CreateProductVariantAttributeKeyInput {
   key: String!
 }
 
+input CreateProductVariantAttributeKeyTranslationInput {
+  keyId: Int!
+  keyTranslation: String!
+  localeCode: String!
+}
+
+input CreateProductVariantAttributeTranslationInput {
+  attributeId: Int!
+  locale: String!
+  valueTranslation: String!
+}
+
 input CreateProductVariantInput {
   """List of Product Variant Attribute IDs"""
   attributes: [Int!]!
@@ -236,6 +248,8 @@ type Mutation {
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
   createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
   createProductVariantAttributeKey(createProductVariantAttributeKeyInput: CreateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
+  createProductVariantAttributeKeyTranslation(input: CreateProductVariantAttributeKeyTranslationInput!): ProductVariantAttributeKeyTranslation!
+  createProductVariantAttributeTranslation(input: CreateProductVariantAttributeTranslationInput!): ProductVariantAttributeTranslation!
   deleteAccount: Void
   deleteAvatar: Void!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
@@ -250,8 +264,10 @@ type Mutation {
   removeCategory(id: Int!): Category!
   removeProduct(id: Int!): Product!
   removeProductVariant(id: Int!): Int!
-  removeProductVariantAttribute(id: Int!): ProductVariantAttribute!
-  removeProductVariantAttributeKey(id: Int!): ProductVariantAttributeKey!
+  removeProductVariantAttribute(id: Int!): Void!
+  removeProductVariantAttributeKey(id: Int!): Void!
+  removeProductVariantAttributeKeyTranslation(id: Int!): Void!
+  removeProductVariantAttributeTranslation(id: Int!): Void!
   removeProductVariantImage(id: Int!): Int!
   removeUser(id: ID!): User!
   retryPendingPayment(orderId: Int!): String!
@@ -266,6 +282,8 @@ type Mutation {
   updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
   updateProductVariantAttribute(updateProductVariantAttributeInput: UpdateProductVariantAttributeInput!): ProductVariantAttribute!
   updateProductVariantAttributeKey(updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
+  updateProductVariantAttributeKeyTranslation(input: UpdateProductVariantAttributeKeyTranslationInput!): ProductVariantAttributeKeyTranslation!
+  updateProductVariantAttributeTranslation(input: UpdateProductVariantAttributeTranslationInput!): ProductVariantAttributeTranslation!
   updateUser(input: UpdateUserInput!): User!
   updateUserRole(newRole: Role!, userId: Int!): Void!
   uploadAvatar(base64: String!, mimeType: String!): Void!
@@ -448,7 +466,7 @@ type ProductVariantAttribute {
   attributeKeyId: Int!
   id: Int!
   key: ProductVariantAttributeKey
-  productVariantId: Int
+  productVariants: [ProductVariant!]!
   translatedValue: String
   translations: [ProductVariantAttributeTranslation!]!
   value: String!
@@ -642,6 +660,18 @@ input UpdateProductVariantAttributeInput {
 input UpdateProductVariantAttributeKeyInput {
   id: Int!
   key: String
+}
+
+input UpdateProductVariantAttributeKeyTranslationInput {
+  id: Int!
+  keyTranslation: String!
+  localeCode: String!
+}
+
+input UpdateProductVariantAttributeTranslationInput {
+  id: Int!
+  locale: String!
+  valueTranslation: String!
 }
 
 input UpdateProductVariantInput {

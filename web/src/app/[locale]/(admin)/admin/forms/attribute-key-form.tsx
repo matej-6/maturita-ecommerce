@@ -22,7 +22,7 @@ import {
 } from "../schemas/attribute-key-form-schema";
 import {
   createAttributeKeyAction,
-  editAttributeKeyAction,
+  updateAttributeKeyAction,
 } from "@/app/data-access-layer/admin/product-variant-attribute/actions";
 
 type AttributeKeyFormProps = {
@@ -56,7 +56,7 @@ export const AttributeKeyForm = ({
     mutationFn: async (data: productVariantAttributeKeyFormSchemaType) => {
       const res =
         mode === "edit"
-          ? await editAttributeKeyAction(keyId!, data, productId)
+          ? await updateAttributeKeyAction(keyId!, data, productId)
           : await createAttributeKeyAction(data, productId);
       if (!res.success) {
         const fieldErrorsMap = new Map();

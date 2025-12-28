@@ -159,6 +159,18 @@ export type CreateProductVariantAttributeKeyInput = {
   key: Scalars['String']['input'];
 };
 
+export type CreateProductVariantAttributeKeyTranslationInput = {
+  keyId: Scalars['Int']['input'];
+  keyTranslation: Scalars['String']['input'];
+  localeCode: Scalars['String']['input'];
+};
+
+export type CreateProductVariantAttributeTranslationInput = {
+  attributeId: Scalars['Int']['input'];
+  locale: Scalars['String']['input'];
+  valueTranslation: Scalars['String']['input'];
+};
+
 export type CreateProductVariantInput = {
   /** List of Product Variant Attribute IDs */
   attributes: Array<Scalars['Int']['input']>;
@@ -250,6 +262,8 @@ export type Mutation = {
   createProductVariant: ProductVariant;
   createProductVariantAttribute: ProductVariantAttribute;
   createProductVariantAttributeKey: ProductVariantAttributeKey;
+  createProductVariantAttributeKeyTranslation: ProductVariantAttributeKeyTranslation;
+  createProductVariantAttributeTranslation: ProductVariantAttributeTranslation;
   deleteAccount?: Maybe<Scalars['Void']['output']>;
   deleteAvatar: Scalars['Void']['output'];
   deleteCategoryTranslation: Scalars['Int']['output'];
@@ -264,8 +278,10 @@ export type Mutation = {
   removeCategory: Category;
   removeProduct: Product;
   removeProductVariant: Scalars['Int']['output'];
-  removeProductVariantAttribute: ProductVariantAttribute;
-  removeProductVariantAttributeKey: ProductVariantAttributeKey;
+  removeProductVariantAttribute: Scalars['Void']['output'];
+  removeProductVariantAttributeKey: Scalars['Void']['output'];
+  removeProductVariantAttributeKeyTranslation: Scalars['Void']['output'];
+  removeProductVariantAttributeTranslation: Scalars['Void']['output'];
   removeProductVariantImage: Scalars['Int']['output'];
   removeUser: User;
   retryPendingPayment: Scalars['String']['output'];
@@ -280,6 +296,8 @@ export type Mutation = {
   updateProductVariant: ProductVariant;
   updateProductVariantAttribute: ProductVariantAttribute;
   updateProductVariantAttributeKey: ProductVariantAttributeKey;
+  updateProductVariantAttributeKeyTranslation: ProductVariantAttributeKeyTranslation;
+  updateProductVariantAttributeTranslation: ProductVariantAttributeTranslation;
   updateUser: User;
   updateUserRole: Scalars['Void']['output'];
   uploadAvatar: Scalars['Void']['output'];
@@ -364,6 +382,16 @@ export type MutationCreateProductVariantAttributeKeyArgs = {
 };
 
 
+export type MutationCreateProductVariantAttributeKeyTranslationArgs = {
+  input: CreateProductVariantAttributeKeyTranslationInput;
+};
+
+
+export type MutationCreateProductVariantAttributeTranslationArgs = {
+  input: CreateProductVariantAttributeTranslationInput;
+};
+
+
 export type MutationDeleteCategoryTranslationArgs = {
   categoryTranslationId: Scalars['Int']['input'];
 };
@@ -417,6 +445,16 @@ export type MutationRemoveProductVariantAttributeArgs = {
 
 
 export type MutationRemoveProductVariantAttributeKeyArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationRemoveProductVariantAttributeKeyTranslationArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationRemoveProductVariantAttributeTranslationArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -490,6 +528,16 @@ export type MutationUpdateProductVariantAttributeArgs = {
 
 export type MutationUpdateProductVariantAttributeKeyArgs = {
   updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput;
+};
+
+
+export type MutationUpdateProductVariantAttributeKeyTranslationArgs = {
+  input: UpdateProductVariantAttributeKeyTranslationInput;
+};
+
+
+export type MutationUpdateProductVariantAttributeTranslationArgs = {
+  input: UpdateProductVariantAttributeTranslationInput;
 };
 
 
@@ -708,7 +756,7 @@ export type ProductVariantAttribute = {
   attributeKeyId: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   key?: Maybe<ProductVariantAttributeKey>;
-  productVariantId?: Maybe<Scalars['Int']['output']>;
+  productVariants: Array<ProductVariant>;
   translatedValue?: Maybe<Scalars['String']['output']>;
   translations: Array<ProductVariantAttributeTranslation>;
   value: Scalars['String']['output'];
@@ -1044,6 +1092,18 @@ export type UpdateProductVariantAttributeKeyInput = {
   key?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateProductVariantAttributeKeyTranslationInput = {
+  id: Scalars['Int']['input'];
+  keyTranslation: Scalars['String']['input'];
+  localeCode: Scalars['String']['input'];
+};
+
+export type UpdateProductVariantAttributeTranslationInput = {
+  id: Scalars['Int']['input'];
+  locale: Scalars['String']['input'];
+  valueTranslation: Scalars['String']['input'];
+};
+
 export type UpdateProductVariantInput = {
   /** List of Product Variant Attribute IDs */
   attributes?: InputMaybe<Array<Scalars['Int']['input']>>;
@@ -1273,6 +1333,13 @@ export type EditAttributeKeyMutationMutationVariables = Exact<{
 
 export type EditAttributeKeyMutationMutation = { __typename?: 'Mutation', updateProductVariantAttributeKey: { __typename?: 'ProductVariantAttributeKey', id: number, key: string } };
 
+export type DeleteAttributeKeyMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteAttributeKeyMutationMutation = { __typename?: 'Mutation', removeProductVariantAttributeKey: any };
+
 export type CreateAttributeMutationMutationVariables = Exact<{
   attributeKeyId: Scalars['Int']['input'];
   attributeValue: Scalars['String']['input'];
@@ -1280,6 +1347,78 @@ export type CreateAttributeMutationMutationVariables = Exact<{
 
 
 export type CreateAttributeMutationMutation = { __typename?: 'Mutation', createProductVariantAttribute: { __typename?: 'ProductVariantAttribute', id: number } };
+
+export type UpdateAttributeMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  attributeValue: Scalars['String']['input'];
+}>;
+
+
+export type UpdateAttributeMutationMutation = { __typename?: 'Mutation', updateProductVariantAttribute: { __typename?: 'ProductVariantAttribute', id: number } };
+
+export type DeleteAttributeMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteAttributeMutationMutation = { __typename?: 'Mutation', removeProductVariantAttribute: any };
+
+export type CreateAttributeKeyTranslationMutationMutationVariables = Exact<{
+  attributeKeyId: Scalars['Int']['input'];
+  keyTranslation: Scalars['String']['input'];
+  locale: Scalars['String']['input'];
+}>;
+
+
+export type CreateAttributeKeyTranslationMutationMutation = { __typename?: 'Mutation', createProductVariantAttributeKeyTranslation: { __typename?: 'ProductVariantAttributeKeyTranslation', id: number } };
+
+export type DeleteAttributeKeyTranslationMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteAttributeKeyTranslationMutationMutation = { __typename?: 'Mutation', removeProductVariantAttributeKeyTranslation: any };
+
+export type DeleteAttributeTranslationMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteAttributeTranslationMutationMutation = { __typename?: 'Mutation', removeProductVariantAttributeTranslation: any };
+
+export type UpdateAttributeKeyTranslationMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  keyTranslation: Scalars['String']['input'];
+  locale: Scalars['String']['input'];
+}>;
+
+
+export type UpdateAttributeKeyTranslationMutationMutation = { __typename?: 'Mutation', updateProductVariantAttributeKeyTranslation: { __typename?: 'ProductVariantAttributeKeyTranslation', id: number } };
+
+export type CreateProductVariantAttributeTranslationMutationVariables = Exact<{
+  attributeId: Scalars['Int']['input'];
+  valueTranslation: Scalars['String']['input'];
+  locale: Scalars['String']['input'];
+}>;
+
+
+export type CreateProductVariantAttributeTranslationMutation = { __typename?: 'Mutation', createProductVariantAttributeTranslation: { __typename?: 'ProductVariantAttributeTranslation', id: number } };
+
+export type UpdateProductVariantAttributeTranslationMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  valueTranslation: Scalars['String']['input'];
+  locale: Scalars['String']['input'];
+}>;
+
+
+export type UpdateProductVariantAttributeTranslationMutationMutation = { __typename?: 'Mutation', updateProductVariantAttributeTranslation: { __typename?: 'ProductVariantAttributeTranslation', id: number } };
+
+export type DeleteProductVariantAttributeTranslationMutationMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteProductVariantAttributeTranslationMutationMutation = { __typename?: 'Mutation', removeProductVariantAttributeTranslation: any };
 
 export type PagedAttributeKeysQueryQueryVariables = Exact<{
   cursor?: InputMaybe<Scalars['Int']['input']>;
@@ -1298,7 +1437,7 @@ export type AdminAttributeKeyDetailsPageQueryQueryVariables = Exact<{
 }>;
 
 
-export type AdminAttributeKeyDetailsPageQueryQuery = { __typename?: 'Query', productVariantAttributeKey: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, createdAt: any, updatedAt: any, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, productVariantId?: number | null, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', id: number, locale: string, value: string }> }>, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', keyTranslation: string, locale: string }> } };
+export type AdminAttributeKeyDetailsPageQueryQuery = { __typename?: 'Query', productVariantAttributeKey: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, createdAt: any, updatedAt: any, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, productVariants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, productId: number }>, translations: Array<{ __typename?: 'ProductVariantAttributeTranslation', id: number, locale: string, value: string }> }>, translations: Array<{ __typename?: 'ProductVariantAttributeKeyTranslation', id: number, keyTranslation: string, locale: string }> }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> };
 
 export type CreateProductMutationMutationVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -2151,6 +2290,11 @@ export const EditAttributeKeyMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EditAttributeKeyMutationMutation, EditAttributeKeyMutationMutationVariables>;
+export const DeleteAttributeKeyMutationDocument = new TypedDocumentString(`
+    mutation DeleteAttributeKeyMutation($id: Int!) {
+  removeProductVariantAttributeKey(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteAttributeKeyMutationMutation, DeleteAttributeKeyMutationMutationVariables>;
 export const CreateAttributeMutationDocument = new TypedDocumentString(`
     mutation CreateAttributeMutation($attributeKeyId: Int!, $attributeValue: String!) {
   createProductVariantAttribute(
@@ -2160,6 +2304,71 @@ export const CreateAttributeMutationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CreateAttributeMutationMutation, CreateAttributeMutationMutationVariables>;
+export const UpdateAttributeMutationDocument = new TypedDocumentString(`
+    mutation UpdateAttributeMutation($id: Int!, $attributeValue: String!) {
+  updateProductVariantAttribute(
+    updateProductVariantAttributeInput: {id: $id, value: $attributeValue}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateAttributeMutationMutation, UpdateAttributeMutationMutationVariables>;
+export const DeleteAttributeMutationDocument = new TypedDocumentString(`
+    mutation DeleteAttributeMutation($id: Int!) {
+  removeProductVariantAttribute(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteAttributeMutationMutation, DeleteAttributeMutationMutationVariables>;
+export const CreateAttributeKeyTranslationMutationDocument = new TypedDocumentString(`
+    mutation CreateAttributeKeyTranslationMutation($attributeKeyId: Int!, $keyTranslation: String!, $locale: String!) {
+  createProductVariantAttributeKeyTranslation(
+    input: {keyId: $attributeKeyId, keyTranslation: $keyTranslation, localeCode: $locale}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateAttributeKeyTranslationMutationMutation, CreateAttributeKeyTranslationMutationMutationVariables>;
+export const DeleteAttributeKeyTranslationMutationDocument = new TypedDocumentString(`
+    mutation DeleteAttributeKeyTranslationMutation($id: Int!) {
+  removeProductVariantAttributeKeyTranslation(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteAttributeKeyTranslationMutationMutation, DeleteAttributeKeyTranslationMutationMutationVariables>;
+export const DeleteAttributeTranslationMutationDocument = new TypedDocumentString(`
+    mutation DeleteAttributeTranslationMutation($id: Int!) {
+  removeProductVariantAttributeTranslation(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteAttributeTranslationMutationMutation, DeleteAttributeTranslationMutationMutationVariables>;
+export const UpdateAttributeKeyTranslationMutationDocument = new TypedDocumentString(`
+    mutation UpdateAttributeKeyTranslationMutation($id: Int!, $keyTranslation: String!, $locale: String!) {
+  updateProductVariantAttributeKeyTranslation(
+    input: {id: $id, keyTranslation: $keyTranslation, localeCode: $locale}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateAttributeKeyTranslationMutationMutation, UpdateAttributeKeyTranslationMutationMutationVariables>;
+export const CreateProductVariantAttributeTranslationDocument = new TypedDocumentString(`
+    mutation CreateProductVariantAttributeTranslation($attributeId: Int!, $valueTranslation: String!, $locale: String!) {
+  createProductVariantAttributeTranslation(
+    input: {attributeId: $attributeId, valueTranslation: $valueTranslation, locale: $locale}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateProductVariantAttributeTranslationMutation, CreateProductVariantAttributeTranslationMutationVariables>;
+export const UpdateProductVariantAttributeTranslationMutationDocument = new TypedDocumentString(`
+    mutation UpdateProductVariantAttributeTranslationMutation($id: Int!, $valueTranslation: String!, $locale: String!) {
+  updateProductVariantAttributeTranslation(
+    input: {id: $id, valueTranslation: $valueTranslation, locale: $locale}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateProductVariantAttributeTranslationMutationMutation, UpdateProductVariantAttributeTranslationMutationMutationVariables>;
+export const DeleteProductVariantAttributeTranslationMutationDocument = new TypedDocumentString(`
+    mutation DeleteProductVariantAttributeTranslationMutation($id: Int!) {
+  removeProductVariantAttributeTranslation(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteProductVariantAttributeTranslationMutationMutation, DeleteProductVariantAttributeTranslationMutationMutationVariables>;
 export const PagedAttributeKeysQueryDocument = new TypedDocumentString(`
     query PagedAttributeKeysQuery($cursor: Int, $pageSize: Int!, $id: Int, $key: String, $ascending: Boolean, $sortBy: AttributeKeySortingField) {
   findAllPaginatedProductVariantAttributeKeys(
@@ -2196,7 +2405,12 @@ export const AdminAttributeKeyDetailsPageQueryDocument = new TypedDocumentString
     updatedAt
     attributes {
       id
-      productVariantId
+      value
+      productVariants {
+        id
+        sku
+        productId
+      }
       translations {
         id
         locale
@@ -2204,9 +2418,15 @@ export const AdminAttributeKeyDetailsPageQueryDocument = new TypedDocumentString
       }
     }
     translations {
+      id
       keyTranslation
       locale
     }
+  }
+  locales {
+    code
+    name
+    flag
   }
 }
     `) as unknown as TypedDocumentString<AdminAttributeKeyDetailsPageQueryQuery, AdminAttributeKeyDetailsPageQueryQueryVariables>;
