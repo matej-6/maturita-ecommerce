@@ -239,7 +239,6 @@ model Order {
   orderItems            OrderItem[]
   StripeSessionId       String?
   StripePaymentIntentId String?
-  userNote              String?               @db.LongText
 
   @@index([userId])
   @@index([StripeSessionId])

@@ -21,9 +21,6 @@ export class Order implements Partial<DbOrder> {
 
   @Field(() => Int, { nullable: true })
   userId: number | null;
-
-  @Field(() => String, { nullable: true })
-  userNote?: string | null;
 }
 
 registerEnumType(OrderStatus, {
