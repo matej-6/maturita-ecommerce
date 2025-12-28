@@ -1,5 +1,7 @@
 {
   "service": {
+    "productNotFound": "The product you're trying to access doesn't exist.",
+    "productVariantNotFound": "The product variant you're trying to access doesn't exist.",
     "update": {
       "notFound": "The product variant you're trying to update doesn't exist."
     },
@@ -9,6 +11,7 @@
     "addImage": {
       "productVariantNotFound": "The product variant you're trying to add an image to doesn't exist."
     },
-    "imageNotFound": "The product image with that ID doesn't exist."
+    "imageNotFound": "The product image with that ID doesn't exist.",
+    "attributeNotFound": "The product variant attribute with that ID doesn't exist."
   }
 }

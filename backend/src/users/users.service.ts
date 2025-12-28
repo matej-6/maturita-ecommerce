@@ -15,6 +15,7 @@ import { PaginationArgs } from 'src/lib/pagination.args';
 import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { PaginatedUser } from './entities/user.entity';
+import { ERROR } from 'src/errors';
 
 @Injectable()
 export class UsersService {
@@ -26,8 +27,11 @@ export class UsersService {
     try {
       hashedPassword = await bcrypt.hash(createUserInput.password, 10);
     } catch (err) {
-      this.logger.error('Failed to hash password: ', err.message);
-      throw new InternalServerErrorException('Failed to hash password');
+      this.logger.fatal(
+        'Failed to hash password: ',
+        err instanceof Error ? err.message : err,
+      );
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
 
     try {
@@ -46,9 +50,9 @@ export class UsersService {
         err instanceof PrismaClientKnownRequestError &&
         err.code === 'P2002'
       ) {
-        throw new BadRequestException('Email already exists');
+        throw new BadRequestException(ERROR.emailAlreadyInUse);
       }
-      throw new InternalServerErrorException('Failed to create user');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -62,9 +66,7 @@ export class UsersService {
       return user;
     } catch (err) {
       this.logger.error('Failed to find user by email: ', err);
-      throw new InternalServerErrorException(
-        'Something went wrong. Please try again.',
-      );
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -87,10 +89,10 @@ export class UsersService {
         err instanceof PrismaClientKnownRequestError &&
         err.code === 'P2002'
       ) {
-        throw new BadRequestException('emailAlreadyInUse');
+        throw new BadRequestException(ERROR.emailAlreadyInUse);
       }
       this.logger.error('Failed to update user: ', err);
-      throw new InternalServerErrorException('Failed to update user');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -109,9 +111,7 @@ export class UsersService {
       this.logger.log(`User deleted: ${id}`);
     } catch (err) {
       this.logger.error('Failed to delete user: ', err);
-      throw new InternalServerErrorException(
-        'Something went wrong. Please try again.',
-      );
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -125,9 +125,7 @@ export class UsersService {
       return users;
     } catch (err) {
       this.logger.error('Failed to find all users: ', err);
-      throw new InternalServerErrorException(
-        'Something went wrong. Please try again.',
-      );
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -142,9 +140,7 @@ export class UsersService {
       return user;
     } catch (err) {
       this.logger.error('Failed to find user: ', err);
-      throw new InternalServerErrorException(
-        'Something went wrong. Please try again.',
-      );
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -186,7 +182,7 @@ export class UsersService {
       where: { id: userId },
     });
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException(ERROR.badRequest);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -194,7 +190,7 @@ export class UsersService {
       user.hashedPassword!,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException('Current password is incorrect');
+      throw new BadRequestException('users.service.currentPasswordIncorrect');
     }
 
     const newHashedPassword = await bcrypt.hash(newPassword, 10);

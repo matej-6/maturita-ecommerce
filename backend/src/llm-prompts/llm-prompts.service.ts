@@ -10,6 +10,8 @@ import {
   LLMTaskJobType,
   UserPromptJob,
 } from './llm-task.consumer';
+import { I18nContext } from 'nestjs-i18n';
+import { ERROR } from 'src/errors';
 
 @Injectable()
 export class LLMPromptsService {
@@ -26,28 +28,15 @@ export class LLMPromptsService {
     userId: number,
     lang: string,
   ): Promise<LLMTask> {
-    const todayUsage = await this.prisma.lLMTask.count({
-      where: {
-        userId: userId,
-        date: new Date(),
-      },
-    });
-
-    if (todayUsage >= this.DAILY_USER_TASK_LIMIT) {
-      throw new Error(
-        `Daily limit of ${this.DAILY_USER_TASK_LIMIT} LLM tasks reached.`,
-      );
-    }
-
     if (input.prompt.trim().length === 0) {
-      throw new Error('Prompt cannot be empty');
+      throw new Error('llm.service.emptyPrompt');
     }
 
     const existingJob = await this.llmTasksQueue.getJob(
       this.getUserPromptTaskJobIdByUserId(userId),
     );
     if (existingJob) {
-      throw new Error('Please wait for your previous prompt to finish.');
+      throw new Error('llm.service.existingJob');
     }
     const llmTask = await this.prisma.lLMTask.create({
       data: {
@@ -72,7 +61,12 @@ export class LLMPromptsService {
         response: null,
       };
     } catch (error) {
-      this.logger.error(error.message);
+      this.logger.error(
+        `Failed to enqueue LLM task: ${error instanceof Error ? error.message : String(error)}`,
+      );
+
+      const i18n = I18nContext.current();
+
       const res = await this.prisma.lLMTask.update({
         where: {
           id: llmTask.id,
@@ -81,7 +75,7 @@ export class LLMPromptsService {
           status: LLMTaskStatus.FAILED,
           response: {
             create: {
-              text: 'Failed to enqueue LLM task.',
+              text: i18n?.t(ERROR.unknownError) || 'An unknown error occurred.',
             },
           },
         },

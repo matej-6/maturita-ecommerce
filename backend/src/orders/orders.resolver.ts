@@ -20,7 +20,6 @@ import { PaginationArgs } from 'src/lib/pagination.args';
 import { OrderFindAllQueryArgs, OrderSortingArgs } from './order.resolver.args';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { GraphQLVoid } from 'graphql-scalars';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -111,15 +110,5 @@ export class OrdersResolver {
     @Args('input', { type: () => UpdateOrderDto }) input: UpdateOrderDto,
   ) {
     return this.ordersService.updateOrder(orderId, input);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Mutation(() => GraphQLVoid, { name: 'addNoteToOrder' })
-  async addNoteToOrder(
-    @Args('orderId', { type: () => Int }) orderId: number,
-    @Args('note', { type: () => String }) note: string,
-    @CurrentUser() user: AuthenticatedUserDto,
-  ): Promise<void> {
-    await this.ordersService.addNoteToOrder(orderId, note, user.id);
   }
 }

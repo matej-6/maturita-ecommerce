@@ -1,0 +1,9 @@
+{
+  "service": {
+    "attributeKeyAlreadyExists": "A product variant attribute key with this name already exists.",
+    "attributeKeyNotFound": "Product variant attribute key not found.",
+    "cannotDeleteKeyInUse": "Cannot delete a product variant attribute key that is in use by one or more attributes.",
+    "translationAlreadyExists": "A translation with the locale you're trying to use already exists.",
+    "translationNotFound": "Translation not found."
+  }
+}

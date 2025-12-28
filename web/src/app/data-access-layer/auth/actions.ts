@@ -1,10 +1,7 @@
 "use server";
 
 import "server-only";
-import {
-  AUTHENTICATION_COOKIE_NAME,
-  REFRESH_COOKIE_NAME,
-} from "@/app/lib/auth.constants";
+import { REFRESH_COOKIE_NAME } from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
 import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -21,9 +18,65 @@ export type AuthResponse = {
   refreshTokenExpirationSeconds: number;
 };
 
+export type LogoutAllActionResult =
+  | {
+      success: true;
+    }
+  | ({
+      success: false;
+    } & ErrorResponse);
+
+export async function authLogoutAllAction(): Promise<LogoutAllActionResult> {
+  const cookieStore = await cookies();
+  const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
+  const locale = await getLocale();
+  const t = await getTranslations("error");
+
+  const defaultErrorResponse: ErrorResponse = {
+    message: t("INTERNAL_SERVER_ERROR"),
+    statusCode: 500,
+  };
+
+  if (refreshTokenCookie) {
+    const refreshToken = refreshTokenCookie.value;
+    try {
+      if (refreshToken) {
+        const res = await fetchBackend("/auth/logout-all", {
+          method: "POST",
+          headers: {
+            "x-refresh-token": refreshToken,
+            "x-custom-lang": locale,
+          },
+        });
+        if (!res.ok) {
+          const e = await res.json();
+          return {
+            success: false,
+            ...(newErrorResponse(e) || defaultErrorResponse),
+          };
+        } else {
+          setAuthCookies(cookieStore, null);
+          return redirect({ href: "/auth/login", locale: locale });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      return {
+        success: false,
+        ...defaultErrorResponse,
+      };
+    }
+  }
+  setAuthCookies(cookieStore, null);
+  return redirect({ href: "/auth/login", locale: locale });
+}
+
 export async function authLogoutAction() {
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
+
+  const locale = await getLocale();
+
   if (refreshTokenCookie) {
     const refreshToken = refreshTokenCookie.value;
     if (refreshToken) {
@@ -32,6 +85,7 @@ export async function authLogoutAction() {
           method: "POST",
           headers: {
             "x-refresh-token": refreshToken,
+            "x-custom-lang": locale,
           },
         });
       } catch (e) {
@@ -39,7 +93,6 @@ export async function authLogoutAction() {
       }
     }
   }
-  const locale = await getLocale();
   setAuthCookies(cookieStore, null);
   return redirect({ href: "/auth/login", locale: locale });
 }
@@ -63,10 +116,15 @@ export async function authLoginAction(
     statusCode: 500,
   };
 
+  const locale = await getLocale();
+
   try {
     const res = await fetchBackend(`/auth/login`, {
       method: "POST",
       body: JSON.stringify(formData),
+      headers: {
+        "x-custom-lang": locale,
+      },
     });
     if (!res.ok) {
       const e = await res.json();
@@ -105,6 +163,7 @@ export async function authRegisterAction(
 ): Promise<RegisterActionResult> {
   const cookieStore = await cookies();
   const t = await getTranslations("error");
+  const locale = await getLocale();
 
   const defaultErrorResponse: ErrorResponse = {
     message: t("INTERNAL_SERVER_ERROR"),
@@ -115,6 +174,9 @@ export async function authRegisterAction(
     const res = await fetchBackend(`/auth/register`, {
       method: "POST",
       body: JSON.stringify(data),
+      headers: {
+        "x-custom-lang": locale,
+      },
     });
     if (!res.ok) {
       const body = await res.json();
@@ -147,32 +209,22 @@ export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult
     return { success: false };
   }
   const refreshToken = refreshTokenCookie.value;
-
-  console.log(`
-    REFRESHING TOKEN WITH REFRESH TOKEN VALUE: ${refreshToken}
-    `);
+  const locale = await getLocale();
 
   const res = await fetchBackend(`/auth/refresh-token`, {
     method: "POST",
     headers: {
       "x-refresh-token": refreshToken,
+      "x-custom-lang": locale,
     },
   });
   if (res.ok) {
     const data: AuthResponse = await res.json();
-    console.log(`
-      REFRESH TOKEN SUCCESS
-      WITH DATA: ${JSON.stringify(data)}
-      `);
     setAuthCookies(cookieStore, data);
     return {
       success: true,
     };
   }
-  console.log(`
-    REFRESH TOKEN FAILED
-    WITH STATUS: ${res.status}
-    `);
   setAuthCookies(cookieStore, null);
   return {
     success: false,
@@ -182,19 +234,3 @@ export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult
 export const getCurrentSessionAction = cache(async () => {
   return await getCurrentSession();
 });
-
-export async function ensureAuthOrRedirectAction(): Promise<void> {
-  const locale = await getLocale();
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get(AUTHENTICATION_COOKIE_NAME);
-
-  if (!authCookie?.value) {
-    const res = await authRefreshTokenAction();
-    if (!res.success) {
-      return redirect({
-        href: "/auth/fail",
-        locale: locale,
-      });
-    }
-  }
-}

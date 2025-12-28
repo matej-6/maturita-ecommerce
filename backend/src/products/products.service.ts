@@ -19,6 +19,7 @@ import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
 import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { ProductEmbedding } from './entities/product-embedding.entity';
 import { ProductContentEmbedding } from './entities/product-content-embedding.entity';
+import { ERROR } from 'src/errors';
 
 @Injectable()
 export class ProductsService {
@@ -53,6 +54,7 @@ export class ProductsService {
         if (e.code === 'P2002') {
           throw new BadRequestException('products.service.slugAlreadyInUse');
         }
+        throw new BadRequestException(ERROR.badRequest);
       }
       throw e;
     }
@@ -202,7 +204,7 @@ export class ProductsService {
       .findAll()
       .some((l) => l.code.toString() === lang);
     if (!isLangSupported) {
-      throw new BadRequestException('Unsupported language code');
+      throw new BadRequestException('locales.service.localeNotFound');
     }
 
     await this.llmService.removeProductEmbeddingTask(productId, lang);
@@ -222,7 +224,7 @@ export class ProductsService {
       .findAll()
       .some((l) => l.code.toString() === lang);
     if (!isLangSupported) {
-      throw new BadRequestException('Unsupported language code');
+      throw new BadRequestException('locales.service.localeNotFound');
     }
 
     await this.llmService.removeProductContentEmbeddingTask(productId, lang);
@@ -242,7 +244,7 @@ export class ProductsService {
       .findAll()
       .some((l) => l.code.toString() === lang);
     if (!isLangSupported) {
-      throw new BadRequestException('Unsupported language code');
+      throw new BadRequestException('locales.service.localeNotFound');
     }
 
     await this.llmService.removeProductEmbeddingTask(productId, lang);
@@ -350,7 +352,7 @@ export class ProductsService {
               ProductTranslations: {
                 where: {
                   locale: {
-                    equals: this.localesService.locales().english.code,
+                    equals: this.localesService.getDefaultLocale().code,
                   },
                 },
               },
@@ -421,7 +423,7 @@ export class ProductsService {
                 ProductTranslations: {
                   some: {
                     locale: {
-                      equals: this.localesService.locales().english.code,
+                      equals: this.localesService.getDefaultLocale().code,
                     },
                   },
                 },
@@ -453,7 +455,7 @@ export class ProductsService {
                 ProductTranslations: {
                   none: {
                     locale: {
-                      equals: this.localesService.locales().english.code,
+                      equals: this.localesService.getDefaultLocale().code,
                     },
                   },
                 },
@@ -532,7 +534,7 @@ export class ProductsService {
           select: {
             ProductTranslations: {
               where: {
-                locale: this.localesService.locales().english.code,
+                locale: this.localesService.getDefaultLocale().code,
               },
             },
             ProductVariants: true,
@@ -583,7 +585,7 @@ export class ProductsService {
           select: {
             ProductTranslations: {
               where: {
-                locale: this.localesService.locales().english.code,
+                locale: this.localesService.getDefaultLocale().code,
               },
             },
             ProductVariants: true,
@@ -618,14 +620,6 @@ export class ProductsService {
   }
 
   async removeCategoryFromProducts(categoryId: number) {
-    const affected = await this.prisma.product.findMany({
-      where: {
-        categoryId: categoryId,
-      },
-      select: {
-        id: true,
-      },
-    });
     await this.prisma.product.updateMany({
       where: {
         categoryId: categoryId,
@@ -682,7 +676,7 @@ export class ProductsService {
             ProductTranslations: {
               where: {
                 locale: {
-                  equals: this.localesService.locales().english.code,
+                  equals: this.localesService.getDefaultLocale().code,
                 },
               },
             },

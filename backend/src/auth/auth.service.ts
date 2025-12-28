@@ -93,7 +93,7 @@ export class AuthService {
         this.logger.warn(
           `No refresh token sessions found for this user id: ${userId}`,
         );
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(ERROR.unauthorizedException);
       }
 
       let refreshTokenSession = null;
@@ -109,7 +109,7 @@ export class AuthService {
         this.logger.warn(
           `No refresh token sessions matches for this user id: ${userId}`,
         );
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(ERROR.unauthorizedException);
       }
 
       if (refreshTokenSession.blacklisted === true) {
@@ -117,7 +117,7 @@ export class AuthService {
           `Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`,
         );
         await this.signOutAll(refreshTokenSession.userId);
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(ERROR.unauthorizedException);
       }
 
       return refreshTokenSession.user;
@@ -126,7 +126,7 @@ export class AuthService {
         'Error verifying user refresh token: ',
         error instanceof Error ? error.message : JSON.stringify(error),
       );
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(ERROR.unauthorizedException);
     }
   }
 
@@ -177,18 +177,14 @@ export class AuthService {
   ) {
     res.cookie('Authentication', accessToken.token, {
       httpOnly: true,
-      secure:
-        this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
-        'production',
+      secure: false,
       expires: accessToken.expires,
       sameSite: 'lax',
     });
 
     res.cookie('Refresh', refreshToken.token, {
       httpOnly: true,
-      secure:
-        this.configService.getOrThrow<Env['NODE_ENV']>('NODE_ENV') ===
-        'production',
+      secure: false,
       expires: refreshToken.expires,
       sameSite: 'lax',
     });
@@ -312,10 +308,11 @@ export class AuthService {
             blacklisted: true,
           },
         });
-        return; // Successfully blacklisted the token
+        return;
       }
     }
 
+    this.logger.warn('Refresh token to sign out not foundd.');
     throw new BadRequestException(ERROR.badRequest);
   }
 

@@ -1,0 +1,15 @@
+{
+  "service": {
+    "emptyPrompt": "The prompt cannot be empty.",
+    "existingJob": "You already have an existing request."
+  },
+  "consumer": {
+    "unsupportedLanguageForEmbeddings": "The selected language is not supported for embeddings.",
+    "productNotFound": "Could not find given product.",
+    "translationNotFound": "Translation not found for the specified language",
+    "unknownPromptCategory": "I can't asnwer this type of question. You can ask me about product details or product recommendations.",
+    "missingProductId": "I can't provide the information you're looking for without a product ID. Please visit the product page and try again.",
+    "noSimiliarProductsFound": "I couldn't find any similar products to recommend based on your request.",
+    "noProductsFound": "I couldn't find any products matching your request."
+  }
+}

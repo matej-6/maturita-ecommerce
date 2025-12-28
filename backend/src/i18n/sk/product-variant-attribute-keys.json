@@ -1,0 +1,9 @@
+{
+  "service": {
+    "attributeKeyAlreadyExists": "Taky kľúč atribútu už existuje.",
+    "attributeKeyNotFound": "Kľúč atribút s týmto ID neexistuje.",
+    "cannotDeleteKeyInUse": "Nie je možné vymazať kľúč atribútu, ktorý je používaný jedným alebo viacerými atribútmi.",
+    "translationAlreadyExists": "Preklad s jazykom, ktorý sa snažíte použiť, už existuje.",
+    "translationNotFound": "Preklad nebol nájdený."
+  }
+}

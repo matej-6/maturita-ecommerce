@@ -1,7 +1,8 @@
 {
   "service": {
     "update": {
-      "categoryNotFound": "The category you're trying to update doesn't exist."
+      "categoryNotFound": "The category you're trying to update doesn't exist.",
+      "cycleDetected": "This update would create a cycle."
     },
     "slugAlreadyInUse": "This slug is already in use",
     "invalidLocaleCode": "Invalid locale code.",

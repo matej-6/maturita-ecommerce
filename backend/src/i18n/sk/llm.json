@@ -1,0 +1,15 @@
+{
+  "service": {
+    "emptyPrompt": "Prompt nemôže byť prázdny.",
+    "existingJob": "Už máte existujúcu požiadavku."
+  },
+  "consumer": {
+    "unsupportedLanguageForEmbeddings": "Vybraný jazyk nie je podporovaný pre embeddings.",
+    "productNotFound": "Nepodarilo sa nájsť daný produkt.",
+    "translationNotFound": "Pre daný jazyk sa nenašiel preklad",
+    "unknownPromptCategory": "Nemôžem odpovedať na tento typ otázky. Môžete sa ma opýtať na detaily produktu alebo odporúčania produktov.",
+    "missingProductId": "Nemôžem poskytnúť informácie, ktoré hľadáte, bez ID produktu. Prosím, navštívte stránku produktu a skúste to znova.",
+    "noSimiliarProductsFound": "Nenašiel som žiadne podobné produkty, ktoré by som mohol odporučiť na základe vašej požiadavky.",
+    "noProductsFound": "Nenašiel som žiadne produkty zodpovedajúce vašej požiadavke."
+  }
+}

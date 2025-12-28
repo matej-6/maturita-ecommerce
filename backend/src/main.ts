@@ -4,7 +4,6 @@ import * as cookieParser from 'cookie-parser';
 import { I18nMiddleware, I18nValidationPipe } from 'nestjs-i18n';
 import { AllExceptionsFilter } from './exception/all-exceptions.filter';
 import { ValidationFilter } from './validation/validation.filter';
-import { ErrorFilter } from './exception/error.filter';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
@@ -24,11 +23,7 @@ async function bootstrap() {
   app.useBodyParser('json', { limit: '10mb' });
   // app.use(json({ limit: '10mb' }));
 
-  app.useGlobalFilters(
-    new ErrorFilter(),
-    new AllExceptionsFilter(),
-    new ValidationFilter(),
-  );
+  app.useGlobalFilters(new AllExceptionsFilter(), new ValidationFilter());
 
   app.useGlobalPipes(
     new I18nValidationPipe({

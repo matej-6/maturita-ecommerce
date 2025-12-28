@@ -6,7 +6,7 @@
     "slugAlreadyInUse": "Tento slug už používa iný variant produktu",
     "invalidLocaleCode": "Neplatný kód lokality",
     "editTranslation": {
-      "notFound": "Preklad produktu s týmto ID neexistuje. Skúste obnoviť stránku aby ste mali čerstvé dáta.",
+      "notFound": "Preklad produktu s týmto ID neexistuje.",
       "translationWithThisLocaleAlreadyExists": "Preklad s jazykom, ktorý chcete nastaviť, už existuje."
     },
     "removeTranslation": {
@@ -20,6 +20,7 @@
     "addImage": {
       "productNotFound": "Produkt, ku ktorému sa snažíte pridať obrázok, nebol nájdený."
     },
-    "imageNotFound": "Obrázok produktu s poskytnutým ID nebol nájdený."
+    "imageNotFound": "Obrázok produktu s poskytnutým ID nebol nájdený.",
+    "attributeNotFound": "Atribút variantu produktu s týmto ID nebol nájdený."
   }
 }

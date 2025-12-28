@@ -16,7 +16,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
-import { I18n, I18nContext } from 'nestjs-i18n';
+import { ERROR } from 'src/errors';
 
 @Controller('auth')
 export class AuthController {
@@ -25,10 +25,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(
-    @I18n() i18n: I18nContext,
-    @Body() loginDto: LoginDto,
-  ): Promise<AuthResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.authService.validateUserWithCredentials(
       loginDto.email,
       loginDto.password,
@@ -36,7 +33,7 @@ export class AuthController {
 
     if (!user) {
       this.logger.warn(`Invalid login attempt for email: ${loginDto.email}`);
-      throw new UnauthorizedException('INVALID_EMAIL_OR_PASSWORD');
+      throw new UnauthorizedException(ERROR.invalidEmailOrPassword);
     }
 
     return await this.authService.login({

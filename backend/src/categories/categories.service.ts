@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -21,10 +26,10 @@ import {
 } from './categories.resolver.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { PaginationArgs } from 'src/lib/pagination.args';
+import { ERROR } from 'src/errors';
 
 @Injectable()
 export class CategoriesService {
-  private readonly CATEGORIES_CACHE_KEY = 'app:categories';
   private readonly logger = new Logger(CategoriesService.name);
 
   constructor(
@@ -33,7 +38,6 @@ export class CategoriesService {
     private readonly productsService: ProductsService,
   ) {}
   async create(createCategoryInput: CreateCategoryInput) {
-    // ak uz existuje takato kategoria => error
     const existingCategory = await this.prisma.category.findUnique({
       where: {
         slug: createCategoryInput.slug,
@@ -159,10 +163,6 @@ export class CategoriesService {
     }
   }
 
-  private getCategoryCacheKey(id: number): string {
-    return `${this.CATEGORIES_CACHE_KEY}:${id}`;
-  }
-
   private validateFindAllArgs(
     args: CategoryFindAllQueryFilterArgs,
     role?: AuthenticatedUserDto['role'],
@@ -226,7 +226,7 @@ export class CategoriesService {
             CategoryTranslation: {
               where: {
                 locale: {
-                  equals: this.localesService.locales().english.code,
+                  equals: this.localesService.getDefaultLocale().code,
                 },
               },
             },
@@ -309,7 +309,7 @@ export class CategoriesService {
               CategoryTranslation: {
                 where: {
                   locale: {
-                    equals: this.localesService.locales().english.code,
+                    equals: this.localesService.getDefaultLocale().code,
                   },
                 },
               },
@@ -378,7 +378,7 @@ export class CategoriesService {
                   CategoryTranslation: {
                     where: {
                       locale: {
-                        equals: this.localesService.locales().english.code,
+                        equals: this.localesService.getDefaultLocale().code,
                       },
                     },
                   },
@@ -429,7 +429,7 @@ export class CategoriesService {
                   CategoryTranslation: {
                     where: {
                       locale: {
-                        equals: this.localesService.locales().english.code,
+                        equals: this.localesService.getDefaultLocale().code,
                       },
                     },
                   },
@@ -490,7 +490,7 @@ export class CategoriesService {
             CategoryTranslation: {
               where: {
                 locale: {
-                  equals: this.localesService.locales().english.code,
+                  equals: this.localesService.getDefaultLocale().code,
                 },
               },
             },
@@ -572,14 +572,16 @@ export class CategoriesService {
       while (queue.length > 0) {
         const cid = queue.pop()!;
         if (seen.has(cid)) {
-          this.logger.warn(`Category ${cid} is part of a circular chain`);
+          this.logger.fatal(`Category ${cid} is part of cycle`);
           continue;
         }
         seen.add(cid);
         const subcategories = categorySubcategoriesMap.get(cid);
         for (const sub of subcategories ?? []) {
           if (sub === updateCategoryInput.parentCategoryId) {
-            throw new BadRequestException();
+            throw new BadRequestException(
+              'categories.service.update.cycleDetected',
+            );
           }
           queue.push(sub);
         }
@@ -616,7 +618,7 @@ export class CategoriesService {
       this.logger.error(
         `Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`,
       );
-      throw error;
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
 
@@ -671,7 +673,7 @@ export class CategoriesService {
             in: categoryIds,
           },
           locale: {
-            in: [lang, DEFAULT_LOCALE.code],
+            in: [lang, this.localesService.getDefaultLocale().code],
           },
         },
       },

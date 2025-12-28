@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Order, OrderShippingDetails } from 'generated/prisma/client';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
@@ -10,6 +15,8 @@ import { OrderFindAllQueryArgs } from './order.resolver.args';
 import { SortingArgs } from 'src/args/sorting-args';
 import { PaginatedOrder } from './entities/order.entity';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { ERROR } from 'src/errors';
+import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 
 @Injectable()
 export class OrdersService {
@@ -87,11 +94,7 @@ export class OrdersService {
         if (syncedOrder) {
           res = syncedOrder;
         }
-      } catch (e) {
-        this.logger.error(
-          `Failed to sync order status with Stripe for order ID ${id}: ${e}`,
-        );
-      }
+      } catch (e) {}
     }
     return res;
   }
@@ -107,34 +110,6 @@ export class OrdersService {
     });
 
     return updatedOrder;
-  }
-
-  async addNoteToOrder(
-    orderId: number,
-    note: string | null,
-    userId: number,
-  ): Promise<void> {
-    if (!note || note.trim() === '') {
-      note = null;
-    }
-
-    const order = await this.prisma.order.findFirst({
-      where: {
-        id: orderId,
-        userId: userId,
-      },
-    });
-
-    if (!order) {
-      throw new Error('Order not found');
-    }
-
-    await this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        userNote: note,
-      },
-    });
   }
 
   private async syncOrderStatusWithStripe(orderId: number) {
@@ -170,6 +145,7 @@ export class OrdersService {
               postalCode: paymentIntent.shipping?.address?.postal_code || '',
               state: paymentIntent.shipping?.address?.state || '',
               line2: paymentIntent.shipping?.address?.line2 || '',
+              phone: paymentIntent.shipping?.phone || '',
             },
           },
         },
@@ -187,7 +163,7 @@ export class OrdersService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new BadRequestException(ERROR.badRequest);
     }
 
     const cart = await this.prisma.cart.findFirst({
@@ -213,16 +189,14 @@ export class OrdersService {
     });
 
     if (!cart || cart.CartItems.length === 0) {
-      throw new Error('Cart is empty');
+      throw new BadRequestException('orders.service.cartIsEmpty');
     }
 
     const order = await this.prisma.$transaction(async (tx) => {
       let total = 0;
       for (const item of cart.CartItems) {
         if (item.quantity > item.ProductVariant.stock) {
-          throw new Error(
-            `Insufficient stock for product variant ID ${item.ProductVariant.id}`,
-          );
+          throw new BadRequestException('orders.service.insufficientStock');
         }
         total += item.quantity * item.ProductVariant.priceInCents;
         await tx.productVariant.update({
@@ -355,11 +329,7 @@ export class OrdersService {
   async retryPendingCheckout(orderId: number, userId: number) {
     try {
       await this.syncOrderStatusWithStripe(orderId);
-    } catch (error) {
-      this.logger.error(
-        `Failed to sync order status with Stripe for order ID ${orderId}: ${error}`,
-      );
-    }
+    } catch (error) {}
     const order = await this.prisma.order.findUnique({
       where: { id: orderId, userId: userId },
       include: {
@@ -368,11 +338,13 @@ export class OrdersService {
     });
 
     if (!order) {
-      throw new Error('Order not found');
+      throw new BadRequestException('orders.service.orderNotFound');
     }
 
     if (order.status !== 'PENDING') {
-      throw new Error('Only PENDING orders can be retried');
+      throw new BadRequestException(
+        'orders.service.onlyPendingOrdersCanBeRetried',
+      );
     }
 
     const session = await this.stripe.checkout.sessions.retrieve(
@@ -386,16 +358,14 @@ export class OrdersService {
           status: 'FAILED',
         },
       });
-      throw new Error(
-        'The checkout session has expired. Please create a new order.',
-      );
+      throw new BadRequestException('orders.service.checkoutSessionExpired');
     }
 
     if (!session.url) {
       this.logger.error(
         `Stripe session for order ID ${orderId} does not have a URL`,
       );
-      throw new Error('An unexpected error occurred. Please try again later.');
+      throw new InternalServerErrorException(ERROR.unknownError);
     }
 
     return session.url;
@@ -409,6 +379,9 @@ export class OrdersService {
     });
 
     if (!order || !order.StripeSessionId) {
+      this.logger.error(
+        `Order not found or missing Stripe session ID for order ID ${orderId}`,
+      );
       throw new Error('Order not found or missing session ID');
     }
 
@@ -425,22 +398,20 @@ export class OrdersService {
   async cancelOrder(orderId: number, userId: number): Promise<Order> {
     try {
       await this.syncOrderStatusWithStripe(orderId);
-    } catch (error) {
-      this.logger.error(
-        `Failed to sync order status with Stripe for order ID ${orderId}: ${error}`,
-      );
-    }
+    } catch (error) {}
 
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, userId: userId },
     });
 
     if (!order) {
-      throw new Error('Order not found');
+      throw new Error('orders.service.orderNotFound');
     }
 
     if (order.status !== 'PENDING' && order.status !== 'PROCESSING') {
-      throw new Error('Only PENDING or PROCESSING orders can be canceled');
+      throw new Error(
+        'orders.service.onlyPendingOrProcessingOrdersCanBeCanceled',
+      );
     }
 
     const session = await this.stripe.checkout.sessions.retrieve(
@@ -533,11 +504,19 @@ export class OrdersService {
   async getOrderShippingDetails(
     id: number,
   ): Promise<OrderShippingDetails | null> {
-    return this.prisma.orderShippingDetails.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    try {
+      return this.prisma.orderShippingDetails.findUnique({
+        where: {
+          id: id,
+        },
+      });
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        throw new BadRequestException(ERROR.badRequest);
+      } else {
+        throw new InternalServerErrorException(ERROR.unknownError);
+      }
+    }
   }
 
   private validatePaginationArgs(args: PaginationArgs) {

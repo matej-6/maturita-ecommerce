@@ -1,6 +1,6 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { LLMPromptsService } from './llm-prompts.service';
-import { Logger, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { LLMTask } from './entities/llm-task.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateLLMPromptInput } from './dto/create-llm-prompt.input';
@@ -11,8 +11,6 @@ import { LocalesService } from 'src/locales/locales.service';
 
 @Resolver()
 export class LLMPromptsResolver {
-  private readonly logger = new Logger(LLMPromptsResolver.name);
-
   constructor(
     private readonly llmTasksService: LLMPromptsService,
     private readonly localesService: LocalesService,
@@ -29,7 +27,6 @@ export class LLMPromptsResolver {
       this.localesService.getDefaultLocale().code;
 
     return await this.llmTasksService.createTask(input, user.id, lang);
-    // return await this.llmTasksService.createTask(input, 33);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -115,7 +115,9 @@ export class ProductVariantAttributesService {
     });
 
     if (productsUsingAttribute > 0) {
-      throw new BadRequestException('...');
+      throw new BadRequestException(
+        'product-variant-attributes.service.cannotDeleteAttributeInUse',
+      );
     }
 
     return this.prisma.attribute.delete({

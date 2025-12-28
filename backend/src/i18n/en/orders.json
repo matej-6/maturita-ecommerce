@@ -1,0 +1,10 @@
+{
+  "service": {
+    "cartIsEmpty": "Your cart is empty. Please add items to your cart before placing an order.",
+    "insufficientStock": "Insufficient stock for one or more items in your cart.",
+    "orderNotFound": "Order not found.",
+    "onlyPendingOrdersCanBeRetried": "Only pending orders can be retried.",
+    "checkoutSessionExpired": "Your checkout session has expired. Please try again.",
+    "onlyPendingOrProcessingOrdersCanBeCanceled": "Only pending or processing orders can be canceled."
+  }
+}

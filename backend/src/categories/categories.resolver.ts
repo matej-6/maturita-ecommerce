@@ -30,7 +30,6 @@ import {
 } from './categories.resolver.args';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 import { PaginationArgs } from 'src/lib/pagination.args';
-import { ProductsService } from 'src/products/products.service';
 import { ProductVariantAttribute } from 'src/product-variant-attributes/entities/product-variant-attribute.entity';
 import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
 import { PaginatedProductVariant } from 'src/product-variants/entities/product-variant.entity';
@@ -40,7 +39,6 @@ import { ProductVariantsService } from 'src/product-variants/product-variants.se
 export class CategoriesResolver {
   constructor(
     private readonly categoriesService: CategoriesService,
-    private readonly productsService: ProductsService,
     private readonly productVariantAttributesService: ProductVariantAttributesService,
     private readonly productVariantsService: ProductVariantsService,
   ) {}

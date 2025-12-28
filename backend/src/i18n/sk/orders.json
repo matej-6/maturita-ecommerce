@@ -1,0 +1,10 @@
+{
+  "service": {
+    "cartIsEmpty": "Tvoj košík je prázdny. Prosím, pridaj položky do košíka predtým, než zadáš objednávku.",
+    "insufficientStock": "Nedostatok zásob pre jednu alebo viac položiek vo vašom košíku.",
+    "orderNotFound": "Objednávka nebola nájdená.",
+    "onlyPendingOrdersCanBeRetried": "Len nedokončené objednávky môžu byť opätovne spracované.",
+    "checkoutSessionExpired": "Tvoj session vypršal. Skús to prosím znova.",
+    "onlyPendingOrProcessingOrdersCanBeCanceled": "Len nedokončené alebo spracovávané objednávky môžu byť zrušené."
+  }
+}

@@ -1,4 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
+import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
+import { ERROR } from 'src/errors';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -8,11 +15,13 @@ export class CartsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getCartItems(cartId: number) {
-    return await this.prisma.cartItem.findMany({
+    const cartItems = await this.prisma.cartItem.findMany({
       where: {
         cartId,
       },
     });
+
+    return cartItems;
   }
 
   async getCartByUserId(userId: number) {
@@ -82,23 +91,39 @@ export class CartsService {
 
   async updateCartItemQuantity(cartItemId: number, quantity: number) {
     if (quantity < 1) {
-      await this.prisma.cartItem.delete({
-        where: {
-          id: cartItemId,
-        },
-      });
+      try {
+        await this.prisma.cartItem.delete({
+          where: {
+            id: cartItemId,
+          },
+        });
+      } catch (e) {
+        this.logger.warn('Failed to delete cart item', e);
+        if (e instanceof PrismaClientKnownRequestError && e.code === 'P2025') {
+          return null;
+        }
+        throw new InternalServerErrorException(ERROR.unknownError);
+      }
       return null;
     }
 
-    const updatedCartItem = await this.prisma.cartItem.update({
-      where: {
-        id: cartItemId,
-      },
-      data: {
-        quantity: quantity,
-      },
-    });
+    try {
+      const updatedCartItem = await this.prisma.cartItem.update({
+        where: {
+          id: cartItemId,
+        },
+        data: {
+          quantity: quantity,
+        },
+      });
 
-    return updatedCartItem;
+      return updatedCartItem;
+    } catch (e) {
+      this.logger.warn('Failed to update cart item quantity', e);
+      if (e instanceof PrismaClientKnownRequestError && e.code === 'P2025') {
+        throw new BadRequestException(ERROR.badRequest);
+      }
+      throw new InternalServerErrorException(ERROR.unknownError);
+    }
   }
 }

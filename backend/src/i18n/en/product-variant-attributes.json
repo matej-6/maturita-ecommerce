@@ -2,6 +2,8 @@
   "service": {
     "attributeAlreadyExists": "This attribute already exists.",
     "attributeKeyNotFound": "Attribute key with that ID doesn't exist.",
-    "attributeNotFound": "Attribute with that ID doesn't exist."
+    "attributeNotFound": "Attribute with that ID doesn't exist.",
+    "cannotDeleteAttributeInUse": "Cannot delete an attribute that is in use by one or more product variants.",
+    "translationNotFound": "Translation not found."
   }
 }

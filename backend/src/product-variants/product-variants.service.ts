@@ -43,6 +43,9 @@ export class ProductVariantsService {
         where: { id: createProductVariantInput.productId },
       });
       if (!prod) {
+        this.logger.error(
+          `Product not found with ID: ${createProductVariantInput.productId}`,
+        );
         throw new BadRequestException(
           'product-variants.service.create.productNotFound',
         );

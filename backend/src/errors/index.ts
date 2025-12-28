@@ -3,7 +3,5 @@ export const ERROR = {
   unknownError: 'unknownError',
   badRequest: 'badRequest',
   emailAlreadyInUse: 'emailAlreadyInUse',
-  emailAlreadyVerified: 'emailAlreadyVerified',
-  emailInvalidVerificationCode: 'emailInvalidVerificationCode',
   unauthorizedException: 'unauthorizedException',
 } as const;

@@ -1,7 +1,8 @@
 {
   "service": {
     "update": {
-      "categoryNotFound": "Kategóriu, ktorú sa snažíte aktualizovať, sa nepodarilo nájst."
+      "categoryNotFound": "Kategóriu, ktorú sa snažíte aktualizovať, sa nepodarilo nájst.",
+      "cycleDetected": "Pri tejto aktualizácii by nastal cyklus."
     },
     "slugAlreadyInUse": "Tento slug už používa iná kategória",
     "invalidLocaleCode": "Neplatný kód lokality",

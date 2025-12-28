@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateProductVariantAttributeKeyInput } from './dto/create-product-variant-attribute-key.input';
 import { UpdateProductVariantAttributeKeyInput } from './dto/update-product-variant-attribute-key.input';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,6 +11,8 @@ import {
   AttributeKeySortingArgs,
 } from './product-variant-attributes-keys.args';
 import { PaginatedProductVariantAttributeKey } from './entities/product-variant-attribute-key.entity';
+import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
+import { ERROR } from 'src/errors';
 
 @Injectable()
 export class ProductVariantAttributeKeysService {
@@ -78,19 +80,30 @@ export class ProductVariantAttributeKeysService {
     });
 
     if (!keyToUpdate) {
-      throw new Error(
+      throw new BadRequestException(
         'product-variant-attribute-keys.service.attributeKeyNotFound',
       );
     }
 
-    return this.prisma.attributeKey.update({
-      where: {
-        id: updateProductVariantAttributeKeyInput.id,
-      },
-      data: {
-        key: updateProductVariantAttributeKeyInput.key,
-      },
-    });
+    try {
+      return this.prisma.attributeKey.update({
+        where: {
+          id: updateProductVariantAttributeKeyInput.id,
+        },
+        data: {
+          key: updateProductVariantAttributeKeyInput.key,
+        },
+      });
+    } catch (e) {
+      this.logger.error(
+        `Error updating attribute key: ${e instanceof Error ? e.message : e}`,
+      );
+      if (e instanceof PrismaClientKnownRequestError) {
+        throw new BadRequestException(ERROR.badRequest);
+      } else {
+        throw e;
+      }
+    }
   }
 
   async remove(id: number) {
@@ -101,7 +114,9 @@ export class ProductVariantAttributeKeysService {
     });
 
     if (attributesWithKey > 0) {
-      throw new Error('...');
+      throw new BadRequestException(
+        'product-variant-attribute-keys.service.cannotDeleteKeyInUse',
+      );
     }
 
     return await this.prisma.attributeKey.delete({
@@ -246,11 +261,27 @@ export class ProductVariantAttributeKeysService {
   }
 
   async deleteTranslation(id: number) {
-    return this.prisma.attributeKeyTranslation.delete({
-      where: {
-        id: id,
-      },
-    });
+    try {
+      return this.prisma.attributeKeyTranslation.delete({
+        where: {
+          id: id,
+        },
+      });
+    } catch (e) {
+      this.logger.error(
+        `Error deleting attribute key translation: ${e instanceof Error ? e.message : e}`,
+      );
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new BadRequestException(
+            'product-variant-attribute-keys.service.translationNotFound',
+          );
+        }
+        throw new BadRequestException(ERROR.badRequest);
+      } else {
+        throw e;
+      }
+    }
   }
 
   async findAllPaginated(

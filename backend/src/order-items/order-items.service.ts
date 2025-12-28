@@ -1,11 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ProductVariant } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class OrderItemsService {
-  private readonly logger = new Logger(OrderItemsService.name);
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findAllByOrderId(orderId: number) {

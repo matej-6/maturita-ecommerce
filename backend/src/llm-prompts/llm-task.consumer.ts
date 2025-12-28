@@ -1,5 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { forwardRef, Inject, Logger } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
 import { EmbeddingTaskStatus } from 'generated/prisma/enums';
@@ -9,7 +14,8 @@ import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { LocalesService } from 'src/locales/locales.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
-import { translate } from '@vitalets/google-translate-api';
+import { ERROR } from 'src/errors';
+import { I18nService } from 'nestjs-i18n';
 
 export enum LLMTaskJobType {
   USER_PROMPT = 'user-prompt',
@@ -51,6 +57,7 @@ export class LLMTaskConsumer extends WorkerHost {
     private readonly qdrantService: QdrantService,
     private readonly configService: ConfigService<Env>,
     private readonly localesService: LocalesService,
+    private readonly i18nService: I18nService,
   ) {
     super();
     this.LLM_BASE_URL = this.configService.getOrThrow('OLLAMA_BASE_URL');
@@ -61,7 +68,7 @@ export class LLMTaskConsumer extends WorkerHost {
   }
 
   async process(job: Job<LLMTaskJob, any, string>): Promise<any> {
-    console.log('Processing job:', job);
+    this.logger.log(`Received job id ${job.id}, type ${job.name}`);
     switch (job.name as LLMTaskJobType) {
       case LLMTaskJobType.USER_PROMPT: {
         this.logger.log(`Processing USER_PROMPT job id ${job.id}`);
@@ -96,7 +103,7 @@ export class LLMTaskConsumer extends WorkerHost {
           .findAll()
           .map((l) => l.code as string);
         if (!supportedLanguages.includes(jobData.lang)) {
-          throw new Error('Unsupported language for embedding task');
+          throw new Error('llm.consumer.unsupportedLanguageForEmbeddings');
         }
         try {
           const dbEmbeddingTask = await this.prisma.embeddingTask.findUnique({
@@ -212,7 +219,7 @@ export class LLMTaskConsumer extends WorkerHost {
 
     if (!res.ok) {
       this.logger.error(`LLM request failed with status ${res.status}`);
-      throw new Error('An unexpected error ocurred. Please try again.');
+      throw new Error(ERROR.unknownError);
     }
 
     try {
@@ -225,7 +232,7 @@ export class LLMTaskConsumer extends WorkerHost {
       return output;
     } catch (error) {
       this.logger.error('Error parsing LLM response as JSON', error);
-      throw new Error('An unexpected error ocurred. Please try again.');
+      throw new Error(ERROR.unknownError);
     }
   }
 
@@ -242,7 +249,8 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     if (!res.ok) {
-      throw new Error(`Embedding request failed with status ${res.status}`);
+      this.logger.error(`Embedding request failed with status ${res.status}`);
+      throw new Error(ERROR.unknownError);
     }
 
     const data = (await res.json()) as { embeddings: number[][] };
@@ -272,28 +280,9 @@ export class LLMTaskConsumer extends WorkerHost {
       category !== 'none'
     ) {
       this.logger.error('Invalid category returned from LLM', category);
-      throw new Error('Something went wrong.');
+      throw new Error(this.i18nService.t(ERROR.unknownError));
     }
     return category;
-  }
-
-  private async translate(
-    textToTranslate: string,
-    from: string = 'auto',
-    to: string = 'en',
-  ): Promise<{
-    translation: string;
-    original_language: string;
-  }> {
-    const { raw, text } = await translate(textToTranslate, {
-      from: from,
-      to: to,
-    });
-
-    return {
-      original_language: raw.src,
-      translation: text,
-    };
   }
 
   async processProductEmbeddingJob(job: EmbeddingJob): Promise<void> {
@@ -356,13 +345,11 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     if (!product) {
-      throw new Error('Product not found');
+      throw new Error('llm.consumer.productNotFound');
     }
 
     if (product.ProductTranslations.length === 0) {
-      throw new Error(
-        'Product translation not found for the specified language',
-      );
+      throw new Error('llm.consumer.translationNotFound');
     }
     const input = {
       product: {
@@ -391,20 +378,25 @@ export class LLMTaskConsumer extends WorkerHost {
     this.logger.log(`Generated embedding for product ID ${product.id}`);
     this.logger.log(`Embedding vector length: ${res.length}`);
 
-    await this.qdrantService.qdrantClient.upsert(QdrantCollections.PRODUCTS, {
-      points: [
-        {
-          id: product.id,
-          vector: res[0],
-          payload: {
-            ...input,
-            productId: product.id,
-            lang: job.lang,
+    try {
+      await this.qdrantService.qdrantClient.upsert(QdrantCollections.PRODUCTS, {
+        points: [
+          {
+            id: product.id,
+            vector: res[0],
+            payload: {
+              ...input,
+              productId: product.id,
+              lang: job.lang,
+            },
           },
-        },
-      ],
-      wait: true,
-    });
+        ],
+        wait: true,
+      });
+    } catch (e) {
+      this.logger.error('Error upserting embedding to Qdrant', e);
+      throw new InternalServerErrorException(ERROR.unknownError);
+    }
   }
 
   async processProductContentEmbeddingJob(job: EmbeddingJob): Promise<void> {
@@ -453,13 +445,11 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     if (!product) {
-      throw new Error('Product not found');
+      throw new Error('llm.consumer.productNotFound');
     }
 
     if (product.ProductTranslations.length === 0) {
-      throw new Error(
-        'Product translation not found for the specified language',
-      );
+      throw new Error('llm.consumer.translationNotFound');
     }
 
     const chunkedContent = this.chunkProductContentForEmbedding(
@@ -505,19 +495,6 @@ export class LLMTaskConsumer extends WorkerHost {
     });
   }
 
-  private async translateResponseToOriginalLanguage(
-    englishResponse: string,
-    originalLanguageCode: string,
-  ) {
-    const system = `Translate the following text from English to this language code: ${originalLanguageCode}. Respond ONLY with the translated text.`;
-    const response = await this.fetchLLM<string>(
-      system,
-      englishResponse,
-      false,
-    );
-    return response;
-  }
-
   private chunkProductContentForEmbedding(
     content: string,
     chunkSize: number = 500,
@@ -552,14 +529,14 @@ export class LLMTaskConsumer extends WorkerHost {
     const category = await this.categorizePrompt(userPrompt);
 
     if (category === 'none') {
-      throw new Error("I can't assist with that request.");
+      throw new Error(this.i18nService.t('llm.consumer.unknownPromptCategory'));
     }
 
     if (
       (category === 'productInformation' || category === 'similiarProducts') &&
       !job.productId
     ) {
-      throw new Error("I can't provide that information without a product.");
+      throw new Error(this.i18nService.t('llm.consumer.missingProductId'));
     }
 
     if (category === 'similiarProducts') {
@@ -608,6 +585,12 @@ export class LLMTaskConsumer extends WorkerHost {
       },
     );
 
+    if (similarProducts.length === 0) {
+      throw new Error(
+        this.i18nService.t('llm.consumer.noSimilarProductsFound'),
+      );
+    }
+
     const system = `You are an AI assistant that provides a list of products similar to a given product based on its attributes and description.
     Use the following similar products to answer the user's prompt:
     ${JSON.stringify(similarProducts)}
@@ -643,6 +626,10 @@ export class LLMTaskConsumer extends WorkerHost {
         },
       },
     );
+
+    if (similarProducts.length === 0) {
+      throw new Error(this.i18nService.t('llm.consumer.noProductsFound'));
+    }
 
     const system = `You are an AI assistant that provides a list of products based on a user's search criteria.
     Use the following products to answer the user's prompt:
@@ -688,7 +675,7 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     if (!productContent) {
-      throw new Error('Product not found');
+      throw new Error(this.i18nService.t('llm.consumer.productNotFound'));
     }
 
     const similarChunks = await this.qdrantService.qdrantClient.search(

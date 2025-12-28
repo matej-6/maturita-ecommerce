@@ -52,8 +52,14 @@ export class OrdersController {
         signature,
       );
     } catch (error) {
-      this.logger.warn(`Stripe webhook error: ${error.message}`);
-      res.status(400).send(`Webhook Error: ${error.message}`);
+      this.logger.warn(
+        `Stripe webhook error: ${error instanceof Error ? error.message : error}`,
+      );
+      res
+        .status(400)
+        .send(
+          `Webhook Error: ${error instanceof Error ? error.message : error}`,
+        );
       return;
     }
 

@@ -17,6 +17,10 @@ export class CartItemsService {
       },
     });
 
+    this.logger.debug(
+      `Fetched ProductVariants for CartItem IDs: ${cartItemIds.join(', ')}`,
+    );
+
     return cartItemIds.map((id) => {
       const cartItem = cartItems.find((ci) => ci.id === id);
       return cartItem ? cartItem.ProductVariant : null;
