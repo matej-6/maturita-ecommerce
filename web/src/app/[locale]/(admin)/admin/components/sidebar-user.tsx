@@ -27,7 +27,9 @@ import {
   CreditCardIcon,
   HomeIcon,
   LogOutIcon,
+  UserIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { use } from "react";
 
 type SidebarUserProps = {
@@ -35,6 +37,8 @@ type SidebarUserProps = {
 };
 
 export function SidebarUser({ currentSessionPromise }: SidebarUserProps) {
+  const t = useTranslations("admin.sidebar");
+
   const isMobile = useIsMobile();
   const session = use(currentSessionPromise);
   if (!session) return null;
@@ -96,26 +100,16 @@ export function SidebarUser({ currentSessionPromise }: SidebarUserProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            <Link href="/account-details">
               <DropdownMenuItem>
-                <BadgeCheckIcon />
-                Account
+                <UserIcon />
+                {t("account.account")}
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                Billing
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOutIcon />
-              Log out
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            </Link>
             <Link href="/">
               <DropdownMenuItem>
                 <HomeIcon />
-                Exit admin dashboard
+                {t("account.exit")}
               </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>

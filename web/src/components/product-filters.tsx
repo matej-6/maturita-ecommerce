@@ -4,6 +4,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+import { useTranslations } from "next-intl";
 
 export type ProductFiltersProps = {
   attributes: Map<
@@ -30,6 +31,8 @@ export function ProductFilters({
   const [selectedAttributes, setSelectedAttributes] = useState<
     Map<string, Set<string>>
   >(new Map());
+
+  const t = useTranslations("productFiltersSheet");
 
   useEffect(() => {
     const initialSelected = new Map<string, Set<string>>();
@@ -122,7 +125,7 @@ export function ProductFilters({
         }}
         className="sticky bottom-2"
       >
-        Apply filters
+        {t("applyFilters")}
       </Button>
       {selectedAttributes.size > 0 && (
         <Button
@@ -132,7 +135,7 @@ export function ProductFilters({
           }}
           variant={"outline"}
         >
-          Reset
+          {t("clearAll")}
         </Button>
       )}
     </div>

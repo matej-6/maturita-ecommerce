@@ -64,6 +64,10 @@ const CategoryQueryDocument = graphql(`
             attributes {
               value
               translatedValue
+              key {
+                key
+                translatedKey
+              }
             }
           }
         }

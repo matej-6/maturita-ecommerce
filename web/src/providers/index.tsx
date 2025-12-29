@@ -6,7 +6,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
       <QueryProvider>
-        <Toaster richColors />
+        <Toaster />
         {children}
       </QueryProvider>
     </I18nProvider>

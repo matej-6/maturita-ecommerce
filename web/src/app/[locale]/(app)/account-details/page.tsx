@@ -46,7 +46,7 @@ export default async function AccountDetailsPage() {
   const user = data.data.me;
 
   return (
-    <div className="max-width-container my-6 sm:my-12 flex flex-col gap-y-6 sm:gap-y-12">
+    <div className="max-width-container py-6 sm:py-12 flex flex-col gap-y-6 sm:gap-y-12">
       <div className="flex flex-col gap-y-3 sm:gap-y-6">
         <h1 className="text-2xl sm:text-4xl font-semibold">{t("title")}</h1>
         <Card className="w-full flex flex-col gap-y-4 sm:gap-y-5 p-3 sm:p-4">

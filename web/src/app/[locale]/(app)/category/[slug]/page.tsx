@@ -2,24 +2,19 @@
 
 import { getCategoryQueryData } from "@/app/data-access-layer/category.queries";
 import { getImageSrc } from "@/app/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { PrevButton } from "@/components/prev-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ProductFilters } from "@/components/product-filters";
-import { group } from "console";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
-import { AddToCartButton } from "@/components/add-to-cart-button";
+import { ProductVariantCard } from "@/components/product-variant-card";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
-// este dokoncit pageSize
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
@@ -111,6 +106,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         keyTranslation: attr.key!.translatedKey || undefined,
       });
     }
+
     groupedAttributes.get(attr.key!.key)!.values!.add({
       value: attr.value,
       translatedValue: attr.translatedValue || undefined,
@@ -118,44 +114,32 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     });
   });
 
+  const t = await getTranslations("categoryPage");
+  const pt = await getTranslations("pagination");
+
   return (
-    <div className="max-width-container bg-base/50 w-full mx-auto mt-8 gap-y-8 flex flex-col relative">
-      {/* {groupedAttributes.size > 0 && (
-        <div className="absolute -left-12 -translate-x-full hidden min-[1920px]:block">
-          <Card className="w-[216px]">
-            <CardHeader>
-              <CardTitle className="font-medium text-center">Filters</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-y-6">
-              <ProductFilters
-                baseUrl={`/category/${slug}`}
-                attributes={groupedAttributes}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      )} */}
-      <div className="flex flex-col gap-y-6">
-        <div className="flex flex-col gap-y-4">
-          <h1 className="text-3xl font-bold">{category.name}</h1>
-          <p className="text-secondary-foreground">{category.description}</p>
+    <div className="max-width-container  w-full mx-auto py-6 sm:py-12 gap-y-6 sm:gap-y-12 flex flex-col relative">
+      <div className="flex flex-col gap-y-3 sm:gap-y-6">
+        <div className="flex flex-col gap-y-2 sm:gap-y-4">
+          <h1 className="text-2xl sm:text-4xl font-bold">{category.name}</h1>
+          <p className="text-muted-foreground">{category.description}</p>
         </div>
         {category.subcategories.length > 0 && (
-          <div className="flex flex-col gap-y-2">
-            <h2 className="font-medium text-secondary-foreground">
-              Subcategories
+          <div className="flex flex-col gap-y-1 sm:gap-y-2">
+            <h2 className="font-medium text-muted-foreground">
+              {t("subcategories")}
             </h2>
             <div className="flex flex-wrap gap-2">
               {category.subcategories.map((s) => (
                 <Link key={s.slug} href={`/category/${s.slug}`}>
-                  <Button variant={"secondary"}>{s.name || s.slug}</Button>
+                  <Button variant={"outline"}>{s.name || s.slug}</Button>
                 </Link>
               ))}
             </div>
           </div>
         )}
       </div>
-      <div className="h-0.5 w-full bg-accent my-4" />
+      <div className="h-0.5 w-full bg-accent" />
       <div className="flex flex-wrap gap-4">
         {category.categoryProductVariants.edges &&
         category.categoryProductVariants.edges.length > 0 ? (
@@ -177,53 +161,26 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                   productVariant.thumbnailImage ||
                   productVariant.product.thumbnailImage ||
                   null;
+                const name =
+                  productVariant.product.name +
+                  " " +
+                  productVariant.attributes
+                    .map((a) => a.translatedValue || a.value)
+                    .sort()
+                    .join(" ");
                 return (
-                  <Card key={productVariant.sku} className="w-[296px]">
-                    <CardHeader className="flex h-[256px]">
-                      {image ? (
-                        <img
-                          src={getImageSrc(image.mimeType, image.base64)}
-                          alt={productVariant.sku + " image"}
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <div className="bg-accent size-full flex items-center justify-center">
-                          <span className="text-muted-foreground">
-                            No Image
-                          </span>
-                        </div>
-                      )}
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-y-4">
-                      <div className="h-[96px]">
-                        <Link
-                          className="group"
-                          href={`/product/${productVariant.product.slug}?variant=${productVariant.sku}`}
-                        >
-                          <div className="flex flex-col gap-y-1">
-                            <CardTitle className="group-hover:underline">
-                              {productVariant.product.name}{" "}
-                              {productVariant.attributes
-                                .map((a) => a.translatedValue || a.value)
-                                .sort()
-                                .join(" ")}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground text-pretty line-clamp-3">
-                              {productVariant.product.description}
-                            </p>
-                          </div>
-                        </Link>
-                      </div>
-                      <div className="flex flex-col gap-y-1">
-                        <p className="font-medium text-xl">
-                          {(productVariant.priceInCents / 100).toFixed(2)}€
-                        </p>
-                      </div>
-                      <AddToCartButton productVariantId={productVariant.id}>
-                        Add to Cart
-                      </AddToCartButton>
-                    </CardContent>
-                  </Card>
+                  <ProductVariantCard
+                    key={productVariant.id}
+                    variant={{
+                      ...productVariant,
+                      imageUrl: image
+                        ? getImageSrc(image.mimeType, image.base64)
+                        : undefined,
+                      productSlug: productVariant.product.slug,
+                      name: name,
+                      description: productVariant.product.description || "",
+                    }}
+                  />
                 );
               })}
             </div>
@@ -232,28 +189,25 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                 size={"sm"}
                 disabled={cursor == null}
                 className="items-center"
-              >
-                <ArrowLeftIcon className="size-3.5" />
-                <span>Previous</span>
-              </PrevButton>
+              />
               {!!nextPageLink ? (
                 <Link href={nextPageLink}>
                   <Button size={"sm"} className="items-center">
-                    <span>Next</span>
+                    <span>{pt("next")}</span>
                     <ArrowRightIcon className="size-3.5" />
                   </Button>
                 </Link>
               ) : (
                 <Button size={"sm"} disabled className="items-center">
-                  <span>Next</span>
+                  <span>{pt("next")}</span>
                   <ArrowRightIcon className="size-3.5" />
                 </Button>
               )}
             </div>
           </div>
         ) : (
-          <div className="text-muted-foreground">
-            No products found in this category.
+          <div className="text-muted-foreground text-lg">
+            {t("noProductsFound")}
           </div>
         )}
       </div>

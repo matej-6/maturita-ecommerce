@@ -25,6 +25,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type ChartData = {
   sku: string;
@@ -36,16 +37,6 @@ type Props = {
   data30Days: ChartData;
   data90Days: ChartData;
 };
-
-const chartConfig = {
-  quantitySold: {
-    label: "Quantity Sold",
-    color: "var(--chart-2)",
-  },
-  sku: {
-    color: "var(--background)",
-  },
-} satisfies ChartConfig;
 
 export function BestSellingProductVariantsChart({
   data30Days,
@@ -60,6 +51,18 @@ export function BestSellingProductVariantsChart({
       : selectedData === "30D"
       ? data30Days
       : data7Days;
+
+  const t = useTranslations("admin.dashboard.graphs");
+
+  const chartConfig = {
+    quantitySold: {
+      label: t("bestSellingProductVariants.quantitySold"),
+      color: "var(--chart-2)",
+    },
+    sku: {
+      color: "var(--background)",
+    },
+  } satisfies ChartConfig;
 
   const button90DRef = useRef<HTMLButtonElement>(null);
   const button7DRef = useRef<HTMLButtonElement>(null);
@@ -87,7 +90,7 @@ export function BestSellingProductVariantsChart({
     <Card className="p-0">
       <CardHeader className="flex flex-col items-stretch border-b sm:flex-row py-4!">
         <div className="flex flex-1/2 flex-col justify-center gap-1 p-0!">
-          <CardTitle>Best Selling Product Variants</CardTitle>
+          <CardTitle>{t("bestSellingProductVariants.title")}</CardTitle>
         </div>
         <div className="flex gap-y-0 relative">
           <div
@@ -99,21 +102,21 @@ export function BestSellingProductVariantsChart({
             onClick={() => setSelectedData("90D")}
             className="text-xs text-secondary-foreground w-[64px] h-[24px]  flex items-center justify-center"
           >
-            <span>90 Days</span>
+            <span>{t("timePeriod.90Days")}</span>
           </button>
           <button
             ref={button30DRef}
             onClick={() => setSelectedData("30D")}
             className="text-xs text-secondary-foreground w-[64px] h-[24px]  flex items-center justify-center"
           >
-            30 Days
+            <span>{t("timePeriod.30Days")}</span>
           </button>
           <button
             ref={button7DRef}
             onClick={() => setSelectedData("7D")}
             className="text-xs text-secondary-foreground w-[64px] h-[24px]  flex items-center justify-center"
           >
-            7 Days
+            <span>{t("timePeriod.7Days")}</span>
           </button>
         </div>
       </CardHeader>

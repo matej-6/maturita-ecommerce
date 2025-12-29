@@ -39,7 +39,7 @@
     "locale": "{locale, select, en {🇺🇸 English} sk {🇸🇰 Slovenský} other {Unknown}}"
   },
   "footer": {
-    "copyright": "© 2025 GoFitShop. All rights reserved.",
+    "copyright": "© 2025 GoFitShop",
     "dark-mode": {
       "light": "Light",
       "dark": "Dark",
@@ -134,6 +134,26 @@
       "viewOrder": "View Order",
       "tableDescription": "A list of your orders.",
       "errorLoadingOrders": "We're having trouble loading your orders right now. Please try again later."
+    },
+    "editAccountDetailsForm": {
+      "title": "Edit Account Details",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "submitButton": "Save changes",
+      "loadingButton": "Saving changes...",
+      "closeButton": "Close",
+      "successToast": "Account details updated successfully."
+    },
+    "changePasswordForm": {
+      "title": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "submitButton": "Change Password",
+      "loadingButton": "Changing Password...",
+      "closeButton": "Close",
+      "successToast": "Password changed successfully."
     }
   },
   "orderPage": {
@@ -153,6 +173,61 @@
     }
   },
   "admin": {
+    "sidebar": {
+      "dashboard": {
+        "label": "Dashboard",
+        "overview": "Overview"
+      },
+      "general": {
+        "label": "General",
+        "categories": "Categories",
+        "users": "Users",
+        "orders": "Orders"
+      },
+      "products": {
+        "label": "Products",
+        "products": "Products",
+        "attributes": "Attributes"
+      },
+      "account": {
+        "exit": "Exit Admin Dashboard",
+        "account": "Account"
+      }
+    },
+    "dashboard": {
+      "graphs": {
+        "timePeriod": {
+          "7Days": "7 Days",
+          "30Days": "30 Days",
+          "90Days": "90 Days"
+        },
+        "bestSellingCategories": {
+          "title": "Best Selling Categories",
+          "itemsSold": "Items Sold",
+          "totalRevenue": "Total Revenue"
+        },
+        "bestSellingProductVariants": {
+          "title": "Best Selling Product Variants",
+          "quantitySold": "Quantity Sold"
+        },
+        "revenue": {
+          "title": "Revenue",
+          "revenue": "Revenue",
+          "description": {
+            "growth": {
+              "90days": "growth in the last 90 days",
+              "30days": "growth in the last 30 days",
+              "7days": "growth in the last 7 days"
+            },
+            "decline": {
+              "90days": "decline in the last 90 days",
+              "30days": "decline in the last 30 days",
+              "7days": "decline in the last 7 days"
+            }
+          }
+        }
+      }
+    },
     "productVariant": {
       "attributeKey": {
         "form": {
@@ -293,5 +368,34 @@
         "phone": "Phone"
       }
     }
+  },
+  "cart": {
+    "title": "Cart",
+    "emptyCart": "Your cart is empty.",
+    "total": "Total",
+    "checkoutButton": "Proceed to Checkout",
+    "item": {
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "totalPrice": "Total Price"
+    },
+    "messages": {
+      "tooManyItems": "Your cart has one or more items that exceed available stock. Please reduce the quantity of these items before proceeding to checkout."
+    }
+  },
+  "categoryPage": {
+    "subcategories": "Subcategories",
+    "noProductsFound": "No products found in this category."
+  },
+  "productFiltersSheet": {
+    "title": "Filters",
+    "description": "Use the filters to narrow down your product search.",
+    "clearAll": "Clear All",
+    "applyFilters": "Apply Filters",
+    "triggerButton": "Filters"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
   }
 }

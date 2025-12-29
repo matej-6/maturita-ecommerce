@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import { useTranslations } from "next-intl";
 import { FormFieldErrorMessage } from "./formFieldErrorMessage";
 import { ResponsiveButton } from "../responsive-button";
+import { toast } from "sonner";
 
 export function UpdateUserPasswordFormSheet() {
   const [formData, setFormData] = useState({
@@ -24,6 +25,8 @@ export function UpdateUserPasswordFormSheet() {
     newPassword: "",
     confirmNewPassword: "",
   });
+
+  const t = useTranslations("accountDetailsPage");
 
   const [fieldErrors, setFieldErrors] = useState<
     Map<string, string[]> | undefined
@@ -54,11 +57,10 @@ export function UpdateUserPasswordFormSheet() {
       } else {
         setFieldErrors(undefined);
         setErrorMessage(undefined);
+        toast.success(t("changePasswordForm.successToast"));
       }
     },
   });
-
-  const t = useTranslations("accountDetailsPage");
 
   return (
     <Sheet>
@@ -70,7 +72,7 @@ export function UpdateUserPasswordFormSheet() {
 
       <SheetContent className="grow">
         <SheetHeader>
-          <SheetTitle>Change Password</SheetTitle>
+          <SheetTitle>{t("changePasswordForm.title")}</SheetTitle>
         </SheetHeader>
         <form
           onSubmit={(e) => {
@@ -80,7 +82,9 @@ export function UpdateUserPasswordFormSheet() {
           className="flex flex-col gap-y-3 sm:gap-y-6 px-4 grow"
         >
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="currentPassword">Current Password</Label>
+            <Label htmlFor="currentPassword">
+              {t("changePasswordForm.currentPassword")}
+            </Label>
             <Input
               id="currentPassword"
               type="password"
@@ -93,7 +97,9 @@ export function UpdateUserPasswordFormSheet() {
             />
           </div>
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="newPassword">New Password</Label>
+            <Label htmlFor="newPassword">
+              {t("changePasswordForm.newPassword")}
+            </Label>
             <Input
               id="newPassword"
               type="password"
@@ -106,7 +112,9 @@ export function UpdateUserPasswordFormSheet() {
             />
           </div>
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+            <Label htmlFor="confirmNewPassword">
+              {t("changePasswordForm.confirmNewPassword")}
+            </Label>
             <Input
               id="confirmNewPassword"
               type="password"
@@ -121,10 +129,14 @@ export function UpdateUserPasswordFormSheet() {
           <p className="text-red-600">{errorMessage}</p>
           <div className="flex flex-col gap-y-2 mt-auto pb-4">
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Changes"}
+              {isPending
+                ? t("changePasswordForm.loadingButton")
+                : t("changePasswordForm.submitButton")}
             </Button>
             <SheetClose asChild>
-              <Button variant={"outline"}>Close</Button>
+              <Button variant={"outline"}>
+                {t("changePasswordForm.closeButton")}
+              </Button>
             </SheetClose>
           </div>
         </form>

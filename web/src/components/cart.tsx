@@ -10,8 +10,11 @@ import {
 } from "@/lib/tanstack-query/mutations";
 import { Link } from "@/i18n/navigation";
 import { CheckoutButton } from "./checkout-button";
+import { useTranslations } from "next-intl";
 
 export function Cart() {
+  const t = useTranslations("cart");
+
   const { data: cartItems, isLoading } = useCartQuery();
 
   const { mutate: updateCartItemQuantity, isPending: isUpdating } =
@@ -23,13 +26,17 @@ export function Cart() {
     },
   });
 
+  const hasProductsMoreThanStock = cartItems?.some(
+    (item) => item.quantity > item.productVariant.stock
+  );
+
   return (
     <div className="flex flex-col gap-y-8 overflow-y-scroll grow">
       <div className="flex flex-col gap-y-4">
         {isLoading && cartItems === undefined ? (
           [...Array(3)].map((_, idx) => <CartItemSkeleton key={idx} />)
         ) : !cartItems || cartItems.length === 0 ? (
-          <span className="text-center">Your cart is empty.</span>
+          <span className="text-center">{t("emptyCart")}</span>
         ) : (
           cartItems.map((item) => {
             const thumbnailImage =
@@ -73,7 +80,7 @@ export function Cart() {
                     </div>
                     <div className="flex items-center gap-x-2">
                       <div className="flex items-center gap-x-1">
-                        <span className="text-sm">Quantity</span>
+                        <span className="text-sm">{t("item.quantity")}</span>
                         <span className="text-sm font-medium">
                           {item.quantity}
                         </span>
@@ -113,18 +120,14 @@ export function Cart() {
                         </Button>
                       </div>
                     </div>
-                    <h5 className="font-semibold">
-                      {(item.productVariant.priceInCents / 100).toFixed(2)} €
-                      each
-                    </h5>
-                    {item.productVariant.stock < item.quantity && (
-                      <div className="flex items-start gap-x-1">
-                        <AlertTriangleIcon className="text-red-500 size-6" />
-                        <span className="text-sm text-red-500">
-                          Not enough stock, please reduce quantity.
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex flex-col gap-y-0">
+                      <span className="text-sm text-muted-foreground">
+                        {t("item.unitPrice")}
+                      </span>
+                      <span className="font-semibold">
+                        {(item.productVariant.priceInCents / 100).toFixed(2)} €
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -142,9 +145,17 @@ export function Cart() {
         )}
       </div>
       {cartItems && cartItems.length > 0 && (
-        <div className="flex flex-col gap-y-2 mt-auto pb-4">
+        <div className="flex flex-col gap-y-2 mt-auto pb-4 w-full">
+          {hasProductsMoreThanStock && (
+            <div className="flex flex-col gap-y-1 p-1 sm:p-2 border border-red-200 bg-red-100 rounded-lg w-full">
+              <AlertTriangleIcon className="text-red-900 size-6" />
+              <span className="text-sm font-bold text-red-900">
+                {t("messages.tooManyItems")}
+              </span>
+            </div>
+          )}
           <div className="flex flex-col gap-y-0">
-            <h3 className="text-lg font-medium">Total</h3>
+            <h3 className="text-lg font-medium">{t("total")}</h3>
             <span className="text-2xl font-bold">
               {cartItems
                 ? (
@@ -162,7 +173,8 @@ export function Cart() {
           {/* https://docs.stripe.com/checkout/quickstart?client=react&lang=node */}
           {/* https://docs.stripe.com/checkout/quickstart */}
           {/* https://docs.stripe.com/checkout/fulfillment */}
-          <CheckoutButton />
+
+          <CheckoutButton disabled={hasProductsMoreThanStock} />
         </div>
       )}
     </div>

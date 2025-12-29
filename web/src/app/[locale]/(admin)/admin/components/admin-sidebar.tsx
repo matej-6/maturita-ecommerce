@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { getCurrentSession } from "@/app/data-access-layer/auth/queries";
 import { ElementType } from "react";
+import { getTranslations } from "next-intl/server";
 
 // https://ui.shadcn.com/blocks/sidebar#sidebar-08
 
@@ -33,36 +34,42 @@ type NavItem = {
   icon: ElementType;
 };
 
-const generalNavItems: NavItem[] = [
-  {
-    label: "Categories",
-    href: "/admin/categories",
-    icon: Layers2Icon,
-  },
-
-  {
-    label: "Users",
-    href: "/admin/users",
-    icon: UserCog2Icon,
-  },
-  {
-    label: "Orders",
-    href: "/admin/orders",
-    icon: BadgeEuroIcon,
-  },
-];
-
-const productsNavItems: NavItem[] = [
-  {
-    label: "Products",
-    href: "/admin/products",
-    icon: ShoppingBagIcon,
-  },
-  { label: "Attributes", href: "/admin/attribute-keys", icon: KeyIcon },
-];
-
 export async function AdminSidebar() {
   const currentSessionPromise = getCurrentSession();
+
+  const t = await getTranslations("admin.sidebar");
+
+  const generalNavItems: NavItem[] = [
+    {
+      label: t("general.categories"),
+      href: "/admin/categories",
+      icon: Layers2Icon,
+    },
+
+    {
+      label: t("general.users"),
+      href: "/admin/users",
+      icon: UserCog2Icon,
+    },
+    {
+      label: t("general.orders"),
+      href: "/admin/orders",
+      icon: BadgeEuroIcon,
+    },
+  ];
+
+  const productsNavItems: NavItem[] = [
+    {
+      label: t("products.products"),
+      href: "/admin/products",
+      icon: ShoppingBagIcon,
+    },
+    {
+      label: t("products.attributes"),
+      href: "/admin/attribute-keys",
+      icon: KeyIcon,
+    },
+  ];
 
   return (
     <Sidebar variant="inset">
@@ -76,7 +83,7 @@ export async function AdminSidebar() {
                     GoFitShop
                   </span>
                   <span className="text-xs truncate text-sidebar-foreground/70">
-                    Dashboard
+                    {t("dashboard.label")}
                   </span>
                 </div>
               </Link>
@@ -86,7 +93,7 @@ export async function AdminSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>General</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("general.label")}</SidebarGroupLabel>
           <SidebarMenu>
             {generalNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
@@ -100,7 +107,7 @@ export async function AdminSidebar() {
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Products</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("products.label")}</SidebarGroupLabel>
           <SidebarMenu>
             {productsNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>

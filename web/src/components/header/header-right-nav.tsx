@@ -93,7 +93,7 @@ export function HeaderRightNav() {
                   <ShoppingCartIcon className="size-6 text-secondary-foreground" />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="min-w-[300px] grow flex flex-col">
+              <SheetContent className="min-w-full xs:min-w-[400px] grow flex flex-col z-[999]">
                 <SheetHeader>
                   <SheetTitle>Cart</SheetTitle>
                 </SheetHeader>

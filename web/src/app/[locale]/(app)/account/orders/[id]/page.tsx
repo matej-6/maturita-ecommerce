@@ -52,7 +52,7 @@ export default async function OrderPage({ params }: Props) {
   const ft = await getTranslations("fields.order");
 
   return (
-    <div className="max-width-container mt-6 xl:mt-12 flex flex-col gap-y-6 sm:gap-y-12">
+    <div className="max-width-container py-6 xl:py-12 flex flex-col gap-y-6 sm:gap-y-12">
       <h1 className="text-2xl sm:text-4xl font-semibold">
         {t("order")} #{order.id}
       </h1>
@@ -77,7 +77,7 @@ export default async function OrderPage({ params }: Props) {
                 label: ft("total"),
                 node: (
                   <span className="text-base sm:text-lg">
-                    ${(order.totalInCents / 100).toFixed(2)}
+                    {(order.totalInCents / 100).toFixed(2)} €
                   </span>
                 ),
               },
@@ -212,7 +212,7 @@ export default async function OrderPage({ params }: Props) {
                       )}
                     </TableCell>
                     <TableCell>
-                      ${(item.unitPriceInCents / 100).toFixed(2)}
+                      {(item.unitPriceInCents / 100).toFixed(2)} €
                     </TableCell>
                     <TableCell>{item.quantity}</TableCell>
                   </TableRow>

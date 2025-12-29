@@ -249,7 +249,6 @@ export type Locale = {
 export type Mutation = {
   __typename?: 'Mutation';
   addItemToCart: Cart;
-  addNoteToOrder: Scalars['Void']['output'];
   addProductImage: ProductImage;
   addProductVariantImage: ProductVariantImage;
   cancelOrder: Order;
@@ -307,12 +306,6 @@ export type Mutation = {
 export type MutationAddItemToCartArgs = {
   productVariantId: Scalars['Int']['input'];
   quantity: Scalars['Int']['input'];
-};
-
-
-export type MutationAddNoteToOrderArgs = {
-  note: Scalars['String']['input'];
-  orderId: Scalars['Int']['input'];
 };
 
 
@@ -567,7 +560,6 @@ export type Order = {
   totalInCents: Scalars['Int']['output'];
   updatedAt: Scalars['DateTime']['output'];
   userId?: Maybe<Scalars['Int']['output']>;
-  userNote?: Maybe<Scalars['String']['output']>;
 };
 
 export type OrderEdge = {
@@ -1687,12 +1679,12 @@ export type CategoryQueryQueryVariables = Exact<{
 }>;
 
 
-export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
+export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
 
 export type HomepageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomepageQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', edges?: Array<{ __typename?: 'ProductVariantEdge', node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', slug: string, name?: string | null, id: number, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null } };
+export type HomepageQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', edges?: Array<{ __typename?: 'ProductVariantEdge', node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', slug: string, name?: string | null, id: number, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null }, bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', productVariant: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } }> | null };
 
 export type NewLlmTaskMutationVariables = Exact<{
   prompt: Scalars['String']['input'];
@@ -3021,6 +3013,10 @@ export const CategoryQueryDocument = new TypedDocumentString(`
           attributes {
             value
             translatedValue
+            key {
+              key
+              translatedKey
+            }
           }
         }
       }
@@ -3062,6 +3058,35 @@ export const HomepageQueryDocument = new TypedDocumentString(`
             base64
             mimeType
           }
+        }
+      }
+    }
+  }
+  bestSellingProductVariantsStatistic(limit: 6, timePeriod: LAST_SEVEN_DAYS) {
+    productVariant {
+      id
+      sku
+      priceInCents
+      thumbnailImage {
+        base64
+        mimeType
+      }
+      product {
+        id
+        slug
+        name
+        description
+        thumbnailImage {
+          base64
+          mimeType
+        }
+      }
+      attributes {
+        value
+        translatedValue
+        key {
+          key
+          translatedKey
         }
       }
     }

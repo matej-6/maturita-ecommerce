@@ -22,7 +22,6 @@ export class StatisticsResolver {
     return this.statisticsService.getRevenuePerDayStatistic(timePeriod);
   }
 
-  @UseGuards(AdminGuard)
   @Query(() => [BestSellingProductVariant], {
     nullable: true,
     name: 'bestSellingProductVariantsStatistic',

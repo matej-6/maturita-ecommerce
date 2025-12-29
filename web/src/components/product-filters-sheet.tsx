@@ -13,6 +13,7 @@ import {
 import { Button } from "./ui/button";
 import { ProductFilters, ProductFiltersProps } from "./product-filters";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   productFilterProps: ProductFiltersProps;
@@ -21,19 +22,19 @@ type Props = {
 export function ProductFiltersSheet({ productFilterProps }: Props) {
   const [open, setIsOpen] = useState(false);
 
+  const t = useTranslations("productFiltersSheet");
+
   return (
     <Sheet open={open} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="w-fit">
-          Filters
+        <Button variant="secondary" className="w-fit">
+          {t("triggerButton")}
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="min-w-[300px]">
         <SheetHeader>
-          <SheetTitle>Filters</SheetTitle>
-          <SheetDescription>
-            Use the filters to narrow down your search results.
-          </SheetDescription>
+          <SheetTitle>{t("title")}</SheetTitle>
+          <SheetDescription>{t("description")}</SheetDescription>
         </SheetHeader>
         <div className="px-4 py-2">
           <ProductFilters

@@ -235,7 +235,6 @@ type Locale {
 
 type Mutation {
   addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
-  addNoteToOrder(note: String!, orderId: Int!): Void!
   addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
   addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   cancelOrder(id: Int!): Order!
@@ -298,7 +297,6 @@ type Order {
   totalInCents: Int!
   updatedAt: DateTime!
   userId: Int
-  userNote: String
 }
 
 type OrderEdge {

@@ -39,7 +39,7 @@
     "locale": "{locale, select, sk {🇸🇰 Slovenský} en {🇺🇸 English} other {Neznámy}}"
   },
   "footer": {
-    "copyright": "© 2025 GoFitShop. Všetky práva vyhradené.",
+    "copyright": "© 2025 GoFitShop",
     "dark-mode": {
       "light": "Svetlý",
       "dark": "Tmavý",
@@ -134,6 +134,26 @@
       "viewOrder": "Pozrieť objednávku",
       "tableDescription": "Zoznam vašich objednávok.",
       "errorLoadingOrders": "Máme momentálne problém s načítaním vašich objednávok. Skúste to prosím neskôr."
+    },
+    "editAccountDetailsForm": {
+      "title": "Upraviť údaje o účte",
+      "firstName": "Meno",
+      "lastName": "Priezvisko",
+      "email": "Email",
+      "submitButton": "Uložiť zmeny",
+      "loadingButton": "Ukladám zmeny...",
+      "closeButton": "Zavrieť",
+      "successToast": "Údaje o účte boli úspešne aktualizované."
+    },
+    "changePasswordForm": {
+      "title": "Zmeniť heslo",
+      "currentPassword": "Aktuálne heslo",
+      "newPassword": "Nové heslo",
+      "confirmNewPassword": "Potvrdiť nové heslo",
+      "submitButton": "Zmeniť heslo",
+      "loadingButton": "Mením heslo...",
+      "closeButton": "Zavrieť",
+      "successToast": "Heslo bolo úspešne zmenené."
     }
   },
   "orderPage": {
@@ -153,6 +173,61 @@
     }
   },
   "admin": {
+    "sidebar": {
+      "dashboard": {
+        "label": "Panel",
+        "overview": "Prehľad"
+      },
+      "general": {
+        "label": "Všeobecné",
+        "categories": "Kategórie",
+        "users": "Používatelia",
+        "orders": "Objednávky"
+      },
+      "products": {
+        "label": "Produkty",
+        "products": "Produkty",
+        "attributes": "Atribúty"
+      },
+      "account": {
+        "exit": "Opustiť Admin Panel",
+        "account": "Účet"
+      }
+    },
+    "dashboard": {
+      "graphs": {
+        "timePeriod": {
+          "7Days": "7 Dní",
+          "30Days": "30 Dní",
+          "90Days": "90 Dní"
+        },
+        "bestSellingCategories": {
+          "title": "Najlepšie predávané kategórie",
+          "itemsSold": "Predané položky",
+          "totalRevenue": "Celkové príjmy"
+        },
+        "bestSellingProductVariants": {
+          "title": "Najlepšie predávané varianty produktov",
+          "quantitySold": "Predané množstvo"
+        },
+        "revenue": {
+          "title": "Príjmy",
+          "revenue": "Príjmy",
+          "description": {
+            "growth": {
+              "90days": "rast za posledných 90 dní",
+              "30days": "rast za posledných 30 dní",
+              "7days": "rast za posledných 7 dní"
+            },
+            "decline": {
+              "90days": "pokles za posledných 90 dní",
+              "30days": "pokles za posledných 30 dní",
+              "7days": "pokles za posledných 7 dní"
+            }
+          }
+        }
+      }
+    },
     "productVariant": {
       "attributeKey": {
         "form": {
@@ -279,19 +354,48 @@
     "order": {
       "id": "ID",
       "status": "Status",
-      "total": "Total",
-      "items": "Items",
-      "createdAt": "Created At",
-      "updatedAt": "Updated At",
+      "total": "Spolu",
+      "items": "Položky",
+      "createdAt": "Dátum vytvorenia",
+      "updatedAt": "Naposledy aktualizované",
       "shippingDetails": {
-        "line1": "Line 1",
-        "line2": "Line 2",
-        "city": "City",
-        "state": "State",
-        "postalCode": "Postal Code",
-        "country": "Country",
-        "phone": "Phone"
+        "line1": "Adresa 1",
+        "line2": "Adresa 2",
+        "city": "Mesto",
+        "state": "Štát/Provincia",
+        "postalCode": "PSČ",
+        "country": "Krajina",
+        "phone": "Telefón"
       }
     }
+  },
+  "cart": {
+    "title": "Košík",
+    "emptyCart": "Váš košík je prázdny.",
+    "total": "Spolu",
+    "checkoutButton": "Vytvoriť objednávku",
+    "item": {
+      "quantity": "Množstvo",
+      "unitPrice": "Cena/kus",
+      "totalPrice": "Celková cena"
+    },
+    "messages": {
+      "tooManyItems": " Váš košík obsahuje jednu alebo viac produktov, ktoré prekračujú dostupné množstvo v sklade. Pred vytvorením objednávky znížte množstvo týchto produktov."
+    }
+  },
+  "categoryPage": {
+    "subcategories": "Podkategórie",
+    "noProductsFound": "Nenašli sa žiadne produkty."
+  },
+  "productFiltersSheet": {
+    "title": "Filtre",
+    "description": "Použite filtre na zúženie vyhľadávania produktov.",
+    "clearAll": "Vymazať všetko",
+    "applyFilters": "Použiť filtre",
+    "triggerButton": "Filtrovať"
+  },
+  "pagination": {
+    "previous": "Predchádzajúca",
+    "next": "Ďalšia"
   }
 }

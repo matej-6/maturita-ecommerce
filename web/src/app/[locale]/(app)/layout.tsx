@@ -12,7 +12,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Header />
       <div className="min-h-screen">
         {children}
-        <div className="fixed bottom-0 right-2 sm:right-4 lg:right-32 flex justify-end z-[9999999]">
+        <div className="fixed bottom-0 right-2 sm:right-4 lg:right-32 flex justify-end z-[99]">
           <Chatbot />
         </div>
       </div>

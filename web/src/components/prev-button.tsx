@@ -4,6 +4,7 @@ import { VariantProps } from "class-variance-authority";
 import { Button, buttonVariants } from "./ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { ArrowLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function PrevButton({
   disabled,
@@ -14,6 +15,8 @@ export function PrevButton({
     asChild?: boolean;
   }) {
   const router = useRouter();
+
+  const pt = useTranslations("pagination");
 
   return (
     <Button
@@ -27,8 +30,8 @@ export function PrevButton({
     >
       {children ?? (
         <>
-          <ArrowLeftIcon className="size-3" />
-          Previous
+          <ArrowLeftIcon className="size-3.5" />
+          <span>{pt("previous")}</span>
         </>
       )}
     </Button>

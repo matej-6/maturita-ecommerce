@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import { useTranslations } from "next-intl";
 import { FormFieldErrorMessage } from "./formFieldErrorMessage";
 import { ResponsiveButton } from "../responsive-button";
+import { toast } from "sonner";
 
 type Props = {
   initialValues: EditUserFormData;
@@ -39,6 +40,8 @@ export function EditUserFormSheet({ initialValues }: Props) {
     undefined
   );
 
+  const t = useTranslations("accountDetailsPage");
+
   useEffect(() => {
     setFormData(initialValues);
   }, [initialValues]);
@@ -56,6 +59,7 @@ export function EditUserFormSheet({ initialValues }: Props) {
       } else {
         setFieldErrors(undefined);
         setErrorMessage(undefined);
+        toast.success(t("editAccountDetailsForm.successToast"));
       }
     },
   });
@@ -64,8 +68,6 @@ export function EditUserFormSheet({ initialValues }: Props) {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   };
-
-  const t = useTranslations("accountDetailsPage");
 
   return (
     <Sheet>
@@ -77,7 +79,7 @@ export function EditUserFormSheet({ initialValues }: Props) {
 
       <SheetContent className="grow">
         <SheetHeader>
-          <SheetTitle>Edit Account Details</SheetTitle>
+          <SheetTitle>{t("editAccountDetailsForm.title")}</SheetTitle>
         </SheetHeader>
         <form
           onSubmit={(e) => {
@@ -87,7 +89,7 @@ export function EditUserFormSheet({ initialValues }: Props) {
           className="flex flex-col gap-y-3 sm:gap-y-6 px-4 grow"
         >
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("editAccountDetailsForm.email")}</Label>
             <Input
               id="email"
               type="email"
@@ -100,7 +102,9 @@ export function EditUserFormSheet({ initialValues }: Props) {
             />
           </div>
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="name">First Name</Label>
+            <Label htmlFor="name">
+              {t("editAccountDetailsForm.firstName")}
+            </Label>
             <Input
               id="name"
               type="text"
@@ -110,7 +114,9 @@ export function EditUserFormSheet({ initialValues }: Props) {
             <FormFieldErrorMessage fieldErrors={fieldErrors} fieldName="name" />
           </div>
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="lastName">
+              {t("editAccountDetailsForm.lastName")}
+            </Label>
             <Input
               id="lastName"
               type="text"
@@ -125,10 +131,14 @@ export function EditUserFormSheet({ initialValues }: Props) {
           <p className="text-red-600">{errorMessage}</p>
           <div className="flex flex-col gap-y-2 mt-auto pb-4">
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Changes"}
+              {isPending
+                ? t("editAccountDetailsForm.loadingButton")
+                : t("editAccountDetailsForm.submitButton")}
             </Button>
             <SheetClose asChild>
-              <Button variant={"outline"}>Close</Button>
+              <Button variant={"outline"}>
+                {t("editAccountDetailsForm.closeButton")}
+              </Button>
             </SheetClose>
           </div>
         </form>

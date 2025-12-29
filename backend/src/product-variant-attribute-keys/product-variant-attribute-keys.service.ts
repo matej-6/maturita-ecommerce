@@ -127,7 +127,7 @@ export class ProductVariantAttributeKeysService {
   async getTranslationsByBatch(locale: string, keyIds: number[]) {
     const translations = await this.prisma.attributeKeyTranslation.findMany({
       where: {
-        id: {
+        attributeKeyId: {
           in: keyIds,
         },
         locale: {
@@ -135,6 +135,12 @@ export class ProductVariantAttributeKeysService {
         },
       },
     });
+
+    this.logger.debug(
+      `Fetched ${translations.length} translations for locale ${locale} and key IDs: ${keyIds.join(
+        ', ',
+      )}`,
+    );
 
     return keyIds.map((id) => {
       const translationsForKey = translations.filter(

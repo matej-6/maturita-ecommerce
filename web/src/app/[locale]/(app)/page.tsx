@@ -20,11 +20,13 @@ export default async function Home() {
     locale === "sk" ? SK_Banner1Desktop : EN_Banner1Desktop;
   const bannerImage = locale === "sk" ? SK_Banner1 : EN_Banner1;
 
-  const products =
-    (data?.success ? data.data?.searchProductVariants.edges : []) ?? [];
+  const products = data.success ? data.data : null;
+
+  const newArrivals = products?.searchProductVariants.edges || [];
+  const bestSellers = products?.bestSellingProductVariantsStatistic || [];
 
   return (
-    <div className="max-width-container mt-6 sm:mt-12 flex flex-col gap-y-6 sm:gap-y-12">
+    <div className="max-width-container my-6 sm:my-12 flex flex-col gap-y-6 sm:gap-y-12">
       <div>
         <Image
           src={bannerImage}
@@ -40,11 +42,43 @@ export default async function Home() {
         />
       </div>
       <div className="flex flex-col gap-y-3 sm:gap-y-6">
-        {products.length > 0 ? (
+        {newArrivals.length > 0 ? (
           <ProductsScroll
             header={t("newArrivals")}
-            variants={products.map((productVariant) => {
+            variants={newArrivals.map((productVariant) => {
               const variant = productVariant.node;
+              const thumbnailImage =
+                variant.thumbnailImage ??
+                variant.product.thumbnailImage ??
+                null;
+              const variantName =
+                variant.product.name +
+                " " +
+                variant.attributes
+                  .map((a) => a.translatedValue || a.value)
+                  .sort()
+                  .join(" ");
+              return {
+                id: variant.id,
+                name: variantName,
+                description: variant.product.description ?? undefined,
+                priceInCents: variant.priceInCents,
+                productSlug: variant.product.slug,
+                sku: variant.sku,
+                imageUrl: thumbnailImage
+                  ? getImageSrc(thumbnailImage.mimeType, thumbnailImage.base64)
+                  : undefined,
+              };
+            })}
+          />
+        ) : (
+          <p>{t("errorLoadingProducts")}</p>
+        )}
+        {bestSellers.length > 0 ? (
+          <ProductsScroll
+            header={t("bestSellers")}
+            variants={bestSellers.map((statistic) => {
+              const variant = statistic.productVariant;
               const thumbnailImage =
                 variant.thumbnailImage ??
                 variant.product.thumbnailImage ??

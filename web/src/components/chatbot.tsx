@@ -79,7 +79,9 @@ export function Chatbot() {
             {
               question: prompt,
               response: {
-                text: "An unexpected error occurred while fetching product information. Please try again later.",
+                text: !res.success
+                  ? res.message
+                  : "An unexpected error occurred while fetching product information. Please try again later.",
                 success: false,
               },
             },
@@ -97,7 +99,9 @@ export function Chatbot() {
           {
             question: prompt,
             response: {
-              text: "An unexpected error occurred while processing your request. Please try again later.",
+              text: !res.success
+                ? res.message
+                : "An unexpected error occurred while processing your request. Please try again later.",
               success: false,
             },
           },
@@ -108,7 +112,6 @@ export function Chatbot() {
 
       const llmTaskId = res.data.createLlmTask.id;
 
-      // retry every 2 seconds to get the response
       const interval = setInterval(async () => {
         const res = await getLLMTaskByIdAction(llmTaskId);
         if (res.success && res.data?.getUserLLMTaskById) {

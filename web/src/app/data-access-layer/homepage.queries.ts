@@ -37,6 +37,35 @@ const HomepageQueryDocument = graphql(`
         }
       }
     }
+    bestSellingProductVariantsStatistic(limit: 6, timePeriod: LAST_SEVEN_DAYS) {
+      productVariant {
+        id
+        sku
+        priceInCents
+        thumbnailImage {
+          base64
+          mimeType
+        }
+        product {
+          id
+          slug
+          name
+          description
+          thumbnailImage {
+            base64
+            mimeType
+          }
+        }
+        attributes {
+          value
+          translatedValue
+          key {
+            key
+            translatedKey
+          }
+        }
+      }
+    }
   }
 `);
 

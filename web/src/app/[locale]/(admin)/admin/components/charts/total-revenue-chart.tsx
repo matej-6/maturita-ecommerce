@@ -18,6 +18,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export type ChartProps = {
   data90Days: {
@@ -40,13 +41,6 @@ type ChartData = {
   label: string;
 }[];
 
-const chartConfig: ChartConfig = {
-  revenue: {
-    label: "Revenue",
-    color: "var(--chart-3)",
-  },
-};
-
 export function TotalRevenueChartBar({
   data7Days,
   data90Days,
@@ -60,6 +54,15 @@ export function TotalRevenueChartBar({
       : selectedData === "30D"
       ? data30Days
       : data7Days;
+
+  const t = useTranslations("admin.dashboard.graphs");
+
+  const chartConfig: ChartConfig = {
+    revenue: {
+      label: t("revenue.revenue"),
+      color: "var(--chart-3)",
+    },
+  };
 
   const button90DRef = useRef<HTMLButtonElement>(null);
   const button7DRef = useRef<HTMLButtonElement>(null);
@@ -87,15 +90,21 @@ export function TotalRevenueChartBar({
     <Card className="p-0">
       <CardHeader className="flex flex-col items-stretch border-b sm:flex-row py-4!">
         <div className="flex flex-1 flex-col justify-center gap-1 sm:p-0!">
-          <CardTitle>Revenue</CardTitle>
+          <CardTitle>{t("revenue.title")}</CardTitle>
           <CardDescription className="flex gap-x-2 items-center">
-            {data.trend}% Growth Last{" "}
-            {selectedData === "90D"
-              ? "90 Days"
+            {data.trend}%{" "}
+            {data.trend >= 0
+              ? selectedData === "90D"
+                ? t("revenue.description.growth.90days")
+                : selectedData === "30D"
+                ? t("revenue.description.growth.30days")
+                : t("revenue.description.growth.7days")
+              : selectedData === "90D"
+              ? t("revenue.description.decline.90days")
               : selectedData === "30D"
-              ? "30 Days"
-              : "7 Days"}{" "}
-            {data.trend > 0 ? (
+              ? t("revenue.description.decline.30days")
+              : t("revenue.description.decline.7days")}
+            {data.trend >= 0 ? (
               <TrendingUpIcon />
             ) : data.trend < 0 ? (
               <TrendingDownIcon />
@@ -112,21 +121,21 @@ export function TotalRevenueChartBar({
             onClick={() => setSelectedData("90D")}
             className="text-xs text-secondary-foreground w-[64px] h-[24px]  flex items-center justify-center"
           >
-            <span>90 Days</span>
+            <span>{t("timePeriod.90Days")}</span>
           </button>
           <button
             ref={button30DRef}
             onClick={() => setSelectedData("30D")}
             className="text-xs text-secondary-foreground w-[64px] h-[24px]  flex items-center justify-center"
           >
-            30 Days
+            {t("timePeriod.30Days")}
           </button>
           <button
             ref={button7DRef}
             onClick={() => setSelectedData("7D")}
             className="text-xs text-secondary-foreground w-[64px] h-[24px]  flex items-center justify-center"
           >
-            7 Days
+            {t("timePeriod.7Days")}
           </button>
         </div>
       </CardHeader>
@@ -148,11 +157,10 @@ export function TotalRevenueChartBar({
               dataKey="date"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
+                return date.toLocaleDateString(undefined, {
                   month: "short",
                   day: "numeric",
                 });
@@ -164,7 +172,7 @@ export function TotalRevenueChartBar({
                   className="w-[150px]"
                   nameKey="views"
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
+                    return new Date(value).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
