@@ -97,7 +97,9 @@ import { StatisticsModule } from './statistics/statistics.module';
     CategoriesModule,
     UsersModule,
     AuthModule,
-    JwtModule.register({}),
+    JwtModule.register({
+      global: true,
+    }),
     RedisModule,
     LocalesModule,
     ProductsModule,

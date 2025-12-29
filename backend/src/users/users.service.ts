@@ -16,6 +16,7 @@ import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { PaginatedUser } from './entities/user.entity';
 import { ERROR } from 'src/errors';
+import { hashPassword } from 'src/lib/hashing';
 
 @Injectable()
 export class UsersService {
@@ -23,16 +24,7 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserInput: CreateUserInput) {
-    let hashedPassword: string;
-    try {
-      hashedPassword = await bcrypt.hash(createUserInput.password, 10);
-    } catch (err) {
-      this.logger.fatal(
-        'Failed to hash password: ',
-        err instanceof Error ? err.message : err,
-      );
-      throw new InternalServerErrorException(ERROR.unknownError);
-    }
+    let hashedPassword = hashPassword(createUserInput.password);
 
     try {
       const user = await this.prisma.user.create({
@@ -185,15 +177,11 @@ export class UsersService {
       throw new BadRequestException(ERROR.badRequest);
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.hashedPassword!,
-    );
-    if (!isPasswordValid) {
+    const newHashedPassword = hashPassword(newPassword);
+    if (user.hashedPassword === newHashedPassword) {
       throw new BadRequestException('users.service.currentPasswordIncorrect');
     }
 
-    const newHashedPassword = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({
       where: { id: userId },
       data: { hashedPassword: newHashedPassword },

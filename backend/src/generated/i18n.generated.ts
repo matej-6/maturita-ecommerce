@@ -5,10 +5,18 @@
 import { Path } from "nestjs-i18n";
 /* prettier-ignore */
 export type I18nTranslations = {
+    "auth": {
+        "service": {
+            "deleteAccount": {
+                "pendingOrders": string;
+            };
+        };
+    };
     "categories": {
         "service": {
             "update": {
                 "categoryNotFound": string;
+                "cycleDetected": string;
             };
             "slugAlreadyInUse": string;
             "invalidLocaleCode": string;
@@ -30,15 +38,58 @@ export type I18nTranslations = {
         "emailInvalidVerificationCode": string;
         "unauthorizedException": string;
     };
+    "llm": {
+        "service": {
+            "emptyPrompt": string;
+            "existingJob": string;
+        };
+        "consumer": {
+            "unsupportedLanguageForEmbeddings": string;
+            "productNotFound": string;
+            "translationNotFound": string;
+            "unknownPromptCategory": string;
+            "missingProductId": string;
+            "noSimiliarProductsFound": string;
+            "noProductsFound": string;
+        };
+    };
+    "locales": {
+        "service": {
+            "localeNotFound": string;
+        };
+    };
+    "orders": {
+        "service": {
+            "cartIsEmpty": string;
+            "insufficientStock": string;
+            "orderNotFound": string;
+            "onlyPendingOrdersCanBeRetried": string;
+            "checkoutSessionExpired": string;
+            "onlyPendingOrProcessingOrdersCanBeCanceled": string;
+        };
+    };
+    "product-variant-attribute-keys": {
+        "service": {
+            "attributeKeyAlreadyExists": string;
+            "attributeKeyNotFound": string;
+            "cannotDeleteKeyInUse": string;
+            "translationAlreadyExists": string;
+            "translationNotFound": string;
+        };
+    };
     "product-variant-attributes": {
         "service": {
             "attributeAlreadyExists": string;
             "attributeKeyNotFound": string;
             "attributeNotFound": string;
+            "cannotDeleteAttributeInUse": string;
+            "translationNotFound": string;
         };
     };
     "product-variants": {
         "service": {
+            "productNotFound": string;
+            "productVariantNotFound": string;
             "update": {
                 "notFound": string;
             };
@@ -50,6 +101,7 @@ export type I18nTranslations = {
                 "productNotFound": string;
             };
             "imageNotFound": string;
+            "attributeNotFound": string;
             "slugAlreadyInUse": string;
             "editTranslation": {
                 "notFound": string;
@@ -87,6 +139,11 @@ export type I18nTranslations = {
                 "productNotFound": string;
             };
             "imageNotFound": string;
+        };
+    };
+    "users": {
+        "service": {
+            "currentPasswordIncorrect": string;
         };
     };
     "validation": {

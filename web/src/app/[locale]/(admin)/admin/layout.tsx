@@ -1,3 +1,5 @@
+"use server";
+
 import {
   SidebarInset,
   SidebarProvider,
@@ -6,12 +8,21 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { AdminSidebar } from "./components/admin-sidebar";
 import { Breadcrumbs } from "./components/breadcrumbs";
+import { getCurrentSessionAction } from "@/app/data-access-layer/auth/actions";
+import { notFound } from "next/navigation";
+import { Role } from "@/graphql/graphql";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getCurrentSessionAction();
+
+  if (session?.role !== Role.Admin) {
+    return notFound();
+  }
+
   return (
     <SidebarProvider className="bg-secondary">
       <AdminSidebar />

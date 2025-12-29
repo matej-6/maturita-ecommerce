@@ -54,16 +54,16 @@ export class SeedService implements OnModuleInit {
     const users = [
       {
         email: 'email@admin.com',
-        password: '123456789',
-        confirmPassword: '123456789',
+        password: '123123123',
+        confirmPassword: '123123123',
         name: 'Admin',
         lastName: 'User',
         role: 'ADMIN',
       },
       {
         email: 'email@user.com',
-        password: '123456789',
-        confirmPassword: '123456789',
+        password: '123123123',
+        confirmPassword: '123123123',
         name: 'Regular',
         lastName: 'User',
         role: 'USER',

@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -18,6 +17,7 @@ import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 import { ERROR } from 'src/errors';
+import { hashPassword, hashToken } from 'src/lib/hashing';
 @Injectable()
 export class AuthService {
   private readonly accessTokenExpirationInSeconds: number;
@@ -55,11 +55,10 @@ export class AuthService {
     password: string,
   ): Promise<UserDto | null> {
     const user = await this.usersService.findOneByEmail(email);
-    if (
-      user &&
-      user.hashedPassword &&
-      (await bcrypt.compare(password, user.hashedPassword))
-    ) {
+
+    const hashedPassword = hashPassword(password);
+
+    if (user && user.hashedPassword === hashedPassword) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { hashedPassword, ...rest } = user;
       return rest;
@@ -67,101 +66,54 @@ export class AuthService {
     return null;
   }
 
-  async verifyUserRefreshToken(
-    refreshToken: string,
-    userId: number,
-  ): Promise<UserDto> {
-    try {
-      const refreshTokenSessions =
-        await this.prismaService.refreshTokenSession.findMany({
-          where: {
-            expiresAt: {
-              gte: new Date(Date.now()),
-            },
-            userId: userId,
-          },
-          include: {
-            user: {
-              omit: {
-                hashedPassword: true,
-              },
+  async verifyUserRefreshToken(hashedToken: string, userId: number) {
+    const refreshTokenSession =
+      await this.prismaService.refreshTokenSession.findFirst({
+        where: {
+          userId: userId,
+          token: hashedToken,
+        },
+        include: {
+          user: {
+            omit: {
+              hashedPassword: true,
             },
           },
-        });
+        },
+      });
 
-      if (refreshTokenSessions.length === 0) {
-        this.logger.warn(
-          `No refresh token sessions found for this user id: ${userId}`,
-        );
-        throw new UnauthorizedException(ERROR.unauthorizedException);
-      }
-
-      let refreshTokenSession = null;
-
-      for (const session of refreshTokenSessions) {
-        const isValid = await bcrypt.compare(refreshToken, session.token);
-        if (isValid) {
-          refreshTokenSession = session;
-          break;
-        }
-      }
-      if (refreshTokenSession === null) {
-        this.logger.warn(
-          `No refresh token sessions matches for this user id: ${userId}`,
-        );
-        throw new UnauthorizedException(ERROR.unauthorizedException);
-      }
-
-      if (refreshTokenSession.blacklisted === true) {
-        this.logger.warn(
-          `Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`,
-        );
-        await this.signOutAll(refreshTokenSession.userId);
-        throw new UnauthorizedException(ERROR.unauthorizedException);
-      }
-
-      return refreshTokenSession.user;
-    } catch (error) {
-      this.logger.error(
-        'Error verifying user refresh token: ',
-        error instanceof Error ? error.message : JSON.stringify(error),
+    if (!refreshTokenSession) {
+      this.logger.warn(
+        `No refresh token sessions found for this user id: ${userId}`,
       );
       throw new UnauthorizedException(ERROR.unauthorizedException);
     }
+
+    if (refreshTokenSession.expiresAt < new Date()) {
+      this.logger.warn('Expired refresh token used.');
+      throw new UnauthorizedException(ERROR.unauthorizedException);
+    }
+
+    if (refreshTokenSession.blacklisted === true) {
+      this.logger.warn(
+        `Blacklisted refresh token used by user with id: ${userId}`,
+      );
+      await this.signOutAll(refreshTokenSession.userId);
+      throw new UnauthorizedException(ERROR.unauthorizedException);
+    }
+
+    return { user: refreshTokenSession.user, session: refreshTokenSession };
   }
 
-  async blacklistRefreshToken(
-    refreshToken: string,
-    userId: number,
-  ): Promise<void> {
-    try {
-      const refreshTokenSessions =
-        await this.prismaService.refreshTokenSession.findMany({
-          where: {
-            expiresAt: {
-              gte: new Date(),
-            },
-            userId: userId,
-          },
-        });
-
-      for (const session of refreshTokenSessions) {
-        const isValid = await bcrypt.compare(refreshToken, session.token);
-        if (isValid) {
-          await this.prismaService.refreshTokenSession.update({
-            where: {
-              id: session.id,
-            },
-            data: {
-              blacklisted: true,
-            },
-          });
-          break;
-        }
-      }
-    } catch (error) {
-      this.logger.error('Error blacklisting refresh token: ', error);
-    }
+  async blacklistRefreshToken(sessionId: number): Promise<void> {
+    await this.prismaService.refreshTokenSession.update({
+      where: {
+        id: sessionId,
+      },
+      data: {
+        blacklisted: true,
+      },
+    });
   }
 
   setAuthCookies(
@@ -219,8 +171,23 @@ export class AuthService {
         email: user.email,
       };
 
+      const refreshTokenSession =
+        await this.prismaService.refreshTokenSession.create({
+          data: {
+            user: {
+              connect: {
+                id: user.id,
+              },
+            },
+            token: '',
+            expiresAt: refreshTokenExpirationDate,
+            blacklisted: false,
+          },
+        });
+
       const refreshTokenPayload = {
         userId: user.id,
+        sessionId: refreshTokenSession.id,
       };
 
       const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
@@ -236,18 +203,14 @@ export class AuthService {
         },
       );
 
-      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+      const hashedRefreshToken = this.hashToken(refreshToken);
 
-      await this.prismaService.refreshTokenSession.create({
+      await this.prismaService.refreshTokenSession.update({
+        where: {
+          id: refreshTokenSession.id,
+        },
         data: {
-          user: {
-            connect: {
-              id: user.id,
-            },
-          },
           token: hashedRefreshToken,
-          expiresAt: refreshTokenExpirationDate,
-          blacklisted: false,
         },
       });
 
@@ -261,6 +224,10 @@ export class AuthService {
       this.logger.error(error);
       throw new InternalServerErrorException(ERROR.unknownError);
     }
+  }
+
+  hashToken(token: string): string {
+    return hashToken(token);
   }
 
   async signOutAll(userId: number) {
@@ -279,41 +246,14 @@ export class AuthService {
   }
 
   async signOut(refreshToken: string, userId: number) {
-    const refreshTokenSessions =
-      await this.prismaService.refreshTokenSession.findMany({
-        where: {
-          userId: userId,
-          expiresAt: {
-            gte: new Date(),
-          },
-        },
-      });
+    const hashedRefreshToken = this.hashToken(refreshToken);
 
-    for (const session of refreshTokenSessions) {
-      const isValid = await bcrypt.compare(refreshToken, session.token);
-      if (isValid) {
-        if (session.blacklisted) {
-          this.logger.warn(
-            `Blacklisted refresh token used: ${refreshToken} by user with id: ${userId}`,
-          );
-          await this.signOutAll(userId);
-          this.logger.warn('Invalid refresh token used.');
-          throw new BadRequestException(ERROR.badRequest);
-        }
-        await this.prismaService.refreshTokenSession.update({
-          where: {
-            id: session.id,
-          },
-          data: {
-            blacklisted: true,
-          },
-        });
-        return;
-      }
-    }
-
-    this.logger.warn('Refresh token to sign out not foundd.');
-    throw new BadRequestException(ERROR.badRequest);
+    await this.prismaService.refreshTokenSession.delete({
+      where: {
+        userId: userId,
+        token: hashedRefreshToken,
+      },
+    });
   }
 
   async register(registerDto: RegisterDto) {
@@ -323,7 +263,7 @@ export class AuthService {
           firstName: registerDto.firstName,
           lastName: registerDto.lastName,
           email: registerDto.email,
-          hashedPassword: await bcrypt.hash(registerDto.password, 10),
+          hashedPassword: hashPassword(registerDto.password),
           role: Role.USER,
         },
       });
