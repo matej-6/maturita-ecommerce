@@ -150,12 +150,6 @@ input CreateProductVariantInput {
   stock: Int!
 }
 
-type DataPoint {
-  label: String!
-  x: String!
-  y: String!
-}
-
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -258,7 +252,7 @@ type Mutation {
   updateCartItemQuantity(cartItemId: Int!, quantity: Int!): Cart!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateCategoryTranslation(editTranslationInput: EditCategoryTranslationInput!): CategoryTranslation!
-  updateOrder(input: UpdateOrderDto!, orderId: Int!): Boolean!
+  updateOrder(input: UpdateOrderDto!, orderId: Int!): Void!
   updatePassword(input: UpdatePasswordInput!): Void!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
@@ -325,7 +319,7 @@ enum OrderStatus {
 
 type OverallTrendStatistic {
   percentChange: Float!
-  points: [DataPoint!]!
+  points: [RevenueDataPoint!]!
   timePeriod: TimePeriod!
 }
 
@@ -575,6 +569,11 @@ type Query {
   revenuePerDayStatistic(timePeriod: TimePeriod!): OverallTrendStatistic
   searchProductVariants(ascending: Boolean, attributeFilters: [[String!]!], cursor: Int, pageSize: Int = 10, searchTerm: String, sortBy: String): PaginatedProductVariant!
   user(id: ID!): User!
+}
+
+type RevenueDataPoint {
+  date: String!
+  revenue: Float!
 }
 
 """User role"""

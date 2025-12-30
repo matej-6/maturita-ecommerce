@@ -20,6 +20,7 @@ import { PaginationArgs } from 'src/lib/pagination.args';
 import { OrderFindAllQueryArgs, OrderSortingArgs } from './order.resolver.args';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { GraphQLVoid } from 'graphql-scalars';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -104,11 +105,12 @@ export class OrdersResolver {
   }
 
   @UseGuards(AdminGuard)
-  @Mutation(() => Boolean, { name: 'updateOrder' })
+  @Mutation(() => GraphQLVoid, { name: 'updateOrder' })
   async updateOrder(
     @Args('orderId', { type: () => Int }) orderId: number,
     @Args('input', { type: () => UpdateOrderDto }) input: UpdateOrderDto,
   ) {
-    return this.ordersService.updateOrder(orderId, input);
+    await this.ordersService.updateOrder(orderId, input);
+    return GraphQLVoid;
   }
 }

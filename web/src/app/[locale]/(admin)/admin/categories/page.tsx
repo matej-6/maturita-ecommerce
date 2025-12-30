@@ -1,67 +1,126 @@
 "use server";
 
-import { getCategoriesTableDataAction } from "@/app/data-access-layer/admin/category/actions";
+import {
+  CategoreisPagingArgs,
+  CategoriesFilterArgs,
+  CategoriesSortingArgs,
+  getCategoriesTableDataAction,
+} from "@/app/data-access-layer/admin/category/actions";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { getQueryClient } from "@/lib/get-query-client";
 import { CategoriesTableWithFilters } from "../components/categories/categories-table-with-filters";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
-export default async function CategoriesPage() {
-  const initialSortingArgs = {
-    ascending: null,
-    sortBy: null,
+type Props = {
+  searchParams: {
+    [key: string]: string | string[] | undefined;
+  };
+};
+
+export default async function CategoriesPage({ searchParams }: Props) {
+  const sp = await searchParams;
+
+  const sortingArgs: CategoriesSortingArgs = {
+    ascending:
+      sp.ascending === "true" ? true : sp.ascending === "false" ? false : null,
+    sortBy: typeof sp.sortBy === "string" ? sp.sortBy : null,
   };
 
-  const initialTableArgs = {
-    id: null,
-    slug: null,
-    parentCategoryId: 0,
-    isSetup: null,
-    isPublic: null,
+  const tableArgs: CategoriesFilterArgs = {
+    id: typeof sp.id === "string" ? parseInt(sp.id, 10) || null : null,
+    slug: typeof sp.slug === "string" ? sp.slug : null,
+    parentCategoryId:
+      sp.parentCategoryId === "null"
+        ? null
+        : typeof sp.parentCategoryId === "string"
+        ? parseInt(sp.parentCategoryId, 10) ?? 0
+        : 0,
+    isSetup:
+      sp.isSetup === "true" ? true : sp.isSetup === "false" ? false : null,
+    isPublic:
+      sp.isPublic === "true" ? true : sp.isPublic === "false" ? false : null,
   };
 
-  const initialPagingArgs = {
-    cursor: null,
-    pageSize: 25,
+  const pagingArgs: CategoreisPagingArgs & {
+    nextCursor: number | null;
+  } = {
+    cursor:
+      typeof sp.cursor === "string" ? parseInt(sp.cursor, 10) ?? null : null,
+    pageSize:
+      typeof sp.pageSize === "string" ? parseInt(sp.pageSize, 10) ?? 25 : 25,
+    nextCursor: null,
   };
 
-  const queryClient = getQueryClient();
-  const queryKey = [
-    "categories",
-    { ...initialTableArgs, ...initialPagingArgs, ...initialSortingArgs },
-  ];
-  await queryClient.prefetchQuery({
-    queryKey: queryKey,
-    queryFn: async () => {
-      const res = await getCategoriesTableDataAction(
-        initialPagingArgs,
-        initialSortingArgs,
-        initialTableArgs
-      );
-      if (!res.success) {
-        throw new Error(res.message);
-      }
-      return res.data;
-    },
+  const data = await getCategoriesTableDataAction(
+    pagingArgs,
+    sortingArgs,
+    tableArgs
+  );
+
+  pagingArgs.nextCursor =
+    data.success && data.data?.hasNextPage
+      ? data.data.edges?.slice(-1)[0].cursor ?? null
+      : null;
+
+  const urlSearchParams = new URLSearchParams({
+    ...(pagingArgs.cursor ? { cursor: pagingArgs.cursor.toString() } : {}),
+    ...(pagingArgs.pageSize
+      ? { pageSize: pagingArgs.pageSize.toString() }
+      : {}),
+    ...(sortingArgs.sortBy ? { sortBy: sortingArgs.sortBy } : {}),
+    ...(sortingArgs.ascending !== null
+      ? { ascending: sortingArgs.ascending.toString() }
+      : {}),
+    ...(tableArgs.id ? { id: tableArgs.id.toString() } : {}),
+    ...(tableArgs.slug ? { slug: tableArgs.slug.toString() } : {}),
+    ...(tableArgs.parentCategoryId
+      ? { parentCategoryId: tableArgs.parentCategoryId.toString() }
+      : {}),
+    ...(tableArgs.isSetup !== null
+      ? { isSetup: tableArgs.isSetup.toString() }
+      : {}),
+    ...(tableArgs.isPublic !== null
+      ? { isPublic: tableArgs.isPublic.toString() }
+      : {}),
   });
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex-1 flex flex-col gap-4">
-        <div>
-          <Link href={"categories/new-category"}>
-            <Button>Add New Category</Button>
-          </Link>
-        </div>
-        <div className="bg-muted/50 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
-          <CategoriesTableWithFilters
-            initialPagingArgs={initialPagingArgs}
-            initialSortingArgs={initialSortingArgs}
-            initialTableArgs={initialTableArgs}
-          />
-        </div>
+    <div className="flex-1 flex flex-col gap-4">
+      <div>
+        <Link href={"categories/new-category"}>
+          <Button>Add New Category</Button>
+        </Link>
       </div>
-    </HydrationBoundary>
+      <div className="bg-muted/50 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min flex flex-col">
+        <CategoriesTableWithFilters
+          initialPagingArgs={pagingArgs}
+          initialSortingArgs={sortingArgs}
+          initialTableArgs={tableArgs}
+          searchParams={urlSearchParams.toString()}
+          sortableColumns={[
+            "id",
+            "slug",
+            "isPublic",
+            "isSetup",
+            "createdAt",
+            "updatedAt",
+            "productsCount",
+          ]}
+          data={
+            data.success
+              ? data.data?.edges?.map((c) => ({
+                  id: c.node.id,
+                  slug: c.node.slug,
+                  parentCategoryId: c.node.parentCategoryId || null,
+                  isPublic: c.node.isPublic,
+                  isSetup: c.node.isSetup,
+                  createdAt: new Date(c.node.createdAt),
+                  updatedAt: new Date(c.node.updatedAt),
+                  productsCount: c.node.productsCount,
+                })) || null
+              : null
+          }
+        />
+      </div>
+    </div>
   );
 }

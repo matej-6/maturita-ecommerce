@@ -41,9 +41,8 @@ export const AdminPageStatisticsQueryDocument = graphql(`
     ) {
       percentChange
       points {
-        x
-        y
-        label
+        date
+        revenue
       }
       timePeriod
     }
@@ -52,9 +51,8 @@ export const AdminPageStatisticsQueryDocument = graphql(`
     ) {
       percentChange
       points {
-        x
-        y
-        label
+        date
+        revenue
       }
       timePeriod
     }
@@ -63,9 +61,8 @@ export const AdminPageStatisticsQueryDocument = graphql(`
     ) {
       percentChange
       points {
-        x
-        y
-        label
+        date
+        revenue
       }
       timePeriod
     }

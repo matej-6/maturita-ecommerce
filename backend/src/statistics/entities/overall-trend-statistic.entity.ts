@@ -9,18 +9,15 @@ export class OverallTrendStatistic {
   @Field(() => TimePeriod)
   timePeriod: TimePeriod;
 
-  @Field(() => [DataPoint])
-  points: DataPoint[];
+  @Field(() => [RevenueDataPoint])
+  points: RevenueDataPoint[];
 }
 
 @ObjectType()
-export class DataPoint {
+export class RevenueDataPoint {
   @Field(() => String)
-  x: string;
+  date: string;
 
-  @Field(() => String)
-  y: string;
-
-  @Field(() => String)
-  label: string;
+  @Field(() => Number)
+  revenue: number;
 }

@@ -182,13 +182,6 @@ export type CreateProductVariantInput = {
   stock: Scalars['Int']['input'];
 };
 
-export type DataPoint = {
-  __typename?: 'DataPoint';
-  label: Scalars['String']['output'];
-  x: Scalars['String']['output'];
-  y: Scalars['String']['output'];
-};
-
 export type EditCategoryTranslationInput = {
   /** category translation id */
   categoryTranslationId: Scalars['Int']['input'];
@@ -289,7 +282,7 @@ export type Mutation = {
   updateCartItemQuantity: Cart;
   updateCategory: Category;
   updateCategoryTranslation: CategoryTranslation;
-  updateOrder: Scalars['Boolean']['output'];
+  updateOrder: Scalars['Void']['output'];
   updatePassword: Scalars['Void']['output'];
   updateProduct: Product;
   updateProductVariant: ProductVariant;
@@ -609,7 +602,7 @@ export enum OrderStatus {
 export type OverallTrendStatistic = {
   __typename?: 'OverallTrendStatistic';
   percentChange: Scalars['Float']['output'];
-  points: Array<DataPoint>;
+  points: Array<RevenueDataPoint>;
   timePeriod: TimePeriod;
 };
 
@@ -1033,6 +1026,12 @@ export type QueryUserArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type RevenueDataPoint = {
+  __typename?: 'RevenueDataPoint';
+  date: Scalars['String']['output'];
+  revenue: Scalars['Float']['output'];
+};
+
 /** User role */
 export enum Role {
   Admin = 'ADMIN',
@@ -1255,7 +1254,7 @@ export type AdminUpdateOrderMutationVariables = Exact<{
 }>;
 
 
-export type AdminUpdateOrderMutation = { __typename?: 'Mutation', updateOrder: boolean };
+export type AdminUpdateOrderMutation = { __typename?: 'Mutation', updateOrder: any };
 
 export type AdminOrdersPage_QueryDocumentQueryVariables = Exact<{
   cursor?: InputMaybe<Scalars['Int']['input']>;
@@ -1579,26 +1578,10 @@ export type ProductsPage_QueryDocumentQueryVariables = Exact<{
 
 export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null } };
 
-export type RevenuePerDayLastNinetyDaysFragmentFragment = { __typename?: 'Query', revenuePerDayStatistic?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null } & { ' $fragmentName'?: 'RevenuePerDayLastNinetyDaysFragmentFragment' };
-
-export type RevenuePerDayLastSevenDaysFragmentFragment = { __typename?: 'Query', revenuePerDayStatistic?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null } & { ' $fragmentName'?: 'RevenuePerDayLastSevenDaysFragmentFragment' };
-
-export type BestSellingCategoriesStatisticLastSevenDaysFragmentFragment = { __typename?: 'Query', bestSellingCategoriesStatistic?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null } & { ' $fragmentName'?: 'BestSellingCategoriesStatisticLastSevenDaysFragmentFragment' };
-
-export type BestSellingProductVariantsStatisticLastSevenDaysFragmentFragment = { __typename?: 'Query', bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, product: { __typename?: 'Product', id: number, name?: string | null, slug: string } } }> | null } & { ' $fragmentName'?: 'BestSellingProductVariantsStatisticLastSevenDaysFragmentFragment' };
-
-export type BestSellingCategoriesStatisticLastThirtyDaysFragmentFragment = { __typename?: 'Query', bestSellingCategoriesStatistic?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null } & { ' $fragmentName'?: 'BestSellingCategoriesStatisticLastThirtyDaysFragmentFragment' };
-
-export type BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragment = { __typename?: 'Query', bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, product: { __typename?: 'Product', id: number, name?: string | null, slug: string } } }> | null } & { ' $fragmentName'?: 'BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragment' };
-
-export type BestSellingCategoriesStatisticLastNinetyDaysFragmentFragment = { __typename?: 'Query', bestSellingCategoriesStatistic?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null } & { ' $fragmentName'?: 'BestSellingCategoriesStatisticLastNinetyDaysFragmentFragment' };
-
-export type BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragment = { __typename?: 'Query', bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, product: { __typename?: 'Product', id: number, name?: string | null, slug: string } } }> | null } & { ' $fragmentName'?: 'BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragment' };
-
 export type AdminPageStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AdminPageStatisticsQuery = { __typename?: 'Query', BestSellingCategoriesStatisticLastSevenDays?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, RevenuePerDayLastNinetyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, RevenuePerDayLastSevenDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, RevenuePerDayLastThirtyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'DataPoint', x: string, y: string, label: string }> } | null, BestSellingProductVariantsStatisticLastSevenDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null };
+export type AdminPageStatisticsQuery = { __typename?: 'Query', BestSellingCategoriesStatisticLastSevenDays?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, BestSellingCategoriesStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingCategory', itemsSold: number, totalRevenueInCents: number, category: { __typename?: 'Category', id: number, slug: string } }> | null, RevenuePerDayLastNinetyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'RevenueDataPoint', date: string, revenue: number }> } | null, RevenuePerDayLastSevenDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'RevenueDataPoint', date: string, revenue: number }> } | null, RevenuePerDayLastThirtyDaysFragment?: { __typename?: 'OverallTrendStatistic', percentChange: number, timePeriod: TimePeriod, points: Array<{ __typename?: 'RevenueDataPoint', date: string, revenue: number }> } | null, BestSellingProductVariantsStatisticLastSevenDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastThirtyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null, BestSellingProductVariantsStatisticLastNinetyDaysFragment?: Array<{ __typename?: 'BestSellingProductVariant', quantitySold: number, productVariant: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, product: { __typename?: 'Product', id: number, slug: string, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null };
 
 export type AdminUpdateUserRoleMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1830,116 +1813,6 @@ export const Locales_QueryFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"Locales_QueryFragment"}) as unknown as TypedDocumentString<Locales_QueryFragmentFragment, unknown>;
-export const RevenuePerDayLastNinetyDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment RevenuePerDayLastNinetyDaysFragment on Query {
-  revenuePerDayStatistic(timePeriod: LAST_NINETY_DAYS) {
-    percentChange
-    points {
-      x
-      y
-      label
-    }
-    timePeriod
-  }
-}
-    `, {"fragmentName":"RevenuePerDayLastNinetyDaysFragment"}) as unknown as TypedDocumentString<RevenuePerDayLastNinetyDaysFragmentFragment, unknown>;
-export const RevenuePerDayLastSevenDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment RevenuePerDayLastSevenDaysFragment on Query {
-  revenuePerDayStatistic(timePeriod: LAST_SEVEN_DAYS) {
-    percentChange
-    points {
-      x
-      y
-      label
-    }
-    timePeriod
-  }
-}
-    `, {"fragmentName":"RevenuePerDayLastSevenDaysFragment"}) as unknown as TypedDocumentString<RevenuePerDayLastSevenDaysFragmentFragment, unknown>;
-export const BestSellingCategoriesStatisticLastSevenDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment BestSellingCategoriesStatisticLastSevenDaysFragment on Query {
-  bestSellingCategoriesStatistic(limit: 5, timePeriod: LAST_SEVEN_DAYS) {
-    category {
-      id
-      slug
-    }
-    itemsSold
-    totalRevenueInCents
-  }
-}
-    `, {"fragmentName":"BestSellingCategoriesStatisticLastSevenDaysFragment"}) as unknown as TypedDocumentString<BestSellingCategoriesStatisticLastSevenDaysFragmentFragment, unknown>;
-export const BestSellingProductVariantsStatisticLastSevenDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment BestSellingProductVariantsStatisticLastSevenDaysFragment on Query {
-  bestSellingProductVariantsStatistic(limit: 5, timePeriod: LAST_SEVEN_DAYS) {
-    productVariant {
-      id
-      sku
-      product {
-        id
-        name
-        slug
-      }
-    }
-    quantitySold
-  }
-}
-    `, {"fragmentName":"BestSellingProductVariantsStatisticLastSevenDaysFragment"}) as unknown as TypedDocumentString<BestSellingProductVariantsStatisticLastSevenDaysFragmentFragment, unknown>;
-export const BestSellingCategoriesStatisticLastThirtyDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment BestSellingCategoriesStatisticLastThirtyDaysFragment on Query {
-  bestSellingCategoriesStatistic(limit: 5, timePeriod: LAST_THIRTY_DAYS) {
-    category {
-      id
-      slug
-    }
-    itemsSold
-    totalRevenueInCents
-  }
-}
-    `, {"fragmentName":"BestSellingCategoriesStatisticLastThirtyDaysFragment"}) as unknown as TypedDocumentString<BestSellingCategoriesStatisticLastThirtyDaysFragmentFragment, unknown>;
-export const BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment BestSellingProductVariantsStatisticLastThirtyDaysFragment on Query {
-  bestSellingProductVariantsStatistic(limit: 5, timePeriod: LAST_THIRTY_DAYS) {
-    productVariant {
-      id
-      sku
-      product {
-        id
-        name
-        slug
-      }
-    }
-    quantitySold
-  }
-}
-    `, {"fragmentName":"BestSellingProductVariantsStatisticLastThirtyDaysFragment"}) as unknown as TypedDocumentString<BestSellingProductVariantsStatisticLastThirtyDaysFragmentFragment, unknown>;
-export const BestSellingCategoriesStatisticLastNinetyDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment BestSellingCategoriesStatisticLastNinetyDaysFragment on Query {
-  bestSellingCategoriesStatistic(limit: 5, timePeriod: LAST_NINETY_DAYS) {
-    category {
-      id
-      slug
-    }
-    itemsSold
-    totalRevenueInCents
-  }
-}
-    `, {"fragmentName":"BestSellingCategoriesStatisticLastNinetyDaysFragment"}) as unknown as TypedDocumentString<BestSellingCategoriesStatisticLastNinetyDaysFragmentFragment, unknown>;
-export const BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragmentDoc = new TypedDocumentString(`
-    fragment BestSellingProductVariantsStatisticLastNinetyDaysFragment on Query {
-  bestSellingProductVariantsStatistic(limit: 5, timePeriod: LAST_NINETY_DAYS) {
-    productVariant {
-      id
-      sku
-      product {
-        id
-        name
-        slug
-      }
-    }
-    quantitySold
-  }
-}
-    `, {"fragmentName":"BestSellingProductVariantsStatisticLastNinetyDaysFragment"}) as unknown as TypedDocumentString<BestSellingProductVariantsStatisticLastNinetyDaysFragmentFragment, unknown>;
 export const MeFragmentFragmentDoc = new TypedDocumentString(`
     fragment MeFragment on User {
   id
@@ -2697,9 +2570,8 @@ export const AdminPageStatisticsDocument = new TypedDocumentString(`
   ) {
     percentChange
     points {
-      x
-      y
-      label
+      date
+      revenue
     }
     timePeriod
   }
@@ -2708,9 +2580,8 @@ export const AdminPageStatisticsDocument = new TypedDocumentString(`
   ) {
     percentChange
     points {
-      x
-      y
-      label
+      date
+      revenue
     }
     timePeriod
   }
@@ -2719,9 +2590,8 @@ export const AdminPageStatisticsDocument = new TypedDocumentString(`
   ) {
     percentChange
     points {
-      x
-      y
-      label
+      date
+      revenue
     }
     timePeriod
   }

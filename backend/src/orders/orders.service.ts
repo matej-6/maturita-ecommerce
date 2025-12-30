@@ -265,8 +265,8 @@ export class OrdersService {
         },
       })),
       mode: 'payment',
-      success_url: `${this.nextjsUrl}/orders/${order.id}`,
-      cancel_url: `${this.nextjsUrl}/orders/${order.id}`,
+      success_url: `${this.nextjsUrl}/account/orders/${order.id}`,
+      cancel_url: `${this.nextjsUrl}/account/orders/${order.id}`,
     });
 
     await this.prisma.order.update({

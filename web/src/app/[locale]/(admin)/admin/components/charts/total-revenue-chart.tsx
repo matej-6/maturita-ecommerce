@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 export type ChartProps = {
@@ -37,8 +37,7 @@ export type ChartProps = {
 
 type ChartData = {
   date: string;
-  revenue: string;
-  label: string;
+  revenue: number;
 }[];
 
 export function TotalRevenueChartBar({
@@ -183,7 +182,7 @@ export function TotalRevenueChartBar({
             />
             <Bar
               dataKey={"revenue"}
-              label={"label"}
+              label={"revenue"}
               fill={`var(--color-chart-3)`}
             />
           </BarChart>

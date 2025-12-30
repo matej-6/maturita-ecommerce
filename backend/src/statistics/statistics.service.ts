@@ -74,15 +74,13 @@ export class StatisticsService {
       );
       if (orderForDate) {
         points.push({
-          x: dateStr,
-          y: (orderForDate.totalInCents / 100).toFixed(2).toString(),
-          label: dateStr,
+          date: dateStr,
+          revenue: Number((orderForDate.totalInCents / 100).toFixed(2)),
         });
       } else {
         points.push({
-          x: dateStr,
-          y: '0.00',
-          label: dateStr,
+          date: dateStr,
+          revenue: 0,
         });
       }
     }

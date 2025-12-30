@@ -12,22 +12,28 @@ import {
 } from "@/graphql/graphql";
 import { handleGraphqlError } from "../handleGraphqlFormError";
 
+export type CategoreisPagingArgs = {
+  cursor: number | null;
+  pageSize: number;
+};
+
+export type CategoriesSortingArgs = {
+  sortBy: string | null;
+  ascending: boolean | null;
+};
+
+export type CategoriesFilterArgs = {
+  id: number | null;
+  slug: string | null;
+  parentCategoryId: number | null;
+  isSetup: boolean | null;
+  isPublic: boolean | null;
+};
+
 export async function getCategoriesTableDataAction(
-  pagingArgs: {
-    cursor: number | null;
-    pageSize: number;
-  },
-  sortingArgs: {
-    sortBy: string | null;
-    ascending: boolean | null;
-  },
-  filterArgs: {
-    id: number | null;
-    slug: string | null;
-    parentCategoryId: number | null;
-    isSetup: boolean | null;
-    isPublic: boolean | null;
-  }
+  pagingArgs: CategoreisPagingArgs,
+  sortingArgs: CategoriesSortingArgs,
+  filterArgs: CategoriesFilterArgs
 ): Promise<
   ActionResponse<
     | NonNullable<
