@@ -267,12 +267,43 @@
       }
     },
     "categories": {
-      "newCategory": {
-        "page": {
-          "title": "Vytvoriť novú kategóriu"
+      "table": {
+        "noRecordsFound": "Neboli nájdené žiadne kategórie.",
+        "filters": {
+          "openFilters": "Otvoriť filtre",
+          "closeFilters": "Zatvoriť filtre",
+          "clearFilters": "Vymazať filtre",
+          "title": "Filtre",
+          "isPublicSelect": {
+            "any": "Všetko",
+            "true": "Verejné",
+            "false": "Súkromné"
+          },
+          "isSetupSelect": {
+            "any": "Všetko",
+            "true": "Nastavené",
+            "false": "Nenastavené"
+          },
+          "applyFilters": "Použiť filtre"
         },
+        "actions": {
+          "title": "Možnosti",
+          "visitPage": "Navštíviť stránku",
+          "edit": "Upraviť"
+        },
+        "yes": "Áno",
+        "no": "Nie",
+        "previous": "Predchádzajúca",
+        "next": "Ďalšia",
+        "filterSubcategories": "Filtrovať podľa podkategórií"
+      },
+      "newCategory": {
+        "button": "Pridať novú kategóriu",
         "form": {
+          "title": "Pridať novú kategóriu",
+          "slug": "Slug",
           "submitButton": "Vytvoriť kategóriu",
+          "closeButton": "Zavrieť",
           "parentCategoryId": {
             "combobox": {
               "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
@@ -307,10 +338,16 @@
   },
   "fields": {
     "category": {
+      "id": "ID",
       "slug": "Slug",
-      "parentCategoryId": "ID nadkategórie",
+      "parentCategoryId": "ID rodičovskej kategórie",
       "name": "Meno",
-      "description": "Popis"
+      "description": "Popis",
+      "isSetup": "Je nastavený",
+      "isPublic": "Je verejný",
+      "createdAt": "Dátum vytvorenia",
+      "updatedAt": "Naposledy aktualizované",
+      "productsCount": "Počet produktov"
     },
     "locale": {
       "code": "Kód lokality"

@@ -11,6 +11,8 @@ import {
   EditCategoryMutationMutation,
 } from "@/graphql/graphql";
 import { handleGraphqlError } from "../handleGraphqlFormError";
+import { getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 
 export type CategoreisPagingArgs = {
   cursor: number | null;
@@ -35,12 +37,9 @@ export async function getCategoriesTableDataAction(
   sortingArgs: CategoriesSortingArgs,
   filterArgs: CategoriesFilterArgs
 ): Promise<
-  ActionResponse<
-    | NonNullable<
-        ExecutionResult<CategoriesTable_QueryDocumentQuery>["data"]
-      >["paginatedCategories"]
-    | null
-  >
+  ActionResponse<NonNullable<
+    ExecutionResult<CategoriesTable_QueryDocumentQuery>["data"]
+  > | null>
 > {
   const res = await execute(CategoriesTable_QueryDocumentDocument, {
     pageSize: pagingArgs.pageSize,
@@ -60,7 +59,7 @@ export async function getCategoriesTableDataAction(
 
   return {
     success: true,
-    data: res.data?.paginatedCategories || null,
+    data: res.data || null,
   };
 }
 
@@ -82,6 +81,9 @@ export async function createCategoryAction(
       message: "An unknown error ocurred",
     };
   }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/categories`);
 
   return {
     success: true,

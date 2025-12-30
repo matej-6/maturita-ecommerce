@@ -44,6 +44,7 @@ import {
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronUpIcon, MoreHorizontalIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 type CategoriesTableWithFiltersProps = {
@@ -76,6 +77,9 @@ export function CategoriesTableWithFilters({
   searchParams,
   sortableColumns,
 }: CategoriesTableWithFiltersProps) {
+  const ft = useTranslations("fields");
+  const t = useTranslations("admin.categories");
+
   const [tableArgs, setTableArgs] = useState(initialTableArgs);
 
   useEffect(() => {
@@ -158,11 +162,11 @@ export function CategoriesTableWithFilters({
     <div className="space-y-4">
       {!filtersOpen ? (
         <Button variant={"outline"} onClick={() => setFiltersOpen(true)}>
-          Open Filters
+          {t("table.filters.openFilters")}
         </Button>
       ) : (
         <Button variant={"outline"} onClick={() => setFiltersOpen(false)}>
-          Close Filters
+          {t("table.filters.closeFilters")}
         </Button>
       )}
       {filtersOpen && (
@@ -172,11 +176,11 @@ export function CategoriesTableWithFilters({
           }
         >
           <CardHeader className="p-0!">
-            <CardTitle>Filters</CardTitle>
+            <CardTitle>{t("table.filters.title")}</CardTitle>
           </CardHeader>
           <CardContent className="p-0! flex flex-col gap-y-4">
             <div className="flex flex-col items-start justify-start gap-y-2">
-              <Label htmlFor="id">ID</Label>
+              <Label htmlFor="id">{ft("category.id")}</Label>
               <Input
                 id="id"
                 value={tableArgs.id ?? ""}
@@ -189,11 +193,12 @@ export function CategoriesTableWithFilters({
                     }));
                   }
                 }}
-                placeholder="type an ID to filter by"
               />
             </div>
             <div className="flex flex-col items-start justify-start gap-y-2">
-              <Label htmlFor="parent-category-id">Parent Category ID</Label>
+              <Label htmlFor="parent-category-id">
+                {ft("category.parentCategoryId")}
+              </Label>
               <Input
                 id="parent-category-id"
                 value={
@@ -219,11 +224,10 @@ export function CategoriesTableWithFilters({
                     }
                   }
                 }}
-                placeholder="type a Parent Category ID to filter by"
               />
             </div>
             <div className="flex flex-col items-start justify-start gap-y-2">
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">{ft("category.slug")}</Label>
               <Input
                 id="slug"
                 value={tableArgs.slug === null ? "" : tableArgs.slug}
@@ -240,11 +244,10 @@ export function CategoriesTableWithFilters({
                     }));
                   }
                 }}
-                placeholder="type a Slug to filter by"
               />
             </div>
             <div className="flex flex-col items-start justify-start gap-y-2">
-              <Label htmlFor="is-public">Is Public</Label>
+              <Label htmlFor="is-public">{ft("category.isPublic")}</Label>
               <Select
                 value={
                   tableArgs.isPublic === null
@@ -277,16 +280,22 @@ export function CategoriesTableWithFilters({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Is Public</SelectLabel>
-                    <SelectItem value="any">Any</SelectItem>
-                    <SelectItem value="true">True</SelectItem>
-                    <SelectItem value="false">False</SelectItem>
+                    <SelectLabel>{ft("category.isPublic")}</SelectLabel>
+                    <SelectItem value="any">
+                      {t("table.filters.isPublicSelect.any")}
+                    </SelectItem>
+                    <SelectItem value="true">
+                      {t("table.filters.isPublicSelect.true")}
+                    </SelectItem>
+                    <SelectItem value="false">
+                      {t("table.filters.isPublicSelect.false")}
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex flex-col items-start justify-start gap-y-2">
-              <Label htmlFor="is-setup">Is Setup</Label>
+              <Label htmlFor="is-setup">{ft("category.isSetup")}</Label>
               <Select
                 value={
                   tableArgs.isSetup === null
@@ -319,11 +328,17 @@ export function CategoriesTableWithFilters({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Is Setup</SelectLabel>
+                    <SelectLabel>{ft("category.isSetup")}</SelectLabel>
 
-                    <SelectItem value="any">Any</SelectItem>
-                    <SelectItem value="true">True</SelectItem>
-                    <SelectItem value="false">False</SelectItem>
+                    <SelectItem value="any">
+                      {t("table.filters.isSetupSelect.any")}
+                    </SelectItem>
+                    <SelectItem value="true">
+                      {t("table.filters.isSetupSelect.true")}
+                    </SelectItem>
+                    <SelectItem value="false">
+                      {t("table.filters.isSetupSelect.false")}
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -337,7 +352,7 @@ export function CategoriesTableWithFilters({
                   variant={"secondary"}
                   onClick={() => applyFilters()}
                 >
-                  Apply Filters
+                  {t("table.filters.applyFilters")}
                 </Button>
                 <Button
                   variant={"secondary"}
@@ -345,7 +360,7 @@ export function CategoriesTableWithFilters({
                     clearFilters();
                   }}
                 >
-                  Clear
+                  {t("table.filters.clearFilters")}
                 </Button>
               </div>
             </div>
@@ -360,43 +375,43 @@ export function CategoriesTableWithFilters({
               <TableRow className="">
                 {[
                   {
-                    label: "ID",
+                    label: ft("category.id"),
                     key: "id",
                   },
                   {
-                    label: "Slug",
+                    label: ft("category.slug"),
                     key: "slug",
                   },
                   {
-                    label: "Parent Category ID",
+                    label: ft("category.parentCategoryId"),
                     key: "parentCategoryId",
                   },
                   {
-                    label: "Products Count",
+                    label: ft("category.productsCount"),
                     key: "productsCount",
                   },
 
                   {
-                    label: "Created At",
+                    label: ft("category.createdAt"),
                     key: "createdAt",
                   },
                   {
-                    label: "Updated At",
+                    label: ft("category.updatedAt"),
                     key: "updatedAt",
                   },
                   {
-                    label: "Is Setup",
+                    label: ft("category.isSetup"),
                     key: "isSetup",
                   },
                   {
-                    label: "Is Public",
+                    label: ft("category.isPublic"),
                     key: "isPublic",
                   },
                 ].map((column) => {
                   const isSortByPossible = sortableColumns.includes(column.key);
                   return (
                     <TableHead
-                      className="p-4"
+                      className="p-2 sm:p-4"
                       key={column.key}
                       onClick={() => {
                         if (!isSortByPossible) return;
@@ -438,58 +453,66 @@ export function CategoriesTableWithFilters({
                     </TableHead>
                   );
                 })}
-                <TableHead className="sr-only">Actions</TableHead>
+                <TableHead className="sr-only">
+                  {t("table.actions.title")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.map((category) => (
                 <TableRow key={category.id} className="text-left px-2 py-1">
-                  <TableCell className="px-4 py-2">{category.id}</TableCell>
-                  <TableCell className="px-4 py-2">{category.slug}</TableCell>
-                  <TableCell className="px-4 py-2">
+                  <TableCell className="px-2 sm:px-4 py-2">
+                    {category.id}
+                  </TableCell>
+                  <TableCell className="px-2 sm:px-4 py-2">
+                    {category.slug}
+                  </TableCell>
+                  <TableCell className="px-2 sm:px-4 py-2">
                     {category.parentCategoryId || "N/A"}
                   </TableCell>
-                  <TableCell className="px-4 py-2">
+                  <TableCell className="px-2 sm:px-4 py-2">
                     {category.productsCount}
                   </TableCell>
-                  <TableCell className="px-4 py-2">
+                  <TableCell className="px-2 sm:px-4 py-2">
                     {
                       new Date(category.createdAt)
                         .toLocaleString()
                         .split(",")[0]
                     }
                   </TableCell>
-                  <TableCell className="px-4 py-2">
+                  <TableCell className="px-2 sm:px-4 py-2">
                     {
                       new Date(category.updatedAt)
                         .toLocaleString()
                         .split(",")[0]
                     }
                   </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {category.isSetup ? "Yes" : "No"}
+                  <TableCell className="px-2 sm:px-4 py-2">
+                    {category.isSetup ? t("table.yes") : t("table.no")}
                   </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {category.isPublic ? "Yes" : "No"}
+                  <TableCell className="px-2 sm:px-4 py-2">
+                    {category.isPublic ? t("table.yes") : t("table.no")}
                   </TableCell>
-                  <TableCell className="px-4 py-2">
+                  <TableCell className="px-2 sm:px-4 py-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">
+                            {t("table.actions.title")}
+                          </span>
                           <MoreHorizontalIcon className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel className="text-muted-foreground">
-                          Actions
+                          {t("table.actions.title")}
                         </DropdownMenuLabel>
                         <DropdownMenuItem>
                           <Link
                             className="grow hover:underline"
                             href={`/category/${category.slug}`}
                           >
-                            Visit page
+                            {t("table.actions.visitPage")}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
@@ -497,7 +520,7 @@ export function CategoriesTableWithFilters({
                             className="grow hover:underline"
                             href={`categories/edit-category/${category.id}`}
                           >
-                            Visit details page
+                            {t("table.actions.edit")}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -510,7 +533,7 @@ export function CategoriesTableWithFilters({
                             }));
                           }}
                         >
-                          Filter subcategories
+                          {t("table.filterSubcategories")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -520,7 +543,7 @@ export function CategoriesTableWithFilters({
             </TableBody>
           </Table>
         ) : (
-          <div className="py-4">No categories found.</div>
+          <div className="py-4">{t("table.noRecordsFound")}</div>
         )}
       </div>
       <div className="max-w-fit flex justify-start items-center gap-x-2">
@@ -532,7 +555,7 @@ export function CategoriesTableWithFilters({
             prevPage();
           }}
         >
-          Previous
+          {t("table.previous")}
         </Button>
         <Button
           variant={"secondary"}
@@ -540,7 +563,7 @@ export function CategoriesTableWithFilters({
           disabled={initialPagingArgs.nextCursor === null}
           onClick={() => nextPage()}
         >
-          Next
+          {t("table.next")}
         </Button>
       </div>
     </div>

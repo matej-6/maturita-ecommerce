@@ -1216,15 +1216,7 @@ export type CategoriesTable_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type CategoriesTable_QueryDocumentQuery = { __typename?: 'Query', paginatedCategories: { __typename?: 'PaginatedCategory', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'CategoryEdge', cursor: number, node: { __typename?: 'Category', id: number, slug: string, createdAt: any, updatedAt: any, isSetup: boolean, isPublic: boolean, name?: string | null, productsCount: number, parentCategoryId?: number | null } }> | null } };
-
-export type NewCategory_QueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type NewCategory_QueryDocumentQuery = (
-  { __typename?: 'Query' }
-  & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment;'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
-);
+export type CategoriesTable_QueryDocumentQuery = { __typename?: 'Query', paginatedCategories: { __typename?: 'PaginatedCategory', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'CategoryEdge', cursor: number, node: { __typename?: 'Category', id: number, slug: string, createdAt: any, updatedAt: any, isSetup: boolean, isPublic: boolean, name?: string | null, productsCount: number, parentCategoryId?: number | null } }> | null }, allCategories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> };
 
 export type EditCategory_QueryDocumentQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1948,26 +1940,13 @@ export const CategoriesTable_QueryDocumentDocument = new TypedDocumentString(`
     hasNextPage
     totalCount
   }
-}
-    `) as unknown as TypedDocumentString<CategoriesTable_QueryDocumentQuery, CategoriesTable_QueryDocumentQueryVariables>;
-export const NewCategory_QueryDocumentDocument = new TypedDocumentString(`
-    query newCategory_QueryDocument {
-  ...AllCategories_QueryFragment
-  ...Locales_QueryFragment
-}
-    fragment AllCategories_QueryFragment on Query {
-  categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
+  allCategories: categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
     id
     slug
     parentCategoryId
   }
 }
-fragment Locales_QueryFragment on Query {
-  locales {
-    code
-    name
-  }
-}`) as unknown as TypedDocumentString<NewCategory_QueryDocumentQuery, NewCategory_QueryDocumentQueryVariables>;
+    `) as unknown as TypedDocumentString<CategoriesTable_QueryDocumentQuery, CategoriesTable_QueryDocumentQueryVariables>;
 export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
     query editCategory_QueryDocument($id: Int!, $productCursor: Int, $productPageSize: Int) {
   category(id: $id, isPublic: null, isSetup: null) {

@@ -43,13 +43,15 @@ const categoriesTableQueryDocument = graphql(`
       hasNextPage
       totalCount
     }
-  }
-`);
-
-const newCategoryQueryDocument = graphql(`
-  query newCategory_QueryDocument {
-    ...AllCategories_QueryFragment
-    ...Locales_QueryFragment
+    allCategories: categories(
+      parentCategoryId: 0
+      isPublic: null
+      isSetup: null
+    ) {
+      id
+      slug
+      parentCategoryId
+    }
   }
 `);
 
@@ -102,10 +104,6 @@ const editCategoryQueryDocument = graphql(`
     ...AllCategories_QueryFragment
   }
 `);
-
-export async function getDataForNewCategory() {
-  return await fetchGraphql(newCategoryQueryDocument);
-}
 
 export async function getEditCategoryQueryDocumentData(
   id: number,

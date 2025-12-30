@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { CategoriesTableWithFilters } from "../components/categories/categories-table-with-filters";
+import { NewCategoryFormSheet } from "../forms/new-cateogry-form-sheet";
 
 type Props = {
   searchParams: {
@@ -56,9 +57,16 @@ export default async function CategoriesPage({ searchParams }: Props) {
     tableArgs
   );
 
+  if (!data.success) {
+    return <div>Error loading data...</div>;
+  }
+
+  const paginatedCategories = data.data?.paginatedCategories;
+  const allCategories = data.data?.allCategories;
+
   pagingArgs.nextCursor =
-    data.success && data.data?.hasNextPage
-      ? data.data.edges?.slice(-1)[0].cursor ?? null
+    data.success && paginatedCategories?.hasNextPage
+      ? paginatedCategories.edges?.slice(-1)[0].cursor ?? null
       : null;
 
   const urlSearchParams = new URLSearchParams({
@@ -84,13 +92,11 @@ export default async function CategoriesPage({ searchParams }: Props) {
   });
 
   return (
-    <div className="flex-1 flex flex-col gap-4">
+    <div className="flex-1 flex flex-col gap-4 ">
       <div>
-        <Link href={"categories/new-category"}>
-          <Button>Add New Category</Button>
-        </Link>
+        <NewCategoryFormSheet categories={allCategories ?? []} />
       </div>
-      <div className="bg-muted/50 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min flex flex-col">
+      <div className=" min-h-[100vh] flex-1 md:min-h-min flex flex-col">
         <CategoriesTableWithFilters
           initialPagingArgs={pagingArgs}
           initialSortingArgs={sortingArgs}
@@ -106,8 +112,8 @@ export default async function CategoriesPage({ searchParams }: Props) {
             "productsCount",
           ]}
           data={
-            data.success
-              ? data.data?.edges?.map((c) => ({
+            paginatedCategories
+              ? paginatedCategories.edges?.map((c) => ({
                   id: c.node.id,
                   slug: c.node.slug,
                   parentCategoryId: c.node.parentCategoryId || null,

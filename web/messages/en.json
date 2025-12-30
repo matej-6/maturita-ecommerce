@@ -267,12 +267,43 @@
       }
     },
     "categories": {
-      "newCategory": {
-        "page": {
-          "title": "Add a New Category"
+      "table": {
+        "noRecordsFound": "No categories found.",
+        "filters": {
+          "openFilters": "Open filters",
+          "closeFilters": "Close filters",
+          "clearFilters": "Clear filters",
+          "title": "Filters",
+          "isPublicSelect": {
+            "any": "Any",
+            "true": "Public",
+            "false": "Private"
+          },
+          "isSetupSelect": {
+            "any": "Any",
+            "true": "Setup",
+            "false": "Not Setup"
+          },
+          "applyFilters": "Apply filters"
         },
+        "actions": {
+          "title": "Actions",
+          "visitPage": "Visit page",
+          "edit": "Edit"
+        },
+        "yes": "Yes",
+        "no": "No",
+        "previous": "Previous",
+        "next": "Next",
+        "filterSubcategories": "Filter by subcategories"
+      },
+      "newCategory": {
+        "button": "Add New Category",
         "form": {
+          "title": "Add a New Category",
+          "slug": "Slug",
           "submitButton": "Create category",
+          "closeButton": "Close",
           "parentCategoryId": {
             "combobox": {
               "noResultsFoundText": "No results found.",
@@ -307,10 +338,16 @@
   },
   "fields": {
     "category": {
+      "id": "ID",
       "slug": "Slug",
       "parentCategoryId": "Parent Category Id",
       "name": "Name",
-      "description": "Description"
+      "description": "Description",
+      "isSetup": "Is Setup",
+      "isPublic": "Is Public",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "productsCount": "Products Count"
     },
     "locale": {
       "code": "Locale code"
