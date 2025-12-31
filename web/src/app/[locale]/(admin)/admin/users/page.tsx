@@ -118,7 +118,7 @@ export default async function UsersPage({ searchParams }: Props) {
 
   return (
     <div className="flex-1 flex flex-col gap-4">
-      <div className="bg-muted/25 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
+      <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
         <UsersTableWithFilters
           initialPagingArgs={pagingArgs}
           initialSortingArgs={sortingArgs}

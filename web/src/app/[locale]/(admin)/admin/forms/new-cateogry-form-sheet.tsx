@@ -14,13 +14,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { createCategoryAction } from "@/app/data-access-layer/admin/category/actions";
 import { useRouter } from "@/i18n/navigation";
 import {
@@ -31,7 +29,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ResponsiveButton } from "@/components/responsive-button";
 import { Label } from "@/components/ui/label";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
 

@@ -17,7 +17,7 @@ import { Link } from "@/i18n/navigation";
 import { AlertCircleIcon, ArrowUpRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { ProductForm } from "../../../forms/product-form";
+import { ProductForm } from "../../../forms/product-sheet-form";
 import { ProductTranslation } from "../../../components/products/product-translation";
 import { AddProductTranslationSheet } from "../../../components/products/add-product-translation-sheet";
 import { getImageSrc } from "@/app/lib/utils";

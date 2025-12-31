@@ -239,19 +239,18 @@
       }
     },
     "products": {
-      "newProduct": {
-        "page": {
-          "title": "Pridať nový produkt"
-        },
-        "form": {
-          "submitButtonCreate": "Vytvoriť produkt",
-          "submitButtonUpdate": "Uložiť zmeny",
-          "categoryId": {
-            "combobox": {
-              "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
-              "filterPlaceholderText": "Filtrovať kategórie",
-              "emptyValueLabel": "Vybrať kategóriu"
-            }
+      "form": {
+        "titleCreate": "Vytvoriť nový produkt",
+        "titleUpdate": "Upraviť produkt",
+        "triggerButtonCreate": "Pridať produkt",
+        "triggerButtonUpdate": "Upraviť produkt",
+        "submitButtonCreate": "Vytvoriť produkt",
+        "submitButtonUpdate": "Uložiť zmeny",
+        "categoryId": {
+          "combobox": {
+            "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
+            "filterPlaceholderText": "Filtrovať kategórie",
+            "emptyValueLabel": "Vybrať kategóriu"
           }
         }
       },
@@ -334,6 +333,81 @@
           }
         }
       }
+    },
+    "users": {
+      "forms": {
+        "updateRole": {
+          "button": "Zmeniť rolu",
+          "title": "Zmeniť rolu používateľa",
+          "submitButton": "Uložiť zmeny",
+          "loadingButton": "Ukladanie zmien...",
+          "closeButton": "Zavrieť",
+          "toastSuccess": "Rola používateľa bola úspešne zmenená.",
+          "roleSelect": {
+            "placeholder": "Vybrať rolu"
+          }
+        }
+      },
+      "table": {
+        "noUsersFound": "Neboli nájdení žiadni používatelia.",
+        "paging": {
+          "buttons": {
+            "previous": "Predchádzajúca",
+            "next": "Ďalšia"
+          }
+        },
+        "filters": {
+          "buttons": {
+            "apply": "Použiť filtre",
+            "clear": "Vymazať",
+            "showFilters": "Zobraziť filtre",
+            "hideFilters": "Skryť filtre"
+          },
+          "title": "Filtre",
+          "roleSelect": {
+            "all": "Všetky roly"
+          },
+          "applyFilters": "Použiť filtre"
+        },
+        "actions": {
+          "label": "Možnosti",
+          "viewDetails": "Zobraziť detaily"
+        }
+      }
+    },
+    "orders": {
+      "table": {
+        "noOrdersFound": "Neboli nájdené žiadne objednávky.",
+        "paging": {
+          "buttons": {
+            "previous": "Predchádzajúca",
+            "next": "Ďalšia"
+          }
+        },
+        "filters": {
+          "buttons": {
+            "applyFilters": "Použiť filtre",
+            "clearFilters": "Vymazať filtre",
+            "showFilters": "Zobraziť filtre",
+            "hideFilters": "Skryť filtre"
+          },
+          "columns": {
+            "minPrice": "Najnižšia cena (v centoch)",
+            "maxPrice": "Najvyššia cena (v centoch)",
+            "dateFrom": "Dátum od",
+            "dateTo": "Dátum do"
+          },
+          "title": "Filtre",
+          "statusSelect": {
+            "label": "Vybrať status",
+            "all": "Všetky statusy"
+          }
+        },
+        "actions": {
+          "label": "Možnosti",
+          "viewDetails": "Zobraziť detaily"
+        }
+      }
     }
   },
   "fields": {
@@ -384,13 +458,18 @@
       "selectAttribute": "Vybrať atribút"
     },
     "user": {
+      "id": "ID",
       "firstName": "Meno",
       "lastName": "Priezvisko",
-      "email": "Email"
+      "email": "Email",
+      "role": "Rola",
+      "createdAt": "Dátum vytvorenia",
+      "updatedAt": "Naposledy aktualizované"
     },
     "order": {
       "id": "ID",
       "status": "Status",
+      "userId": "ID používateľa",
       "total": "Spolu",
       "items": "Položky",
       "createdAt": "Dátum vytvorenia",

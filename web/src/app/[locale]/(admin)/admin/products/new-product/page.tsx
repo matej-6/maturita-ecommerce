@@ -2,7 +2,7 @@
 
 import { getDataForNewProductPage } from "@/app/data-access-layer/admin/product/actions";
 import { getTranslations } from "next-intl/server";
-import { ProductForm } from "../../forms/product-form";
+import { ProductForm } from "../../forms/product-sheet-form";
 
 export default async function NewProductPage() {
   const newProductDataPromise = await getDataForNewProductPage();

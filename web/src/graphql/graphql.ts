@@ -1568,7 +1568,7 @@ export type ProductsPage_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null } };
+export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null }, productFormCategories: Array<{ __typename?: 'Category', id: number, slug: string }> };
 
 export type AdminPageStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2506,6 +2506,10 @@ export const ProductsPage_QueryDocumentDocument = new TypedDocumentString(`
       }
       cursor
     }
+  }
+  productFormCategories: categories(isPublic: null, isSetup: null) {
+    id
+    slug
   }
 }
     `) as unknown as TypedDocumentString<ProductsPage_QueryDocumentQuery, ProductsPage_QueryDocumentQueryVariables>;

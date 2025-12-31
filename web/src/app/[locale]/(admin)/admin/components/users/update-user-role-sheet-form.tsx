@@ -1,8 +1,7 @@
 "use client";
 
-import { AdminUpdateOrderAction } from "@/app/data-access-layer/admin/order/actions";
 import { updateUserRoleAction } from "@/app/data-access-layer/admin/user/actions";
-import { ResponsiveButton } from "@/components/responsive-button";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { Role } from "@/graphql/graphql";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -29,6 +29,8 @@ type Props = {
 };
 
 export function UpdateUserRoleSheetForm({ userId, role }: Props) {
+  const t = useTranslations("admin.users.forms.updateRole");
+
   const [selectedRole, setSelectedRole] = useState<Role>(role);
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -45,11 +47,11 @@ export function UpdateUserRoleSheetForm({ userId, role }: Props) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <ResponsiveButton variant={"secondary"}>Update Role</ResponsiveButton>
+        <Button variant={"secondary"}>{t("button")}</Button>
       </SheetTrigger>
       <SheetContent className="p-2 sm:p-4 flex flex-col gap-y-4">
         <SheetHeader className="p-0!">
-          <SheetTitle>Update User Role</SheetTitle>
+          <SheetTitle>{t("title")}</SheetTitle>
         </SheetHeader>
         <form
           onSubmit={(e) => {
@@ -65,7 +67,7 @@ export function UpdateUserRoleSheetForm({ userId, role }: Props) {
             value={selectedRole}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select role" />
+              <SelectValue placeholder={t("roleSelect.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={Role.Admin}>Admin</SelectItem>
@@ -73,11 +75,11 @@ export function UpdateUserRoleSheetForm({ userId, role }: Props) {
             </SelectContent>
           </Select>
           <div className="flex flex-col gap-y-2">
-            <ResponsiveButton type="submit" disabled={isPending}>
-              {isPending ? "Updating..." : "Update Role"}
-            </ResponsiveButton>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? t("loadingButton") : t("submitButton")}
+            </Button>
             <SheetClose asChild>
-              <ResponsiveButton variant={"secondary"}>Cancel</ResponsiveButton>
+              <Button variant={"secondary"}>{t("closeButton")}</Button>
             </SheetClose>
           </div>
         </form>

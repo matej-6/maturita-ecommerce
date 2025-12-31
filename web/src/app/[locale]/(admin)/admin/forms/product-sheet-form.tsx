@@ -1,18 +1,8 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { ReactHookFormFieldErrorMessage } from "@/components/form/reactHookFormFieldErrorMessage";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -30,15 +20,21 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRouter } from "@/i18n/navigation";
-import {
-  productFormSchema,
-  productFormSchemaType,
-} from "../schemas/product-form-schema";
+
 import {
   createProductAction,
   editProductAction,
 } from "@/app/data-access-layer/admin/product/actions";
 import { Switch } from "@/components/ui/switch";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
 
 type ProductFormProps = {
   mode: "create" | "edit";
@@ -46,50 +42,55 @@ type ProductFormProps = {
     id: number;
     slug: string;
   }[];
-  initialData?: productFormSchemaType;
+  initialData?: {
+    slug: string;
+    categoryId: number | null;
+    isPublic: boolean;
+  };
   revalidatePaths?: string[];
   productId?: number;
 };
 export const ProductForm = ({
-  initialData,
+  initialData = {
+    slug: "",
+    categoryId: null,
+    isPublic: false,
+  },
   productId,
   mode = "create",
   categories,
   revalidatePaths = [],
 }: ProductFormProps) => {
   // translations
-  const formt = useTranslations("form"); // general form translations
   const ft = useTranslations("fields"); // fields translations
-  const cft = useTranslations("admin.products.newProduct.form"); // specific form translations
+  const t = useTranslations("admin.products.form"); // specific form translations
+
+  const [formData, setFormData] = useState(initialData);
+
+  const isFormChanged = useMemo(() => {
+    return (
+      formData.slug !== initialData.slug ||
+      formData.categoryId !== initialData.categoryId ||
+      formData.isPublic !== initialData.isPublic
+    );
+  }, [formData, initialData]);
 
   const comboboxCategories = [
-    { label: cft("categoryId.combobox.emptyValueLabel"), value: null },
+    { label: t("categoryId.combobox.emptyValueLabel"), value: null },
     ...(categories.map((c) => ({
       label: c.slug,
       value: c.id,
     })) ?? []),
   ];
 
-  const formSchema = productFormSchema(formt, ft);
-
-  const form = useForm<productFormSchemaType>({
-    resolver: zodResolver(formSchema),
-    mode: "all",
-    defaultValues: {
-      slug: initialData?.slug ?? "",
-      categoryId: initialData?.categoryId ?? null,
-      isPublic: initialData?.isPublic ?? false,
-    },
-  });
-
   const router = useRouter();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (data: productFormSchemaType) => {
+    mutationFn: async () => {
       if (mode === "edit") {
         const res = await editProductAction(
           {
-            ...data,
+            ...formData,
             id: productId!,
           },
           revalidatePaths
@@ -103,7 +104,7 @@ export const ProductForm = ({
           setErrorMessage(res.message);
         }
       } else {
-        const res = await createProductAction(data);
+        const res = await createProductAction(formData);
         if (res.success) {
           router.push(`/admin/products/product-detail/${res.data.id}`);
           return;
@@ -125,81 +126,90 @@ export const ProductForm = ({
     undefined
   );
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(async (data) => {
-          await mutate(data);
-        })}
-        className="flex flex-col gap-y-8 max-w-[600px] h-full"
-      >
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{ft("category.slug")}</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="categoryId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{ft("product.categoryId")}</FormLabel>
-              <FormComboBox
-                data={comboboxCategories}
-                selectedStatus={
-                  comboboxCategories.find((c) => c.value === field.value)!
-                }
-                setSelectedValue={(v) =>
-                  form.setValue("categoryId", v, {
-                    shouldDirty: true,
-                    shouldTouch: true,
-                    shouldValidate: true,
-                  })
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button>
+          {mode === "create"
+            ? t("triggerButtonCreate")
+            : t("triggerButtonUpdate")}
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="grow">
+        <SheetHeader className="p-4!">
+          <SheetTitle>
+            {mode === "create" ? t("titleCreate") : t("titleUpdate")}
+          </SheetTitle>
+        </SheetHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            mutate();
+          }}
+          className="flex flex-col gap-y-8 p-4"
+        >
+          <div className="flex flex-col gap-y-1">
+            <Label htmlFor="slug">{ft("category.slug")}</Label>
+            <Input
+              id="slug"
+              type="text"
+              value={formData.slug}
+              onChange={(e) =>
+                setFormData({ ...formData, slug: e.target.value })
+              }
+              required
+            />
+            <FormFieldErrorMessage fieldErrors={fieldErrors} fieldName="slug" />
+          </div>
+          <div className="flex flex-col gap-y-1">
+            <Label htmlFor="categoryId">{ft("product.categoryId")}</Label>
+            <FormComboBox
+              data={comboboxCategories}
+              selectedStatus={
+                comboboxCategories.find((c) => c.value === formData.categoryId)!
+              }
+              setSelectedValue={(v) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  categoryId: v,
+                }))
+              }
+            />
+            <FormFieldErrorMessage
+              fieldErrors={fieldErrors}
+              fieldName="categoryId"
+            />
+          </div>
+          <div className="flex flex-col gap-y-1">
+            <div className="flex items-center gap-x-3 rounded-md border p-3">
+              <Label>{ft("product.isPublic")}</Label>
+              <Switch
+                checked={formData.isPublic}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, isPublic: checked }))
                 }
               />
-              <ReactHookFormFieldErrorMessage fieldErrors={fieldErrors} />
-            </FormItem>
+            </div>
+            <FormFieldErrorMessage
+              fieldErrors={fieldErrors}
+              fieldName="isPublic"
+            />
+          </div>
+          {errorMessage && (
+            <p className="text-destructive text-sm">{errorMessage}</p>
           )}
-        />
-        <FormField
-          control={form.control}
-          name="isPublic"
-          render={({ field }) => (
-            <FormItem className="flex items-center gap-x-3 rounded-md border p-3">
-              <FormLabel>{ft("product.isPublic")}</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        {errorMessage && (
-          <p className="text-destructive text-sm">{errorMessage}</p>
-        )}
-        <Button
-          type="submit"
-          variant={"default"}
-          className="mt-auto"
-          disabled={
-            !form.formState.isValid || !form.formState.isDirty || isPending
-          }
-        >
-          {mode === "create"
-            ? cft("submitButtonCreate")
-            : cft("submitButtonUpdate")}
-        </Button>
-      </form>
-    </Form>
+          <Button
+            type="submit"
+            variant={"default"}
+            className="mt-auto"
+            disabled={isPending || !isFormChanged}
+          >
+            {mode === "create"
+              ? t("submitButtonCreate")
+              : t("submitButtonUpdate")}
+          </Button>
+        </form>
+      </SheetContent>
+    </Sheet>
   );
 
   type Status = {
@@ -250,18 +260,6 @@ export const ProductForm = ({
           </Command>
         </PopoverContent>
       </Popover>
-    );
-  }
-
-  function FormComboboxSkeleton({ buttonText }: { buttonText: string }) {
-    return (
-      <Button
-        variant={"outline"}
-        className="w-[196px] justify-start animate-pulse"
-        disabled
-      >
-        {buttonText}
-      </Button>
     );
   }
 };

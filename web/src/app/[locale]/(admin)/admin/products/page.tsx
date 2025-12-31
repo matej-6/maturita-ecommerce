@@ -4,6 +4,7 @@ import { getProductsPageData } from "@/app/data-access-layer/admin/product/queri
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { ProductsTableWithFilters } from "../components/products/product-table-with-filters";
+import { ProductForm } from "../forms/product-sheet-form";
 
 type Props = {
   searchParams: {
@@ -109,10 +110,17 @@ export default async function ProductsPage({ searchParams }: Props) {
 
   return (
     <div className="flex-1 flex flex-col gap-4">
-      <Link href={"products/new-product"}>
-        <Button className="w-fit">Add New Product</Button>
-      </Link>
-      <div className="bg-muted/25 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
+      <div>
+        <ProductForm
+          categories={
+            productsPageData.success
+              ? productsPageData.data?.productFormCategories || []
+              : []
+          }
+          mode="create"
+        />
+      </div>
+      <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
         <ProductsTableWithFilters
           initialPagingArgs={pagingArgs}
           initialSortingArgs={sortingArgs}

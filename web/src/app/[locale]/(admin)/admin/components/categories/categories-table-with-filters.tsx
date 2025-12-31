@@ -4,7 +4,6 @@ import {
   CategoreisPagingArgs,
   CategoriesFilterArgs,
   CategoriesSortingArgs,
-  getCategoriesTableDataAction,
 } from "@/app/data-access-layer/admin/category/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -159,7 +158,7 @@ export function CategoriesTableWithFilters({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-y-4 flex-1">
       {!filtersOpen ? (
         <Button variant={"outline"} onClick={() => setFiltersOpen(true)}>
           {t("table.filters.openFilters")}
@@ -170,11 +169,7 @@ export function CategoriesTableWithFilters({
         </Button>
       )}
       {filtersOpen && (
-        <Card
-          className={
-            "p-2 sm:p-4 flex flex-col gap-y-4 transition-all duration-300"
-          }
-        >
+        <Card className={"p-2 sm:p-4 flex flex-col gap-y-4"}>
           <CardHeader className="p-0!">
             <CardTitle>{t("table.filters.title")}</CardTitle>
           </CardHeader>

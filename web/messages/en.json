@@ -239,19 +239,18 @@
       }
     },
     "products": {
-      "newProduct": {
-        "page": {
-          "title": "Add a New Product"
-        },
-        "form": {
-          "submitButtonCreate": "Create product",
-          "submitButtonUpdate": "Save changes",
-          "categoryId": {
-            "combobox": {
-              "noResultsFoundText": "No results found.",
-              "filterPlaceholderText": "Filter categories",
-              "emptyValueLabel": "Select category"
-            }
+      "form": {
+        "titleCreate": "Add a New Product",
+        "titleUpdate": "Edit Product",
+        "triggerButtonCreate": "Add New Product",
+        "triggerButtonUpdate": "Edit Product",
+        "submitButtonCreate": "Create product",
+        "submitButtonUpdate": "Save changes",
+        "categoryId": {
+          "combobox": {
+            "noResultsFoundText": "No results found.",
+            "filterPlaceholderText": "Filter categories",
+            "emptyValueLabel": "Select category"
           }
         }
       },
@@ -334,6 +333,81 @@
           }
         }
       }
+    },
+    "users": {
+      "forms": {
+        "updateRole": {
+          "button": "Update Role",
+          "title": "Update User Role",
+          "submitButton": "Save changes",
+          "loadingButton": "Saving changes...",
+          "closeButton": "Close",
+          "toastSuccess": "User role updated successfully.",
+          "roleSelect": {
+            "placeholder": "Select role"
+          }
+        }
+      },
+      "table": {
+        "noUsersFound": "No users found.",
+        "paging": {
+          "buttons": {
+            "previous": "Previous",
+            "next": "Next"
+          }
+        },
+        "filters": {
+          "buttons": {
+            "apply": "Apply filters",
+            "clear": "Clear",
+            "showFilters": "Show filters",
+            "hideFilters": "Hide filters"
+          },
+          "title": "Filters",
+          "roleSelect": {
+            "all": "All Roles"
+          },
+          "applyFilters": "Apply filters"
+        },
+        "actions": {
+          "label": "Actions",
+          "viewDetails": "View Details"
+        }
+      }
+    },
+    "orders": {
+      "table": {
+        "noOrdersFound": "No orders found.",
+        "paging": {
+          "buttons": {
+            "previous": "Previous",
+            "next": "Next"
+          }
+        },
+        "filters": {
+          "buttons": {
+            "applyFilters": "Apply filters",
+            "clearFilters": "Clear",
+            "showFilters": "Show filters",
+            "hideFilters": "Hide filters"
+          },
+          "columns": {
+            "minPrice": "Min Price (in cents)",
+            "maxPrice": "Max Price (in cents)",
+            "dateFrom": "Date From",
+            "dateTo": "Date To"
+          },
+          "title": "Filters",
+          "statusSelect": {
+            "label": "Select status",
+            "all": "All Statuses"
+          }
+        },
+        "actions": {
+          "label": "Actions",
+          "viewDetails": "View Details"
+        }
+      }
     }
   },
   "fields": {
@@ -384,13 +458,18 @@
       "selectAttribute": "Select Attribute"
     },
     "user": {
+      "id": "ID",
       "firstName": "First Name",
       "lastName": "Last Name",
-      "email": "Email"
+      "email": "Email",
+      "role": "Role",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
     },
     "order": {
       "id": "ID",
       "status": "Status",
+      "userId": "User ID",
       "total": "Total",
       "items": "Items",
       "createdAt": "Created At",

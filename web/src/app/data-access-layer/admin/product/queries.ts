@@ -144,6 +144,10 @@ export const ProductsPageQueryDocument = graphql(`
         cursor
       }
     }
+    productFormCategories: categories(isPublic: null, isSetup: null) {
+      id
+      slug
+    }
   }
 `);
 
