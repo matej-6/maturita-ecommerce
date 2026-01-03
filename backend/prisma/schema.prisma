@@ -23,8 +23,8 @@ model User {
   id             Int                   @id @default(autoincrement())
   email          String                @unique
   hashedPassword String?
-  firstName      String?
-  lastName       String?
+  firstName      String
+  lastName       String
   avatar         String?
   role           Role                  @default(USER)
   createdAt      DateTime              @default(now())

@@ -9,6 +9,7 @@ import {
 import { i18nValidationMessage } from 'nestjs-i18n';
 
 export class RegisterDto {
+  @IsString({ message: i18nValidationMessage('validation.required') })
   @MinLength(1, { message: i18nValidationMessage('validation.required') })
   @MaxLength(128, { message: i18nValidationMessage('validation.maxLength') })
   firstName: string;

@@ -694,7 +694,7 @@ type User {
   avatar: UserAvatar
   createdAt: DateTime!
   email: String!
-  firstName: String
+  firstName: String!
   id: Int!
   lastName: String
   orders: [Order!]!

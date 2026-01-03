@@ -139,6 +139,8 @@ export class OrdersService {
         where: { id: orderId },
         data: {
           status: 'PROCESSING',
+          StripePaymentIntentId:
+            (session.payment_intent as string) || undefined,
           shippingDetails: {
             create: {
               city: shippingDetails?.address?.city || '',
@@ -308,6 +310,8 @@ export class OrdersService {
         where: { id: orderId },
         data: {
           status: 'PROCESSING',
+          StripePaymentIntentId:
+            (session.payment_intent as string) || undefined,
           shippingDetails: shippingDetails
             ? {
                 create: {
