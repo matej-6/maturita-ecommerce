@@ -16,6 +16,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
 import { ERROR } from 'src/errors';
 import { I18nService } from 'nestjs-i18n';
+import z from 'zod';
+import { Ollama } from 'ollama';
 
 export enum LLMTaskJobType {
   USER_PROMPT = 'user-prompt',
@@ -67,6 +69,12 @@ export class LLMTaskConsumer extends WorkerHost {
     );
   }
 
+  private get ollamaClient(): Ollama {
+    return new Ollama({
+      host: this.LLM_BASE_URL,
+    });
+  }
+
   async process(job: Job<LLMTaskJob, any, string>): Promise<any> {
     this.logger.log(`Received job id ${job.id}, type ${job.name}`);
     switch (job.name as LLMTaskJobType) {
@@ -99,12 +107,6 @@ export class LLMTaskConsumer extends WorkerHost {
       case LLMTaskJobType.PRODUCT_EMBEDDING: {
         this.logger.log(`Processing PRODUCT_EMBEDDING job id ${job.id}`);
         const jobData = job.data as EmbeddingJob;
-        const supportedLanguages = this.localesService
-          .findAll()
-          .map((l) => l.code as string);
-        if (!supportedLanguages.includes(jobData.lang)) {
-          throw new Error('llm.consumer.unsupportedLanguageForEmbeddings');
-        }
         try {
           const dbEmbeddingTask = await this.prisma.embeddingTask.findUnique({
             where: {
@@ -199,63 +201,36 @@ export class LLMTaskConsumer extends WorkerHost {
     }
   }
 
-  private async fetchLLM<T = string>(
+  private async fetchLLM<T extends z.ZodObject>(
     system: string,
     prompt: string,
-    parseJson: boolean = true,
-  ): Promise<T> {
-    const res = await fetch(`${this.LLM_BASE_URL}/api/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: this.LLM_MODEL,
-        system: system,
-        prompt: prompt,
-        stream: false,
-      }),
+    schema: T,
+  ): Promise<z.output<T>> {
+    const result = await this.ollamaClient.generate({
+      model: this.LLM_MODEL,
+      system: system,
+      prompt: prompt,
+      stream: false,
+      format: z.toJSONSchema(schema),
     });
-
-    if (!res.ok) {
-      this.logger.error(`LLM request failed with status ${res.status}`);
-      throw new Error(ERROR.unknownError);
-    }
-
     try {
-      const data = (await res.json()) as { response: string };
-      this.logger.log('LLM response data:', data);
-      if (!parseJson) {
-        return data.response as T;
-      }
-      const output = (await JSON.parse(data.response)) as T;
-      return output;
+      this.logger.log(`LLM response: ${result.response}`);
+      return schema.parse(JSON.parse(result.response));
     } catch (error) {
-      this.logger.error('Error parsing LLM response as JSON', error);
+      this.logger.error('Error parsing LLM response with Zod schema', error);
       throw new Error(ERROR.unknownError);
     }
   }
 
-  private async fetchEmbedding(input: string): Promise<number[][]> {
-    const res = await fetch(`${this.LLM_BASE_URL}/api/embed`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: this.EMBEDDING_MODEL,
-        input: input,
-      }),
+  private async fetchEmbedding(...input: string[]): Promise<number[][]> {
+    const result = await this.ollamaClient.embed({
+      model: this.EMBEDDING_MODEL,
+      input: input,
     });
-
-    if (!res.ok) {
-      this.logger.error(`Embedding request failed with status ${res.status}`);
-      throw new Error(ERROR.unknownError);
+    for (const embedding of result.embeddings) {
+      this.logger.log(`Embedding vector length: ${embedding.length}`);
     }
-
-    const data = (await res.json()) as { embeddings: number[][] };
-    this.logger.log('Embedding response data:', data);
-    return data.embeddings;
+    return result.embeddings;
   }
 
   private async categorizePrompt(
@@ -263,26 +238,23 @@ export class LLMTaskConsumer extends WorkerHost {
   ): Promise<
     'similiarProducts' | 'productSearch' | 'productInformation' | 'none'
   > {
+    const categorySchema = z.object({
+      category: z.literal([
+        'similiarProducts',
+        'productSearch',
+        'productInformation',
+        'none',
+      ]),
+    });
     const system = `You are an AI assistant that categorizes user prompts into one of 4 categories: 'similiarProducts', 'productSearch', 'productInformation', or 'none'.
         Here's a brief description of each category:
         1. similiarProducts: The user is looking for products similar to a given product
         2. productSearch: The user is searching for products based on certain criteria or keywords
         3. productInformation: The user is seeking specific information about a particular product
         4. none: The prompt does not fit into any of the above categories.
-        Analyze the following prompt and determine the most appropriate category.
-        Respond with this JSON FORMAT, NOTHING ELSE: { "category": "your_chosen_category" }`;
-    const response = await this.fetchLLM<{ category: string }>(system, prompt);
-    const category = response.category;
-    if (
-      category !== 'similiarProducts' &&
-      category !== 'productSearch' &&
-      category !== 'productInformation' &&
-      category !== 'none'
-    ) {
-      this.logger.error('Invalid category returned from LLM', category);
-      throw new Error(this.i18nService.t(ERROR.unknownError));
-    }
-    return category;
+        Analyze the following prompt and determine the most appropriate category.`;
+    const response = await this.fetchLLM(system, prompt, categorySchema);
+    return response.category;
   }
 
   async processProductEmbeddingJob(job: EmbeddingJob): Promise<void> {
@@ -373,7 +345,7 @@ export class LLMTaskConsumer extends WorkerHost {
       },
     };
 
-    const res = await this.fetchEmbedding(JSON.stringify(input));
+    const res = (await this.fetchEmbedding(JSON.stringify(input)))[0];
 
     this.logger.log(`Generated embedding for product ID ${product.id}`);
     this.logger.log(`Embedding vector length: ${res.length}`);
@@ -382,8 +354,8 @@ export class LLMTaskConsumer extends WorkerHost {
       await this.qdrantService.qdrantClient.upsert(QdrantCollections.PRODUCTS, {
         points: [
           {
-            id: product.id,
-            vector: res[0],
+            id: randomUUID(),
+            vector: res,
             payload: {
               ...input,
               productId: product.id,
@@ -456,13 +428,29 @@ export class LLMTaskConsumer extends WorkerHost {
       product.ProductTranslations[0]?.markdownContent || '',
     );
 
-    for (let i = 0; i < chunkedContent.length; i++) {
-      const embeddingResponse = await this.fetchEmbedding(chunkedContent[i]);
+    const res = await this.fetchEmbedding(...chunkedContent);
+
+    await this.qdrantService.qdrantClient.delete(
+      QdrantCollections.PRODUCT_CHUNKS,
+      {
+        filter: {
+          must: [
+            {
+              key: 'productId',
+              match: { value: product.id },
+            },
+            {
+              key: 'lang',
+              match: { value: job.lang },
+            },
+          ],
+        },
+      },
+    );
+
+    for (let i = 0; i < res.length; i++) {
       this.logger.log(
-        `Generated embedding for product ID ${product.id}, chunk ${i}`,
-      );
-      this.logger.log(
-        `Embedding vector length: ${embeddingResponse[0].length}`,
+        `Embedding vector length for chunk ${i}: ${res[i].length}`,
       );
       await this.qdrantService.qdrantClient.upsert(
         QdrantCollections.PRODUCT_CHUNKS,
@@ -470,7 +458,7 @@ export class LLMTaskConsumer extends WorkerHost {
           points: [
             {
               id: randomUUID(),
-              vector: embeddingResponse[0],
+              vector: res[i],
               payload: {
                 productId: product.id,
                 lang: job.lang,
@@ -596,13 +584,18 @@ export class LLMTaskConsumer extends WorkerHost {
     ${JSON.stringify(similarProducts)}
 
     Answer the user's prompt using the provided similar products. If the information is insufficient, respond accordingly.
+    Answer in the following JSON FORMAT, NOTHING ELSE: { "text": "your_answer_here" }
     `;
 
-    const text = await this.fetchLLM<string>(system, prompt, false);
+    const schema = z.object({
+      text: z.string(),
+    });
+
+    const response = await this.fetchLLM(system, prompt, schema);
     const productIds = similarProducts.map(
       (p) => p.payload!.productId as number,
     );
-    return { text, productIds };
+    return { text: response.text, productIds };
   }
 
   private async processProductSearchPrompt(
@@ -636,13 +629,18 @@ export class LLMTaskConsumer extends WorkerHost {
     ${JSON.stringify(similarProducts)}
 
     Answer the user's prompt using the provided products. If the information is insufficient, respond accordingly.
+    Answer in the following JSON FORMAT, NOTHING ELSE: { "text": "your_answer_here" }
     `;
 
-    const text = await this.fetchLLM<string>(system, prompt, false);
+    const schema = z.object({
+      text: z.string(),
+    });
+
+    const response = await this.fetchLLM(system, prompt, schema);
     const productIds = similarProducts.map(
       (p) => p.payload!.productId as number,
     );
-    return { text, productIds };
+    return { text: response.text, productIds };
   }
 
   private async generateProductInformationResponse(
@@ -718,9 +716,14 @@ export class LLMTaskConsumer extends WorkerHost {
     ${JSON.stringify(productInfo)}
 
     Answer the user's prompt using the provided product information. If the information is insufficient, respond accordingly.
+    Answer in the following JSON FORMAT, NOTHING ELSE: { "text": "your_answer_here" }
     `;
 
-    const res = await this.fetchLLM<string>(system, prompt, false);
-    return { text: res, productIds: [productId] };
+    const schema = z.object({
+      text: z.string(),
+    });
+
+    const response = await this.fetchLLM(system, prompt, schema);
+    return { text: response.text, productIds: [productId] };
   }
 }

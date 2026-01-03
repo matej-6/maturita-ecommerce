@@ -19,7 +19,7 @@ export function CancelOrderButton({ orderId }: props) {
       if (!res.success) {
         toast.error(res.message || "Failed to cancel order.");
       } else {
-        router.push(`/account/orders`);
+        router.push(`/account-details`);
       }
     },
   });

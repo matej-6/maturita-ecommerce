@@ -7,6 +7,13 @@ import {
 } from "@/app/data-access-layer/admin/product-variant-attribute/queries";
 import { OrderStatusLabel } from "@/components/order-status";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,10 +31,12 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { AttributeKeySortingField } from "@/graphql/graphql";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronUpIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   initialPagingArgs: PagingArgs & {
@@ -55,19 +64,22 @@ export function AttributeKeysTableWithFilters({
   sortableColumns,
   data,
 }: Props) {
+  const t = useTranslations("admin.attributeKeys.table");
+  const ft = useTranslations("fields.attributeKey");
+
   const [tableArgs, setTableArgs] = useState(initialTableArgs);
-  const [isTableArgsChanged, setIsTableArgsChanged] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  const isTableArgsChanged = useMemo(() => {
+    return (
+      initialTableArgs.id !== tableArgs.id ||
+      initialTableArgs.key !== tableArgs.key
+    );
+  }, [tableArgs, initialTableArgs]);
 
   useEffect(() => {
     setTableArgs(initialTableArgs);
   }, [initialTableArgs]);
-
-  useEffect(() => {
-    setIsTableArgsChanged(
-      initialTableArgs.id !== tableArgs.id ||
-        initialTableArgs.key !== tableArgs.key
-    );
-  }, [tableArgs, initialTableArgs]);
 
   const router = useRouter();
 
@@ -98,13 +110,6 @@ export function AttributeKeysTableWithFilters({
     router.back();
   }
 
-  function changePageSize(newPageSize: number) {
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set("pageSize", newPageSize.toString());
-    newParams.delete("cursor");
-    router.push(`?${newParams.toString()}`);
-  }
-
   function changeSortingColumn(sortBy: string | null, ascending: boolean) {
     const newParams = new URLSearchParams(searchParams);
     if (sortBy === null) {
@@ -119,84 +124,78 @@ export function AttributeKeysTableWithFilters({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-y-6">
-          <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="id">ID</Label>
-            <Input
-              id="id"
-              value={tableArgs.id ?? ""}
-              onChange={(e) => {
-                const parsedId = parseInt(e.target.value, 10);
-                if (!isNaN(parsedId)) {
-                  setTableArgs((prev) => ({
-                    ...prev,
-                    id: parsedId,
-                  }));
-                }
-              }}
-              placeholder="type an ID to filter by"
-            />
-          </div>
-          <div className="flex flex-col items-start justify-start gap-y-2">
-            <Label htmlFor="key">Key</Label>
-            <Input
-              id="key"
-              value={tableArgs.key ?? ""}
-              onChange={(e) => {
-                const k = e.target.value;
-                if (k !== null) {
-                  setTableArgs((prev) => ({
-                    ...prev,
-                    key: k,
-                  }));
-                }
-              }}
-              placeholder="type a key to filter by"
-            />
-          </div>
-        </div>
+    <div className="flex flex-col gap-y-4">
+      <div>
+        {!isFiltersOpen ? (
+          <Button variant={"outline"} onClick={() => setIsFiltersOpen(true)}>
+            {t("filters.openFiltersButton")}
+          </Button>
+        ) : (
+          <Button variant={"outline"} onClick={() => setIsFiltersOpen(false)}>
+            {t("filters.closeFiltersButton")}
+          </Button>
+        )}
       </div>
-      <div className="flex items-center justify-between w-full">
-        <div className="flex gap-x-2 items-center justify-start">
-          <Button
-            disabled={!isTableArgsChanged}
-            variant={"secondary"}
-            onClick={() => applyFilters()}
-          >
-            Apply Filters
-          </Button>
-          <Button
-            variant={"secondary"}
-            onClick={() => {
-              clearFilters();
-            }}
-          >
-            Clear
-          </Button>
-        </div>
-        <div className="max-w-fit flex justify-start items-center gap-x-2">
-          <Button
-            size={"sm"}
-            variant={"secondary"}
-            disabled={initialPagingArgs.cursor === null}
-            onClick={() => {
-              prevPage();
-            }}
-          >
-            Previous
-          </Button>
-          <Button
-            variant={"secondary"}
-            size={"sm"}
-            disabled={initialPagingArgs.nextCursor === null}
-            onClick={() => nextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      {isFiltersOpen && (
+        <Card className="flex flex-col gap-y-4 p-2 sm:p-4">
+          <CardHeader className="p-0!">
+            <CardTitle>{t("filters.title")}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-y-4 p-0!">
+            <div className="flex flex-col items-start justify-start gap-y-2">
+              <Label htmlFor="id">{ft("id")}</Label>
+              <Input
+                id="id"
+                value={tableArgs.id ?? ""}
+                onChange={(e) => {
+                  const parsedId = parseInt(e.target.value, 10);
+                  if (!isNaN(parsedId)) {
+                    setTableArgs((prev) => ({
+                      ...prev,
+                      id: parsedId,
+                    }));
+                  }
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start justify-start gap-y-2">
+              <Label htmlFor="key">{ft("key")}</Label>
+              <Input
+                id="key"
+                value={tableArgs.key ?? ""}
+                onChange={(e) => {
+                  const k = e.target.value;
+                  if (k !== null) {
+                    setTableArgs((prev) => ({
+                      ...prev,
+                      key: k,
+                    }));
+                  }
+                }}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="p-0!">
+            <div className="flex gap-x-2 items-center justify-start">
+              <Button
+                disabled={!isTableArgsChanged}
+                variant={"secondary"}
+                onClick={() => applyFilters()}
+              >
+                {t("filters.applyFiltersButton")}
+              </Button>
+              <Button
+                variant={"secondary"}
+                onClick={() => {
+                  clearFilters();
+                }}
+              >
+                {t("filters.clearFiltersButton")}
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
       <div className="rounded-xl overflow-hidden">
         {data !== null && data.length > 0 ? (
           <Table className="overflow-x-scroll p-2">
@@ -204,31 +203,35 @@ export function AttributeKeysTableWithFilters({
               <TableRow className="">
                 {[
                   {
-                    label: "ID",
-                    key: "ID",
+                    label: ft("id"),
+                    key: "id",
+                    sortingKey: AttributeKeySortingField.Id,
                   },
                   {
-                    label: "Key",
-                    key: "KEY",
+                    label: ft("key"),
+                    key: "key",
+                    sortingKey: AttributeKeySortingField.Key,
                   },
                   {
-                    label: "Created At",
-                    key: "CREATED_AT",
+                    label: ft("createdAt"),
+                    key: "createdAt",
+                    sortingKey: AttributeKeySortingField.CreatedAt,
                   },
                   {
-                    label: "Updated At",
-                    key: "UPDATED_AT",
+                    label: ft("updatedAt"),
+                    key: "updatedAt",
+                    sortingKey: AttributeKeySortingField.UpdatedAt,
                   },
                 ].map((column) => (
                   <TableHead
                     className="p-4"
                     key={column.key}
                     onClick={() => {
-                      if (!sortableColumns.includes(column.key)) return;
+                      if (!column.sortingKey) return;
                       const nextIsAscending =
                         initialSortingArgs.sortBy === null
                           ? true
-                          : initialSortingArgs.sortBy !== column.key
+                          : initialSortingArgs.sortBy !== column.sortingKey
                           ? true
                           : initialSortingArgs.ascending === null
                           ? true
@@ -236,31 +239,30 @@ export function AttributeKeysTableWithFilters({
                           ? false
                           : null;
                       changeSortingColumn(
-                        nextIsAscending === null ? null : column.key,
+                        nextIsAscending === null ? null : column.sortingKey,
                         nextIsAscending === null ? true : nextIsAscending
                       );
                     }}
                   >
                     <div
                       className={cn("flex gap-x-1 justify-start items-center", {
-                        "cursor-pointer hover:underline":
-                          sortableColumns.includes(column.key),
+                        "cursor-pointer hover:underline": !!column.sortingKey,
                       })}
                     >
                       <span>{column.label}</span>
                       <ChevronUpIcon
                         className={cn("size-4 opacity-0", {
                           "opacity-100!":
-                            initialSortingArgs.sortBy === column.key,
+                            initialSortingArgs.sortBy === column.sortingKey,
                           "rotate-180":
-                            initialSortingArgs.sortBy === column.key &&
+                            initialSortingArgs.sortBy === column.sortingKey &&
                             initialSortingArgs.ascending,
                         })}
                       />
                     </div>
                   </TableHead>
                 ))}
-                <TableHead className="sr-only">Actions</TableHead>
+                <TableHead className="sr-only">{t("actions.label")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -277,7 +279,7 @@ export function AttributeKeysTableWithFilters({
                   <TableCell className="px-4 py-2 flex justify-end">
                     <Link href={`/admin/attribute-keys/key-detail/${keys.id}`}>
                       <Button variant="secondary" size="sm">
-                        View Details
+                        {t("actions.viewDetails")}
                       </Button>
                     </Link>
                   </TableCell>
@@ -286,8 +288,28 @@ export function AttributeKeysTableWithFilters({
             </TableBody>
           </Table>
         ) : (
-          <div className="py-4">No attribute keys found.</div>
+          <div className="py-4">{t("noAttributeKeysFound")}</div>
         )}
+      </div>
+      <div className="flex items-center gap-x-2">
+        <Button
+          size={"sm"}
+          variant={"secondary"}
+          disabled={initialPagingArgs.cursor === null}
+          onClick={() => {
+            prevPage();
+          }}
+        >
+          {t("pagination.buttons.previous")}
+        </Button>
+        <Button
+          variant={"secondary"}
+          size={"sm"}
+          disabled={initialPagingArgs.nextCursor === null}
+          onClick={() => nextPage()}
+        >
+          {t("pagination.buttons.next")}
+        </Button>
       </div>
     </div>
   );

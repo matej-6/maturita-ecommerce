@@ -263,6 +263,37 @@
             "atLeastOneVisibleVariant": "Musí obsahovať aspoň jednu viditeľnú variantu"
           }
         }
+      },
+      "table": {
+        "pagination": {
+          "prevPageButton": "Predchádzajúca",
+          "nextPageButton": "Ďalšia"
+        },
+        "noItemsFound": "Neboli nájdené žiadne produkty.",
+        "filters": {
+          "openFiltersButton": "Otvoriť filtre",
+          "closeFiltersButton": "Zatvoriť filtre",
+          "clearFiltersButton": "Vymazať filtre",
+          "applyFiltersButton": "Použiť filtre",
+          "isPublic": {
+            "placeholder": "Vybrať viditeľnosť",
+            "any": "Všetko",
+            "true": "Verejné",
+            "false": "Súkromné"
+          },
+          "isSetup": {
+            "placeholder": "Vybrať stav nastavenia",
+            "any": "Všetko",
+            "true": "Nastavené",
+            "false": "Nenastavené"
+          },
+          "title": "Filtre"
+        },
+        "actions": {
+          "title": "Možnosti",
+          "viewPage": "Zobraziť stránku",
+          "viewDetails": "Zobraziť detaily"
+        }
       }
     },
     "categories": {
@@ -408,6 +439,38 @@
           "viewDetails": "Zobraziť detaily"
         }
       }
+    },
+    "attributeKeys": {
+      "form": {
+        "titleCreate": "Pridať nový kľúč atribútu",
+        "titleUpdate": "Upraviť kľúč atribútu",
+        "triggerButtonCreate": "Pridať nový kľúč atribútu",
+        "triggerButtonUpdate": "Upraviť kľúč atribútu",
+        "submitButtonCreate": "Vytvoriť kľúč atribútu",
+        "submitButtonUpdate": "Uložiť zmeny",
+        "loadingButton": "Prebieha odosielanie...",
+        "closeButton": "Zavrieť"
+      },
+      "table": {
+        "noAttributeKeysFound": "Neboli nájdené žiadne kľúče atribútov.",
+        "pagination": {
+          "buttons": {
+            "previous": "Predchádzajúca",
+            "next": "Ďalšia"
+          }
+        },
+        "actions": {
+          "label": "Možnosti",
+          "viewDetails": "Zobraziť detaily"
+        },
+        "filters": {
+          "applyFiltersButton": "Použiť filtre",
+          "clearFiltersButton": "Vymazať filtre",
+          "openFiltersButton": "Zobraziť filtre",
+          "closeFiltersButton": "Skryť filtre",
+          "title": "Filtre"
+        }
+      }
     }
   },
   "fields": {
@@ -434,8 +497,20 @@
       "slug": "Slug",
       "categoryId": "ID kategórie",
       "isPublic": "Je verejný",
+      "isPublicYes": "Áno",
+      "isPublicNo": "Nie",
       "isSetup": "Je nastavený",
-      "id": "ID"
+      "isSetupYes": "Áno",
+      "isSetupNo": "Nie",
+      "id": "ID",
+      "createdAt": "Dátum vytvorenia",
+      "updatedAt": "Naposledy aktualizované"
+    },
+    "attributeKey": {
+      "id": "ID",
+      "key": "Kľúč",
+      "createdAt": "Dátum vytvorenia",
+      "updatedAt": "Naposledy aktualizované"
     },
     "productTranslation": {
       "title": "Názov",

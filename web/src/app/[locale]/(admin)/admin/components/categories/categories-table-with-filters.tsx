@@ -159,15 +159,17 @@ export function CategoriesTableWithFilters({
 
   return (
     <div className="flex flex-col gap-y-4 flex-1">
-      {!filtersOpen ? (
-        <Button variant={"outline"} onClick={() => setFiltersOpen(true)}>
-          {t("table.filters.openFilters")}
-        </Button>
-      ) : (
-        <Button variant={"outline"} onClick={() => setFiltersOpen(false)}>
-          {t("table.filters.closeFilters")}
-        </Button>
-      )}
+      <div>
+        {!filtersOpen ? (
+          <Button variant={"outline"} onClick={() => setFiltersOpen(true)}>
+            {t("table.filters.openFilters")}
+          </Button>
+        ) : (
+          <Button variant={"outline"} onClick={() => setFiltersOpen(false)}>
+            {t("table.filters.closeFilters")}
+          </Button>
+        )}
+      </div>
       {filtersOpen && (
         <Card className={"p-2 sm:p-4 flex flex-col gap-y-4"}>
           <CardHeader className="p-0!">
@@ -340,24 +342,22 @@ export function CategoriesTableWithFilters({
             </div>
           </CardContent>
           <CardFooter className="p-0!">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex gap-x-2 items-center justify-start">
-                <Button
-                  disabled={!isTableArgsChanged}
-                  variant={"secondary"}
-                  onClick={() => applyFilters()}
-                >
-                  {t("table.filters.applyFilters")}
-                </Button>
-                <Button
-                  variant={"secondary"}
-                  onClick={() => {
-                    clearFilters();
-                  }}
-                >
-                  {t("table.filters.clearFilters")}
-                </Button>
-              </div>
+            <div className="flex gap-x-2 items-center justify-start">
+              <Button
+                disabled={!isTableArgsChanged}
+                variant={"secondary"}
+                onClick={() => applyFilters()}
+              >
+                {t("table.filters.applyFilters")}
+              </Button>
+              <Button
+                variant={"secondary"}
+                onClick={() => {
+                  clearFilters();
+                }}
+              >
+                {t("table.filters.clearFilters")}
+              </Button>
             </div>
           </CardFooter>
         </Card>

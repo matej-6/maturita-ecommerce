@@ -120,32 +120,35 @@ export class OrdersService {
       throw new Error('Order not found or missing session ID');
     }
 
-    if (!order.StripePaymentIntentId) {
-      throw new Error('Order does not have a Stripe Payment Intent ID');
+    if (!order.StripeSessionId) {
+      throw new Error('Order not found or missing session ID');
     }
 
-    const paymentIntent = await this.stripe.paymentIntents.retrieve(
-      order.StripePaymentIntentId,
+    const session = await this.stripe.checkout.sessions.retrieve(
+      order.StripeSessionId,
     );
 
     if (
-      paymentIntent.status === 'succeeded' &&
+      session.status === 'complete' &&
+      session.payment_status !== 'unpaid' &&
       (order.status === 'PENDING' || order.status === 'FAILED')
     ) {
+      const shippingDetails = session.collected_information?.shipping_details;
+
       const updatedOrder = await this.prisma.order.update({
         where: { id: orderId },
         data: {
           status: 'PROCESSING',
           shippingDetails: {
             create: {
-              city: paymentIntent.shipping?.address?.city || '',
-              country: paymentIntent.shipping?.address?.country || '',
-              line1: paymentIntent.shipping?.address?.line1 || '',
-              name: paymentIntent.shipping?.name || '',
-              postalCode: paymentIntent.shipping?.address?.postal_code || '',
-              state: paymentIntent.shipping?.address?.state || '',
-              line2: paymentIntent.shipping?.address?.line2 || '',
-              phone: paymentIntent.shipping?.phone || '',
+              city: shippingDetails?.address?.city || '',
+              country: shippingDetails?.address?.country || '',
+              line1: shippingDetails?.address?.line1 || '',
+              name: shippingDetails?.name || '',
+              postalCode: shippingDetails?.address?.postal_code || '',
+              state: shippingDetails?.address?.state || '',
+              line2: shippingDetails?.address?.line2 || '',
+              phone: session.customer_details?.phone || '',
             },
           },
         },

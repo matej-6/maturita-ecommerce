@@ -18,6 +18,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type Props = {
@@ -30,7 +31,10 @@ type FormData = {
   key: string;
 };
 
-export function AttributeSheetForm({ initialData }: Props) {
+export function AttributeKeySheetForm({ initialData }: Props) {
+  const t = useTranslations("admin.attributeKeys.form");
+  const ft = useTranslations("fields.attributeKey");
+
   const [formData, setFormData] = useState<FormData>({
     key: initialData?.key || "",
   });
@@ -80,15 +84,15 @@ export function AttributeSheetForm({ initialData }: Props) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <ResponsiveButton variant="secondary">
-          {initialData ? "Edit Attribute" : "Add Attribute"}
+        <ResponsiveButton>
+          {initialData ? t("triggerButtonUpdate") : t("triggerButtonCreate")}
         </ResponsiveButton>
       </SheetTrigger>
 
       <SheetContent className="grow">
         <SheetHeader>
           <SheetTitle>
-            {initialData ? "Edit Attribute Key" : "Add Attribute Key"}
+            {initialData ? t("titleUpdate") : t("titleCreate")}
           </SheetTitle>
         </SheetHeader>
         <form
@@ -99,7 +103,7 @@ export function AttributeSheetForm({ initialData }: Props) {
           className="flex flex-col gap-y-3 sm:gap-y-6 px-4 grow"
         >
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="key">Key</Label>
+            <Label htmlFor="key">{ft("key")}</Label>
             <Input
               id="key"
               type="text"
@@ -114,14 +118,14 @@ export function AttributeSheetForm({ initialData }: Props) {
             <Button type="submit" disabled={isPending}>
               {initialData
                 ? isPending
-                  ? "Saving..."
-                  : "Save Changes"
+                  ? t("loadingButton")
+                  : t("submitButtonUpdate")
                 : isPending
-                ? "Creating..."
-                : "Create Attribute"}
+                ? t("loadingButton")
+                : t("submitButtonCreate")}
             </Button>
             <SheetClose asChild>
-              <Button variant={"outline"}>Close</Button>
+              <Button variant={"outline"}>{t("closeButton")}</Button>
             </SheetClose>
           </div>
         </form>

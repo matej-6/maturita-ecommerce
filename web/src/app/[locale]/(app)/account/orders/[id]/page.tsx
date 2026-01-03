@@ -221,7 +221,7 @@ export default async function OrderPage({ params }: Props) {
             </TableBody>
           </Table>
         </div>
-        <div>
+        <div className="flex items-center gap-x-2">
           {(order.status === OrderStatus.Pending ||
             order.status === OrderStatus.Processing) && (
             <CancelOrderButton orderId={order.id} />

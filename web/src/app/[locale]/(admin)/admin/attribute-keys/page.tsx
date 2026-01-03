@@ -8,6 +8,7 @@ import {
 } from "@/app/data-access-layer/admin/product-variant-attribute/queries";
 import { getPagedAttributeKeysQuery } from "@/app/data-access-layer/admin/product-variant-attribute/actions";
 import { AttributeKeysTableWithFilters } from "../components/attribute-keys/attribute-keys-table-with-filters";
+import { AttributeKeySheetForm } from "../forms/attribute-key-sheet-form";
 
 type Props = {
   searchParams: {
@@ -26,6 +27,8 @@ export default async function AttributeKeysPage({ searchParams }: Props) {
         return AttributeKeySortingField.Key;
       case AttributeKeySortingField.CreatedAt:
         return AttributeKeySortingField.CreatedAt;
+      case AttributeKeySortingField.UpdatedAt:
+        return AttributeKeySortingField.UpdatedAt;
       default:
         return null;
     }
@@ -100,8 +103,11 @@ export default async function AttributeKeysPage({ searchParams }: Props) {
   });
 
   return (
-    <div className="flex-1 flex flex-col gap-4">
-      <div className="bg-muted/25 dark:bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
+    <div className="flex-1 flex flex-col gap-y-4">
+      <div>
+        <AttributeKeySheetForm />
+      </div>
+      <div className="flex-1 flex flex-col">
         <AttributeKeysTableWithFilters
           initialPagingArgs={pagingArgs}
           initialSortingArgs={sortingArgs}

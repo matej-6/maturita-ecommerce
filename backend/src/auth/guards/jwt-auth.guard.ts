@@ -13,6 +13,7 @@ import { GraphqlAppContext } from 'src/app.module';
 import { Env } from 'src/config/validate';
 import { ERROR } from 'src/errors';
 import { AuthenticatedUserDto } from '../dto/authenticated-user.dto';
+import { Role } from 'generated/prisma/enums';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -63,22 +64,25 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException(ERROR.unauthorizedException);
     }
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const payload = await this.jwtService.verifyAsync(tokenFromHeader, {
+      const payload = await this.jwtService.verifyAsync<{
+        userId: number;
+        role: Role;
+        email: string;
+      }>(tokenFromHeader, {
         secret: this.accessTokenSecret,
       });
 
-      const user = {
+      const user: AuthenticatedUserDto = {
         id: payload.userId,
         role: payload.role,
         email: payload.email,
       };
 
-      request['user'] = user as AuthenticatedUserDto;
+      request['user'] = user;
       if (context.getType<ContextType | 'graphql'>() === 'graphql') {
         const gqlContext =
           GqlExecutionContext.create(context).getContext<GraphqlAppContext>();
-        gqlContext.user = user as AuthenticatedUserDto;
+        gqlContext.user = user;
       }
     } catch {
       throw new UnauthorizedException(ERROR.unauthorizedException);

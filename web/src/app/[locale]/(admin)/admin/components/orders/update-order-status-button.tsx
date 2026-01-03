@@ -73,6 +73,7 @@ export function UpdateOrderStatusButton({ orderId, status }: Props) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={OrderStatus.Canceled}>Canceled</SelectItem>
+              <SelectItem value={OrderStatus.Failed}>Failed</SelectItem>
               <SelectItem value={OrderStatus.Pending}>Pending</SelectItem>
               <SelectItem value={OrderStatus.Processing}>Processing</SelectItem>
               <SelectItem value={OrderStatus.Shipped}>Shipped</SelectItem>

@@ -7,10 +7,15 @@ import { QdrantClient } from '@qdrant/js-client-rest';
 export class QdrantService implements OnModuleInit {
   private readonly logger = new Logger(QdrantService.name);
 
+  private embeddingModelDimension: number;
+
   private client: QdrantClient;
 
   constructor(private readonly configService: ConfigService<Env>) {
     console.log('QdrantService constructor called');
+    this.embeddingModelDimension = this.configService.getOrThrow<number>(
+      'OLLAMA_EMBEDDING_MODEL_DIMENSION',
+    );
   }
 
   get qdrantClient(): QdrantClient {
@@ -48,7 +53,7 @@ export class QdrantService implements OnModuleInit {
   private async createProductChunksCollection() {
     await this.client.createCollection(QdrantCollections.PRODUCT_CHUNKS, {
       vectors: {
-        size: 2560, // https://github.com/QwenLM/Qwen3-Embedding?tab=readme-ov-file#qwen3-embedding-series-model-list
+        size: this.embeddingModelDimension,
         distance: 'Cosine',
       },
     });
@@ -57,7 +62,7 @@ export class QdrantService implements OnModuleInit {
   private async createProductCollection() {
     await this.client.createCollection(QdrantCollections.PRODUCTS, {
       vectors: {
-        size: 2560, //https://github.com/QwenLM/Qwen3-Embedding?tab=readme-ov-file#qwen3-embedding-series-model-list
+        size: this.embeddingModelDimension,
         distance: 'Cosine',
       },
     });

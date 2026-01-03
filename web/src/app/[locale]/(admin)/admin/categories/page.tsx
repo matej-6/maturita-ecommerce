@@ -6,8 +6,6 @@ import {
   CategoriesSortingArgs,
   getCategoriesTableDataAction,
 } from "@/app/data-access-layer/admin/category/actions";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
 import { CategoriesTableWithFilters } from "../components/categories/categories-table-with-filters";
 import { NewCategoryFormSheet } from "../forms/new-cateogry-form-sheet";
 

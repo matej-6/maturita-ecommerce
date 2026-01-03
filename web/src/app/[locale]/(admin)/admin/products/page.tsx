@@ -120,7 +120,7 @@ export default async function ProductsPage({ searchParams }: Props) {
           mode="create"
         />
       </div>
-      <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
+      <div className="flex-1 flex flex-col">
         <ProductsTableWithFilters
           initialPagingArgs={pagingArgs}
           initialSortingArgs={sortingArgs}

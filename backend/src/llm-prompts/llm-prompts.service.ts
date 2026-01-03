@@ -211,7 +211,7 @@ export class LLMPromptsService {
       removeOnFail: true,
       attempts: 3,
       priority: 5,
-      jobId: this.getProductEmbeddingTaskJobId(newEmbeddingTask.id, data.lang),
+      jobId: this.getProductEmbeddingTaskJobId(data.productId, data.lang),
     });
 
     return newEmbeddingTask;
@@ -237,7 +237,7 @@ export class LLMPromptsService {
         attempts: 3,
         priority: 5,
         jobId: this.getProductContentEmbeddingTaskJobId(
-          newContentTask.id,
+          data.productId,
           data.lang,
         ),
       },
@@ -247,10 +247,10 @@ export class LLMPromptsService {
   }
 
   private getProductContentEmbeddingTaskJobId(
-    taskId: number,
+    productId: number,
     lang: string,
   ): string {
-    return `product-content-embedding-${taskId}-${lang}`;
+    return `product-content-embedding-${productId}-${lang}`;
   }
 
   private getProductEmbeddingTaskJobId(
@@ -260,8 +260,8 @@ export class LLMPromptsService {
     return `product-embedding-${productId}-${lang}`;
   }
 
-  private getUserPromptTaskJobIdByUserId(taskId: number): string {
-    return `user-prompt-${taskId}`;
+  private getUserPromptTaskJobIdByUserId(userId: number): string {
+    return `user-prompt-${userId}`;
   }
 
   async removeProductEmbeddingTask(
@@ -277,7 +277,7 @@ export class LLMPromptsService {
     }
 
     await this.llmTasksQueue.remove(
-      this.getProductEmbeddingTaskJobId(task.id, lang),
+      this.getProductEmbeddingTaskJobId(productId, lang),
     );
   }
 
@@ -293,8 +293,11 @@ export class LLMPromptsService {
       return;
     }
     await this.llmTasksQueue.remove(
-      this.getProductContentEmbeddingTaskJobId(task.id, lang),
+      this.getProductContentEmbeddingTaskJobId(productId, lang),
     );
+    await this.prisma.productContentEmbeddingTask.delete({
+      where: { id: task.id },
+    });
   }
 
   async removeUserPromptTaskByUserId(id: number): Promise<void> {

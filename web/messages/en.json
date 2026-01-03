@@ -263,6 +263,37 @@
             "atLeastOneVisibleVariant": "Make sure it has at least one visible variant"
           }
         }
+      },
+      "table": {
+        "pagination": {
+          "prevPageButton": "Previous",
+          "nextPageButton": "Next"
+        },
+        "noItemsFound": "No products found.",
+        "filters": {
+          "openFiltersButton": "Open filters",
+          "closeFiltersButton": "Close filters",
+          "clearFiltersButton": "Clear filters",
+          "applyFiltersButton": "Apply filters",
+          "isPublic": {
+            "placeholder": "Select visibility",
+            "any": "Any",
+            "true": "Public",
+            "false": "Private"
+          },
+          "isSetup": {
+            "placeholder": "Select setup status",
+            "any": "Any",
+            "true": "Setup",
+            "false": "Not Setup"
+          },
+          "title": "Filters"
+        },
+        "actions": {
+          "title": "Actions",
+          "viewPage": "View Page",
+          "viewDetails": "View Details"
+        }
       }
     },
     "categories": {
@@ -408,6 +439,38 @@
           "viewDetails": "View Details"
         }
       }
+    },
+    "attributeKeys": {
+      "form": {
+        "titleCreate": "Add a New Attribute Key",
+        "titleUpdate": "Edit Attribute Key",
+        "triggerButtonCreate": "Add New Attribute Key",
+        "triggerButtonUpdate": "Edit Attribute Key",
+        "submitButtonCreate": "Create attribute key",
+        "submitButtonUpdate": "Save changes",
+        "loadingButton": "Submitting...",
+        "closeButton": "Close"
+      },
+      "table": {
+        "noAttributeKeysFound": "No attribute keys found.",
+        "pagination": {
+          "buttons": {
+            "previous": "Previous",
+            "next": "Next"
+          }
+        },
+        "actions": {
+          "label": "Actions",
+          "viewDetails": "View Details"
+        },
+        "filters": {
+          "applyFiltersButton": "Apply filters",
+          "clearFiltersButton": "Clear filters",
+          "openFiltersButton": "Open filters",
+          "closeFiltersButton": "Close filters",
+          "title": "Filters"
+        }
+      }
     }
   },
   "fields": {
@@ -434,8 +497,20 @@
       "slug": "Slug",
       "categoryId": "Category Id",
       "isPublic": "Is Public",
+      "isPublicYes": "Yes",
+      "isPublicNo": "No",
       "isSetup": "Is Setup",
-      "id": "ID"
+      "isSetupYes": "Yes",
+      "isSetupNo": "No",
+      "id": "ID",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    },
+    "attributeKey": {
+      "id": "ID",
+      "key": "Key",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
     },
     "productTranslation": {
       "title": "Title",

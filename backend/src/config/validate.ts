@@ -21,6 +21,7 @@ const envSchema = z.object({
   OLLAMA_BASE_URL: z.string().optional(),
   OLLAMA_LLM_MODEL: z.string().optional(),
   OLLAMA_EMBEDDING_MODEL: z.string().optional(),
+  OLLAMA_EMBEDDING_MODEL_DIMENSION: z.coerce.number().optional(),
   QDRANT_HOST: z.string().optional(),
   QDRANT_PORT: z.coerce.number().optional(),
 });
