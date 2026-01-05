@@ -91,7 +91,13 @@
     "addToCartButton": "Pridať do košíka",
     "moreVariants": "Ďalšie varianty",
     "additionalInformation": "Dodatočné informácie",
-    "noImageAvailable": "Obrázok nie je dostupný"
+    "noImageAvailable": "Obrázok nie je dostupný",
+    "otherVariants": "Iné varianty",
+    "stock": {
+      "inStock": "Na sklade",
+      "limitedStock": "Obmedzený počet",
+      "outOfStock": "Nedostupné"
+    }
   },
   "homePage": {
     "newArrivals": "Novinky",

@@ -83,7 +83,7 @@ export function ProductVariantsScroll({ variants }: Props) {
     <div className="flex flex-col gap-y-1">
       <div className="flex items-center justify-between">
         <h2 className="text-sm text-muted-foreground font-medium">
-          Other Variants
+          {t("otherVariants")}
         </h2>
         <div className="flex items-center gap-x-1 ">
           <button

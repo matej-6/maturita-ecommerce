@@ -1,6 +1,5 @@
 "use server";
 
-import { categoryFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/category-form-schema";
 import { execute } from "@/graphql/execute";
 import { EditCategoryMutation, NewCategoryMutation } from "./mutations";
 import { ActionResponse } from "../../formActionResponse";
@@ -63,9 +62,10 @@ export async function getCategoriesTableDataAction(
   };
 }
 
-export async function createCategoryAction(
-  data: categoryFormSchemaType
-): Promise<ActionResponse<{ id: number }>> {
+export async function createCategoryAction(data: {
+  parentCategoryId: number | null;
+  slug: string;
+}): Promise<ActionResponse<{ id: number }>> {
   const res = await execute(NewCategoryMutation, {
     parentCategoryId: data.parentCategoryId || undefined,
     slug: data.slug,

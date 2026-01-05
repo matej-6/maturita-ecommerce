@@ -54,12 +54,6 @@ export class UsersResolver {
     return this.usersService.findOne(id);
   }
 
-  @UseGuards(AdminGuard)
-  @Mutation(() => User)
-  removeUser(@Args('id', { type: () => ID }) id: number) {
-    return this.usersService.remove(id);
-  }
-
   @UseGuards(JwtAuthGuard)
   @ResolveField(() => UserAvatar, { name: 'avatar', nullable: true })
   async getAvatar(@Parent() user: User): Promise<UserAvatar | null> {

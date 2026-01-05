@@ -262,7 +262,6 @@ type Mutation {
   removeProductVariantAttributeKeyTranslation(id: Int!): Void!
   removeProductVariantAttributeTranslation(id: Int!): Void!
   removeProductVariantImage(id: Int!): Int!
-  removeUser(id: ID!): User!
   retryPendingPayment(orderId: Int!): String!
   setProductThumbnailImage(productImageId: Int!): ProductImage!
   setProductVariantThumbnailImage(id: Int!): ProductVariantImage!

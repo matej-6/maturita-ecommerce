@@ -1,6 +1,5 @@
 "use server";
 
-import { productVariantAttributeKeyFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/attribute-key-form-schema";
 import { ActionResponse } from "../../formActionResponse";
 import { ExecutionResult } from "graphql";
 import {
@@ -9,7 +8,6 @@ import {
   CreateAttributeKeyTranslationMutationMutation,
   CreateProductVariantAttributeTranslationDocument,
   CreateProductVariantAttributeTranslationMutation,
-  DeleteAttributeKeyTranslationMutationDocument,
   DeleteAttributeTranslationMutationDocument,
   EditAttributeKeyMutationMutation,
   PagedAttributeKeysQueryQuery,
@@ -33,7 +31,6 @@ import {
 import { handleGraphqlError } from "../handleGraphqlFormError";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
-import { productVariantAttributeFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/product-variant-attribute-schema";
 import {
   AdminAttributeKeyDetailsPageQueryDocument,
   FilterArgs,
@@ -43,7 +40,7 @@ import {
 } from "./queries";
 
 export async function createAttributeKeyAction(
-  data: productVariantAttributeKeyFormSchemaType,
+  data: { key: string },
   productId?: number
 ): Promise<
   ActionResponse<
@@ -81,7 +78,7 @@ export async function createAttributeKeyAction(
 
 export async function updateAttributeKeyAction(
   keyId: number,
-  data: productVariantAttributeKeyFormSchemaType,
+  data: { key: string },
   productId?: number
 ): Promise<
   ActionResponse<
@@ -120,7 +117,7 @@ export async function updateAttributeKeyAction(
 }
 
 export async function createAttributeAction(
-  data: productVariantAttributeFormSchemaType,
+  data: { attributeKeyId: number; attributeValue: string },
   productId?: number
 ): Promise<ActionResponse<null>> {
   const res = await execute(CreateAttributeMutation, {

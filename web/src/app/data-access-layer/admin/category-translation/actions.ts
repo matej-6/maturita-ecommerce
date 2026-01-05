@@ -3,7 +3,6 @@
 import { execute } from "@/graphql/execute";
 import { ActionResponse } from "../../formActionResponse";
 import { handleGraphqlError } from "../handleGraphqlFormError";
-import { categoryTranslationSchemaType } from "@/app/[locale]/(admin)/admin/schemas/category-translation-schema";
 import { ExecutionResult } from "graphql";
 import {
   DeleteCategoryTranslationMutationMutation,

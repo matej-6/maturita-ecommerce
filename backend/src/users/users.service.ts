@@ -95,18 +95,6 @@ export class UsersService {
     });
   }
 
-  async remove(id: number) {
-    try {
-      await this.prisma.user.delete({
-        where: { id },
-      });
-      this.logger.log(`User deleted: ${id}`);
-    } catch (err) {
-      this.logger.error('Failed to delete user: ', err);
-      throw new InternalServerErrorException(ERROR.unknownError);
-    }
-  }
-
   async findAll(): Promise<UserDto[]> {
     try {
       const users: UserDto[] = await this.prisma.user.findMany({

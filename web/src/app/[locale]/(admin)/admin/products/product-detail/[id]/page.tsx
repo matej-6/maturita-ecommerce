@@ -3,23 +3,13 @@
 import { getProductDetailPageData } from "@/app/data-access-layer/admin/product/queries";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+
 import { Link } from "@/i18n/navigation";
 import { AlertCircleIcon, ArrowUpRightIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ProductForm } from "../../../forms/product-sheet-form";
 import { ProductTranslation } from "../../../components/products/product-translation";
-import { AddProductTranslationSheet } from "../../../components/products/add-product-translation-sheet";
 import { getImageSrc } from "@/app/lib/utils";
 import Image from "next/image";
 import { ProductImageForm } from "../../../forms/product-image-form";
@@ -27,8 +17,6 @@ import { SetImageThumbnailButton } from "../../../components/products/set-image-
 import { DeleteImage } from "../../../components/products/delete-image-button";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AttributeKeyForm } from "../../../forms/attribute-key-form";
-import { AttributeForm } from "../../../forms/attribute-form";
 import { ProductVariantSheetForm } from "../../../forms/product-variant-sheet-form";
 import { GenerateEmbeddingsButton } from "../../../components/products/generate-embeddings-button";
 import { RegenerateAllEmbeddingsButton } from "../../../components/products/regenerate-all-embeddings-button";

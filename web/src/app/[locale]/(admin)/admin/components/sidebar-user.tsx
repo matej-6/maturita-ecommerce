@@ -1,9 +1,9 @@
 "use client";
 
 import { CurrentSession } from "@/app/data-access-layer/auth/queries";
+import { Avatar } from "@/components/avatar";
 // https://ui.shadcn.com/blocks/sidebar#sidebar-08
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,17 +52,7 @@ export function SidebarUser({ currentSessionPromise }: SidebarUserProps) {
               size={"lg"}
               className="data-[state=open]:bg-sidebar-accent text-sidebar-accent-foreground"
             >
-              <Avatar className="size-8 rounded-lg">
-                <AvatarImage
-                  src={session.avatar ?? ""}
-                  alt={session.firstName ?? "User image"}
-                />
-                <AvatarFallback className="rounded-lg">
-                  {session.firstName
-                    ? session.firstName[0]
-                    : session.email.slice(0, 2)}
-                </AvatarFallback>
-              </Avatar>
+              <Avatar size="sm" />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
                   {session.firstName} {session.lastName}
@@ -80,17 +70,7 @@ export function SidebarUser({ currentSessionPromise }: SidebarUserProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="size-8 rounded-lg">
-                  <AvatarImage
-                    src={session.avatar ?? ""}
-                    alt={session.firstName ?? "User image"}
-                  />
-                  <AvatarFallback className="rounded-lg">
-                    {session.firstName
-                      ? session.firstName[0]
-                      : session.email.slice(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
+                <Avatar size="sm" />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
                     {session.firstName} {session.lastName}

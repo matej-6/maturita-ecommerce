@@ -1,6 +1,5 @@
 "use server";
 
-import { productFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/product-form-schema";
 import { ActionResponse } from "../../formActionResponse";
 import { execute } from "@/graphql/execute";
 import { handleGraphqlError } from "../handleGraphqlFormError";
@@ -34,13 +33,13 @@ import {
   SetVariantImageThumbnailMutation,
 } from "./mutations";
 import { revalidatePath } from "next/cache";
-import { readFileSync } from "fs";
 import { getLocale } from "next-intl/server";
-import { productVariantFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/product-variant-schema";
 
-export async function createProductAction(
-  data: productFormSchemaType
-): Promise<
+export async function createProductAction(data: {
+  categoryId: number | null;
+  slug: string;
+  isPublic: boolean;
+}): Promise<
   ActionResponse<
     NonNullable<
       ExecutionResult<CreateProductMutationMutation>["data"]
@@ -73,9 +72,12 @@ export async function createProductAction(
   };
 }
 
-export async function editProductAction(
-  data: productFormSchemaType & { id: number }
-): Promise<
+export async function editProductAction(data: {
+  categoryId: number | null;
+  slug: string;
+  isPublic: boolean;
+  id: number;
+}): Promise<
   ActionResponse<
     NonNullable<
       ExecutionResult<EditProductMutationMutation>["data"]
@@ -330,7 +332,13 @@ export async function deleteVariantImageAction(
 
 export async function createVariantAction(
   productId: number,
-  data: productVariantFormSchemaType
+  data: {
+    sku: string;
+    priceInCents: number;
+    isPublic: boolean;
+    stock: number;
+    attributes?: number[];
+  }
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -371,7 +379,13 @@ export async function createVariantAction(
 export async function editVariantAction(
   productId: number,
   variantId: number,
-  data: productVariantFormSchemaType
+  data: {
+    sku: string;
+    priceInCents: number;
+    isPublic: boolean;
+    stock: number;
+    attributes?: number[];
+  }
 ): Promise<
   ActionResponse<
     NonNullable<

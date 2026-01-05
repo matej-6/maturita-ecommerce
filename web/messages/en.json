@@ -91,7 +91,13 @@
     "addToCartButton": "Add to Cart",
     "moreVariants": "More variants",
     "additionalInformation": "Additional Information",
-    "noImageAvailable": "No image available"
+    "noImageAvailable": "No image available",
+    "otherVariants": "Other Variants",
+    "stock": {
+      "inStock": "In Stock",
+      "limitedStock": "Limited Stock",
+      "outOfStock": "Out of Stock"
+    }
   },
   "homePage": {
     "newArrivals": "New Arrivals",

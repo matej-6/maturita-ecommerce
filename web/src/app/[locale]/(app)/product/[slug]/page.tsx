@@ -39,6 +39,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const locale = await getLocale();
 
   const t = await getTranslations("productPage");
+  const ft = await getTranslations("fields");
 
   if (variant === null) {
     const newSearchParams = new URLSearchParams();
@@ -126,7 +127,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
           {data.data.productBySlug.description && (
             <div className="flex flex-col gap-y-1">
               <h2 className="text-muted-foreground text-sm font-medium">
-                Description
+                {ft("productTranslation.description")}
               </h2>
               <p className="text-secondary-foreground text-base">
                 {data.data.productBySlug.description}
@@ -159,10 +160,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 })}
               >
                 {selectedVariant.stock > 5
-                  ? "In Stock"
+                  ? t("stock.inStock")
                   : selectedVariant.stock > 0 && selectedVariant.stock <= 5
-                  ? "Limited Stock"
-                  : "Out of Stock"}
+                  ? t("stock.limitedStock")
+                  : t("stock.outOfStock")}
               </span>
             </div>
           </div>
