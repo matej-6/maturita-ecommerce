@@ -36,6 +36,8 @@ import {
 } from "../ui/drawer";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
+import { HeaderSearch } from "./header-search";
 
 export function HeaderRightNav({
   categories,
@@ -69,19 +71,21 @@ export function HeaderRightNav({
 
   return (
     <>
-      <div className="sm:hidden">
+      <div className="lg:hidden">
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DrawerTrigger asChild>
             <Button variant={"ghost"} size={"icon"}>
               <MenuIcon className="size-6" />
             </Button>
           </DrawerTrigger>
-          <DrawerContent>
-            <div className="mx-auto w-full max-w-sm">
+          <DrawerContent className="max-h-[100vh]!">
+            <div className="mx-auto w-full max-w-sm overflow-y-scroll">
               <DrawerHeader>
-                <DrawerTitle>GoFitShop</DrawerTitle>
+                <DrawerTitle>
+                  <Link href="/">GoFitShop</Link>
+                </DrawerTitle>
               </DrawerHeader>
-              <div className="p-4 flex flex-col gap-y-4">
+              <div className="p-4 flex flex-col gap-y-8">
                 <div className="flex flex-col gap-y-2">
                   {currentSession ? (
                     <>
@@ -98,24 +102,10 @@ export function HeaderRightNav({
                           </div>
                         </SheetContent>
                       </Sheet>
-                      <Button
-                        variant={"outline"}
-                        size={"sm"}
-                        asChild
-                        className="text-sm"
-                      >
+                      <Button variant={"outline"} asChild>
                         <Link href="/account-details">
                           {t("account-details")}
                         </Link>
-                      </Button>
-                      <Button
-                        variant={"outline"}
-                        size={"sm"}
-                        className="text-sm"
-                      >
-                        <span onClick={() => logout()} className="w-full">
-                          {isLoggingOut ? t("logging-out") : t("logout")}
-                        </span>
                       </Button>
                     </>
                   ) : (
@@ -139,22 +129,25 @@ export function HeaderRightNav({
                     </>
                   )}
                 </div>
+                <HeaderSearch />
                 <div className="flex flex-col gap-y-2">
-                  <h2>{t("browse-categories")}</h2>
+                  <h2 className="text-center text-sm font-bold">
+                    {t("browse-categories")}
+                  </h2>
                   {categories.map((category) => (
                     <div key={category.id} className="flex flex-col gap-y-1">
                       <Link
                         href={`/category/${category.slug}`}
-                        className={buttonVariants({ variant: "link" })}
+                        className={"text-center text-lg hover:underline"}
                       >
                         {category.name}
                       </Link>
-                      <div className="ml-4 flex flex-col gap-y-0.5">
+                      <div className="flex flex-col gap-y-0.5">
                         {category.subcategories.map((subcategory) => (
                           <Link
-                            className={buttonVariants({ variant: "link" })}
                             key={subcategory.id}
                             href={`/category/${subcategory.slug}`}
+                            className={"text-center hover:underline"}
                           >
                             {subcategory.name}
                           </Link>
@@ -163,18 +156,29 @@ export function HeaderRightNav({
                     </div>
                   ))}
                 </div>
+                {currentSession && (
+                  <Button>
+                    <span onClick={() => logout()} className="w-full">
+                      {isLoggingOut ? t("logging-out") : t("logout")}
+                    </span>
+                  </Button>
+                )}
               </div>
             </div>
           </DrawerContent>
         </Drawer>
       </div>
-      <div className="hidden sm:flex items-center gap-2">
+      <div className="hidden lg:flex items-center gap-2">
         {currentSession ? (
           <div className="flex items-center gap-2">
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="flex gap-x-2 w-fit">
+                  <NavigationMenuTrigger
+                    className={
+                      "flex gap-x-2 w-fit hover:bg-background! data-[state=open]:bg-background! data-[state=open]:hover:bg-background! focus:bg-background!"
+                    }
+                  >
                     <Avatar size="sm" />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>

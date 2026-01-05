@@ -119,16 +119,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   return (
     <div className="max-width-container  w-full mx-auto py-6 sm:py-12 gap-y-6 sm:gap-y-12 flex flex-col relative">
-      <div className="flex flex-col gap-y-3 sm:gap-y-6">
-        <div className="flex flex-col gap-y-2 sm:gap-y-4">
-          <h1 className="text-2xl sm:text-4xl font-bold">{category.name}</h1>
-          <p className="text-muted-foreground">{category.description}</p>
-        </div>
+      <div className="flex flex-col gap-y-2 sm:gap-y-4">
+        <h1 className="text-2xl sm:text-4xl font-bold">{category.name}</h1>
+        <p className="text-muted-foreground">{category.description}</p>
         {category.subcategories.length > 0 && (
           <div className="flex flex-col gap-y-1 sm:gap-y-2">
-            <h2 className="font-medium text-muted-foreground">
-              {t("subcategories")}
-            </h2>
+            <h2 className="text-muted-foreground">{t("subcategories")}</h2>
             <div className="flex flex-wrap gap-2">
               {category.subcategories.map((s) => (
                 <Link key={s.slug} href={`/category/${s.slug}`}>

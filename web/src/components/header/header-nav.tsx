@@ -10,28 +10,11 @@ import {
   NavigationMenuLink,
 } from "../ui/navigation-menu";
 import { useTranslations } from "next-intl";
-import { FragmentType, getFragmentData, graphql } from "@/graphql";
 import { getCategoryLink } from "@/app/lib/navigation";
-import { use, useEffect, useState } from "react";
-import { ExecutionResult } from "graphql";
+import { useEffect, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-
-const HeaderNav_QueryFragment = graphql(`
-  fragment HeaderNav_QueryFragment on Query {
-    categories(parentCategoryId: null) {
-      id
-      name
-      description
-      slug
-      subcategories {
-        id
-        slug
-        name
-      }
-    }
-  }
-`);
+import { HeaderSearch } from "./header-search";
 
 type HeaderNavProps = {
   categories: {
@@ -115,24 +98,7 @@ export function HeaderNav({ categories }: HeaderNavProps) {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const searchParams = new URLSearchParams();
-            if (searchValue.trim().length > 0) {
-              searchParams.append("q", searchValue.trim());
-              router.push(`/search?${searchParams.toString()}`);
-            }
-          }}
-        >
-          <Input
-            placeholder={t("search")}
-            className="w-full max-w-[360px] text-sm placeholder:text-sm"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </form>
+        <HeaderSearch />
       </div>
     </nav>
   );

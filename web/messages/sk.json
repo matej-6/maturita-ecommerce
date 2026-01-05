@@ -25,6 +25,7 @@
   },
   "header": {
     "search": "Hľadať",
+    "searchLabel": "Vyhľadávanie produktov",
     "browse-categories": "Prehľadávať kategórie",
     "login": "Prihlásiť sa",
     "register": "Registrovať sa",

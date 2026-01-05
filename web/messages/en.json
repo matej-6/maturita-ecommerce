@@ -25,6 +25,7 @@
   },
   "header": {
     "search": "Search",
+    "searchLabel": "Search Products",
     "browse-categories": "Browse",
     "login": "Sign in",
     "register": "Register",

@@ -112,54 +112,59 @@ export function Chatbot() {
 
       const llmTaskId = res.data.createLlmTask.id;
 
-      const interval = setInterval(async () => {
-        const res = await getLLMTaskByIdAction(llmTaskId);
-        if (res.success && res.data?.getUserLLMTaskById) {
-          setIsWaitingForResponse(false);
-          const task = res.data.getUserLLMTaskById;
-          if (task.status === LlmTaskStatus.Completed) {
-            setPastChats((chats) => [
-              ...chats,
-              {
-                question: prompt,
-                response: {
-                  text: task.response?.text || "",
-                  products: task.response?.products
-                    ? task.response?.products.map((p) => ({
-                        ...p,
-                        name: p.name || null,
-                        imageUrl: p.thumbnailImage
-                          ? getImageSrc(
-                              p.thumbnailImage.mimeType,
-                              p.thumbnailImage.base64
-                            )
-                          : undefined,
-                      }))
-                    : undefined,
-                  success: true,
+      try {
+        const interval = setInterval(async () => {
+          const res = await getLLMTaskByIdAction(llmTaskId);
+          if (res.success && res.data?.getUserLLMTaskById) {
+            const task = res.data.getUserLLMTaskById;
+            if (task.status === LlmTaskStatus.Completed) {
+              setPastChats((chats) => [
+                ...chats,
+                {
+                  question: prompt,
+                  response: {
+                    text: task.response?.text || "",
+                    products: task.response?.products
+                      ? task.response?.products.map((p) => ({
+                          ...p,
+                          name: p.name || null,
+                          imageUrl: p.thumbnailImage
+                            ? getImageSrc(
+                                p.thumbnailImage.mimeType,
+                                p.thumbnailImage.base64
+                              )
+                            : undefined,
+                        }))
+                      : undefined,
+                    success: true,
+                  },
                 },
-              },
-            ]);
-            clearInterval(interval);
-          } else if (task.status === LlmTaskStatus.Failed) {
-            setPastChats((chats) => [
-              ...chats,
-              {
-                question: prompt,
-                response: {
-                  text:
-                    task.response?.text ||
-                    "An error occurred while generating the response.",
-                  success: false,
+              ]);
+              clearInterval(interval);
+              setIsWaitingForResponse(false);
+            } else if (task.status === LlmTaskStatus.Failed) {
+              setPastChats((chats) => [
+                ...chats,
+                {
+                  question: prompt,
+                  response: {
+                    text:
+                      task.response?.text ||
+                      "An error occurred while generating the response.",
+                    success: false,
+                  },
                 },
-              },
-            ]);
-            clearInterval(interval);
+              ]);
+              clearInterval(interval);
+              setIsWaitingForResponse(false);
+            }
+          } else {
+            throw new Error("Failed to fetch LLM task status.");
           }
-        } else {
-          throw new Error("Failed to fetch LLM task status.");
-        }
-      }, 2000);
+        }, 2000);
+      } catch (error) {
+        setIsWaitingForResponse(false);
+      }
     },
     onSettled: () => {
       setInputValue("");
