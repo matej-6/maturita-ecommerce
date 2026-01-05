@@ -12,14 +12,7 @@ export function ResponsiveButton({ children, className, ...rest }: Props) {
   return (
     <>
       <Button
-        className={cn("block xs:hidden", className)}
-        size={"xs"}
-        {...rest}
-      >
-        {children}
-      </Button>
-      <Button
-        className={cn("hidden xs:block sm:hidden", className)}
+        className={cn("block sm:hidden", className)}
         size={"sm"}
         {...rest}
       >

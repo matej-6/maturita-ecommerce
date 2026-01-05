@@ -1,6 +1,5 @@
 "use client";
 
-import { OrderStatus } from "@/graphql/graphql";
 import { Button } from "./ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { cancelOrderMutationAction } from "@/app/data-access-layer/order/mutations";

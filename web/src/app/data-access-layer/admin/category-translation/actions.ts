@@ -15,8 +15,11 @@ import {
   EditCategoryTranslationMutation,
   NewCategoryTranslationMutation,
 } from "./mutations";
+import { getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 
 export async function deleteCategoryTranslationAction(
+  categoryId: number,
   translationId: number
 ): Promise<
   ActionResponse<
@@ -33,6 +36,9 @@ export async function deleteCategoryTranslationAction(
     return await handleGraphqlError(res.errors);
   }
 
+  const locale = await getLocale();
+  revalidatePath(`${locale}/admin/categories/edit-category/${categoryId}`);
+
   if (!res.data) {
     return {
       success: false,
@@ -48,7 +54,7 @@ export async function deleteCategoryTranslationAction(
 
 export async function createCategoryTranslationAction(
   categoryId: number,
-  data: categoryTranslationSchemaType
+  data: { name: string; description?: string; locale: string }
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -81,8 +87,9 @@ export async function createCategoryTranslationAction(
 }
 
 export async function editCategoryTranslationAction(
+  categoryId: number,
   categoryTranslationId: number,
-  data: categoryTranslationSchemaType
+  data: { name: string; description?: string; locale: string }
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -100,6 +107,9 @@ export async function editCategoryTranslationAction(
   if (res.errors) {
     return await handleGraphqlError(res.errors);
   }
+
+  const locale = await getLocale();
+  revalidatePath(`${locale}/admin/categories/edit-category/${categoryId}`);
 
   if (!res.data) {
     return {

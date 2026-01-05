@@ -57,6 +57,9 @@ export async function createProductAction(
     return await handleGraphqlError(res.errors);
   }
 
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products`);
+
   if (!res.data) {
     return {
       success: false,
@@ -71,8 +74,7 @@ export async function createProductAction(
 }
 
 export async function editProductAction(
-  data: productFormSchemaType & { id: number },
-  revalidatePaths: string[] = []
+  data: productFormSchemaType & { id: number }
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -91,9 +93,9 @@ export async function editProductAction(
     return await handleGraphqlError(res.errors);
   }
 
-  for (const path of revalidatePaths) {
-    revalidatePath(path);
-  }
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products/product-detail/${data.id}`);
+  revalidatePath(`/${locale}/admin/products`);
 
   if (!res.data) {
     return {

@@ -2,6 +2,11 @@
 
 import { graphql } from "@/graphql";
 import { fetchGraphql } from "../../fetch-graphql";
+import { ActionResponse } from "../../formActionResponse";
+import { ExecutionResult } from "graphql";
+import { EditCategory_QueryDocumentQuery } from "@/graphql/graphql";
+import { execute } from "@/graphql/execute";
+import { handleGraphqlError } from "../handleGraphqlFormError";
 
 const categoriesTableQueryDocument = graphql(`
   query categoriesTable_QueryDocument(
@@ -101,7 +106,15 @@ const editCategoryQueryDocument = graphql(`
       name
       flag
     }
-    ...AllCategories_QueryFragment
+    allCategories: categories(
+      parentCategoryId: 0
+      isPublic: null
+      isSetup: null
+    ) {
+      id
+      slug
+      parentCategoryId
+    }
   }
 `);
 
@@ -109,10 +122,18 @@ export async function getEditCategoryQueryDocumentData(
   id: number,
   productCursor: number | null,
   productPageSize: number | null
-) {
-  return await fetchGraphql(editCategoryQueryDocument, {
+): Promise<
+  ActionResponse<ExecutionResult<EditCategory_QueryDocumentQuery>["data"]>
+> {
+  const res = await execute(editCategoryQueryDocument, {
     id: id,
     productCursor: productCursor,
     productPageSize: productPageSize,
   });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  return { success: true, data: res.data };
 }

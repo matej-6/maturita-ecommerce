@@ -22,9 +22,10 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  ProductTranslationForm,
+  ProductTranslationSheetForm,
   ProductTranslationFormProps,
-} from "../../forms/product-translation-form";
+} from "../../forms/product-translation-sheet-form";
+import { useTranslations } from "next-intl";
 
 type ProductTranslationProps = {
   translationId: number;
@@ -47,7 +48,8 @@ export function ProductTranslation({
   description,
   productId,
 }: ProductTranslationProps) {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const ft = useTranslations("fields.productTranslation");
+  const t = useTranslations("admin.products.productDetail.page.translations");
 
   const { mutate: deleteTranslation, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -80,42 +82,26 @@ export function ProductTranslation({
       </CardHeader>
       <CardContent className="space-y-3 flex-auto">
         <div>
-          <span className="text-muted-foreground text-xs">Name</span>
+          <span className="text-muted-foreground text-xs">{ft("title")}</span>
           <p>{name}</p>
         </div>
         <div>
-          <span className="text-muted-foreground text-xs">Description</span>
+          <span className="text-muted-foreground text-xs">
+            {ft("description")}
+          </span>
           <p>{description}</p>
         </div>
       </CardContent>
       <CardFooter>
         <div className="flex items-center gap-x-2 justify-center">
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger asChild>
-              <Button>Edit</Button>
-            </SheetTrigger>
-            <SheetContent className="overflow-y-scroll">
-              <SheetHeader>
-                <SheetTitle>Edit translation</SheetTitle>
-              </SheetHeader>
-              <div className="flex-1 flex flex-col">
-                <div className="flex-1 px-4">
-                  {isSheetOpen && <ProductTranslationForm {...formProps} />}
-                </div>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <ProductTranslationSheetForm {...formProps} />
+
           <Button
             disabled={isDeleting}
             onClick={() => deleteTranslation()}
             variant={confirmation ? "destructive" : "secondary"}
           >
-            {confirmation ? "Are you sure?" : "Delete"}
+            {confirmation ? t("deleteConfirmButton") : t("deleteButton")}
           </Button>
         </div>
       </CardFooter>

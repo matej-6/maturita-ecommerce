@@ -6,6 +6,7 @@ import {
 } from "@/app/data-access-layer/admin/product/actions";
 import { ResponsiveButton } from "@/components/responsive-button";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 type Props = {
@@ -42,6 +43,8 @@ export function GenerateEmbeddingsButton({
     },
   });
 
+  const t = useTranslations("admin.products.productDetail.page.embeddings");
+
   return (
     <ResponsiveButton
       onClick={() => generateEmbeddings()}
@@ -49,10 +52,10 @@ export function GenerateEmbeddingsButton({
       variant={type === "generate" ? "secondary" : "default"}
     >
       {isGenerating
-        ? "Generating..."
+        ? t("generating")
         : type === "generate"
-        ? "Generate"
-        : "Regenerate"}
+        ? t("generate")
+        : t("regenerate")}
     </ResponsiveButton>
   );
 }

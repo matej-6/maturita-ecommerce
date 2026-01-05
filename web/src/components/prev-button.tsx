@@ -9,10 +9,12 @@ import { useTranslations } from "next-intl";
 export function PrevButton({
   disabled,
   children,
+  cursor,
   ...variantProps
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    cursor?: string | number | null;
   }) {
   const router = useRouter();
 
@@ -26,7 +28,7 @@ export function PrevButton({
         }
       }}
       {...variantProps}
-      disabled={disabled}
+      disabled={disabled || cursor === null}
     >
       {children ?? (
         <>

@@ -34,14 +34,20 @@ const HeaderNav_QueryFragment = graphql(`
 `);
 
 type HeaderNavProps = {
-  queryPromise: Promise<
-    ExecutionResult<FragmentType<typeof HeaderNav_QueryFragment>>
-  >;
+  categories: {
+    id: number;
+    name: string;
+    description: string;
+    slug: string;
+    subcategories: {
+      id: number;
+      slug: string;
+      name: string;
+    }[];
+  }[];
 };
 
-export function HeaderNav({ queryPromise }: HeaderNavProps) {
-  const query = use(queryPromise);
-  const data = getFragmentData(HeaderNav_QueryFragment, query.data);
+export function HeaderNav({ categories }: HeaderNavProps) {
   const t = useTranslations("header");
 
   const router = useRouter();
@@ -64,12 +70,15 @@ export function HeaderNav({ queryPromise }: HeaderNavProps) {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger disabled={!data} className="text-sm">
+                <NavigationMenuTrigger
+                  disabled={categories.length === 0}
+                  className="text-sm"
+                >
                   {t("browse-categories")}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-2 w-[800px] grid-cols-3 z-50">
-                    {data?.categories.map((category) => (
+                    {categories.map((category) => (
                       <NavigationMenuLink key={category.id} asChild>
                         <div className="flex flex-col gap-4">
                           <Link

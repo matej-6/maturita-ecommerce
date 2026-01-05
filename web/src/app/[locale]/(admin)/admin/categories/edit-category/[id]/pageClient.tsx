@@ -27,10 +27,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { CategoryTranslationForm } from "../../../forms/category-translation-form";
+import { CategoryTranslationSheetForm } from "../../../forms/category-translation-sheet-form";
 import { CategoryTranslation } from "../../../components/categories/category-translation";
 import { useState } from "react";
-import { EditCategoryForm } from "../../../forms/edit-category-form";
+import { EditCategorySheetForm } from "../../../forms/edit-category-sheet-form";
 
 export default function EditCategoryPageClient({
   id,
@@ -69,8 +69,6 @@ export default function EditCategoryPageClient({
     },
   });
 
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
   if (!data.data) {
     return notFound();
   }
@@ -80,7 +78,7 @@ export default function EditCategoryPageClient({
   );
 
   return (
-    <div className="bg-muted/50 dark:bg-muted/50 flex flex-col flex-1 rounded-xl p-6 gap-y-10">
+    <div className="flex flex-col flex-1 gap-y-10">
       <div className="flex flex-col gap-y-8">
         <div className="space-y-8">
           <h1 className="font-medium font-secondary">Overview</h1>
@@ -98,8 +96,8 @@ export default function EditCategoryPageClient({
             </Alert>
           )}
         </div>
-        <div className="space-y-6">
-          <div className="grid grid-cols-3 gap-6 w-3xl">
+        <div className="flex flex-col gap-y-6">
+          <div className="flex flex-wrap gap-x-24 gap-y-6">
             <div className="flex flex-col gap-y-0">
               <span className="text-muted-foreground text-xs">Slug</span>
               <p className="">{data.data.category.slug}</p>
@@ -169,11 +167,11 @@ export default function EditCategoryPageClient({
               </SheetHeader>
               <div className="flex-1 flex flex-col">
                 <div className="flex-1 px-4">
-                  <EditCategoryForm
+                  <EditCategorySheetForm
                     refetchQueryKey={queryKey}
                     categoriesQuery={data}
                     categoryId={id}
-                    data={{
+                    initialData={{
                       slug: data.data.category.slug,
                       parentCategoryId:
                         data.data.category.parentCategoryId || null,
@@ -235,41 +233,15 @@ export default function EditCategoryPageClient({
             );
           })}
         </div>
-        <Sheet
-          open={isSheetOpen && missingTranslations.length > 0}
-          onOpenChange={setIsSheetOpen}
-        >
-          <SheetTrigger asChild>
-            <Button disabled={missingTranslations.length === 0}>
-              Add Translation
-            </Button>
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Add translation</SheetTitle>
-            </SheetHeader>
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 px-4">
-                {missingTranslations.length > 0 && (
-                  <CategoryTranslationForm
-                    availableLocales={missingTranslations.map((t) => ({
-                      label: t.name,
-                      value: t.code,
-                    }))}
-                    mode="create"
-                    categoryId={id}
-                    refetchQueryKey={queryKey}
-                  />
-                )}
-              </div>
-              <SheetFooter>
-                <SheetClose asChild>
-                  <Button variant="outline">Close</Button>
-                </SheetClose>
-              </SheetFooter>
-            </div>
-          </SheetContent>
-        </Sheet>
+        <CategoryTranslationSheetForm
+          availableLocales={missingTranslations.map((t) => ({
+            label: t.name,
+            value: t.code,
+          }))}
+          mode="create"
+          categoryId={id}
+          refetchQueryKey={queryKey}
+        />
       </div>
       <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
       <div className="space-y-8">

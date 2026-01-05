@@ -231,11 +231,20 @@
     "productVariant": {
       "attributeKey": {
         "form": {
-          "submitButton": "Odoslať"
+          "submitButton": "Odoslať",
+          "closeButton": "Zavrieť"
         }
       },
       "form": {
-        "submitButton": "Odoslať"
+        "submitButton": "Odoslať",
+        "closeButton": "Zavrieť",
+        "selectKeyToFilterAttributes": "Vyber kľúč na filtrovanie atribútov",
+        "noFilter": "Žiadny filter",
+        "triggerButtonCreate": "Pridať nový variant",
+        "triggerButtonUpdate": "Upraviť variant",
+        "titleCreate": "Pridať nový variant",
+        "titleUpdate": "Upraviť variant",
+        "loadingButton": "Odosielanie..."
       }
     },
     "products": {
@@ -246,6 +255,7 @@
         "triggerButtonUpdate": "Upraviť produkt",
         "submitButtonCreate": "Vytvoriť produkt",
         "submitButtonUpdate": "Uložiť zmeny",
+        "closeButton": "Zavrieť",
         "categoryId": {
           "combobox": {
             "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
@@ -256,6 +266,73 @@
       },
       "productDetail": {
         "page": {
+          "title": "Prehľad",
+          "viewPageButton": "Zobraziť stránku",
+          "noVariants": "Žiadne varianty",
+          "yes": "Áno",
+          "no": "Nie",
+          "images": {
+            "title": "Obrázky",
+            "noImages": "Žiadne obrázky neboli nahrané.",
+            "thumbnailLabel": "Thumbnail",
+            "uploadImageButton": "Nahrať obrázok",
+            "uploadingButton": "Nahrávanie..."
+          },
+          "translations": {
+            "title": "Preklady",
+            "noTranslations": "Nie sú dostupné žiadne preklady.",
+            "deleteButton": "Vymazať",
+            "deleteConfirmButton": "Si si istý?",
+            "deletePendingButton": "Mazanie...",
+            "form": {
+              "triggerButtonCreate": "Pridať nový preklad",
+              "triggerButtonUpdate": "Upraviť",
+              "titleCreate": "Pridať nový preklad",
+              "titleUpdate": "Upraviť preklad",
+              "submitButtonCreate": "Odoslať",
+              "submitButtonCreatePending": "Odosielanie...",
+              "submitButtonUpdate": "Uložiť zmeny",
+              "submitButtonUpdatePending": "Ukladanie...",
+              "closeButton": "Zavrieť",
+              "languageSelect": {
+                "placeholder": "Vybrať jazyk"
+              }
+            }
+          },
+          "variants": {
+            "title": "Varianty",
+            "noVariants": "Nie sú dostupné žiadne varianty.",
+            "addVariantButton": "Pridať variant",
+            "attributes": {
+              "title": "Atribúty",
+              "noAttributes": "Nie sú dostupné žiadne atribúty."
+            },
+            "images": {
+              "title": "Obrázky",
+              "noImages": "Žiadne obrázky neboli nahrané.",
+              "thumbnailLabel": "Thumbnail",
+              "uploadImageButton": "Nahrať obrázok",
+              "uploadingButton": "Nahrávanie..."
+            }
+          },
+          "embeddings": {
+            "title": "Embeddings",
+            "noEmbeddings": "Nie sú dostupné žiadne embeddings.",
+            "regenereteButton": "Regenerovať",
+            "createdAt": "Vytvorené",
+            "status": "Stav",
+            "regenerateAll": "Regenerovať všetko",
+            "generating": "Generovanie...",
+            "regenerate": "Regenerovať",
+            "generate": "Generovať"
+          },
+          "contentEmbeddings": {
+            "title": "Content Embeddings",
+            "noEmbeddings": "Nie sú dostupné žiadne content embeddings.",
+            "regenereteButton": "Regenerovať",
+            "createdAt": "Vytvorené",
+            "status": "Stav"
+          },
           "setupWarning": {
             "title": "Tento produkt nie je úplne nastavený",
             "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavený a viditeľný pre zákazníkov",
@@ -345,7 +422,10 @@
       },
       "editCategory": {
         "form": {
+          "triggerButton": "Upraviť kategóriu",
+          "title": "Upraviť kategóriu",
           "submitButton": "Uložiť zmeny",
+          "closeButton": "Zavrieť",
           "parentCategoryId": {
             "combobox": {
               "noResultsFoundText": "Neboli nájdené žiadne výsledky.",
@@ -356,11 +436,41 @@
           "toastSuccess": "Zmeny boli uložené"
         },
         "page": {
+          "title": "Prehľad",
+          "viewPageButton": "Zobraziť stránku",
+          "noSubcategories": "Žiadne podkategórie",
           "setupWarning": {
             "title": "Táto kategória nie je úplne nastavená",
             "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavená a vidiťeľná pre zákazníkov",
             "englishTranslation": "Musí mať anglický preklad",
             "atLeastOneVisibleProduct": "Musí sa obsahovať aspoň jeden viditeľný produkt na predaj"
+          },
+          "yes": "Áno",
+          "no": "Nie",
+          "translations": {
+            "title": "Preklady",
+            "noTranslations": "Nie sú dostupné žiadne preklady.",
+            "deleteButton": "Zmazať",
+            "deleteConfirmButton": "Si si istý?",
+            "deletePendingButton": "Prebieha mazanie...",
+            "form": {
+              "triggerButtonCreate": "Pridať nový preklad",
+              "triggerButtonUpdate": "Upraviť preklad",
+              "titleCreate": "Pridať nový preklad",
+              "titleUpdate": "Upraviť preklad",
+              "submitButtonCreate": "Vytvoriť preklad",
+              "submitButtonCreatePending": "Vytváranie prekladu...",
+              "submitButtonUpdate": "Uložiť zmeny",
+              "submitButtonUpdatePending": "Ukladanie zmien...",
+              "closeButton": "Zavrieť",
+              "languageSelect": {
+                "placeholder": "Vybrať jazyk"
+              }
+            }
+          },
+          "products": {
+            "title": "Produkty",
+            "noProducts": "V tejto kategórii nie sú žiadne produkty."
           }
         }
       }
@@ -441,6 +551,28 @@
       }
     },
     "attributeKeys": {
+      "page": {
+        "title": "Prehľad",
+        "translations": {
+          "title": "Preklady",
+          "noTranslations": "Nie sú dostupné žiadne preklady."
+        },
+        "attributes": {
+          "title": "Atribúty",
+          "noAttributes": "Nie sú dostupné žiadne atribúty.",
+          "deleteButton": "Zmazať",
+          "pendingDeleteButton": "Mažem...",
+          "productVariants": {
+            "title": "Varianty produktov",
+            "noProductVariants": "Nie sú dostupné žiadne varianty produktov.",
+            "viewPageButton": "Zobraziť stránku"
+          },
+          "translations": {
+            "title": "Preklady",
+            "noTranslations": "Nie sú dostupné žiadne preklady."
+          }
+        }
+      },
       "form": {
         "titleCreate": "Pridať nový kľúč atribútu",
         "titleUpdate": "Upraviť kľúč atribútu",
@@ -448,8 +580,48 @@
         "triggerButtonUpdate": "Upraviť kľúč atribútu",
         "submitButtonCreate": "Vytvoriť kľúč atribútu",
         "submitButtonUpdate": "Uložiť zmeny",
-        "loadingButton": "Prebieha odosielanie...",
+        "loadingButton": "Ukladanie...",
         "closeButton": "Zavrieť"
+      },
+      "translationForm": {
+        "triggerButtonCreate": "Pridať nový preklad",
+        "triggerButtonUpdate": "Upraviť",
+        "titleCreate": "Pridať nový preklad",
+        "titleUpdate": "Upraviť preklad",
+        "submitButtonCreate": "Vytvoriť preklad",
+        "submitButtonCreatePending": "Vytváranie...",
+        "submitButtonUpdate": "Uložiť zmeny",
+        "submitButtonUpdatePending": "Ukladanie...",
+        "closeButton": "Zavrieť",
+        "languageSelect": {
+          "placeholder": "Vybrať jazyk"
+        }
+      },
+      "attributeForm": {
+        "triggerButtonCreate": "Pridať nový atribút",
+        "triggerButtonUpdate": "Upraviť atribút",
+        "titleCreate": "Pridať nový atribút",
+        "titleUpdate": "Upraviť atribút",
+        "submitButton": "Odoslať",
+        "loadingButton": "Odosielanie...",
+        "closeButton": "Zavrieť",
+        "keySelect": {
+          "placeholder": "Vybrať kľúč"
+        }
+      },
+      "attributeTranslationForm": {
+        "triggerButtonCreate": "Pridať nový preklad",
+        "triggerButtonUpdate": "Upraviť",
+        "titleCreate": "Pridať nový preklad",
+        "titleUpdate": "Upraviť preklad",
+        "submitButtonCreate": "Vytvoriť preklad",
+        "submitButtonCreatePending": "Vytváranie...",
+        "submitButtonUpdate": "Uložiť zmeny",
+        "submitButtonUpdatePending": "Ukladanie...",
+        "closeButton": "Zavrieť",
+        "languageSelect": {
+          "placeholder": "Vybrať jazyk"
+        }
       },
       "table": {
         "noAttributeKeysFound": "Neboli nájdené žiadne kľúče atribútov.",
@@ -484,7 +656,8 @@
       "isPublic": "Je verejný",
       "createdAt": "Dátum vytvorenia",
       "updatedAt": "Naposledy aktualizované",
-      "productsCount": "Počet produktov"
+      "productsCount": "Počet produktov",
+      "subcategories": "Podkategórie"
     },
     "locale": {
       "code": "Kód lokality"
@@ -504,11 +677,19 @@
       "isSetupNo": "Nie",
       "id": "ID",
       "createdAt": "Dátum vytvorenia",
-      "updatedAt": "Naposledy aktualizované"
+      "updatedAt": "Naposledy aktualizované",
+      "numberOfVariants": "Počet variantov"
     },
     "attributeKey": {
       "id": "ID",
       "key": "Kľúč",
+      "createdAt": "Dátum vytvorenia",
+      "updatedAt": "Naposledy aktualizované"
+    },
+    "attribute": {
+      "id": "ID",
+      "keyId": "ID kľúča",
+      "value": "Hodnota",
       "createdAt": "Dátum vytvorenia",
       "updatedAt": "Naposledy aktualizované"
     },
@@ -518,6 +699,7 @@
       "content": "Obsah"
     },
     "productVariant": {
+      "id": "ID",
       "sku": "SKU",
       "price": "Cena",
       "priceInCents": "Cena v centoch",
@@ -558,6 +740,10 @@
         "country": "Krajina",
         "phone": "Telefón"
       }
+    },
+    "common": {
+      "yes": "Áno",
+      "no": "Nie"
     }
   },
   "cart": {

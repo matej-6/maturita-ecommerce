@@ -7,6 +7,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 type Props = {
   productId: number;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function ProductImageForm({ productId, productVariantId }: Props) {
+  const t = useTranslations("admin.products.productDetail.page.images");
 
   const { mutate: uploadProductImage, isPending: isUploading } = useMutation({
     mutationFn: async (file: File) => {
@@ -52,7 +54,7 @@ export function ProductImageForm({ productId, productVariantId }: Props) {
         }
         className={cn(buttonVariants())}
       >
-        {isUploading ? "Uploading..." : "Upload Image"}
+        {isUploading ? t("uploadingButton") : t("uploadImageButton")}
       </label>
       <input
         id={

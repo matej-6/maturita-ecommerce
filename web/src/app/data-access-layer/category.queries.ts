@@ -1,7 +1,5 @@
 import { graphql } from "@/graphql";
-import { cache } from "react";
 import "server-only";
-import { fetchGraphql } from "./fetch-graphql";
 import { execute } from "@/graphql/execute";
 import { ActionResponse } from "./formActionResponse";
 import { ExecutionResult } from "graphql";
@@ -9,13 +7,23 @@ import { CategoryQueryQuery } from "@/graphql/graphql";
 
 const HeaderQueryDocument = graphql(`
   query HeaderQuery {
-    ...HeaderNav_QueryFragment
+    categories(parentCategoryId: null) {
+      id
+      name
+      description
+      slug
+      subcategories {
+        id
+        slug
+        name
+      }
+    }
   }
 `);
 
-export const getHeaderQueryData = cache(async () => {
-  return await fetchGraphql(HeaderQueryDocument);
-});
+export const getHeaderQueryData = async () => {
+  return await execute(HeaderQueryDocument);
+};
 
 const CategoryQueryDocument = graphql(`
   query CategoryQuery(

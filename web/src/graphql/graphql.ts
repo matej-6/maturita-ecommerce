@@ -1118,7 +1118,7 @@ export type User = {
   avatar?: Maybe<UserAvatar>;
   createdAt: Scalars['DateTime']['output'];
   email: Scalars['String']['output'];
-  firstName?: Maybe<Scalars['String']['output']>;
+  firstName: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
   orders: Array<Order>;
@@ -1225,10 +1225,7 @@ export type EditCategory_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type EditCategory_QueryDocumentQuery = (
-  { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: number | null, isSetup: boolean, isPublic: boolean, productsCount: number, translations: Array<{ __typename?: 'CategoryTranslation', id: number, locale: string, name: string, description?: string | null }>, subcategories: Array<{ __typename?: 'Category', slug: string, id: number }> }, products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, name?: string | null } }> | null }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> }
-  & { ' $fragmentRefs'?: { 'AllCategories_QueryFragmentFragment': AllCategories_QueryFragmentFragment } }
-);
+export type EditCategory_QueryDocumentQuery = { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: number | null, isSetup: boolean, isPublic: boolean, productsCount: number, translations: Array<{ __typename?: 'CategoryTranslation', id: number, locale: string, name: string, description?: string | null }>, subcategories: Array<{ __typename?: 'Category', slug: string, id: number }> }, products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, name?: string | null } }> | null }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }>, allCategories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> };
 
 export type Locales_QueryFragmentFragment = { __typename?: 'Query', locales: Array<{ __typename?: 'Locale', code: string, name: string }> } & { ' $fragmentName'?: 'Locales_QueryFragmentFragment' };
 
@@ -1596,7 +1593,7 @@ export type AdminUsersPageQueryVariables = Exact<{
 
 export type AdminUsersPageQuery = { __typename?: 'Query', findAllPaginatedUsers: { __typename?: 'PaginatedUser', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'UserEdge', cursor: number, node: { __typename?: 'User', id: number, email: string, role: Role, createdAt: any, updatedAt: any } }> | null } };
 
-export type MeFragmentFragment = { __typename?: 'User', id: number, firstName?: string | null, lastName?: string | null, role: Role, email: string } & { ' $fragmentName'?: 'MeFragmentFragment' };
+export type MeFragmentFragment = { __typename?: 'User', id: number, firstName: string, lastName?: string | null, role: Role, email: string, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1641,10 +1638,7 @@ export type CartQueryQuery = { __typename?: 'Query', cart: (
 export type HeaderQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HeaderQueryQuery = (
-  { __typename?: 'Query' }
-  & { ' $fragmentRefs'?: { 'HeaderNav_QueryFragmentFragment': HeaderNav_QueryFragmentFragment } }
-);
+export type HeaderQueryQuery = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> };
 
 export type CategoryQueryQueryVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -1724,7 +1718,7 @@ export type SearchProductsQueryQuery = { __typename?: 'Query', searchProductVari
 export type AccountDetailsPageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null, orders: Array<{ __typename?: 'Order', id: number, totalInCents: number, createdAt: any, status: OrderStatus, items: Array<{ __typename?: 'OrderItem', sku: string }> }> } };
+export type AccountDetailsPageQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName: string, lastName?: string | null, email: string, createdAt: any, updatedAt: any, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null, orders: Array<{ __typename?: 'Order', id: number, totalInCents: number, createdAt: any, status: OrderStatus, items: Array<{ __typename?: 'OrderItem', sku: string }> }> } };
 
 export type DeleteUserAccountMutationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -1812,6 +1806,10 @@ export const MeFragmentFragmentDoc = new TypedDocumentString(`
   lastName
   role
   email
+  avatar {
+    base64
+    mimeType
+  }
 }
     `, {"fragmentName":"MeFragment"}) as unknown as TypedDocumentString<MeFragmentFragment, unknown>;
 export const CartFragmentFragmentDoc = new TypedDocumentString(`
@@ -1989,15 +1987,13 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
     name
     flag
   }
-  ...AllCategories_QueryFragment
-}
-    fragment AllCategories_QueryFragment on Query {
-  categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
+  allCategories: categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
     id
     slug
     parentCategoryId
   }
-}`) as unknown as TypedDocumentString<EditCategory_QueryDocumentQuery, EditCategory_QueryDocumentQueryVariables>;
+}
+    `) as unknown as TypedDocumentString<EditCategory_QueryDocumentQuery, EditCategory_QueryDocumentQueryVariables>;
 export const LocalesQueryDocumentDocument = new TypedDocumentString(`
     query LocalesQueryDocument {
   ...Locales_QueryFragment
@@ -2689,6 +2685,10 @@ export const MeDocument = new TypedDocumentString(`
   lastName
   role
   email
+  avatar {
+    base64
+    mimeType
+  }
 }`) as unknown as TypedDocumentString<MeQuery, MeQueryVariables>;
 export const UpdateCartItemQuantityMutationDocument = new TypedDocumentString(`
     mutation UpdateCartItemQuantityMutation($cartItemId: Int!, $quantity: Int!) {
@@ -2809,9 +2809,6 @@ export const CartQueryDocument = new TypedDocumentString(`
 }`) as unknown as TypedDocumentString<CartQueryQuery, CartQueryQueryVariables>;
 export const HeaderQueryDocument = new TypedDocumentString(`
     query HeaderQuery {
-  ...HeaderNav_QueryFragment
-}
-    fragment HeaderNav_QueryFragment on Query {
   categories(parentCategoryId: null) {
     id
     name
@@ -2823,7 +2820,8 @@ export const HeaderQueryDocument = new TypedDocumentString(`
       name
     }
   }
-}`) as unknown as TypedDocumentString<HeaderQueryQuery, HeaderQueryQueryVariables>;
+}
+    `) as unknown as TypedDocumentString<HeaderQueryQuery, HeaderQueryQueryVariables>;
 export const CategoryQueryDocument = new TypedDocumentString(`
     query CategoryQuery($slug: String!, $productsCursor: Int, $productsPageSize: Int, $attributeFilters: [[String!]!]) {
   category(slug: $slug) {

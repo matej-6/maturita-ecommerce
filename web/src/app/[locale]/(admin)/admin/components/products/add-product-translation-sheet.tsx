@@ -11,7 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState } from "react";
-import { ProductTranslationForm } from "../../forms/product-translation-form";
+import { ProductTranslationSheetForm } from "../../forms/product-translation-sheet-form";
 
 type Props = {
   id: number;
@@ -41,7 +41,7 @@ export function AddProductTranslationSheet({ id, availableLocales }: Props) {
         <div className="flex-1 flex flex-col">
           <div className="flex-1 px-4">
             {availableLocales.length > 0 && (
-              <ProductTranslationForm
+              <ProductTranslationSheetForm
                 availableLocales={availableLocales}
                 mode="create"
                 productId={id}

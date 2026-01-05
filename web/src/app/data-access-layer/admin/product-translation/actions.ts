@@ -58,7 +58,12 @@ export async function deleteProductTranslationAction(
 
 export async function createProductTranslationAction(
   productId: number,
-  data: productTranslationFormSchemaType
+  data: {
+    name: string;
+    locale: string;
+    description?: string;
+    markdownContent?: string;
+  }
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -98,7 +103,12 @@ export async function createProductTranslationAction(
 export async function editProductTranslationAction(
   productTranslationId: number,
   productId: number,
-  data: productTranslationFormSchemaType
+  data: {
+    name: string;
+    locale: string;
+    description?: string;
+    markdownContent?: string;
+  }
 ): Promise<
   ActionResponse<
     NonNullable<

@@ -2,7 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -47,7 +48,6 @@ type ProductFormProps = {
     categoryId: number | null;
     isPublic: boolean;
   };
-  revalidatePaths?: string[];
   productId?: number;
 };
 export const ProductForm = ({
@@ -59,7 +59,6 @@ export const ProductForm = ({
   productId,
   mode = "create",
   categories,
-  revalidatePaths = [],
 }: ProductFormProps) => {
   // translations
   const ft = useTranslations("fields"); // fields translations
@@ -88,13 +87,10 @@ export const ProductForm = ({
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       if (mode === "edit") {
-        const res = await editProductAction(
-          {
-            ...formData,
-            id: productId!,
-          },
-          revalidatePaths
-        );
+        const res = await editProductAction({
+          ...formData,
+          id: productId!,
+        });
         if (!res.success) {
           const fieldErrorsMap = new Map();
           res.fieldErrors?.forEach((e) =>
@@ -197,16 +193,23 @@ export const ProductForm = ({
           {errorMessage && (
             <p className="text-destructive text-sm">{errorMessage}</p>
           )}
-          <Button
-            type="submit"
-            variant={"default"}
-            className="mt-auto"
-            disabled={isPending || !isFormChanged}
-          >
-            {mode === "create"
-              ? t("submitButtonCreate")
-              : t("submitButtonUpdate")}
-          </Button>
+          <div className="flex flex-col gap-y-2">
+            <Button
+              type="submit"
+              variant={"default"}
+              className="mt-auto"
+              disabled={isPending || !isFormChanged}
+            >
+              {mode === "create"
+                ? t("submitButtonCreate")
+                : t("submitButtonUpdate")}
+            </Button>
+            <SheetClose asChild>
+              <Button variant={"secondary"} className="w-full">
+                {t("closeButton")}
+              </Button>
+            </SheetClose>
+          </div>
         </form>
       </SheetContent>
     </Sheet>

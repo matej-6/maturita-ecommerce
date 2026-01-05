@@ -6,7 +6,20 @@ import { HeaderNav } from "./header-nav";
 import { Suspense } from "react";
 import { getHeaderQueryData } from "@/app/data-access-layer/category.queries";
 export async function Header() {
-  const headerQueryDataPromise = getHeaderQueryData();
+  const headerDataRes = await getHeaderQueryData();
+
+  if (headerDataRes.errors) {
+    console.error(headerDataRes.errors);
+  }
+
+  const categories = (headerDataRes.data?.categories || []).map((c) => ({
+    ...c,
+    name: c.name || "",
+    subcategories: (c.subcategories || []).map((sc) => ({
+      ...sc,
+      name: sc.name || "",
+    })),
+  }));
 
   return (
     <header className="w-full border-b-2 z-50">
@@ -21,13 +34,11 @@ export async function Header() {
         </div>
         <div className="col-span-3 flex justify-center">
           <div className="hidden lg:block">
-            <Suspense fallback={null}>
-              <HeaderNav queryPromise={headerQueryDataPromise} />
-            </Suspense>
+            <HeaderNav categories={categories} />
           </div>
         </div>
         <div className="col-span-1 flex justify-end items-center">
-          <HeaderRightNav />
+          <HeaderRightNav categories={categories} />
         </div>
       </div>
     </header>

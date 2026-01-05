@@ -29,9 +29,10 @@ import { DeleteImage } from "../../../components/products/delete-image-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AttributeKeyForm } from "../../../forms/attribute-key-form";
 import { AttributeForm } from "../../../forms/attribute-form";
-import { ProductVariantForm } from "../../../forms/product-variant-form";
+import { ProductVariantSheetForm } from "../../../forms/product-variant-sheet-form";
 import { GenerateEmbeddingsButton } from "../../../components/products/generate-embeddings-button";
 import { RegenerateAllEmbeddingsButton } from "../../../components/products/regenerate-all-embeddings-button";
+import { ProductTranslationSheetForm } from "../../../forms/product-translation-sheet-form";
 
 export default async function ProductDetailPage({
   params,
@@ -57,13 +58,6 @@ export default async function ProductDetailPage({
     return notFound();
   }
 
-  const locale = await getLocale();
-
-  const revalidatePathUrls = [
-    `/${locale}/admin/products/product-detail/${id}`,
-    `/${locale}/admin/products`,
-  ];
-
   const {
     product,
     categories,
@@ -75,12 +69,13 @@ export default async function ProductDetailPage({
   );
 
   const t = await getTranslations("admin.products.productDetail.page");
+  const ft = await getTranslations("fields");
 
   return (
-    <div className="bg-muted/25 dark:bg-muted/50 flex flex-col flex-1 rounded-xl p-6 gap-y-8 ">
+    <div className="flex flex-col gap-y-8 ">
       <div className="flex flex-col gap-y-8">
         <div className="flex flex-col gap-y-8">
-          <h1 className="font-medium font-secondary">Overview</h1>
+          <h1 className="font-medium font-secondary">{t("title")}</h1>
           {!product.isSetup && (
             <Alert className="w-fit" variant={"destructive"}>
               <AlertCircleIcon />
@@ -96,13 +91,17 @@ export default async function ProductDetailPage({
           )}
         </div>
         <div className="flex flex-col gap-y-6">
-          <div className="grid grid-cols-3 gap-6 w-3xl">
-            <div className="space-y-0">
-              <span className="text-muted-foreground text-xs">Slug</span>
+          <div className="flex flex-wrap gap-x-24 gap-y-8 max-w-[1280px]">
+            <div className="space-y-0 w-[300px]">
+              <span className="text-muted-foreground text-xs">
+                {ft("product.slug")}
+              </span>
               <p>{product.slug}</p>
             </div>
-            <div className="space-y-0">
-              <span className="text-muted-foreground text-xs">Category ID</span>
+            <div className="space-y-0 w-[300px]">
+              <span className="text-muted-foreground text-xs">
+                {ft("product.categoryId")}
+              </span>
               <p>
                 {product.categoryId ? (
                   <Link
@@ -111,80 +110,66 @@ export default async function ProductDetailPage({
                     {product.categoryId}
                   </Link>
                 ) : (
-                  "None"
+                  "N/A"
                 )}
               </p>
             </div>
-            <div className="space-y-0">
-              <span className="text-muted-foreground text-xs">Is Setup</span>
-              <p>{product.isSetup ? "Yes" : "No"}</p>
+            <div className="space-y-0 w-[300px]">
+              <span className="text-muted-foreground text-xs">
+                {ft("product.isSetup")}
+              </span>
+              <p>{product.isSetup ? t("yes") : t("no")}</p>
             </div>
-            <div className="space-y-0">
-              <span className="text-muted-foreground text-xs">Is Public</span>
-              <p>{product.isPublic ? "Yes" : "No"}</p>
+            <div className="space-y-0 w-[300px]">
+              <span className="text-muted-foreground text-xs">
+                {ft("product.isPublic")}
+              </span>
+              <p>{product.isPublic ? t("yes") : t("no")}</p>
             </div>
-            <div className="space-y-0">
-              <span className="text-muted-foreground text-xs">Created At</span>
+            <div className="space-y-0 w-[300px]">
+              <span className="text-muted-foreground text-xs">
+                {ft("product.createdAt")}
+              </span>
               <p>{new Date(product.createdAt).toLocaleString()}</p>
             </div>
-            <div className="space-y-0">
-              <span className="text-muted-foreground text-xs">Updated At</span>
+            <div className="space-y-0 w-[300px]">
+              <span className="text-muted-foreground text-xs">
+                {ft("product.updatedAt")}
+              </span>
               <p>{new Date(product.updatedAt).toLocaleString()}</p>
             </div>
-            <div className="space-y-0">
+            <div className="space-y-0 w-[300px]">
               <span className="text-muted-foreground text-xs">
-                Nu. of variants
+                {ft("product.numberOfVariants")}
               </span>
               <p>{product.variants.length}</p>
             </div>
           </div>
         </div>
         <div className="flex items-center justify-start gap-x-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="w-fit">Edit</Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Edit product</SheetTitle>
-                <SheetDescription>
-                  Click save when you're done.
-                </SheetDescription>
-              </SheetHeader>
-              <div className="flex-1 flex flex-col">
-                <div className="flex-1 px-4">
-                  <ProductForm
-                    categories={categories}
-                    mode="edit"
-                    initialData={{
-                      slug: product.slug,
-                      categoryId: product.categoryId || null,
-                      isPublic: product.isPublic,
-                    }}
-                    revalidatePaths={revalidatePathUrls}
-                  />
-                </div>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <ProductForm
+            categories={categories}
+            mode="edit"
+            initialData={{
+              slug: product.slug,
+              categoryId: product.categoryId || null,
+              isPublic: product.isPublic,
+            }}
+          />
+
           <Link href={`/product/${product.slug}`}>
             <Button className="group gap-x-0.5" variant={"link"}>
-              <span>View page</span>
+              <span>{t("viewPageButton")}</span>
               <ArrowUpRightIcon className="size-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition duration-100" />
             </Button>
           </Link>
         </div>
       </div>
-      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">Images</h2>
+        <h2 className="font-medium font-secondary">{t("images.title")}</h2>
         {product.images.length === 0 ? (
-          <span>No images uploaded.</span>
+          <span>{t("images.noImages")}</span>
         ) : (
           <div className="flex flex-wrap gap-4">
             {product.images.map((img) => (
@@ -202,7 +187,7 @@ export default async function ProductDetailPage({
                 <div className="absolute top-2 left-2 flex gap-x-1 justify-start items-end">
                   {img.isThumbnail ? (
                     <span className=" bg-black/60 text-white text-xs px-2 py-1 rounded-md">
-                      Thumbnail
+                      {t("images.thumbnailLabel")}
                     </span>
                   ) : (
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -222,10 +207,12 @@ export default async function ProductDetailPage({
         )}
         <ProductImageForm productId={product.id} />
       </div>
-      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">Translations</h2>
-        <div className="flex gap-8">
+        <h2 className="font-medium font-secondary">
+          {t("translations.title")}
+        </h2>
+        <div className="flex flex-wrap gap-8">
           {product.translations.map((t) => {
             const locale = locales.find((l) => l.code === t.locale);
             if (!locale) return null;
@@ -259,17 +246,20 @@ export default async function ProductDetailPage({
             );
           })}
         </div>
-        <AddProductTranslationSheet
-          id={product.id}
-          availableLocales={missingTranslations.map((t) => ({
-            label: t.name,
-            value: t.code,
-          }))}
-        />
+        <div>
+          <ProductTranslationSheetForm
+            productId={product.id}
+            mode="create"
+            availableLocales={missingTranslations.map((t) => ({
+              label: t.name,
+              value: t.code,
+            }))}
+          />
+        </div>
       </div>
-      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">Variants</h2>
+        <h2 className="font-medium font-secondary">{t("variants.title")}</h2>
 
         <div className="flex flex-wrap gap-8">
           {product.variants.map((variant) => {
@@ -282,99 +272,56 @@ export default async function ProductDetailPage({
                   <div className="grid grid-cols-3 gap-2 max-w-xl">
                     <div className="flex flex-col gap-y-0">
                       <span className="font-medium text-xs text-muted-foreground">
-                        Price
+                        {ft("productVariant.price")}
                       </span>
                       <span>{(variant.priceInCents / 100).toFixed(2)}€</span>
                     </div>
                     <div className="flex flex-col gap-y-0">
                       <span className="font-medium text-xs text-muted-foreground">
-                        Stock
+                        {ft("productVariant.stock")}
                       </span>
                       <span>{variant.stock}</span>
                     </div>
                     <div className="flex flex-col gap-y-0">
                       <span className="font-medium text-xs text-muted-foreground">
-                        Is Public
+                        {ft("productVariant.isPublic")}
                       </span>
-                      <span>{variant.isPublic ? "Yes" : "No"}</span>
+                      <span>
+                        {variant.isPublic ? ft("common.yes") : ft("common.no")}
+                      </span>
                     </div>
                   </div>
                   <div className="flex flex-col gap-y-2">
                     <h3 className="font-medium text-xs text-muted-foreground">
-                      Attributes
+                      {t("variants.attributes.title")}
                     </h3>
-                    <div className="">
+                    <div className="flex flex-wrap gap-2">
                       {variant.attributes.length === 0 ? (
-                        <span>No attributes.</span>
+                        <span>{t("variants.attributes.noAttributes")}</span>
                       ) : (
-                        <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr] justify-start items-center w-full">
-                          <span className="font-medium text-xs text-muted-foreground">
-                            Key
-                          </span>
-                          <span className="font-medium text-xs text-muted-foreground ">
-                            Value
-                          </span>
-                          <span className="col-span-3 font-medium text-xs text-muted-foreground">
-                            Actions
-                          </span>
-                        </div>
-                      )}
-                      {variant.attributes.map((attr) => (
-                        <div
-                          key={attr.id}
-                          className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr] items-center w-full justify-start"
-                        >
-                          <span>{attr.key?.key}</span>
-                          <span>{attr.value}</span>
-                          <Link href={`/admin/attribute-keys/${attr.key?.id}`}>
+                        variant.attributes.map((attr) => (
+                          <Link
+                            key={attr.id}
+                            href={`/admin/attribute-keys/${attr.key?.id}`}
+                          >
                             <Button variant={"link"} size={"sm"}>
-                              Details
+                              {attr.key?.key} {attr.value}{" "}
+                              <ArrowUpRightIcon className="size-3.5 ml-1" />
                             </Button>
                           </Link>
-                          {/* <Sheet>
-                            <SheetTrigger asChild>
-                              <Button
-                                disabled={!attr.key}
-                                variant={"ghost"}
-                                size={"sm"}
-                              >
-                                Edit key
-                              </Button>
-                            </SheetTrigger>
-                            <SheetContent>
-                              <SheetHeader>
-                                <SheetTitle>Edit Attribute Key</SheetTitle>
-                              </SheetHeader>
-                              <div className="grow flex flex-col">
-                                <div className="flex-1 px-4">
-                                  <AttributeKeyForm
-                                    mode="edit"
-                                    productId={product.id}
-                                    keyId={attr.key!.id}
-                                    initialData={{
-                                      key: attr.key?.key || "",
-                                    }}
-                                  />
-                                </div>
-                                <SheetFooter>
-                                  <SheetClose asChild>
-                                    <Button variant="outline">Close</Button>
-                                  </SheetClose>
-                                </SheetFooter>
-                              </div>
-                            </SheetContent>
-                          </Sheet> */}
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-y-4">
                     <h3 className="font-medium text-xs text-muted-foreground">
-                      Images
+                      {t("variants.images.title")}
                     </h3>
                     {variant.images.length === 0 ? (
-                      <span className="text-sm">No images uploaded.</span>
+                      <span className="text-sm">
+                        {t("variants.images.noImages")}
+                      </span>
                     ) : (
                       <div className="flex flex-wrap gap-4">
                         {variant.images.map((img) => (
@@ -392,7 +339,7 @@ export default async function ProductDetailPage({
                             <div className="absolute top-2 left-2 flex gap-x-1 justify-start items-end">
                               {img.isThumbnail ? (
                                 <span className=" bg-black/60 text-white text-xs px-2 py-1 rounded-md">
-                                  Thumbnail
+                                  {t("variants.images.thumbnailLabel")}
                                 </span>
                               ) : (
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -419,53 +366,36 @@ export default async function ProductDetailPage({
                       productVariantId={variant.id}
                       productId={product.id}
                     />
-                    <Sheet>
-                      <SheetTrigger asChild>
-                        <Button className="w-fit">Edit</Button>
-                      </SheetTrigger>
-                      <SheetContent>
-                        <SheetHeader>
-                          <SheetTitle>Edit variant</SheetTitle>
-                        </SheetHeader>
-                        <div className="grow flex flex-col">
-                          <div className="flex-1 px-4">
-                            <ProductVariantForm
-                              mode="edit"
-                              productId={product.id}
-                              productVariantId={variant.id}
-                              initialData={{
-                                ...variant,
-                                attributes: variant.attributes.map((a) => a.id),
-                              }}
-                              allAttributes={attributeKeys.reduce(
-                                (acc, val) => {
-                                  val.attributes.forEach((a) =>
-                                    acc.push({
-                                      id: a.id,
-                                      key: val.key,
-                                      keyId: val.id,
-                                      value: a.value,
-                                    })
-                                  );
-                                  return acc;
-                                },
-                                [] as {
-                                  id: number;
-                                  key: string;
-                                  keyId: number;
-                                  value: string;
-                                }[]
-                              )}
-                            />
-                          </div>
-                          <SheetFooter>
-                            <SheetClose asChild>
-                              <Button variant="outline">Close</Button>
-                            </SheetClose>
-                          </SheetFooter>
-                        </div>
-                      </SheetContent>
-                    </Sheet>
+
+                    <ProductVariantSheetForm
+                      buttonVariant="secondary"
+                      mode="edit"
+                      productId={product.id}
+                      productVariantId={variant.id}
+                      initialData={{
+                        ...variant,
+                        attributes: variant.attributes.map((a) => a.id),
+                      }}
+                      allAttributes={attributeKeys.reduce(
+                        (acc, val) => {
+                          val.attributes.forEach((a) =>
+                            acc.push({
+                              id: a.id,
+                              key: val.key,
+                              keyId: val.id,
+                              value: a.value,
+                            })
+                          );
+                          return acc;
+                        },
+                        [] as {
+                          id: number;
+                          key: string;
+                          keyId: number;
+                          value: string;
+                        }[]
+                      )}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -473,104 +403,34 @@ export default async function ProductDetailPage({
           })}
         </div>
         <div className="flex items-center justify-start gap-x-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="w-fit">Add Variant</Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Add Variant</SheetTitle>
-              </SheetHeader>
-              <div className="grow flex flex-col">
-                <div className="flex-1 px-4">
-                  <ProductVariantForm
-                    mode="create"
-                    productId={product.id}
-                    allAttributes={attributeKeys.reduce(
-                      (acc, val) => {
-                        val.attributes.forEach((a) =>
-                          acc.push({
-                            id: a.id,
-                            key: val.key,
-                            keyId: val.id,
-                            value: a.value,
-                          })
-                        );
-                        return acc;
-                      },
-                      [] as {
-                        id: number;
-                        key: string;
-                        keyId: number;
-                        value: string;
-                      }[]
-                    )}
-                  />
-                </div>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="w-fit" variant={"secondary"}>
-                New Attribute Key
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Add Attribute Key</SheetTitle>
-              </SheetHeader>
-              <div className="grow flex flex-col">
-                <div className="flex-1 px-4">
-                  <AttributeKeyForm mode="create" productId={product.id} />
-                </div>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="w-fit" variant={"secondary"}>
-                New Attribute
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Add Attribute</SheetTitle>
-              </SheetHeader>
-              <div className="grow flex flex-col">
-                <div className="flex-1 px-4">
-                  <AttributeForm
-                    mode="create"
-                    productId={product.id}
-                    availableKeys={attributeKeys.map((k) => ({
-                      id: k.id,
-                      key: k.key,
-                    }))}
-                  />
-                </div>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <ProductVariantSheetForm
+            mode="create"
+            productId={product.id}
+            allAttributes={attributeKeys.reduce(
+              (acc, val) => {
+                val.attributes.forEach((a) =>
+                  acc.push({
+                    id: a.id,
+                    key: val.key,
+                    keyId: val.id,
+                    value: a.value,
+                  })
+                );
+                return acc;
+              },
+              [] as {
+                id: number;
+                key: string;
+                keyId: number;
+                value: string;
+              }[]
+            )}
+          />
         </div>
       </div>
-      <div className="h-px w-full bg-muted-foreground/30 rounded-full" />
+      <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium">Embeddings</h2>
+        <h2 className="font-medium">{t("embeddings.title")}</h2>
         <div>
           <RegenerateAllEmbeddingsButton embeddingType="embedding" />
         </div>
@@ -580,25 +440,36 @@ export default async function ProductDetailPage({
               locales.find((l) => l.code === embedding.lang) || {};
 
             return (
-              <Card key={embedding.id} className="p-2! w-[196px]">
-                <div>
-                  {flag}{" "}
-                  <span className="text-sm text-muted-foreground">
-                    ({name || embedding.lang})
-                  </span>
-                </div>
-                <div className="flex flex-wrap">
-                  <div className="-space-y-1">
-                    <span className="text-muted-foreground font-bold text-sm">
-                      Created At
+              <Card
+                key={embedding.id}
+                className="p-2 sm:p-4 w-[400px] flex flex-col gap-y-4"
+              >
+                <div className="flex flex-col gap-y-4">
+                  <div>
+                    {flag}{" "}
+                    <span className="text-sm text-muted-foreground">
+                      ({name || embedding.lang})
                     </span>
-                    <div>{new Date(embedding.createdAt).toLocaleString()}</div>
                   </div>
-                  <div className="-space-y-1">
-                    <span className="text-muted-foreground font-bold text-sm">
-                      Status
-                    </span>
-                    <div>{embedding.status}</div>
+                  <div className="flex gap-x-4 items-center">
+                    <div className="-space-y-1">
+                      <span className="text-muted-foreground text-xs">
+                        {t("embeddings.createdAt")}
+                      </span>
+                      <div>
+                        {
+                          new Date(embedding.createdAt)
+                            .toLocaleString()
+                            .split(",")[0]
+                        }
+                      </div>
+                    </div>
+                    <div className="-space-y-1">
+                      <span className="text-muted-foreground text-xs">
+                        {t("embeddings.status")}
+                      </span>
+                      <div>{embedding.status}</div>
+                    </div>
                   </div>
                 </div>
                 <GenerateEmbeddingsButton
@@ -611,9 +482,12 @@ export default async function ProductDetailPage({
             );
           })}
           {product.missingEmbeddingLanguages.map((lang) => (
-            <Card key={lang} className="p-2! sm:p-4! w-[196px]">
+            <Card
+              key={lang}
+              className="p-2 sm:p-4 w-[400px] flex flex-col gap-y-4"
+            >
               <div className="text-lg font-semibold">{lang}</div>
-              <div>No embedding generated yet.</div>
+              <div>{t("embeddings.noEmbeddings")}</div>
               <GenerateEmbeddingsButton
                 productId={product.id}
                 lang={lang}
@@ -625,7 +499,7 @@ export default async function ProductDetailPage({
         </div>
       </div>
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium">Content Embeddings</h2>
+        <h2 className="font-medium">{t("contentEmbeddings.title")}</h2>
         <div>
           <RegenerateAllEmbeddingsButton embeddingType="contentEmbedding" />
         </div>
@@ -635,25 +509,36 @@ export default async function ProductDetailPage({
               locales.find((l) => l.code === embedding.lang) || {};
 
             return (
-              <Card key={embedding.id} className="p-2! sm:p-4! w-[196px]">
-                <div>
-                  {flag}{" "}
-                  <span className="text-sm text-muted-foreground">
-                    ({name || embedding.lang})
-                  </span>
-                </div>
-                <div className="flex flex-wrap">
-                  <div className="-space-y-1">
-                    <span className="text-muted-foreground font-bold text-sm">
-                      Created At
+              <Card
+                key={embedding.id}
+                className="p-2 sm:p-4 w-[400px] flex flex-col gap-y-4"
+              >
+                <div className="flex flex-col gap-y-4">
+                  <div>
+                    {flag}{" "}
+                    <span className="text-sm text-muted-foreground">
+                      ({name || embedding.lang})
                     </span>
-                    <div>{new Date(embedding.createdAt).toLocaleString()}</div>
                   </div>
-                  <div className="-space-y-1">
-                    <span className="text-muted-foreground font-bold text-sm">
-                      Status
-                    </span>
-                    <div>{embedding.status}</div>
+                  <div className="flex gap-x-4 items-center">
+                    <div className="-space-y-1">
+                      <span className="text-muted-foreground text-xs">
+                        {t("contentEmbeddings.createdAt")}
+                      </span>
+                      <div>
+                        {
+                          new Date(embedding.createdAt)
+                            .toLocaleString()
+                            .split(",")[0]
+                        }
+                      </div>
+                    </div>
+                    <div className="-space-y-1">
+                      <span className="text-muted-foreground text-xs">
+                        {t("contentEmbeddings.status")}
+                      </span>
+                      <div>{embedding.status}</div>
+                    </div>
                   </div>
                 </div>
                 <GenerateEmbeddingsButton
@@ -667,9 +552,12 @@ export default async function ProductDetailPage({
           })}
         </div>
         {product.missingContentEmbeddingLanguages.map((lang) => (
-          <Card key={lang} className="p-2! w-[196px]">
+          <Card
+            key={lang}
+            className="p-2 sm:p-4 w-[400px] flex flex-col gap-y-4"
+          >
             <div className="text-lg font-semibold">{lang}</div>
-            <div>No embedding generated yet.</div>
+            <div>{t("contentEmbeddings.noEmbeddings")}</div>
             <GenerateEmbeddingsButton
               productId={product.id}
               lang={lang}

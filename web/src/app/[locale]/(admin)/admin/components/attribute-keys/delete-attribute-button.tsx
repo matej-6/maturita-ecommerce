@@ -3,6 +3,7 @@
 import { deleteAttributeAction } from "@/app/data-access-layer/admin/product-variant-attribute/actions";
 import { ResponsiveButton } from "@/components/responsive-button";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 export function DeleteAttributeButton({
@@ -24,13 +25,15 @@ export function DeleteAttributeButton({
     },
   });
 
+  const t = useTranslations("admin.attributeKeys.page.attributes");
+
   return (
     <ResponsiveButton
       variant={"destructive"}
       onClick={() => mutate()}
       disabled={isPending}
     >
-      {isPending ? "Deleting..." : "Delete Attribute"}
+      {isPending ? t("pendingDeleteButton") : t("deleteButton")}
     </ResponsiveButton>
   );
 }

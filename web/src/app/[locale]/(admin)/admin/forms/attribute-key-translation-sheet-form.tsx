@@ -25,6 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type Props = {
@@ -102,18 +103,21 @@ export function AttributeKeyTranslationSheetForm({
     },
   });
 
+  const t = useTranslations("admin.attributeKeys.translationForm");
+  const ft = useTranslations("fields.attributeKey");
+
   return (
     <Sheet>
       <SheetTrigger asChild>
         <ResponsiveButton disabled={!initialData && locales.length === 0}>
-          {initialData ? "Edit Translation" : "Add Translation"}
+          {initialData ? t("triggerButtonUpdate") : t("triggerButtonCreate")}
         </ResponsiveButton>
       </SheetTrigger>
 
       <SheetContent className="grow">
         <SheetHeader>
           <SheetTitle>
-            {initialData ? "Edit Translation" : "Add Translation"}
+            {initialData ? t("titleUpdate") : t("titleCreate")}
           </SheetTitle>
         </SheetHeader>
         <form
@@ -124,7 +128,7 @@ export function AttributeKeyTranslationSheetForm({
           className="flex flex-col gap-y-3 sm:gap-y-6 px-4 grow"
         >
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="keyTranslation">Key Translation</Label>
+            <Label htmlFor="keyTranslation">{ft("key")}</Label>
             <Input
               id="keyTranslation"
               type="text"
@@ -146,7 +150,7 @@ export function AttributeKeyTranslationSheetForm({
             }}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Locale" />
+              <SelectValue placeholder={t("languageSelect.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {locales.map((locale) => (
@@ -161,14 +165,14 @@ export function AttributeKeyTranslationSheetForm({
             <Button type="submit" disabled={isPending}>
               {initialData
                 ? isPending
-                  ? "Saving..."
-                  : "Save Changes"
+                  ? t("submitButtonUpdatePending")
+                  : t("submitButtonUpdate")
                 : isPending
-                ? "Creating..."
-                : "Create Translation"}
+                ? t("submitButtonCreatePending")
+                : t("submitButtonCreate")}
             </Button>
             <SheetClose asChild>
-              <Button variant={"outline"}>Close</Button>
+              <Button variant={"outline"}>{t("closeButton")}</Button>
             </SheetClose>
           </div>
         </form>

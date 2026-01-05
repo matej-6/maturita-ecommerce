@@ -2,11 +2,7 @@
 
 import {
   createAttributeAction,
-  createAttributeKeyTranslationAction,
-  createAttributeTranslationAction,
   updateAttributeAction,
-  updateAttributeKeyTranslationAction,
-  updateAttributeTranslationAction,
 } from "@/app/data-access-layer/admin/product-variant-attribute/actions";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
 import { ResponsiveButton } from "@/components/responsive-button";
@@ -29,6 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type Props = {
@@ -52,6 +49,9 @@ export function AttributeSheetForm({
   initialData,
   showKeyOptions = true,
 }: Props) {
+  const t = useTranslations("admin.attributeKeys.attributeForm");
+  const ft = useTranslations("fields");
+
   const [formData, setFormData] = useState<FormData>({
     keyId: initialData?.keyId || keys[0].id,
     value: initialData?.value || "",
@@ -106,14 +106,14 @@ export function AttributeSheetForm({
     <Sheet>
       <SheetTrigger asChild>
         <ResponsiveButton>
-          {initialData ? "Edit Attribute" : "Add Attribute"}
+          {initialData ? t("triggerButtonUpdate") : t("triggerButtonCreate")}
         </ResponsiveButton>
       </SheetTrigger>
 
       <SheetContent className="grow">
         <SheetHeader>
           <SheetTitle>
-            {initialData ? "Edit Attribute" : "Add Attribute"}
+            {initialData ? t("titleUpdate") : t("titleCreate")}
           </SheetTitle>
         </SheetHeader>
         <form
@@ -124,7 +124,7 @@ export function AttributeSheetForm({
           className="flex flex-col gap-y-3 sm:gap-y-6 px-4 grow"
         >
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="value">Value</Label>
+            <Label htmlFor="value">{ft("attribute.value")}</Label>
             <Input
               id="value"
               type="text"
@@ -147,7 +147,7 @@ export function AttributeSheetForm({
               }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Locale" />
+                <SelectValue placeholder={t("keySelect.placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 {keys.map((key) => (
@@ -161,16 +161,10 @@ export function AttributeSheetForm({
           <p className="text-red-600">{errorMessage}</p>
           <div className="flex flex-col gap-y-2 mt-auto pb-4">
             <Button type="submit" disabled={isPending}>
-              {initialData
-                ? isPending
-                  ? "Saving..."
-                  : "Save Changes"
-                : isPending
-                ? "Creating..."
-                : "Create Attribute"}
+              {isPending ? t("loadingButton") : t("submitButton")}
             </Button>
             <SheetClose asChild>
-              <Button variant={"outline"}>Close</Button>
+              <Button variant={"outline"}>{t("closeButton")}</Button>
             </SheetClose>
           </div>
         </form>

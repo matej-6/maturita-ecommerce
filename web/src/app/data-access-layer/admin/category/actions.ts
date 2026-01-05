@@ -95,7 +95,7 @@ export async function createCategoryAction(
 
 export async function editCategoryAction(
   id: number,
-  data: categoryFormSchemaType
+  data: { parentCategoryId: number | null; slug: string }
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -109,11 +109,13 @@ export async function editCategoryAction(
     slug: data.slug,
   });
 
-  console.log(res);
-
   if (res.errors) {
     return await handleGraphqlError(res.errors);
   }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/categories`);
+  revalidatePath(`/${locale}/admin/categories/edit-category/${id}`);
 
   if (!res.data) {
     return {

@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  createAttributeKeyTranslationAction,
   createAttributeTranslationAction,
-  updateAttributeKeyTranslationAction,
   updateAttributeTranslationAction,
 } from "@/app/data-access-layer/admin/product-variant-attribute/actions";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
@@ -27,6 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type Props = {
@@ -109,6 +108,9 @@ export function AttributeTranslationSheetForm({
     },
   });
 
+  const t = useTranslations("admin.attributeKeys.attributeTranslationForm");
+  const ft = useTranslations("fields.attribute");
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -116,14 +118,14 @@ export function AttributeTranslationSheetForm({
           disabled={!initialData && locales.length === 0}
           variant="secondary"
         >
-          {initialData ? "Edit Translation" : "Add Translation"}
+          {initialData ? t("triggerButtonUpdate") : t("triggerButtonCreate")}
         </ResponsiveButton>
       </SheetTrigger>
 
       <SheetContent className="grow">
         <SheetHeader>
           <SheetTitle>
-            {initialData ? "Edit Translation" : "Add Translation"}
+            {initialData ? t("titleUpdate") : t("titleCreate")}
           </SheetTitle>
         </SheetHeader>
         <form
@@ -134,7 +136,7 @@ export function AttributeTranslationSheetForm({
           className="flex flex-col gap-y-3 sm:gap-y-6 px-4 grow"
         >
           <div className="flex flex-col gap-y-1">
-            <Label htmlFor="valueTranslation">Value Translation</Label>
+            <Label htmlFor="valueTranslation">{ft("value")}</Label>
             <Input
               id="valueTranslation"
               type="text"
@@ -156,7 +158,7 @@ export function AttributeTranslationSheetForm({
             }}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Locale" />
+              <SelectValue placeholder={t("languageSelect.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {locales.map((locale) => (
@@ -171,14 +173,14 @@ export function AttributeTranslationSheetForm({
             <Button type="submit" disabled={isPending}>
               {initialData
                 ? isPending
-                  ? "Saving..."
-                  : "Save Changes"
+                  ? t("submitButtonUpdatePending")
+                  : t("submitButtonUpdate")
                 : isPending
-                ? "Creating..."
-                : "Create Translation"}
+                ? t("submitButtonCreatePending")
+                : t("submitButtonCreate")}
             </Button>
             <SheetClose asChild>
-              <Button variant={"outline"}>Close</Button>
+              <Button variant={"outline"}>{t("closeButton")}</Button>
             </SheetClose>
           </div>
         </form>

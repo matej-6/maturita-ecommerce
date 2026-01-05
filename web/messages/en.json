@@ -231,11 +231,20 @@
     "productVariant": {
       "attributeKey": {
         "form": {
-          "submitButton": "Submit"
+          "submitButton": "Submit",
+          "closeButton": "Close"
         }
       },
       "form": {
-        "submitButton": "Submit"
+        "submitButton": "Submit",
+        "closeButton": "Close",
+        "selectKeyToFilterAttributes": "Select key to filter attributes",
+        "noFilter": "No filter",
+        "triggerButtonCreate": "Add New Variant",
+        "triggerButtonUpdate": "Edit Variant",
+        "titleCreate": "Add a New Variant",
+        "titleUpdate": "Edit Variant",
+        "loadingButton": "Submitting..."
       }
     },
     "products": {
@@ -246,6 +255,7 @@
         "triggerButtonUpdate": "Edit Product",
         "submitButtonCreate": "Create product",
         "submitButtonUpdate": "Save changes",
+        "closeButton": "Close",
         "categoryId": {
           "combobox": {
             "noResultsFoundText": "No results found.",
@@ -256,6 +266,73 @@
       },
       "productDetail": {
         "page": {
+          "title": "Overview",
+          "viewPageButton": "View page",
+          "noVariants": "No variants",
+          "yes": "Yes",
+          "no": "No",
+          "images": {
+            "title": "Images",
+            "noImages": "No images uploaded.",
+            "thumbnailLabel": "Thumbnail",
+            "uploadImageButton": "Upload Image",
+            "uploadingButton": "Uploading..."
+          },
+          "translations": {
+            "title": "Translations",
+            "noTranslations": "No translations available.",
+            "deleteButton": "Delete",
+            "deleteConfirmButton": "Are you sure?",
+            "deletePendingButton": "Deleting...",
+            "form": {
+              "triggerButtonCreate": "Add New Translation",
+              "triggerButtonUpdate": "Edit",
+              "titleCreate": "Add a New Translation",
+              "titleUpdate": "Edit Translation",
+              "submitButtonCreate": "Submit",
+              "submitButtonCreatePending": "Submitting...",
+              "submitButtonUpdate": "Save changes",
+              "submitButtonUpdatePending": "Saving...",
+              "closeButton": "Close",
+              "languageSelect": {
+                "placeholder": "Select language"
+              }
+            }
+          },
+          "variants": {
+            "title": "Variants",
+            "noVariants": "No variants available.",
+            "addVariantButton": "Add Variant",
+            "attributes": {
+              "title": "Attributes",
+              "noAttributes": "No attributes available."
+            },
+            "images": {
+              "title": "Images",
+              "noImages": "No images uploaded.",
+              "thumbnailLabel": "Thumbnail",
+              "uploadImageButton": "Upload Image",
+              "uploadingButton": "Uploading..."
+            }
+          },
+          "embeddings": {
+            "title": "Embeddings",
+            "noEmbeddings": "No embeddings available.",
+            "regenereteButton": "Regenerate",
+            "createdAt": "Created At",
+            "status": "Status",
+            "regenerateAll": "Regenerate All",
+            "generating": "Generating...",
+            "regenerate": "Regenerate",
+            "generate": "Generate"
+          },
+          "contentEmbeddings": {
+            "title": "Content Embeddings",
+            "noEmbeddings": "No content embeddings available.",
+            "regenereteButton": "Regenerate",
+            "createdAt": "Created At",
+            "status": "Status"
+          },
           "setupWarning": {
             "title": "This product has not been setup completely",
             "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
@@ -345,7 +422,10 @@
       },
       "editCategory": {
         "form": {
+          "triggerButton": "Edit Category",
+          "title": "Edit Category",
           "submitButton": "Save changes",
+          "closeButton": "Close",
           "parentCategoryId": {
             "combobox": {
               "noResultsFoundText": "No results found.",
@@ -356,11 +436,41 @@
           "toastSuccess": "Saved changes"
         },
         "page": {
+          "title": "Overview",
+          "viewPageButton": "View page",
+          "noSubcategories": "No subcategories",
           "setupWarning": {
             "title": "This category has not been setup completely",
             "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
             "englishTranslation": "Ensure an english translation exists",
             "atLeastOneVisibleProduct": "Make sure at least one visible product is sold in this category"
+          },
+          "yes": "Yes",
+          "no": "No",
+          "translations": {
+            "title": "Translations",
+            "noTranslations": "No translations available.",
+            "deleteButton": "Delete",
+            "deleteConfirmButton": "Are you sure?",
+            "deletePendingButton": "Deleting...",
+            "form": {
+              "triggerButtonCreate": "Add New Translation",
+              "triggerButtonUpdate": "Edit",
+              "titleCreate": "Add a New Translation",
+              "titleUpdate": "Edit Translation",
+              "submitButtonCreate": "Create translation",
+              "submitButtonCreatePending": "Creating...",
+              "submitButtonUpdate": "Save changes",
+              "submitButtonUpdatePending": "Saving...",
+              "closeButton": "Close",
+              "languageSelect": {
+                "placeholder": "Select language"
+              }
+            }
+          },
+          "products": {
+            "title": "Products",
+            "noProducts": "No products in this category."
           }
         }
       }
@@ -441,6 +551,28 @@
       }
     },
     "attributeKeys": {
+      "page": {
+        "title": "Overview",
+        "translations": {
+          "title": "Translations",
+          "noTranslations": "No translations available."
+        },
+        "attributes": {
+          "title": "Attributes",
+          "noAttributes": "No attributes available.",
+          "deleteButton": "Delete",
+          "pendingDeleteButton": "Deleting...",
+          "productVariants": {
+            "title": "Product Variants",
+            "noProductVariants": "No product variants available.",
+            "viewPageButton": "View Page"
+          },
+          "translations": {
+            "title": "Translations",
+            "noTranslations": "No translations available."
+          }
+        }
+      },
       "form": {
         "titleCreate": "Add a New Attribute Key",
         "titleUpdate": "Edit Attribute Key",
@@ -450,6 +582,46 @@
         "submitButtonUpdate": "Save changes",
         "loadingButton": "Submitting...",
         "closeButton": "Close"
+      },
+      "translationForm": {
+        "triggerButtonCreate": "Add New Translation",
+        "triggerButtonUpdate": "Edit",
+        "titleCreate": "Add a New Translation",
+        "titleUpdate": "Edit Translation",
+        "submitButtonCreate": "Create translation",
+        "submitButtonCreatePending": "Creating...",
+        "submitButtonUpdate": "Save changes",
+        "submitButtonUpdatePending": "Saving...",
+        "closeButton": "Close",
+        "languageSelect": {
+          "placeholder": "Select language"
+        }
+      },
+      "attributeForm": {
+        "triggerButtonCreate": "Add New Attribute",
+        "triggerButtonUpdate": "Edit",
+        "titleCreate": "Add a New Attribute",
+        "titleUpdate": "Edit Attribute",
+        "submitButton": "Submit",
+        "loadingButton": "Submitting...",
+        "closeButton": "Close",
+        "keySelect": {
+          "placeholder": "Select Key"
+        }
+      },
+      "attributeTranslationForm": {
+        "triggerButtonCreate": "Add New Translation",
+        "triggerButtonUpdate": "Edit",
+        "titleCreate": "Add a New Translation",
+        "titleUpdate": "Edit Translation",
+        "submitButtonCreate": "Create translation",
+        "submitButtonCreatePending": "Creating...",
+        "submitButtonUpdate": "Save changes",
+        "submitButtonUpdatePending": "Saving...",
+        "closeButton": "Close",
+        "languageSelect": {
+          "placeholder": "Select language"
+        }
       },
       "table": {
         "noAttributeKeysFound": "No attribute keys found.",
@@ -484,7 +656,8 @@
       "isPublic": "Is Public",
       "createdAt": "Created At",
       "updatedAt": "Updated At",
-      "productsCount": "Products Count"
+      "productsCount": "Products Count",
+      "subcategories": "Subcategories"
     },
     "locale": {
       "code": "Locale code"
@@ -504,11 +677,19 @@
       "isSetupNo": "No",
       "id": "ID",
       "createdAt": "Created At",
-      "updatedAt": "Updated At"
+      "updatedAt": "Updated At",
+      "numberOfVariants": "Number of Variants"
     },
     "attributeKey": {
       "id": "ID",
       "key": "Key",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    },
+    "attribute": {
+      "id": "ID",
+      "keyId": "Key ID",
+      "value": "Value",
       "createdAt": "Created At",
       "updatedAt": "Updated At"
     },
@@ -518,6 +699,7 @@
       "content": "Content"
     },
     "productVariant": {
+      "id": "ID",
       "sku": "SKU",
       "price": "Price",
       "priceInCents": "Price in Cents",
@@ -558,6 +740,10 @@
         "country": "Country",
         "phone": "Phone"
       }
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No"
     }
   },
   "cart": {
