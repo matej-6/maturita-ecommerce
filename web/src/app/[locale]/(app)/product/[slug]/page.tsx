@@ -168,7 +168,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
             </div>
           </div>
 
-          <AddToCartButton productVariantId={selectedVariant.id} quantity={1}>
+          <AddToCartButton
+            buttonProps={{ size: "lg" }}
+            productVariantId={selectedVariant.id}
+            quantity={1}
+            className="text-base"
+          >
             {t("addToCartButton")}
           </AddToCartButton>
         </div>

@@ -87,6 +87,18 @@ export class ProductsResolver {
     );
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
+  @Query(() => [Product], { name: 'allProducts' })
+  findAllWithoutPagination(
+    @Args() findAllQueryArgs: ProductFindAllQueryArgs,
+    @OptionalCurrentUser() user: OptionalCurrentUserDto,
+  ) {
+    return this.productsService.findAllWithoutPagination(
+      findAllQueryArgs,
+      user?.role,
+    );
+  }
+
   @UseGuards(AdminGuard)
   @Mutation(() => ProductImage)
   async addProductImage(

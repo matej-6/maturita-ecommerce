@@ -290,7 +290,7 @@ export default async function ProductDetailPage({
                         variant.attributes.map((attr) => (
                           <Link
                             key={attr.id}
-                            href={`/admin/attribute-keys/${attr.key?.id}`}
+                            href={`/admin/attribute-keys/key-detail/${attr.key?.id}`}
                           >
                             <Button variant={"link"} size={"sm"}>
                               {attr.key?.key} {attr.value}{" "}

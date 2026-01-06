@@ -676,6 +676,7 @@ export class ProductVariantsService {
 
     const productVariants = await this.prisma.productVariant.findMany({
       where: {
+        isPublic: true,
         Product: {
           categoryId: {
             in: allCategories,

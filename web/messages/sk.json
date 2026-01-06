@@ -179,6 +179,11 @@
       "pendingCancelOrder": "Zrušovanie objednávky..."
     }
   },
+  "searchPage": {
+    "title": "Výsledky vyhľadávania pre:",
+    "noResults": "Pre vaše vyhľadávanie neboli nájdené žiadne výsledky.",
+    "errorFetchingResults": "Nastala chyba pri načítaní výsledkov vyhľadávania. Skúste to prosím neskôr."
+  },
   "admin": {
     "sidebar": {
       "dashboard": {
@@ -774,7 +779,7 @@
   "productFiltersSheet": {
     "title": "Filtre",
     "description": "Použite filtre na zúženie vyhľadávania produktov.",
-    "clearAll": "Vymazať všetko",
+    "clearAll": "Zrušiť filtre",
     "applyFilters": "Použiť filtre",
     "triggerButton": "Filtrovať"
   },

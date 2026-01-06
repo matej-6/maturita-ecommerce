@@ -15,17 +15,12 @@ import { NextButton } from "@/components/next-button";
 
 export default async function EditCategoryEditPage({
   params,
-  searchParams,
 }: {
   params: Promise<{
     id: string;
   }>;
-  searchParams: Promise<{
-    [key: string]: string | string[] | undefined;
-  }>;
 }) {
   const { id } = await params;
-  const sp = await searchParams;
 
   const parsedId = parseInt(id, 10);
 
@@ -33,22 +28,7 @@ export default async function EditCategoryEditPage({
     notFound();
   }
 
-  let startingCursor = null;
-  const startingPageSize = 5;
-
-  const cursor = sp.cursor;
-  if (typeof cursor === "string") {
-    const parsedCursor = parseInt(cursor, 10);
-    if (!isNaN(parsedCursor)) {
-      startingCursor = parsedCursor;
-    }
-  }
-
-  const res = await getEditCategoryQueryDocumentData(
-    parsedId,
-    startingCursor,
-    startingPageSize
-  );
+  const res = await getEditCategoryQueryDocumentData(parsedId);
 
   if (!res.success) {
     return (
@@ -65,7 +45,7 @@ export default async function EditCategoryEditPage({
   const t = await getTranslations("admin.categories.editCategory.page");
   const ft = await getTranslations("fields.category");
 
-  const { category, locales, products, allCategories } = res.data;
+  const { category, locales, allProducts: products, allCategories } = res.data;
 
   const missingTranslations = locales.filter(
     (l) => !category.translations.some((t) => t.locale === l.code)
@@ -219,35 +199,23 @@ export default async function EditCategoryEditPage({
       <div className="flex flex-col gap-y-8">
         <h2 className="font-medium font-secondary">{t("products.title")}</h2>
         <div className="flex flex-wrap gap-4">
-          {!products.edges || products.edges.length === 0 ? (
+          {!products || products.length === 0 ? (
             <p>{t("products.noProducts")}</p>
           ) : (
-            products.edges.map(({ node }) => (
+            products.map((p) => (
               <Link
-                key={node.id}
-                href={`/admin/products/product-detail/${node.id}`}
+                key={p.id}
+                href={`/admin/products/product-detail/${p.id}`}
                 className="flex"
               >
                 <Button variant={"secondary"} className="gap-x-1 grow">
-                  <span>{node.slug}</span>
+                  <span>{p.slug}</span>
                   <ArrowUpRight className="size-4" />
                 </Button>
               </Link>
             ))
           )}
         </div>
-        {products.edges && products.edges.length > 0 && (
-          <div className="flex  gap-x-2">
-            <PrevButton cursor={startingCursor} />
-            <NextButton
-              nextCursor={
-                products.hasNextPage
-                  ? products.edges[products.edges.length - 1].cursor
-                  : null
-              }
-            />
-          </div>
-        )}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
 import { VariantProps } from "class-variance-authority";
 import { Button, buttonVariants } from "./ui/button";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
@@ -39,12 +39,10 @@ export function NextButton({
   return (
     <Button
       onClick={() => {
-        if (!disabled) {
-          router.back();
-        }
+        handleClick();
       }}
       {...variantProps}
-      disabled={disabled || nextCursor === null}
+      disabled={disabled || nextCursor == null}
     >
       {children ?? (
         <>

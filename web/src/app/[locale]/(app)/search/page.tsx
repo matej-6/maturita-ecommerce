@@ -3,12 +3,15 @@
 import { getSearchProductsQueryData } from "@/app/data-access-layer/search.queries";
 import { getImageSrc } from "@/app/lib/utils";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { NextButton } from "@/components/next-button";
 import { PrevButton } from "@/components/prev-button";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
+import { ProductVariantCard } from "@/components/product-variant-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -64,10 +67,13 @@ export default async function SearchPage({ searchParams }: Props) {
     pageSize,
     attributes
   );
+
+  const t = await getTranslations("searchPage");
+
   if (!res.success) {
     return (
-      <div className="max-width-container bg-base/50 w-full mx-auto mt-8 gap-y-8">
-        Unable to fetch products.
+      <div className="max-width-container bg-base/50 w-full mx-auto my-8 gap-y-8">
+        {t("errorFetchingResults")}
       </div>
     );
   }
@@ -115,9 +121,9 @@ export default async function SearchPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="max-width-container bg-base/50 w-full mx-auto mt-8 gap-y-8 flex flex-col relative">
+    <div className="max-width-container w-full my-8 gap-y-8 flex flex-col">
       <h1 className="text-4xl font-bold">
-        Showing search results for: "{query}"
+        {t("title")} "{query}"
       </h1>
       {groupedAttributes.size > 0 && (
         <div className="">
@@ -143,83 +149,50 @@ export default async function SearchPage({ searchParams }: Props) {
                   productVariant.product.thumbnailImage ||
                   null;
                 return (
-                  <Card key={productVariant.sku} className="w-[296px]">
-                    <CardHeader className="flex h-[256px]">
-                      {image ? (
-                        <img
-                          src={getImageSrc(image.mimeType, image.base64)}
-                          alt={productVariant.sku + " image"}
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <div className="bg-accent size-full flex items-center justify-center">
-                          <span className="text-muted-foreground">
-                            No Image
-                          </span>
-                        </div>
-                      )}
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-y-4">
-                      <div className="h-[96px]">
-                        <Link
-                          className="group"
-                          href={`/product/${productVariant.product.slug}?variant=${productVariant.sku}`}
-                        >
-                          <div className="flex flex-col gap-y-1">
-                            <CardTitle className="group-hover:underline">
-                              {productVariant.product.name}{" "}
-                              {productVariant.attributes
-                                .map((a) => a.translatedValue || a.value)
-                                .sort()
-                                .join(" ")}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground text-pretty line-clamp-3">
-                              {productVariant.product.description}
-                            </p>
-                          </div>
-                        </Link>
-                      </div>
-                      <div className="flex flex-col gap-y-1">
-                        <p className="font-medium text-xl">
-                          {(productVariant.priceInCents / 100).toFixed(2)}€
-                        </p>
-                      </div>
-                      <AddToCartButton productVariantId={productVariant.id}>
-                        Add to Cart
-                      </AddToCartButton>
-                    </CardContent>
-                  </Card>
+                  <ProductVariantCard
+                    key={productVariant.id}
+                    variant={{
+                      ...productVariant,
+                      name:
+                        productVariant.product.name! +
+                        " " +
+                        productVariant.attributes
+                          .map((a) => a.translatedValue || a.value)
+                          .sort()
+                          .join(" "),
+                      productSlug: productVariant.product.slug,
+                      imageUrl: productVariant.thumbnailImage
+                        ? getImageSrc(
+                            productVariant.thumbnailImage.mimeType,
+                            productVariant.thumbnailImage.base64
+                          )
+                        : productVariant.product.thumbnailImage
+                        ? getImageSrc(
+                            productVariant.product.thumbnailImage.mimeType,
+                            productVariant.product.thumbnailImage.base64
+                          )
+                        : undefined,
+                      description:
+                        productVariant.product.description || undefined,
+                    }}
+                  />
                 );
               })}
             </div>
             <div className="flex items-center justify-start gap-x-2">
-              <PrevButton
-                size={"sm"}
-                disabled={cursor == null}
-                className="items-center"
-              >
-                <ArrowLeftIcon className="size-3.5" />
-                <span>Previous</span>
-              </PrevButton>
-              {!!nextPageLink ? (
-                <Link href={nextPageLink}>
-                  <Button size={"sm"} className="items-center">
-                    <span>Next</span>
-                    <ArrowRightIcon className="size-3.5" />
-                  </Button>
-                </Link>
-              ) : (
-                <Button size={"sm"} disabled className="items-center">
-                  <span>Next</span>
-                  <ArrowRightIcon className="size-3.5" />
-                </Button>
-              )}
+              <PrevButton cursor={cursor} className="items-center" />
+              <NextButton
+                nextCursor={
+                  productVariants.hasNextPage
+                    ? productVariants.edges![productVariants.edges!.length - 1]
+                        .cursor
+                    : undefined
+                }
+              />
             </div>
           </div>
         ) : (
-          <div className="text-muted-foreground">
-            No products found for this search.
-          </div>
+          <div className="text-muted-foreground">{t("noResults")}</div>
         )}
       </div>
     </div>

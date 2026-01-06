@@ -275,7 +275,6 @@ export type Mutation = {
   removeProductVariantAttributeKeyTranslation: Scalars['Void']['output'];
   removeProductVariantAttributeTranslation: Scalars['Void']['output'];
   removeProductVariantImage: Scalars['Int']['output'];
-  removeUser: User;
   retryPendingPayment: Scalars['String']['output'];
   setProductThumbnailImage: ProductImage;
   setProductVariantThumbnailImage: ProductVariantImage;
@@ -447,11 +446,6 @@ export type MutationRemoveProductVariantAttributeTranslationArgs = {
 
 export type MutationRemoveProductVariantImageArgs = {
   id: Scalars['Int']['input'];
-};
-
-
-export type MutationRemoveUserArgs = {
-  id: Scalars['ID']['input'];
 };
 
 
@@ -797,6 +791,7 @@ export type ProductVariantImage = {
 
 export type Query = {
   __typename?: 'Query';
+  allProducts: Array<Product>;
   bestSellingCategoriesStatistic?: Maybe<Array<BestSellingCategory>>;
   bestSellingProductVariantsStatistic?: Maybe<Array<BestSellingProductVariant>>;
   cart: Cart;
@@ -830,6 +825,14 @@ export type Query = {
   revenuePerDayStatistic?: Maybe<OverallTrendStatistic>;
   searchProductVariants: PaginatedProductVariant;
   user: User;
+};
+
+
+export type QueryAllProductsArgs = {
+  categoryId?: InputMaybe<Scalars['Int']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isSetup?: InputMaybe<Scalars['Boolean']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1220,12 +1223,10 @@ export type CategoriesTable_QueryDocumentQuery = { __typename?: 'Query', paginat
 
 export type EditCategory_QueryDocumentQueryVariables = Exact<{
   id: Scalars['Int']['input'];
-  productCursor?: InputMaybe<Scalars['Int']['input']>;
-  productPageSize?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type EditCategory_QueryDocumentQuery = { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: number | null, isSetup: boolean, isPublic: boolean, productsCount: number, translations: Array<{ __typename?: 'CategoryTranslation', id: number, locale: string, name: string, description?: string | null }>, subcategories: Array<{ __typename?: 'Category', slug: string, id: number }> }, products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, name?: string | null } }> | null }, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }>, allCategories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> };
+export type EditCategory_QueryDocumentQuery = { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: number | null, isSetup: boolean, isPublic: boolean, productsCount: number, translations: Array<{ __typename?: 'CategoryTranslation', id: number, locale: string, name: string, description?: string | null }>, subcategories: Array<{ __typename?: 'Category', slug: string, id: number }> }, allProducts: Array<{ __typename?: 'Product', id: number, slug: string, name?: string | null }>, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }>, allCategories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> };
 
 export type Locales_QueryFragmentFragment = { __typename?: 'Query', locales: Array<{ __typename?: 'Locale', code: string, name: string }> } & { ' $fragmentName'?: 'Locales_QueryFragmentFragment' };
 
@@ -1756,8 +1757,6 @@ export type UpdateUserPasswordMutationMutationVariables = Exact<{
 
 export type UpdateUserPasswordMutationMutation = { __typename?: 'Mutation', updatePassword: any };
 
-export type HeaderNav_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, name?: string | null, description: string, slug: string, subcategories: Array<{ __typename?: 'Category', id: number, slug: string, name?: string | null }> }> } & { ' $fragmentName'?: 'HeaderNav_QueryFragmentFragment' };
-
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -1847,21 +1846,6 @@ export const CartFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"CartFragment"}) as unknown as TypedDocumentString<CartFragmentFragment, unknown>;
-export const HeaderNav_QueryFragmentFragmentDoc = new TypedDocumentString(`
-    fragment HeaderNav_QueryFragment on Query {
-  categories(parentCategoryId: null) {
-    id
-    name
-    description
-    slug
-    subcategories {
-      id
-      slug
-      name
-    }
-  }
-}
-    `, {"fragmentName":"HeaderNav_QueryFragment"}) as unknown as TypedDocumentString<HeaderNav_QueryFragmentFragment, unknown>;
 export const DeleteCategoryTranslationMutationDocument = new TypedDocumentString(`
     mutation DeleteCategoryTranslationMutation($id: Int!) {
   deleteCategoryTranslation(categoryTranslationId: $id)
@@ -1946,7 +1930,7 @@ export const CategoriesTable_QueryDocumentDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<CategoriesTable_QueryDocumentQuery, CategoriesTable_QueryDocumentQueryVariables>;
 export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
-    query editCategory_QueryDocument($id: Int!, $productCursor: Int, $productPageSize: Int) {
+    query editCategory_QueryDocument($id: Int!) {
   category(id: $id, isPublic: null, isSetup: null) {
     slug
     name
@@ -1965,22 +1949,10 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
       id
     }
   }
-  products(
-    categoryId: $id
-    cursor: $productCursor
-    pageSize: $productPageSize
-    isPublic: null
-    isSetup: null
-  ) {
-    hasNextPage
-    edges {
-      cursor
-      node {
-        id
-        slug
-        name
-      }
-    }
+  allProducts(categoryId: $id, isPublic: null, isSetup: null) {
+    id
+    slug
+    name
   }
   locales {
     code

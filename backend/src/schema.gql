@@ -506,6 +506,15 @@ type ProductVariantImage {
 }
 
 type Query {
+  allProducts(
+    """
+    null - only products with no category will be returned, 0 - all products will be returned, int >= 1 - only the children of category with given id will be returned
+    """
+    categoryId: Int
+    isPublic: Boolean
+    isSetup: Boolean
+    slug: String
+  ): [Product!]!
   bestSellingCategoriesStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingCategory!]
   bestSellingProductVariantsStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingProductVariant!]
   cart: Cart!

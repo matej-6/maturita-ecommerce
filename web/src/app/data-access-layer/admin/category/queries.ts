@@ -61,11 +61,7 @@ const categoriesTableQueryDocument = graphql(`
 `);
 
 const editCategoryQueryDocument = graphql(`
-  query editCategory_QueryDocument(
-    $id: Int!
-    $productCursor: Int
-    $productPageSize: Int
-  ) {
+  query editCategory_QueryDocument($id: Int!) {
     category(id: $id, isPublic: null, isSetup: null) {
       slug
       name
@@ -84,22 +80,10 @@ const editCategoryQueryDocument = graphql(`
         id
       }
     }
-    products(
-      categoryId: $id
-      cursor: $productCursor
-      pageSize: $productPageSize
-      isPublic: null
-      isSetup: null
-    ) {
-      hasNextPage
-      edges {
-        cursor
-        node {
-          id
-          slug
-          name
-        }
-      }
+    allProducts(categoryId: $id, isPublic: null, isSetup: null) {
+      id
+      slug
+      name
     }
     locales {
       code
@@ -119,16 +103,12 @@ const editCategoryQueryDocument = graphql(`
 `);
 
 export async function getEditCategoryQueryDocumentData(
-  id: number,
-  productCursor: number | null,
-  productPageSize: number | null
+  id: number
 ): Promise<
   ActionResponse<ExecutionResult<EditCategory_QueryDocumentQuery>["data"]>
 > {
   const res = await execute(editCategoryQueryDocument, {
     id: id,
-    productCursor: productCursor,
-    productPageSize: productPageSize,
   });
 
   if (res.errors) {

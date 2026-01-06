@@ -179,6 +179,11 @@
       "pendingCancelOrder": "Cancelling Order..."
     }
   },
+  "searchPage": {
+    "title": "Showing search results for:",
+    "noResults": "No results found for your search.",
+    "errorFetchingResults": "Failed to fetch search results. Please try again later."
+  },
   "admin": {
     "sidebar": {
       "dashboard": {

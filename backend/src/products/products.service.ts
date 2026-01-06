@@ -313,6 +313,63 @@ export class ProductsService {
     return hasEnglishTranslation && variantsCounts > 0;
   }
 
+  async findAllWithoutPagination(
+    queryArgs: ProductFindAllQueryArgs,
+    userRole?: AuthenticatedUserDto['role'],
+  ) {
+    this.validateFindAllQueryArgs(queryArgs, userRole);
+
+    const allProducts = await this.prisma.product.findMany({
+      select: {
+        id: true,
+        isPublic: true,
+        slug: true,
+        categoryId: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            ProductTranslations: {
+              where: {
+                locale: {
+                  equals: this.localesService.getDefaultLocale().code,
+                },
+              },
+            },
+            ProductVariants: true,
+          },
+        },
+      },
+    });
+
+    return allProducts
+      .map((p) => ({
+        ...p,
+        isSetup: this.getIsSetup(
+          p._count.ProductTranslations > 0,
+          p._count.ProductVariants,
+        ),
+      }))
+      .filter((p) => {
+        if (queryArgs.isPublic != null && p.isPublic !== queryArgs.isPublic) {
+          return false;
+        }
+        if (
+          queryArgs.categoryId != null &&
+          p.categoryId !== queryArgs.categoryId
+        ) {
+          return false;
+        }
+        if (queryArgs.slug != null && !p.slug.includes(queryArgs.slug)) {
+          return false;
+        }
+        if (queryArgs.isSetup != null && p.isSetup !== queryArgs.isSetup) {
+          return false;
+        }
+        return true;
+      });
+  }
+
   async findAll(
     paginationArgs: PaginationArgs,
     queryArgs: ProductFindAllQueryArgs,
