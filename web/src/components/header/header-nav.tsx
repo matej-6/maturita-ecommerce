@@ -60,10 +60,10 @@ export function HeaderNav({ categories }: HeaderNavProps) {
                   {t("browse-categories")}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-2 w-[800px] grid-cols-3 z-50">
+                  <ul className="grid grid-cols-2 min-w-[600px] z-50">
                     {categories.map((category) => (
                       <NavigationMenuLink key={category.id} asChild>
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2 w-[300px]">
                           <Link
                             className="flex flex-col gap-2 group"
                             href={getCategoryLink(category.slug)}

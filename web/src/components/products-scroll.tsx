@@ -13,8 +13,8 @@ type Props = {
 export function ProductsScroll({ variants, header }: Props) {
   const t = useTranslations("productPage");
 
+  const scrollElementRef = useRef<HTMLDivElement | null>(null);
   const lastVariantRef = useRef<HTMLDivElement | null>(null);
-  const firstVariantRef = useRef<HTMLDivElement | null>(null);
   const [backDisabled, setBackDisabled] = useState(true);
   const [forwardDisabled, setForwardDisabled] = useState(false);
 
@@ -25,17 +25,16 @@ export function ProductsScroll({ variants, header }: Props) {
       return;
     }
     const handleScroll = () => {
-      if (firstVariantRef.current && lastVariantRef.current) {
-        const firstOffset = firstVariantRef.current.offsetLeft;
-        const lastRightOffset =
+      if (scrollElementRef.current && lastVariantRef.current) {
+        const lastElementRight =
           lastVariantRef.current.getBoundingClientRect().right;
-        const scrollLeft =
-          firstVariantRef.current.parentElement?.scrollLeft || 0;
-        const parentWidth =
-          firstVariantRef.current.parentElement?.offsetWidth || 0;
+        const scrollLeft = scrollElementRef.current.scrollLeft || 0;
+        const scrollElementRight =
+          scrollElementRef.current.parentElement?.getBoundingClientRect()
+            .right || 0;
 
-        setBackDisabled(scrollLeft <= firstOffset);
-        setForwardDisabled(parentWidth >= lastRightOffset - 20);
+        setBackDisabled(scrollLeft < 1);
+        setForwardDisabled(scrollElementRight >= lastElementRight - 1);
       }
     };
 
@@ -43,37 +42,18 @@ export function ProductsScroll({ variants, header }: Props) {
 
     window.addEventListener("resize", handleScroll);
 
-    if (firstVariantRef.current) {
-      firstVariantRef.current.parentElement?.addEventListener(
-        "scroll",
-        handleScroll
-      );
-    }
-
-    if (lastVariantRef.current) {
-      lastVariantRef.current.parentElement?.addEventListener(
-        "scroll",
-        handleScroll
-      );
+    if (scrollElementRef.current) {
+      scrollElementRef.current.addEventListener("scroll", handleScroll);
     }
 
     return () => {
       window.removeEventListener("resize", handleScroll);
 
-      if (firstVariantRef.current) {
-        firstVariantRef.current.parentElement?.removeEventListener(
-          "scroll",
-          handleScroll
-        );
-      }
-      if (lastVariantRef.current) {
-        lastVariantRef.current.parentElement?.removeEventListener(
-          "scroll",
-          handleScroll
-        );
+      if (scrollElementRef.current) {
+        scrollElementRef.current.removeEventListener("scroll", handleScroll);
       }
     };
-  }, [variants.length, firstVariantRef, lastVariantRef]);
+  }, [variants.length, scrollElementRef]);
 
   return (
     <div className="flex flex-col gap-y-3 sm:gap-y-6">
@@ -83,8 +63,8 @@ export function ProductsScroll({ variants, header }: Props) {
           <button
             disabled={backDisabled}
             onClick={() => {
-              firstVariantRef.current?.parentElement?.scrollBy({
-                left: -100,
+              scrollElementRef.current?.scrollBy({
+                left: -200,
                 behavior: "smooth",
               });
             }}
@@ -95,8 +75,8 @@ export function ProductsScroll({ variants, header }: Props) {
           <button
             disabled={forwardDisabled}
             onClick={() => {
-              lastVariantRef.current?.parentElement?.scrollBy({
-                left: 100,
+              scrollElementRef.current?.scrollBy({
+                left: 200,
                 behavior: "smooth",
               });
             }}
@@ -106,17 +86,14 @@ export function ProductsScroll({ variants, header }: Props) {
           </button>
         </div>
       </div>
-      <div className="flex gap-x-2 sm:gap-x-4 overflow-x-auto max-w-full">
+      <div
+        className="flex gap-x-2 sm:gap-x-4 overflow-x-auto max-w-full"
+        ref={scrollElementRef}
+      >
         {variants.map((v, i) => {
           return (
             <ProductVariantCard
-              ref={
-                i === variants.length - 1
-                  ? lastVariantRef
-                  : i === 0
-                  ? firstVariantRef
-                  : null
-              }
+              ref={i === variants.length - 1 ? lastVariantRef : null}
               variant={v}
               key={v.id}
             />
