@@ -249,7 +249,7 @@ export class LLMTaskConsumer extends WorkerHost {
     const system = `You are an AI assistant that categorizes user prompts into one of 4 categories: 'similiarProducts', 'productSearch', 'productInformation', or 'none'.
         Here's a brief description of each category:
         1. similiarProducts: The user is looking for products similar to a given product
-        2. productSearch: The user is searching for products based on certain criteria or keywords
+        2. productSearch: The user is searching for products based on certain criteria or keywords, for example "What are the best products for building muscle?"
         3. productInformation: The user is seeking specific information about a particular product
         4. none: The prompt does not fit into any of the above categories.
         Analyze the following prompt and determine the most appropriate category.`;
@@ -517,14 +517,22 @@ export class LLMTaskConsumer extends WorkerHost {
     const category = await this.categorizePrompt(userPrompt);
 
     if (category === 'none') {
-      throw new Error(this.i18nService.t('llm.consumer.unknownPromptCategory'));
+      throw new Error(
+        this.i18nService.t('llm.consumer.unknownPromptCategory', {
+          lang: lang,
+        }),
+      );
     }
 
     if (
       (category === 'productInformation' || category === 'similiarProducts') &&
       !job.productId
     ) {
-      throw new Error(this.i18nService.t('llm.consumer.missingProductId'));
+      throw new Error(
+        this.i18nService.t('llm.consumer.missingProductId', {
+          lang: lang,
+        }),
+      );
     }
 
     if (category === 'similiarProducts') {
@@ -720,7 +728,9 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     if (!productContent) {
-      throw new Error(this.i18nService.t('llm.consumer.productNotFound'));
+      throw new Error(
+        this.i18nService.t('llm.consumer.productNotFound', { lang }),
+      );
     }
 
     const similarChunks = await this.qdrantService.qdrantClient.search(
@@ -771,6 +781,6 @@ export class LLMTaskConsumer extends WorkerHost {
     });
 
     const response = await this.fetchLLM(system, prompt, schema);
-    return { text: response.text, productIds: [productId] };
+    return { text: response.text, productIds: [] };
   }
 }
