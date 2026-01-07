@@ -551,7 +551,52 @@ export class LLMTaskConsumer extends WorkerHost {
     productId: number,
     lang: string,
   ): Promise<UserPromptResponse> {
-    const embedding = (await this.fetchEmbedding(prompt))[0];
+    const productInfo = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        slug: true,
+        Category: {
+          select: {
+            slug: true,
+            CategoryTranslation: {
+              where: {
+                locale: lang,
+              },
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        ProductTranslations: {
+          where: {
+            locale: lang,
+          },
+          select: {
+            name: true,
+            description: true,
+          },
+        },
+      },
+    });
+
+    if (!productInfo) {
+      throw new Error(this.i18nService.t('llm.consumer.productNotFound'));
+    }
+
+    const productSummary = {
+      slug: productInfo.slug,
+      name: productInfo.ProductTranslations[0]?.name || '',
+      description: productInfo.ProductTranslations[0]?.description || '',
+      category: {
+        slug: productInfo.Category?.slug || '',
+        name: productInfo.Category?.CategoryTranslation[0]?.name || '',
+      },
+    };
+
+    const embedding = (
+      await this.fetchEmbedding(JSON.stringify(productSummary))
+    )[0];
 
     const similarProducts = await this.qdrantService.qdrantClient.search(
       QdrantCollections.PRODUCTS,
@@ -559,11 +604,13 @@ export class LLMTaskConsumer extends WorkerHost {
         vector: embedding,
         limit: 2,
         filter: {
-          must: [
+          must_not: [
             {
               key: 'productId',
               match: { value: productId },
             },
+          ],
+          must: [
             {
               key: 'lang',
               match: { value: lang },
