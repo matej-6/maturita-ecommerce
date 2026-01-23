@@ -75,16 +75,16 @@ export default async function AdminPage() {
       </div>
       <TotalRevenueChartBar
         data7Days={{
-          points: RevenuePerDayLastSevenDaysFragment!.points,
-          trend: RevenuePerDayLastSevenDaysFragment!.percentChange,
+          points: RevenuePerDayLastSevenDaysFragment?.points || [],
+          trend: RevenuePerDayLastSevenDaysFragment?.percentChange || 0,
         }}
         data90Days={{
-          points: RevenuePerDayLastNinetyDaysFragment!.points,
-          trend: RevenuePerDayLastNinetyDaysFragment!.percentChange,
+          points: RevenuePerDayLastNinetyDaysFragment?.points || [],
+          trend: RevenuePerDayLastNinetyDaysFragment?.percentChange || 0,
         }}
         data30Days={{
-          points: RevenuePerDayLastThirtyDaysFragment!.points,
-          trend: RevenuePerDayLastThirtyDaysFragment!.percentChange,
+          points: RevenuePerDayLastThirtyDaysFragment?.points || [],
+          trend: RevenuePerDayLastThirtyDaysFragment?.percentChange || 0,
         }}
       />
     </div>
