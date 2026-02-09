@@ -46,8 +46,8 @@ export function NextButton({
     >
       {children ?? (
         <>
-          <ArrowRightIcon className="size-3.5" />
           <span>{pt("next")}</span>
+          <ArrowRightIcon className="size-3.5" />
         </>
       )}
     </Button>

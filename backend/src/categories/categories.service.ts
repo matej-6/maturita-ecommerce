@@ -319,11 +319,9 @@ export class CategoriesService {
       });
 
       const hasNextPage = categories.length > paginationArgs.pageSize;
-      if (hasNextPage) {
-        categories.pop();
-      }
+      const nextCursor = hasNextPage ? categories.pop()!.id : null;
       return {
-        hasNextPage: hasNextPage,
+        nextCursor,
         totalCount: categories.length,
         edges: categories.map((c) => ({
           cursor: c.id,
@@ -439,12 +437,9 @@ export class CategoriesService {
           });
 
       const hasNextPage = categories.length > paginationArgs.pageSize;
-      if (hasNextPage) {
-        categories.pop();
-      }
-
+      const nextCursor = hasNextPage ? categories.pop()!.id : null;
       return {
-        hasNextPage: hasNextPage,
+        nextCursor,
         totalCount: categories.length,
         edges: categories.map((c) => ({
           cursor: c.id,

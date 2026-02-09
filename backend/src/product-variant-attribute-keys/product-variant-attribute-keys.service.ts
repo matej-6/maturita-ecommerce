@@ -319,12 +319,10 @@ export class ProductVariantAttributeKeysService {
     });
 
     const hasNextPage = keys.length > paginationArgs.pageSize;
-    if (hasNextPage) {
-      keys.pop();
-    }
+    const nextCursor = hasNextPage ? keys.pop()!.id : null;
 
     return {
-      hasNextPage: hasNextPage,
+      nextCursor,
       totalCount: keys.length,
       edges: keys.map((k) => ({
         cursor: k.id,

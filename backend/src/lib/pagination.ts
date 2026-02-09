@@ -2,7 +2,6 @@ import { Type } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 // docs/source: https://docs.nestjs.com/graphql/resolvers#generics
-
 interface IEdgeType<T> {
   cursor: number;
   node: T;
@@ -11,7 +10,7 @@ interface IEdgeType<T> {
 export interface IPaginatedType<T> {
   edges: IEdgeType<T>[];
   totalCount: number;
-  hasNextPage: boolean;
+  nextCursor: number | null;
 }
 
 export function Paginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
@@ -31,8 +30,8 @@ export function Paginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
     @Field(() => Int)
     totalCount: number;
 
-    @Field()
-    hasNextPage: boolean;
+    @Field(() => Int, { nullable: true })
+    nextCursor: number | null;
   }
 
   return PaginatedType as Type<IPaginatedType<T>>;

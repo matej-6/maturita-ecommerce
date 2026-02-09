@@ -324,37 +324,37 @@ type OverallTrendStatistic {
 
 type PaginatedCategory {
   edges: [CategoryEdge!]
-  hasNextPage: Boolean!
+  nextCursor: Int
   totalCount: Int!
 }
 
 type PaginatedOrder {
   edges: [OrderEdge!]
-  hasNextPage: Boolean!
+  nextCursor: Int
   totalCount: Int!
 }
 
 type PaginatedProduct {
   edges: [ProductEdge!]
-  hasNextPage: Boolean!
+  nextCursor: Int
   totalCount: Int!
 }
 
 type PaginatedProductVariant {
   edges: [ProductVariantEdge!]
-  hasNextPage: Boolean!
+  nextCursor: Int
   totalCount: Int!
 }
 
 type PaginatedProductVariantAttributeKey {
   edges: [ProductVariantAttributeKeyEdge!]
-  hasNextPage: Boolean!
+  nextCursor: Int
   totalCount: Int!
 }
 
 type PaginatedUser {
   edges: [UserEdge!]
-  hasNextPage: Boolean!
+  nextCursor: Int
   totalCount: Int!
 }
 

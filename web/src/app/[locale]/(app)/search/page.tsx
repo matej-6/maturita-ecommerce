@@ -2,15 +2,10 @@
 
 import { getSearchProductsQueryData } from "@/app/data-access-layer/search.queries";
 import { getImageSrc } from "@/app/lib/utils";
-import { AddToCartButton } from "@/components/add-to-cart-button";
 import { NextButton } from "@/components/next-button";
 import { PrevButton } from "@/components/prev-button";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
 import { ProductVariantCard } from "@/components/product-variant-card";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "@/i18n/navigation";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 type Props = {
@@ -27,7 +22,7 @@ export default async function SearchPage({ searchParams }: Props) {
     }
   }
 
-  let pageSize = 25;
+  let pageSize = 3;
   if (typeof sp.pageSize === "string") {
     const parsedPageSize = parseInt(sp.pageSize, 10);
     if (!isNaN(parsedPageSize)) {
@@ -65,7 +60,7 @@ export default async function SearchPage({ searchParams }: Props) {
     query,
     cursor,
     pageSize,
-    attributes
+    attributes,
   );
 
   const t = await getTranslations("searchPage");
@@ -104,21 +99,10 @@ export default async function SearchPage({ searchParams }: Props) {
       value: pva.value,
       translatedValue: pva.translatedValue || undefined,
       isSet: attributes.some(
-        (a) => a[0] === pva.key!.key && a[1] === pva.value
+        (a) => a[0] === pva.key!.key && a[1] === pva.value,
       ),
     });
   });
-
-  let nextPageLink = null;
-  if (productVariants?.hasNextPage) {
-    const nextCursor =
-      productVariants.edges![productVariants.edges!.length - 1].cursor;
-    const params = new URLSearchParams();
-    params.append("q", query);
-    params.append("cursor", nextCursor.toString());
-    params.append("pageSize", pageSize.toString());
-    nextPageLink = `/search?${params.toString()}`;
-  }
 
   return (
     <div className="max-width-container w-full my-8 gap-y-8 flex flex-col">
@@ -164,14 +148,14 @@ export default async function SearchPage({ searchParams }: Props) {
                       imageUrl: productVariant.thumbnailImage
                         ? getImageSrc(
                             productVariant.thumbnailImage.mimeType,
-                            productVariant.thumbnailImage.base64
+                            productVariant.thumbnailImage.base64,
                           )
                         : productVariant.product.thumbnailImage
-                        ? getImageSrc(
-                            productVariant.product.thumbnailImage.mimeType,
-                            productVariant.product.thumbnailImage.base64
-                          )
-                        : undefined,
+                          ? getImageSrc(
+                              productVariant.product.thumbnailImage.mimeType,
+                              productVariant.product.thumbnailImage.base64,
+                            )
+                          : undefined,
                       description:
                         productVariant.product.description || undefined,
                     }}
@@ -181,14 +165,7 @@ export default async function SearchPage({ searchParams }: Props) {
             </div>
             <div className="flex items-center justify-start gap-x-2">
               <PrevButton cursor={cursor} className="items-center" />
-              <NextButton
-                nextCursor={
-                  productVariants.hasNextPage
-                    ? productVariants.edges![productVariants.edges!.length - 1]
-                        .cursor
-                    : undefined
-                }
-              />
+              <NextButton nextCursor={productVariants.nextCursor ?? null} />
             </div>
           </div>
         ) : (

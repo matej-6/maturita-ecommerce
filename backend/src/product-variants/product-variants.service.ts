@@ -444,12 +444,10 @@ export class ProductVariantsService {
     });
 
     const hasNextPage = productVariants.length === paginationArgs.pageSize + 1;
-    if (hasNextPage) {
-      productVariants.pop();
-    }
+    const nextCursor = hasNextPage ? productVariants.pop()!.id : null;
 
     return {
-      hasNextPage: hasNextPage,
+      nextCursor,
       totalCount: productVariants.length,
       edges: productVariants.map((pv) => ({
         cursor: pv.id,
@@ -529,12 +527,10 @@ export class ProductVariantsService {
       });
       const hasNextPage =
         productVariants.length === paginationArgs.pageSize + 1;
-      if (hasNextPage) {
-        productVariants.pop();
-      }
+      const nextCursor = hasNextPage ? productVariants.pop()!.id : null;
 
       return {
-        hasNextPage: hasNextPage,
+        nextCursor,
         totalCount: productVariants.length,
         edges: productVariants.map((pv) => ({
           cursor: pv.id,
@@ -614,12 +610,10 @@ export class ProductVariantsService {
 
       const hasNextPage =
         productVariants.length === paginationArgs.pageSize + 1;
-      if (hasNextPage) {
-        productVariants.pop();
-      }
+      const nextCursor = hasNextPage ? productVariants.pop()!.id : null;
 
       return {
-        hasNextPage: hasNextPage,
+        nextCursor,
         totalCount: productVariants.length,
         edges: productVariants.map((pv) => ({
           cursor: pv.id,
@@ -668,7 +662,7 @@ export class ProductVariantsService {
 
     if (allCategories.length === 0) {
       return {
-        hasNextPage: false,
+        nextCursor: null,
         totalCount: 0,
         edges: [],
       };
@@ -750,12 +744,10 @@ export class ProductVariantsService {
     });
 
     const hasNextPage = productVariants.length === paginationArgs.pageSize + 1;
-    if (hasNextPage) {
-      productVariants.pop();
-    }
+    const nextCursor = hasNextPage ? productVariants.pop()!.id : null;
 
     return {
-      hasNextPage: hasNextPage,
+      nextCursor,
       totalCount: productVariants.length,
       edges: productVariants.map((pv) => ({
         cursor: pv.id,

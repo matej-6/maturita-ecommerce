@@ -81,13 +81,10 @@ export default async function AttributeKeysPage({ searchParams }: Props) {
     ...tableArgs,
   });
 
-  pagingArgs.nextCursor =
-    data.success &&
-    data.data?.findAllPaginatedProductVariantAttributeKeys.hasNextPage
-      ? data.data.findAllPaginatedProductVariantAttributeKeys.edges?.slice(
-          -1
-        )[0].cursor ?? null
-      : null;
+  pagingArgs.nextCursor = data.success
+    ? (data.data?.findAllPaginatedProductVariantAttributeKeys.nextCursor ??
+      null)
+    : null;
 
   const urlSearchParams = new URLSearchParams({
     ...(pagingArgs.cursor ? { cursor: pagingArgs.cursor.toString() } : {}),
@@ -122,7 +119,7 @@ export default async function AttributeKeysPage({ searchParams }: Props) {
                     key: k.node.key,
                     createdAt: new Date(k.node.createdAt),
                     updatedAt: new Date(k.node.updatedAt),
-                  })
+                  }),
                 ) || null
               : null
           }

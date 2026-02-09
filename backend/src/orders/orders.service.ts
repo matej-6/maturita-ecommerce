@@ -593,12 +593,10 @@ export class OrdersService {
     });
 
     const hasNextPage = res.length > paginationArgs.pageSize;
-    if (hasNextPage) {
-      res.pop();
-    }
+    const nextCursor = hasNextPage ? res.pop()!.id : null;
 
     return {
-      hasNextPage,
+      nextCursor,
       totalCount: res.length,
       edges: res.map((order) => ({
         cursor: order.id,

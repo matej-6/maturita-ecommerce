@@ -1,9 +1,5 @@
 "use server";
 
-import { getProductsPageData } from "@/app/data-access-layer/admin/product/queries";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
-import { ProductsTableWithFilters } from "../components/products/product-table-with-filters";
 import { OrderStatus } from "@/graphql/graphql";
 import z from "zod";
 import {
@@ -119,14 +115,12 @@ export default async function OrdersPage({ searchParams }: Props) {
   const ordersData = await getAdminOrdersPageDataAction(
     pagingArgs,
     sortingArgs,
-    tableArgs
+    tableArgs,
   );
 
-  pagingArgs.nextCursor =
-    ordersData.success && ordersData.data?.findAllPaginatedOrders.hasNextPage
-      ? ordersData.data.findAllPaginatedOrders.edges?.slice(-1)[0].cursor ??
-        null
-      : null;
+  pagingArgs.nextCursor = ordersData.success
+    ? (ordersData.data?.findAllPaginatedOrders.nextCursor ?? null)
+    : null;
 
   const urlSearchParams = new URLSearchParams({
     ...(pagingArgs.cursor ? { cursor: pagingArgs.cursor.toString() } : {}),

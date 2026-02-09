@@ -79,13 +79,12 @@ export default async function ProductsPage({ searchParams }: Props) {
   const productsPageData = await getProductsPageData(
     pagingArgs,
     sortingArgs,
-    tableArgs
+    tableArgs,
   );
 
-  pagingArgs.nextCursor =
-    productsPageData.success && productsPageData.data?.products.hasNextPage
-      ? productsPageData.data.products.edges?.slice(-1)[0].cursor ?? null
-      : null;
+  pagingArgs.nextCursor = productsPageData.success
+    ? (productsPageData.data?.products.nextCursor ?? null)
+    : null;
 
   const urlSearchParams = new URLSearchParams({
     ...(pagingArgs.cursor ? { cursor: pagingArgs.cursor.toString() } : {}),

@@ -39,7 +39,7 @@ const AdminOrdersPageQueryDocument = graphql(`
       dateFrom: $dateFrom
       dateTo: $dateTo
     ) {
-      hasNextPage
+      nextCursor
       edges {
         node {
           id
@@ -79,7 +79,7 @@ export type TableArgs = {
 export async function getAdminOrdersPageDataAction(
   pagingArgs: PagingArgs,
   sortingArgs: SortingArgs,
-  tableArgs: TableArgs
+  tableArgs: TableArgs,
 ): Promise<
   ActionResponse<ExecutionResult<AdminOrdersPage_QueryDocumentQuery>["data"]>
 > {
@@ -151,7 +151,7 @@ const AdminOrderDetailPageQueryDocument = graphql(`
 `);
 
 export async function getAdminOrderDetailPageDataAction(
-  id: number
+  id: number,
 ): Promise<ActionResponse<ExecutionResult<AdminOrderDetailPageQuery>["data"]>> {
   const res = await execute(AdminOrderDetailPageQueryDocument, {
     id,

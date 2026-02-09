@@ -130,7 +130,7 @@ export const ProductsPageQueryDocument = graphql(`
       isPublic: $isPublic
       categoryId: $categoryId
     ) {
-      hasNextPage
+      nextCursor
       edges {
         node {
           id
@@ -152,7 +152,7 @@ export const ProductsPageQueryDocument = graphql(`
 `);
 
 export async function getProductDetailPageData(
-  id: number
+  id: number,
 ): Promise<
   ActionResponse<ExecutionResult<ProductDetailPage_QueryDocumentQuery>["data"]>
 > {
@@ -186,7 +186,7 @@ export async function getProductsPageData(
     slug: string | null;
     isSetup: true | false | null;
     isPublic: true | false | null;
-  }
+  },
 ): Promise<
   ActionResponse<ExecutionResult<ProductsPage_QueryDocumentQuery>["data"]>
 > {

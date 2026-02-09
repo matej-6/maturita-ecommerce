@@ -47,6 +47,13 @@
       "system": "Systémový"
     }
   },
+  "chatbot": {
+    "notLoggedIn": "Musíte sa prihlásiť, aby ste mohli používať chatbota.",
+    "firstMessage": "Ahoj!. Som tvoj AI nákupný asistent. Môžem ti pomôcť nájsť produtky alebo ti poradiť ohľadom produktu, ktorý práve pozeráš. Ako ti dnes pomôžem?",
+    "inputPlaceholder": "Zadaj svoju správu sem...",
+    "noPastChatsAvailable": "Žiadne predchádzajúce správy nie sú k dispozícii.",
+    "generatingResponse": "Generujem odpoveď..."
+  },
   "auth": {
     "sign-in": {
       "title": "Prihlásiť sa",

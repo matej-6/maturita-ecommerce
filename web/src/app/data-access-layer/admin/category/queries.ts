@@ -45,8 +45,8 @@ const categoriesTableQueryDocument = graphql(`
           parentCategoryId
         }
       }
-      hasNextPage
       totalCount
+      nextCursor
     }
     allCategories: categories(
       parentCategoryId: 0
@@ -103,7 +103,7 @@ const editCategoryQueryDocument = graphql(`
 `);
 
 export async function getEditCategoryQueryDocumentData(
-  id: number
+  id: number,
 ): Promise<
   ActionResponse<ExecutionResult<EditCategory_QueryDocumentQuery>["data"]>
 > {

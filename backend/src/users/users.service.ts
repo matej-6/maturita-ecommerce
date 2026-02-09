@@ -219,12 +219,14 @@ export class UsersService {
     });
 
     const hasNextPage = users.length > paginationArgs.pageSize;
+    let nextCursor: number | null = null;
     if (hasNextPage) {
-      users.pop();
+      const lastUser = users.pop();
+      nextCursor = lastUser ? lastUser.id : null;
     }
 
     return {
-      hasNextPage,
+      nextCursor,
       totalCount: users.length,
       edges: users.map((user) => ({
         cursor: user.id,

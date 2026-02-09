@@ -635,10 +635,8 @@ export class LLMTaskConsumer extends WorkerHost {
     }
 
     const system = `You are an AI assistant that provides a list of products similar to a given product based on its attributes and description.
-    Use the following similar products to answer the user's prompt:
+    Use the information from the following similar products to answer the user's prompt. Please formulate it to answer the user's questions. If the information is insufficient, respond accordingly:
     ${JSON.stringify(similarProducts)}
-
-    Answer the user's prompt using the provided similar products. If the information is insufficient, respond accordingly.
     Answer in the following JSON FORMAT, NOTHING ELSE: { "text": "your_answer_here" }
     `;
 
@@ -680,10 +678,8 @@ export class LLMTaskConsumer extends WorkerHost {
     }
 
     const system = `You are an AI assistant that provides a list of products based on a user's search criteria.
-    Use the following products to answer the user's prompt:
+    Use the information from the following products to answer the user's prompt. Please formulate it to answer the user's questions. If the information is insufficient, respond accordingly:
     ${JSON.stringify(similarProducts)}
-
-    Answer the user's prompt using the provided products. If the information is insufficient, respond accordingly.
     Answer in the following JSON FORMAT, NOTHING ELSE: { "text": "your_answer_here" }
     `;
 

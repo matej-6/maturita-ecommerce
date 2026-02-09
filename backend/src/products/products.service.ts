@@ -435,12 +435,14 @@ export class ProductsService {
               },
       });
       const hasNextPage = products.length === paginationArgs.pageSize + 1;
+      let nextCursor: number | null = null;
       if (hasNextPage) {
-        products.pop();
+        const lastProduct = products.pop();
+        nextCursor = lastProduct ? lastProduct.id : null;
       }
 
       return {
-        hasNextPage: hasNextPage,
+        nextCursor,
         totalCount: products.length,
         edges: products.map((p) => ({
           cursor: p.id,
@@ -527,12 +529,14 @@ export class ProductsService {
             });
 
       const hasNextPage = products.length === paginationArgs.pageSize + 1;
+      let nextCursor: number | null = null;
       if (hasNextPage) {
-        products.pop();
+        const lastProduct = products.pop();
+        nextCursor = lastProduct ? lastProduct.id : null;
       }
 
       return {
-        hasNextPage: hasNextPage,
+        nextCursor,
         totalCount: products.length,
         edges: products.map((p) => ({
           cursor: p.id,

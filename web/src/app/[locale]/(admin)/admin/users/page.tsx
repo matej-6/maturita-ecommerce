@@ -70,9 +70,9 @@ export default async function UsersPage({ searchParams }: Props) {
     typeof sp.sortBy === "string" ? parseSortBy(sp.sortBy) : null;
 
   pagingArgs.cursor =
-    typeof sp.cursor === "string" ? parseInt(sp.cursor, 10) || null : null;
+    typeof sp.cursor === "string" ? (parseInt(sp.cursor, 10) ?? null) : null;
   pagingArgs.pageSize =
-    typeof sp.pageSize === "string" ? parseInt(sp.pageSize, 10) || 25 : 25;
+    typeof sp.pageSize === "string" ? (parseInt(sp.pageSize, 10) ?? 25) : 25;
 
   if (typeof sp.id === "string") {
     const parsedId = parseInt(sp.id, 10);
@@ -93,10 +93,9 @@ export default async function UsersPage({ searchParams }: Props) {
     ...tableArgs,
   });
 
-  pagingArgs.nextCursor =
-    usersData.success && usersData.data?.findAllPaginatedUsers.hasNextPage
-      ? usersData.data.findAllPaginatedUsers.edges?.slice(-1)[0].cursor ?? null
-      : null;
+  pagingArgs.nextCursor = usersData.success
+    ? (usersData.data?.findAllPaginatedUsers.nextCursor ?? null)
+    : null;
 
   const urlSearchParams = new URLSearchParams({
     ...(pagingArgs.cursor ? { cursor: pagingArgs.cursor.toString() } : {}),

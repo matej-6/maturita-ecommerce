@@ -48,7 +48,7 @@ const CategoryQueryDocument = graphql(`
         includeSubcategories: true
         attributeFilters: $attributeFilters
       ) {
-        hasNextPage
+        nextCursor
         edges {
           cursor
           node {
@@ -97,7 +97,7 @@ export async function getCategoryQueryData(
   slug: string,
   productsCursor: number | null,
   productsPageSize: number | null,
-  attributes?: string[][]
+  attributes?: string[][],
 ): Promise<ActionResponse<ExecutionResult<CategoryQueryQuery>["data"]>> {
   const res = await execute(CategoryQueryDocument, {
     slug,

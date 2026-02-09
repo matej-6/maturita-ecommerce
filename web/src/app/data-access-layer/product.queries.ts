@@ -37,6 +37,7 @@ const ProductPageDocument = graphql(`
           translatedValue
           key {
             key
+            translatedKey
           }
         }
       }
@@ -53,7 +54,7 @@ const ProductIdBySlugDocument = graphql(`
 `);
 
 export async function getProductPageData(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<ExecutionResult<ProductPageQueryQuery>["data"]>> {
   const res = await execute(ProductPageDocument, { slug: slug });
 
@@ -68,7 +69,7 @@ export async function getProductPageData(
 }
 
 export async function getProductIdBySlugAction(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<ExecutionResult<ProductIdBySlugQuery>["data"]>> {
   const res = await execute(ProductIdBySlugDocument, { slug: slug });
   if (res.errors) {

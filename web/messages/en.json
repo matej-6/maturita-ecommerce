@@ -47,6 +47,13 @@
       "system": "System"
     }
   },
+  "chatbot": {
+    "notLoggedIn": "You must be logged in to use the chatbot.",
+    "firstMessage": "Hello! I'm your AI shopping assistant. I can help you find products or answer questions about the product you're currently viewing. How can I assist you today?",
+    "inputPlaceholder": "Type your message here...",
+    "noPastChatsAvailable": "No past chats available.",
+    "generatingResponse": "Generating response..."
+  },
   "auth": {
     "sign-in": {
       "title": "Sign In",

@@ -603,42 +603,42 @@ export type OverallTrendStatistic = {
 export type PaginatedCategory = {
   __typename?: 'PaginatedCategory';
   edges?: Maybe<Array<CategoryEdge>>;
-  hasNextPage: Scalars['Boolean']['output'];
+  nextCursor?: Maybe<Scalars['Int']['output']>;
   totalCount: Scalars['Int']['output'];
 };
 
 export type PaginatedOrder = {
   __typename?: 'PaginatedOrder';
   edges?: Maybe<Array<OrderEdge>>;
-  hasNextPage: Scalars['Boolean']['output'];
+  nextCursor?: Maybe<Scalars['Int']['output']>;
   totalCount: Scalars['Int']['output'];
 };
 
 export type PaginatedProduct = {
   __typename?: 'PaginatedProduct';
   edges?: Maybe<Array<ProductEdge>>;
-  hasNextPage: Scalars['Boolean']['output'];
+  nextCursor?: Maybe<Scalars['Int']['output']>;
   totalCount: Scalars['Int']['output'];
 };
 
 export type PaginatedProductVariant = {
   __typename?: 'PaginatedProductVariant';
   edges?: Maybe<Array<ProductVariantEdge>>;
-  hasNextPage: Scalars['Boolean']['output'];
+  nextCursor?: Maybe<Scalars['Int']['output']>;
   totalCount: Scalars['Int']['output'];
 };
 
 export type PaginatedProductVariantAttributeKey = {
   __typename?: 'PaginatedProductVariantAttributeKey';
   edges?: Maybe<Array<ProductVariantAttributeKeyEdge>>;
-  hasNextPage: Scalars['Boolean']['output'];
+  nextCursor?: Maybe<Scalars['Int']['output']>;
   totalCount: Scalars['Int']['output'];
 };
 
 export type PaginatedUser = {
   __typename?: 'PaginatedUser';
   edges?: Maybe<Array<UserEdge>>;
-  hasNextPage: Scalars['Boolean']['output'];
+  nextCursor?: Maybe<Scalars['Int']['output']>;
   totalCount: Scalars['Int']['output'];
 };
 
@@ -1219,7 +1219,7 @@ export type CategoriesTable_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type CategoriesTable_QueryDocumentQuery = { __typename?: 'Query', paginatedCategories: { __typename?: 'PaginatedCategory', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'CategoryEdge', cursor: number, node: { __typename?: 'Category', id: number, slug: string, createdAt: any, updatedAt: any, isSetup: boolean, isPublic: boolean, name?: string | null, productsCount: number, parentCategoryId?: number | null } }> | null }, allCategories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> };
+export type CategoriesTable_QueryDocumentQuery = { __typename?: 'Query', paginatedCategories: { __typename?: 'PaginatedCategory', totalCount: number, nextCursor?: number | null, edges?: Array<{ __typename?: 'CategoryEdge', cursor: number, node: { __typename?: 'Category', id: number, slug: string, createdAt: any, updatedAt: any, isSetup: boolean, isPublic: boolean, name?: string | null, productsCount: number, parentCategoryId?: number | null } }> | null }, allCategories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> };
 
 export type EditCategory_QueryDocumentQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1261,7 +1261,7 @@ export type AdminOrdersPage_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type AdminOrdersPage_QueryDocumentQuery = { __typename?: 'Query', findAllPaginatedOrders: { __typename?: 'PaginatedOrder', hasNextPage: boolean, edges?: Array<{ __typename?: 'OrderEdge', cursor: number, node: { __typename?: 'Order', id: number, totalInCents: number, status: OrderStatus, createdAt: any, updatedAt: any, userId?: number | null } }> | null } };
+export type AdminOrdersPage_QueryDocumentQuery = { __typename?: 'Query', findAllPaginatedOrders: { __typename?: 'PaginatedOrder', nextCursor?: number | null, edges?: Array<{ __typename?: 'OrderEdge', cursor: number, node: { __typename?: 'Order', id: number, totalInCents: number, status: OrderStatus, createdAt: any, updatedAt: any, userId?: number | null } }> | null } };
 
 export type AdminOrderDetailPageQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1411,7 +1411,7 @@ export type PagedAttributeKeysQueryQueryVariables = Exact<{
 }>;
 
 
-export type PagedAttributeKeysQueryQuery = { __typename?: 'Query', findAllPaginatedProductVariantAttributeKeys: { __typename?: 'PaginatedProductVariantAttributeKey', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'ProductVariantAttributeKeyEdge', cursor: number, node: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, createdAt: any, updatedAt: any, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number }> } }> | null } };
+export type PagedAttributeKeysQueryQuery = { __typename?: 'Query', findAllPaginatedProductVariantAttributeKeys: { __typename?: 'PaginatedProductVariantAttributeKey', nextCursor?: number | null, totalCount: number, edges?: Array<{ __typename?: 'ProductVariantAttributeKeyEdge', cursor: number, node: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, createdAt: any, updatedAt: any, attributes: Array<{ __typename?: 'ProductVariantAttribute', id: number }> } }> | null } };
 
 export type AdminAttributeKeyDetailsPageQueryQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1566,7 +1566,7 @@ export type ProductsPage_QueryDocumentQueryVariables = Exact<{
 }>;
 
 
-export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null }, productFormCategories: Array<{ __typename?: 'Category', id: number, slug: string }> };
+export type ProductsPage_QueryDocumentQuery = { __typename?: 'Query', products: { __typename?: 'PaginatedProduct', nextCursor?: number | null, edges?: Array<{ __typename?: 'ProductEdge', cursor: number, node: { __typename?: 'Product', id: number, slug: string, isPublic: boolean, isSetup: boolean, categoryId?: number | null, createdAt: any, updatedAt: any } }> | null }, productFormCategories: Array<{ __typename?: 'Category', id: number, slug: string }> };
 
 export type AdminPageStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1592,7 +1592,7 @@ export type AdminUsersPageQueryVariables = Exact<{
 }>;
 
 
-export type AdminUsersPageQuery = { __typename?: 'Query', findAllPaginatedUsers: { __typename?: 'PaginatedUser', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'UserEdge', cursor: number, node: { __typename?: 'User', id: number, email: string, role: Role, createdAt: any, updatedAt: any } }> | null } };
+export type AdminUsersPageQuery = { __typename?: 'Query', findAllPaginatedUsers: { __typename?: 'PaginatedUser', nextCursor?: number | null, totalCount: number, edges?: Array<{ __typename?: 'UserEdge', cursor: number, node: { __typename?: 'User', id: number, email: string, role: Role, createdAt: any, updatedAt: any } }> | null } };
 
 export type MeFragmentFragment = { __typename?: 'User', id: number, firstName: string, lastName?: string | null, role: Role, email: string, avatar?: { __typename?: 'UserAvatar', base64: string, mimeType: string } | null } & { ' $fragmentName'?: 'MeFragmentFragment' };
 
@@ -1649,7 +1649,7 @@ export type CategoryQueryQueryVariables = Exact<{
 }>;
 
 
-export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
+export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?: 'Category', id: number, name?: string | null, slug: string, description: string, subcategories: Array<{ __typename?: 'Category', slug: string, name?: string | null, description: string }>, categoryProductVariants: { __typename?: 'PaginatedProductVariant', nextCursor?: number | null, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, stock: number, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null }, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } }> | null }, usedProductVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', id: number, value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } };
 
 export type HomepageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1697,7 +1697,7 @@ export type ProductPageQueryQueryVariables = Exact<{
 }>;
 
 
-export type ProductPageQueryQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number, name?: string | null, description?: string | null, markdownContent?: string | null, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, stock: number, priceInCents: number, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string } | null }> }> } | null };
+export type ProductPageQueryQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number, name?: string | null, description?: string | null, markdownContent?: string | null, images: Array<{ __typename?: 'ProductImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, stock: number, priceInCents: number, images: Array<{ __typename?: 'ProductVariantImage', id: number, base64: string, mimeType: string, isThumbnail: boolean }>, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> }> } | null };
 
 export type ProductIdBySlugQueryVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -1714,7 +1714,7 @@ export type SearchProductsQueryQueryVariables = Exact<{
 }>;
 
 
-export type SearchProductsQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', hasNextPage: boolean, totalCount: number, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, stock: number, productId: number, sku: string, priceInCents: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null }, productVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', translatedValue?: string | null, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translatedKey?: string | null } | null }> };
+export type SearchProductsQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', nextCursor?: number | null, totalCount: number, edges?: Array<{ __typename?: 'ProductVariantEdge', cursor: number, node: { __typename?: 'ProductVariant', id: number, stock: number, productId: number, sku: string, priceInCents: number, thumbnailImage?: { __typename?: 'ProductVariantImage', base64: string, mimeType: string } | null, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, product: { __typename?: 'Product', slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', base64: string, mimeType: string } | null } } }> | null }, productVariantAttributes: Array<{ __typename?: 'ProductVariantAttribute', translatedValue?: string | null, value: string, key?: { __typename?: 'ProductVariantAttributeKey', id: number, key: string, translatedKey?: string | null } | null }> };
 
 export type AccountDetailsPageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1919,8 +1919,8 @@ export const CategoriesTable_QueryDocumentDocument = new TypedDocumentString(`
         parentCategoryId
       }
     }
-    hasNextPage
     totalCount
+    nextCursor
   }
   allCategories: categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
     id
@@ -1996,7 +1996,7 @@ export const AdminOrdersPage_QueryDocumentDocument = new TypedDocumentString(`
     dateFrom: $dateFrom
     dateTo: $dateTo
   ) {
-    hasNextPage
+    nextCursor
     edges {
       node {
         id
@@ -2191,7 +2191,7 @@ export const PagedAttributeKeysQueryDocument = new TypedDocumentString(`
     id: $id
     key: $key
   ) {
-    hasNextPage
+    nextCursor
     totalCount
     edges {
       cursor
@@ -2461,7 +2461,7 @@ export const ProductsPage_QueryDocumentDocument = new TypedDocumentString(`
     isPublic: $isPublic
     categoryId: $categoryId
   ) {
-    hasNextPage
+    nextCursor
     edges {
       node {
         id
@@ -2630,7 +2630,7 @@ export const AdminUsersPageDocument = new TypedDocumentString(`
     cursor: $cursor
     ascending: $ascending
   ) {
-    hasNextPage
+    nextCursor
     totalCount
     edges {
       cursor
@@ -2812,7 +2812,7 @@ export const CategoryQueryDocument = new TypedDocumentString(`
       includeSubcategories: true
       attributeFilters: $attributeFilters
     ) {
-      hasNextPage
+      nextCursor
       edges {
         cursor
         node {
@@ -3025,6 +3025,7 @@ export const ProductPageQueryDocument = new TypedDocumentString(`
         translatedValue
         key {
           key
+          translatedKey
         }
       }
     }
@@ -3046,7 +3047,7 @@ export const SearchProductsQueryDocument = new TypedDocumentString(`
     pageSize: $productsPageSize
     searchTerm: $searchTerm
   ) {
-    hasNextPage
+    nextCursor
     totalCount
     edges {
       cursor

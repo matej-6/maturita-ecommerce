@@ -5,10 +5,8 @@ import { getImageSrc } from "@/app/lib/utils";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ProductImages } from "@/components/product-images";
 import { ProductVariantsScroll } from "@/components/product-variants-scroll";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Link, redirect } from "@/i18n/navigation";
+import { redirect } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowLeftIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
@@ -58,7 +56,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   }
 
   const selectedVariant = data.data.productBySlug.variants.find(
-    (v) => v.sku === variant
+    (v) => v.sku === variant,
   );
   if (!selectedVariant) {
     return notFound();
@@ -112,7 +110,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               ? {
                   url: getImageSrc(
                     thumbnailImage.mimeType,
-                    thumbnailImage.base64
+                    thumbnailImage.base64,
                   ),
                   altText: data.data!.productBySlug?.name || slug,
                   id: thumbnailImage.id,
@@ -162,8 +160,8 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 {selectedVariant.stock > 5
                   ? t("stock.inStock")
                   : selectedVariant.stock > 0 && selectedVariant.stock <= 5
-                  ? t("stock.limitedStock")
-                  : t("stock.outOfStock")}
+                    ? t("stock.limitedStock")
+                    : t("stock.outOfStock")}
               </span>
             </div>
           </div>
@@ -190,7 +188,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               {selectedVariant.attributes.map((attr) => (
                 <div key={attr.key!.key} className="flex flex-col gap-y-0">
                   <span className="capitalize text-muted-foreground text-sm">
-                    {attr.key!.key}
+                    {attr.key!.translatedKey ?? attr.key!.key}
                   </span>
                   <span>{attr.value}</span>
                 </div>

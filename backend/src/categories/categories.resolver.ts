@@ -115,8 +115,8 @@ export class CategoriesResolver {
     if (!category) {
       return {
         edges: [],
-        hasNextPage: false,
         totalCount: 0,
+        nextCursor: null,
       };
     }
 

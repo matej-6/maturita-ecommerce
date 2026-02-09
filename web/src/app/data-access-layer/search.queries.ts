@@ -21,7 +21,7 @@ const SearchQueryDocument = graphql(`
       pageSize: $productsPageSize
       searchTerm: $searchTerm
     ) {
-      hasNextPage
+      nextCursor
       totalCount
       edges {
         cursor
@@ -67,7 +67,7 @@ export async function getSearchProductsQueryData(
   searchTerm: string,
   productsCursor: number | null,
   productsPageSize: number | null,
-  attributes?: string[][]
+  attributes?: string[][],
 ): Promise<ActionResponse<ExecutionResult<SearchProductsQueryQuery>["data"]>> {
   const res = await execute(SearchQueryDocument, {
     searchTerm,

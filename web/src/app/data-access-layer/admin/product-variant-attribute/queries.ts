@@ -34,7 +34,7 @@ export const PagedAttributeKeysQueryDocument = graphql(`
       id: $id
       key: $key
     ) {
-      hasNextPage
+      nextCursor
       totalCount
       edges {
         cursor

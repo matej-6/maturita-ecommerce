@@ -20,7 +20,7 @@ export const AdminUsersPageDocument = graphql(`
       cursor: $cursor
       ascending: $ascending
     ) {
-      hasNextPage
+      nextCursor
       totalCount
       edges {
         cursor

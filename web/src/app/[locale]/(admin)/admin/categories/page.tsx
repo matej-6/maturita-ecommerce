@@ -31,8 +31,8 @@ export default async function CategoriesPage({ searchParams }: Props) {
       sp.parentCategoryId === "null"
         ? null
         : typeof sp.parentCategoryId === "string"
-        ? parseInt(sp.parentCategoryId, 10) ?? 0
-        : 0,
+          ? (parseInt(sp.parentCategoryId, 10) ?? 0)
+          : 0,
     isSetup:
       sp.isSetup === "true" ? true : sp.isSetup === "false" ? false : null,
     isPublic:
@@ -43,16 +43,16 @@ export default async function CategoriesPage({ searchParams }: Props) {
     nextCursor: number | null;
   } = {
     cursor:
-      typeof sp.cursor === "string" ? parseInt(sp.cursor, 10) ?? null : null,
+      typeof sp.cursor === "string" ? (parseInt(sp.cursor, 10) ?? null) : null,
     pageSize:
-      typeof sp.pageSize === "string" ? parseInt(sp.pageSize, 10) ?? 25 : 25,
+      typeof sp.pageSize === "string" ? (parseInt(sp.pageSize, 10) ?? 25) : 25,
     nextCursor: null,
   };
 
   const data = await getCategoriesTableDataAction(
     pagingArgs,
     sortingArgs,
-    tableArgs
+    tableArgs,
   );
 
   if (!data.success) {
@@ -62,10 +62,7 @@ export default async function CategoriesPage({ searchParams }: Props) {
   const paginatedCategories = data.data?.paginatedCategories;
   const allCategories = data.data?.allCategories;
 
-  pagingArgs.nextCursor =
-    data.success && paginatedCategories?.hasNextPage
-      ? paginatedCategories.edges?.slice(-1)[0].cursor ?? null
-      : null;
+  pagingArgs.nextCursor = paginatedCategories?.nextCursor ?? null;
 
   const urlSearchParams = new URLSearchParams({
     ...(pagingArgs.cursor ? { cursor: pagingArgs.cursor.toString() } : {}),

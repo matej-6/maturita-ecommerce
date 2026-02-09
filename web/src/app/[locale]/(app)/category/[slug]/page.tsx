@@ -26,7 +26,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     }
   }
 
-  let pageSize = 25;
+  let pageSize = 10;
   if (typeof sp.pageSize === "string") {
     const parsedPageSize = parseInt(sp.pageSize, 10);
     if (!isNaN(parsedPageSize)) {
@@ -58,7 +58,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     slug,
     cursor,
     pageSize,
-    attributes.length > 0 ? attributes : undefined
+    attributes.length > 0 ? attributes : undefined,
   );
   if (!queryRes.success) {
     return <div>{queryRes.message}</div>;
@@ -71,11 +71,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const category = queryRes.data.category;
 
   let nextPageLink = null;
-  if (category.categoryProductVariants.hasNextPage) {
-    const nextCursor =
-      category.categoryProductVariants.edges![
-        category.categoryProductVariants.edges!.length - 1
-      ].cursor;
+  const nextCursor = queryRes.data.category.categoryProductVariants.nextCursor;
+  if (nextCursor) {
     const params = new URLSearchParams();
     params.append("cursor", nextCursor.toString());
     params.append("pageSize", pageSize.toString());
@@ -98,7 +95,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     const setAttributesForKey =
       typeof sp[attr.key!.key] === "string"
         ? [sp[attr.key!.key]]
-        : sp[attr.key!.key] ?? [];
+        : (sp[attr.key!.key] ?? []);
 
     if (!groupedAttributes.has(attr.key!.key)) {
       groupedAttributes.set(attr.key!.key, {
