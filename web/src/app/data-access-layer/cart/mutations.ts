@@ -10,6 +10,9 @@ import {
 import { ExecutionResult } from "graphql";
 import { handleGraphqlError } from "../admin/handleGraphqlFormError";
 import { ActionResponse } from "../formActionResponse";
+import { getAuthToken } from "../auth/actions";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 
 const UpdateCartItemQuantityMutationDocument = graphql(`
   mutation UpdateCartItemQuantityMutation($cartItemId: Int!, $quantity: Int!) {
@@ -29,7 +32,7 @@ const AddItemToCartMutationDocument = graphql(`
 
 export async function updateCartItemQuantityMutationAction(
   cartItemId: number,
-  quantity: number
+  quantity: number,
 ): Promise<
   ActionResponse<
     ExecutionResult<UpdateCartItemQuantityMutationMutation>["data"]
@@ -52,10 +55,16 @@ export async function updateCartItemQuantityMutationAction(
 
 export async function addItemToCartMutationAction(
   productVariantId: number,
-  quantity: number
+  quantity: number,
 ): Promise<
   ActionResponse<ExecutionResult<AddItemToCartMutationMutation>["data"]>
 > {
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    const locale = await getLocale();
+    redirect({ href: "/auth/login", locale });
+  }
+
   const res = await execute(AddItemToCartMutationDocument, {
     productVariantId,
     quantity,

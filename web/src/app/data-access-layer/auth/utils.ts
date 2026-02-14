@@ -2,14 +2,12 @@ import {
   ReadonlyRequestCookies,
   ResponseCookies,
 } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { authRefreshTokenAction, AuthResponse } from "./actions";
+import { AuthResponse } from "./actions";
 import {
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "@/app/lib/auth.constants";
-import { fetchBackend } from "../fetch-backend";
 import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { cookies } from "next/headers";
 
 /**
  * Sets authentication cookies
@@ -17,7 +15,7 @@ import { cookies } from "next/headers";
  */
 export function setAuthCookies(
   cookieStore: ReadonlyRequestCookies | ResponseCookies | RequestCookies,
-  data: AuthResponse | null
+  data: AuthResponse | null,
 ) {
   cookieStore.set(REFRESH_COOKIE_NAME, data?.refreshToken ?? "", {
     httpOnly: true,

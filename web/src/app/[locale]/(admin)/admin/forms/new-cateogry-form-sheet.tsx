@@ -71,7 +71,7 @@ export const NewCategoryFormSheet = ({ categories }: NewCategoryFormProps) => {
       }
       const fieldErrorsMap = new Map();
       res.fieldErrors?.forEach((e) =>
-        fieldErrorsMap.set(e.property, e.constraints)
+        fieldErrorsMap.set(e.property, e.constraints),
       );
       setFieldErrors(fieldErrorsMap);
       setErrorMessage(res.message);
@@ -82,7 +82,7 @@ export const NewCategoryFormSheet = ({ categories }: NewCategoryFormProps) => {
     Map<string, string[]> | undefined
   >(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   return (
     <Sheet>
@@ -107,7 +107,7 @@ export const NewCategoryFormSheet = ({ categories }: NewCategoryFormProps) => {
               type="text"
               value={formState.slug}
               onChange={(e) =>
-                setFormState({ ...formState, slug: e.target.value })
+                setFormState((prev) => ({ ...prev, slug: e.target.value }))
               }
             />
             <FormFieldErrorMessage fieldErrors={fieldErrors} fieldName="slug" />
@@ -118,7 +118,7 @@ export const NewCategoryFormSheet = ({ categories }: NewCategoryFormProps) => {
               data={comboboxCategories}
               selectedStatus={
                 comboboxCategories.find(
-                  (c) => c.value === formState.parentCategoryId
+                  (c) => c.value === formState.parentCategoryId,
                 )!
               }
               setSelectedValue={(v) =>
@@ -128,10 +128,10 @@ export const NewCategoryFormSheet = ({ categories }: NewCategoryFormProps) => {
                 }))
               }
               noResultsFoundText={t(
-                "form.parentCategoryId.combobox.noResultsFoundText"
+                "form.parentCategoryId.combobox.noResultsFoundText",
               )}
               filterPlaceholderText={t(
-                "form.parentCategoryId.combobox.filterPlaceholderText"
+                "form.parentCategoryId.combobox.filterPlaceholderText",
               )}
             />
             <FormFieldErrorMessage

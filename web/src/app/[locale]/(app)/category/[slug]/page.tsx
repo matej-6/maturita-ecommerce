@@ -54,6 +54,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     }
   });
 
+
   const queryRes = await getCategoryQueryData(
     slug,
     cursor,

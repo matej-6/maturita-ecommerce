@@ -1,15 +1,21 @@
 "use server";
 
 import "server-only";
-import { REFRESH_COOKIE_NAME } from "@/app/lib/auth.constants";
+import {
+  AUTH_TOKEN_HEADER_NAME,
+  AUTHENTICATION_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+} from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
 import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getLocale, getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { setAuthCookies } from "./utils";
 import { cache } from "react";
-import { getCurrentSession } from "./queries";
+import { getCurrentSession, MeFragment, meQueryDocument } from "./queries";
 import { redirect } from "@/i18n/navigation";
+import { execute } from "@/graphql/execute";
+import { getFragmentData } from "@/graphql";
 
 export type AuthResponse = {
   accessToken: string;
@@ -94,7 +100,6 @@ export async function authLogoutAction() {
     }
   }
   setAuthCookies(cookieStore, null);
-  return redirect({ href: "/auth/login", locale: locale });
 }
 
 export type LoginActionResult =
@@ -106,7 +111,7 @@ export type LoginActionResult =
     } & ErrorResponse);
 
 export async function authLoginAction(
-  formData: unknown
+  formData: unknown,
 ): Promise<LoginActionResult> {
   const cookieStore = await cookies();
   const t = await getTranslations("error");
@@ -159,7 +164,7 @@ export type RegisterActionResult =
     } & ErrorResponse);
 
 export async function authRegisterAction(
-  data: unknown
+  data: unknown,
 ): Promise<RegisterActionResult> {
   const cookieStore = await cookies();
   const t = await getTranslations("error");
@@ -198,11 +203,16 @@ export async function authRegisterAction(
   }
 }
 
-type RefreshTokenActionResult = {
-  success: boolean;
-};
+type RefreshAccessTokenActionResult =
+  | {
+      success: false;
+    }
+  | {
+      success: true;
+      accessToken: string;
+    };
 
-export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult> {
+export async function refreshAccessTokenAction(): Promise<RefreshAccessTokenActionResult> {
   const cookieStore = await cookies();
   const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
   if (!refreshTokenCookie) {
@@ -211,7 +221,7 @@ export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult
   const refreshToken = refreshTokenCookie.value;
   const locale = await getLocale();
 
-  const res = await fetchBackend(`/auth/refresh-token`, {
+  const res = await fetchBackend(`/auth/access-token`, {
     method: "POST",
     headers: {
       "x-refresh-token": refreshToken,
@@ -223,6 +233,7 @@ export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult
     setAuthCookies(cookieStore, data);
     return {
       success: true,
+      accessToken: data.accessToken,
     };
   }
   setAuthCookies(cookieStore, null);
@@ -232,5 +243,31 @@ export async function authRefreshTokenAction(): Promise<RefreshTokenActionResult
 }
 
 export const getCurrentSessionAction = cache(async () => {
-  return await getCurrentSession();
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    return null;
+  }
+
+  const res = await execute(meQueryDocument);
+  if (res.data) {
+    return getFragmentData(MeFragment, res.data.me);
+  }
+
+  return null;
 });
+
+export async function getAuthToken(): Promise<string | null> {
+  const reqHeaders = await headers();
+  const accessTokenFromHeader = reqHeaders.get(AUTH_TOKEN_HEADER_NAME);
+
+  return accessTokenFromHeader || null;
+}
+
+export async function getCurrentSessionOrRedirect() {
+  const session = await getCurrentSessionAction();
+  if (!session) {
+    const locale = await getLocale();
+    return redirect({ href: "/auth/login", locale });
+  }
+  return session;
+}

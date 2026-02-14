@@ -12,11 +12,9 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { Role } from "@/graphql/graphql";
-// import { getCurrentSessionOrAuthenticate } from "@/app/data-access-layer/auth/queries";
 import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { authLogoutAction } from "@/app/data-access-layer/auth/actions";
-import { useSession } from "@/lib/tanstack-query/queries";
 import {
   Sheet,
   SheetContent,
@@ -34,13 +32,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "../ui/drawer";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 import { HeaderSearch } from "./header-search";
+import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 
 export function HeaderRightNav({
   categories,
+  sessionPromise,
 }: {
   categories: {
     id: number;
@@ -48,20 +47,20 @@ export function HeaderRightNav({
     slug: string;
     subcategories: { id: number; name: string; slug: string }[];
   }[];
+  sessionPromise: Promise<CurrentSession | null>;
 }) {
-  const { data: currentSession } = useSession();
-
+  const currentSession = use(sessionPromise);
   const t = useTranslations("header");
+  const router = useRouter();
 
   const { mutate: logout, isPending: isLoggingOut } = useMutation({
     mutationFn: async () => {
       await authLogoutAction();
+      router.push("/auth/login");
     },
   });
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const router = useRouter();
 
   const pathname = usePathname();
 
@@ -179,7 +178,7 @@ export function HeaderRightNav({
                       "flex gap-x-2 w-fit hover:bg-background! data-[state=open]:bg-background! data-[state=open]:hover:bg-background! focus:bg-background!"
                     }
                   >
-                    <Avatar size="sm" />
+                    <Avatar session={currentSession} size="sm" />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-44 gap-4">

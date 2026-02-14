@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "./ui/card";
 import { ArrowRightIcon, XIcon } from "lucide-react";
-import { useSession } from "@/lib/tanstack-query/queries";
 import { usePathname } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -16,13 +15,18 @@ import { getImageSrc } from "@/app/lib/utils";
 import { ProductCard } from "./prdouct-cart";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 
-export function Chatbot() {
-  const session = useSession();
+export function Chatbot({
+  sessionPromise,
+}: {
+  sessionPromise: Promise<CurrentSession | null>;
+}) {
+  const session = use(sessionPromise);
   const t = useTranslations("chatbot");
   const pathname = usePathname();
 
-  const isLoggedIn = !!session.data;
+  const isLoggedIn = !!session;
   const productSlug = useMemo(() => {
     const pathParts = pathname.split("/");
     const productPartIndex = pathParts.findIndex((part) => part === "product");
@@ -45,7 +49,7 @@ export function Chatbot() {
     setInputValue("");
     setIsWaitingForResponse(false);
     resetPrompt();
-  }, [session.data]);
+  }, [session]);
 
   const [isOpen, setIsOpen] = useState(false);
 

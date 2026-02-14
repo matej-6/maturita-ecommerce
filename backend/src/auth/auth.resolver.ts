@@ -38,6 +38,7 @@ export class AuthResolver {
     if (!foundUser) {
       throw new NotFoundException();
     }
+    this.logger.debug(`User ${foundUser.id} fetched their profile`);
     return foundUser;
   }
 

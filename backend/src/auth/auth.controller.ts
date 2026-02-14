@@ -43,7 +43,7 @@ export class AuthController {
     });
   }
 
-  @Post('refresh-token')
+  @Post('access-token')
   @UseGuards(JwtRefreshAuthGuard)
   async refreshToken(
     @CurrentUser() user: AuthenticatedUserDto,

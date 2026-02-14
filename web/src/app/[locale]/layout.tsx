@@ -14,10 +14,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import "../globals.css";
 import { Metadata } from "next";
-import { getQueryClient } from "@/lib/get-query-client";
-import { getCurrentSessionAction } from "../data-access-layer/auth/actions";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { SESSION_QUERY_KEY } from "@/lib/tanstack-query/query-keys";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,7 +45,7 @@ type LocaleLayoutProps = Readonly<{
 }>;
 
 export async function generateMetadata(
-  props: Omit<LocaleLayoutProps, "children">
+  props: Omit<LocaleLayoutProps, "children">,
 ): Promise<Metadata> {
   const { locale } = await props.params;
 
@@ -73,22 +69,6 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
-  const queryClient = getQueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: SESSION_QUERY_KEY,
-    queryFn: async () => {
-      const session = await getCurrentSessionAction();
-      return session === null
-        ? null
-        : {
-            ...session,
-            __fromServer: true,
-          };
-    },
-  });
-
-const state = dehydrate(queryClient);
-
   return (
     <html className="h-full" lang={locale}>
       <body
@@ -97,13 +77,11 @@ const state = dehydrate(queryClient);
           geistSans.variable,
           geistMono.variable,
           bricolage.variable,
-          "antialiased font-primary overflow-y-scroll!"
+          "antialiased font-primary overflow-y-scroll!",
         )}
       >
         <Providers>
-          <div className="h-screen">
-            <HydrationBoundary state={state}>{children}</HydrationBoundary>
-          </div>
+          <div className="min-h-screen">{children}</div>
         </Providers>
       </body>
     </html>

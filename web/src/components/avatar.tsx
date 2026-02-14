@@ -1,9 +1,9 @@
 "use client";
 
-import { useSession } from "@/lib/tanstack-query/queries";
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "@/lib/utils";
 import { getImageSrc } from "@/app/lib/utils";
+import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 
 export const AvatarSizeClasses = {
   sm: "size-8",
@@ -13,13 +13,13 @@ export const AvatarSizeClasses = {
 
 export function Avatar({
   size = "md",
+  session,
 }: {
+  session: CurrentSession | null;
   imageUrl?: string;
   size?: "sm" | "md" | "lg";
 }) {
-  const session = useSession();
-
-  if (!session.data) {
+  if (!session) {
     return (
       <Skeleton
         className={cn("rounded-full bg-gray-200", AvatarSizeClasses[size])}
@@ -27,17 +27,17 @@ export function Avatar({
     );
   }
 
-  const imageUrl = session.data.avatar
-    ? getImageSrc(session.data.avatar.mimeType, session.data.avatar.base64)
+  const imageUrl = session.avatar
+    ? getImageSrc(session.avatar.mimeType, session.avatar.base64)
     : null;
 
-  const backupString = session.data.firstName[0]?.toUpperCase() || "";
+  const backupString = session.firstName[0]?.toUpperCase() || "";
 
   return (
     <div
       className={cn(
         "rounded-full flex items-center justify-center overflow-hidden bg-gray-200",
-        AvatarSizeClasses[size]
+        AvatarSizeClasses[size],
       )}
     >
       {imageUrl ? (

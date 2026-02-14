@@ -8,7 +8,7 @@ export const isAdmin = cache(async () => {
   return (await getCurrentSession())?.role === Role.Admin;
 });
 
-const MeFragment = graphql(`
+export const MeFragment = graphql(`
   fragment MeFragment on User {
     id
     firstName
@@ -22,7 +22,7 @@ const MeFragment = graphql(`
   }
 `);
 
-const meQueryDocument = graphql(`
+export const meQueryDocument = graphql(`
   query Me {
     me {
       ...MeFragment

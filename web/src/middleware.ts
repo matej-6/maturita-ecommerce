@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 import { MiddlewareConfig, NextRequest, NextResponse } from "next/server";
 import {
+  AUTH_TOKEN_HEADER_NAME,
   AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "./app/lib/auth.constants";
@@ -9,26 +10,22 @@ import { AuthResponse } from "./app/data-access-layer/auth/actions";
 import { setAuthCookies } from "./app/data-access-layer/auth/utils";
 import { fetchBackend } from "./app/data-access-layer/fetch-backend";
 
-// const protectedRoutes = ["/admin"];
-
 export default async function middleware(req: NextRequest) {
   console.log("RUNNING MIDDLEWARE");
 
   const handleI18nRouting = createMiddleware(routing);
-  const response = handleI18nRouting(req);
 
-  // if (req.cookies.has(REFRESH_COOKIE_NAME)) {
-  //   const redirect = NextResponse.redirect(
-  //     new URL(process.env.NEXT_PUBLIC_SITE_URL + "/auth/failed")
-  //   );
-  //   setAuthCookies(redirect.cookies, null);
-  //   return redirect;
-  // }
-
-  if (
-    req.cookies.has(REFRESH_COOKIE_NAME) &&
-    !req.cookies.has(AUTHENTICATION_COOKIE_NAME)
-  ) {
+  if (req.cookies.has(AUTHENTICATION_COOKIE_NAME)) {
+    const newHeaders = new Headers(req.headers);
+    const authToken =
+      req.cookies.get(AUTHENTICATION_COOKIE_NAME)?.value ?? null;
+    if (authToken) {
+      newHeaders.set(AUTH_TOKEN_HEADER_NAME, authToken);
+    }
+    const newRequest = new NextRequest(req.url, { headers: newHeaders });
+    return handleI18nRouting(newRequest);
+  } else if (req.cookies.has(REFRESH_COOKIE_NAME)) {
+    const newHeaders = new Headers(req.headers);
     const refreshToken = req.cookies.get(REFRESH_COOKIE_NAME)?.value;
     const res = await fetchBackend(`/auth/refresh-token`, {
       method: "POST",
@@ -39,33 +36,21 @@ export default async function middleware(req: NextRequest) {
 
     if (res.ok) {
       const data: AuthResponse = await res.json();
-      console.log(data);
-      //setAuthCookies(req.cookies, data); // lebo mozno volame isAdmin, ktory potom vola getCurrentSession, ktory pozera na request cookies, nie na response cookies
+      newHeaders.set(AUTH_TOKEN_HEADER_NAME, data.accessToken);
+      const newRequest = new NextRequest(req.url, { headers: newHeaders });
+      const response = handleI18nRouting(newRequest);
       setAuthCookies(response.cookies, data);
+      return response;
     } else {
       const redirect = NextResponse.redirect(
-        new URL(process.env.NEXT_PUBLIC_SITE_URL + "/auth/failed")
+        new URL(process.env.NEXT_PUBLIC_SITE_URL + "/auth/login"),
       );
       setAuthCookies(redirect.cookies, null);
       return redirect;
     }
   }
 
-  // const path = req.nextUrl.pathname;
-
-  // if (
-  //   protectedRoutes.some(
-  //     (route) =>
-  //       path.startsWith(route) ||
-  //       (path.length > 3 && path.slice(3).startsWith(route))
-  //   )
-  // ) {
-  //   if (!(await isAdmin())) {
-  //     return NextResponse.rewrite(new URL("/not-found", req.url));
-  //   }
-  // }
-
-  return response;
+  return handleI18nRouting(req);
 }
 
 export const config: MiddlewareConfig = {
