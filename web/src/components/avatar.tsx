@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { getImageSrc } from "@/app/lib/utils";
 import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 
-export const AvatarSizeClasses = {
+const AvatarSizeClasses = {
   sm: "size-8",
   md: "size-12",
   lg: "size-20",

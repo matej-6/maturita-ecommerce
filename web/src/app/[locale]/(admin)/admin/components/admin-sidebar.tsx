@@ -16,15 +16,13 @@ import { SidebarUser } from "./sidebar-user";
 import {
   BadgeEuroIcon,
   KeyIcon,
-  LanguagesIcon,
   Layers2Icon,
   ShoppingBagIcon,
-  User2Icon,
   UserCog2Icon,
 } from "lucide-react";
-import { getCurrentSession } from "@/app/data-access-layer/auth/queries";
 import { ElementType } from "react";
 import { getTranslations } from "next-intl/server";
+import { getCurrentSessionAction } from "@/app/data-access-layer/auth/actions";
 
 // https://ui.shadcn.com/blocks/sidebar#sidebar-08
 
@@ -35,7 +33,7 @@ type NavItem = {
 };
 
 export async function AdminSidebar() {
-  const currentSessionPromise = getCurrentSession();
+  const currentSessionPromise = getCurrentSessionAction();
 
   const t = await getTranslations("admin.sidebar");
 

@@ -32,7 +32,7 @@ export function UpdateAccountAvatarButton({ imageUrl, firstName }: Props) {
     <form>
       <label
         htmlFor="accountAvatarImage"
-        className="rounded-full bg-cyan-600 size-12 sm:size-20 flex items-center justify-center overflow-hidden object-cover relative group cursor-pointer"
+        className="rounded-full bg-gray-200 size-12 sm:size-20 flex items-center justify-center overflow-hidden object-cover relative group cursor-pointer"
       >
         <div className="size-full opacity-0 group-hover:opacity-100 bg-black/30 absolute inset-0 flex items-center justify-center transition-opacity">
           <PlusIcon className="size-6 sm:size-8 text-white" />
@@ -40,7 +40,7 @@ export function UpdateAccountAvatarButton({ imageUrl, firstName }: Props) {
         {imageUrl ? (
           <img src={imageUrl} alt="User avatar" className="size-full" />
         ) : (
-          <span className="text-white text-3xl sm:text-5xl font-medium">
+          <span className="text-black text-3xl sm:text-4xl">
             {firstName?.charAt(0).toUpperCase()}
           </span>
         )}

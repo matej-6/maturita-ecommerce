@@ -41,7 +41,7 @@ export async function deleteUserAccountAction(): Promise<ActionResponse<void>> {
 
 export async function updateUserAvatarAction(
   base64: string,
-  mimeType: string
+  mimeType: string,
 ): Promise<ActionResponse<void>> {
   const res = await execute(UpdateAccountAvatarMutation, {
     base64: base64,
@@ -51,6 +51,9 @@ export async function updateUserAvatarAction(
   if (res.errors) {
     return handleGraphqlError(res.errors);
   }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/account-details`);
 
   return {
     success: true,
@@ -64,6 +67,9 @@ export async function removeUserAvatarAction(): Promise<ActionResponse<void>> {
   if (res.errors) {
     return handleGraphqlError(res.errors);
   }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/account-details`);
 
   return {
     success: true,
