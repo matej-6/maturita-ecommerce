@@ -5,7 +5,7 @@ export async function fetchBackend(
   endpoint: string,
   init?: RequestInit,
 ): Promise<Response> {
-  const backendUrl = process.env.BACKEND_API;
+  const backendUrl = process.env.BACKEND_URL;
   if (!backendUrl) throw new Error("No backend url found.");
   const { headers, ...rest } = init || {};
   return fetchInternal(`${backendUrl}${endpoint}`, {

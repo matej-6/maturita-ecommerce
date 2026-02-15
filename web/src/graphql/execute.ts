@@ -22,22 +22,18 @@ export async function execute<TResult, TVariables>(
     headers["Authorization"] = "Bearer " + authToken;
   }
 
-  const response = await fetchInternal(
-    process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT!,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/graphql-response+json",
-        ...headers,
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-      cache: "no-store",
+  const response = await fetchInternal(process.env.BACKEND_URL + "/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/graphql-response+json",
+      ...headers,
     },
-  );
+    body: JSON.stringify({
+      query,
+      variables,
+    }),
+  });
 
   if ([401, 403].includes(response.status)) {
     redirect({ href: "/auth/login", locale });
