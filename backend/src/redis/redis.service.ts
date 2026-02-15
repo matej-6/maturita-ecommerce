@@ -15,19 +15,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.logger.log('Initializing Redis client...');
-    const redisDatabase =
-      this.configService.get<Env['REDIS_DATABASE']>('REDIS_DATABASE');
+    const redisUrl = this.configService.get('REDIS_URL', {
+      infer: true,
+    });
 
     createClient({
-      username:
-        this.configService.getOrThrow<Env['REDIS_USERNAME']>('REDIS_USERNAME'),
-      password:
-        this.configService.getOrThrow<Env['REDIS_PASSWORD']>('REDIS_PASSWORD'),
-      socket: {
-        host: this.configService.getOrThrow<Env['REDIS_HOST']>('REDIS_HOST'),
-        port: this.configService.getOrThrow<Env['REDIS_PORT']>('REDIS_PORT'),
-      },
-      ...(redisDatabase ? { database: redisDatabase } : {}),
+      url: redisUrl,
     })
       .connect()
       .then((client) => {
@@ -46,15 +39,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.redisClient.quit();
   }
 
-  constructor(private readonly configService: ConfigService) {}
-
-  async get(key: string) {
-    return this.redisClient.get(key);
-  }
-
-  async set(key: string, value: string) {
-    return this.redisClient.set(key, value);
-  }
+  constructor(private readonly configService: ConfigService<Env, true>) {}
 
   get client(): Awaited<ReturnType<typeof createClient>> {
     return this.redisClient;

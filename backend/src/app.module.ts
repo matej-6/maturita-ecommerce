@@ -90,7 +90,6 @@ import { StatisticsModule } from './statistics/statistics.module';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.production', '.env.development', '.env'],
       validate: validateEnv,
     }),
     PrismaModule,

@@ -1,7 +1,7 @@
 import z from 'zod';
 
 const envSchema = z.object({
-  PORT: z.coerce.number().default(3000),
+  PORT: z.coerce.number().default(8080),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
@@ -10,11 +10,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string(),
   JWT_ACCESS_EXPIRATION_IN_SECONDS: z.coerce.number(),
   JWT_REFRESH_EXPIRATION_IN_SECONDS: z.coerce.number(),
-  REDIS_USERNAME: z.string(),
-  REDIS_PASSWORD: z.string(),
-  REDIS_HOST: z.string(),
-  REDIS_PORT: z.coerce.number(),
-  REDIS_DATABASE: z.coerce.number().optional(),
+  REDIS_URL: z.string(),
   STRIPE_API_KEY: z.string(),
   STRIPE_WEBHOOK_SECRET: z.string(),
   NEXTJS_URL: z.string(),
@@ -22,8 +18,7 @@ const envSchema = z.object({
   OLLAMA_LLM_MODEL: z.string().optional(),
   OLLAMA_EMBEDDING_MODEL: z.string().optional(),
   OLLAMA_EMBEDDING_MODEL_DIMENSION: z.coerce.number().optional(),
-  QDRANT_HOST: z.string().optional(),
-  QDRANT_PORT: z.coerce.number().optional(),
+  QDRANT_URL: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;

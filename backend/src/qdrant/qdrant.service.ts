@@ -11,7 +11,7 @@ export class QdrantService implements OnModuleInit {
 
   private client: QdrantClient;
 
-  constructor(private readonly configService: ConfigService<Env>) {
+  constructor(private readonly configService: ConfigService<Env, true>) {
     console.log('QdrantService constructor called');
     this.embeddingModelDimension = this.configService.getOrThrow<number>(
       'OLLAMA_EMBEDDING_MODEL_DIMENSION',
@@ -26,12 +26,10 @@ export class QdrantService implements OnModuleInit {
     console.log('QdrantService initialized');
     this.logger.log('Initializing Qdrant client...');
 
-    const qdrantHost = this.configService.getOrThrow<string>('QDRANT_HOST');
-    const qdrantPort = this.configService.getOrThrow<number>('QDRANT_PORT');
+    const qdrantUrl = this.configService.get('QDRANT_URL', { infer: true });
 
     this.client = new QdrantClient({
-      host: qdrantHost,
-      port: qdrantPort,
+      url: qdrantUrl,
     });
     const collections = await this.client.getCollections();
     if (

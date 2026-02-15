@@ -57,7 +57,7 @@ export class LLMTaskConsumer extends WorkerHost {
     private readonly llmPromptsService: LLMPromptsService,
     private readonly prisma: PrismaService,
     private readonly qdrantService: QdrantService,
-    private readonly configService: ConfigService<Env>,
+    private readonly configService: ConfigService<Env, true>,
     private readonly localesService: LocalesService,
     private readonly i18nService: I18nService,
   ) {

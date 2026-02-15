@@ -5,38 +5,34 @@ services:
     environment:
       - MYSQL_DATABASE=app
       - MYSQL_ROOT_PASSWORD=password
-    ports:
-      - "3306:3306"
+    # ports:
+    # - "3306:3306"
     volumes:
-      - gofitshop_db_data_dev:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
-      - gofitshop_network_dev
+      - gofitshop_network
   redis:
     image: redis:7.4.1-alpine
     restart: unless-stopped
     command: ["redis-server", "--loglevel", "warning"]
-    ports:
-      - "6379:6379"
     volumes:
-      - gofitshop_redis_data_dev:/data
+      - redis_data:/data
     networks:
-      - gofitshop_network_dev
+      - gofitshop_network
   qdrant:
     image: qdrant/qdrant:latest
     restart: unless-stopped
-    ports:
-      - "6333:6333"
     volumes:
-      - gofitshop_qdrant_data_dev:/qdrant/storage
+      - qdrant_data:/qdrant/storage
     networks:
-      - gofitshop_network_dev
+      - gofitshop_network
   ollama:
     image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
+    # ports:
+    # - "11434:11434"
     restart: unless-stopped
     networks:
-      - gofitshop_network_dev
+      - gofitshop_network
     entrypoint: >
       sh -c "
       ollama serve &
@@ -59,8 +55,8 @@ services:
   #     - OLLAMA_EMBEDDING_MODEL=qwen3-embedding:4b
 
 networks:
-  gofitshop_network_dev:
+  gofitshop_network:
 volumes:
-  gofitshop_db_data_dev:
-  gofitshop_redis_data_dev:
-  gofitshop_qdrant_data_dev:
+  db_data:
+  redis_data:
+  qdrant_data:

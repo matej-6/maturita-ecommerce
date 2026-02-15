@@ -11,10 +11,7 @@ async function bootstrap() {
     rawBody: true,
   });
   app.enableCors({
-    origin: process.env.ORIGIN || [
-      'http://localhost:3000',
-      'googleusercontent.com',
-    ],
+    origin: process.env.NEXTJS_URL || ['http://localhost:3000'],
     credentials: true,
   });
   app.use(cookieParser());
@@ -33,6 +30,6 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 8080);
 }
 void bootstrap();
