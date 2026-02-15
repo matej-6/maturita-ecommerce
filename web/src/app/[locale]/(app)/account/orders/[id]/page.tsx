@@ -1,5 +1,3 @@
-"use server";
-
 import { getOrderDetailsPageData } from "@/app/data-access-layer/order/queries";
 import { getImageSrc } from "@/app/lib/utils";
 import { CancelOrderButton } from "@/components/cancel-order.button";
@@ -19,6 +17,8 @@ import { Link } from "@/i18n/navigation";
 import { ArrowUpRightIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{
@@ -156,7 +156,7 @@ export default async function OrderPage({ params }: Props) {
                           {item.value}
                         </span>
                       </div>
-                    )
+                    ),
                 )}
               </div>
             </div>
@@ -192,8 +192,9 @@ export default async function OrderPage({ params }: Props) {
                           <img
                             src={getImageSrc(
                               thumbnailImage.mimeType,
-                              thumbnailImage.base64
+                              thumbnailImage.base64,
                             )}
+                            alt={"Image of " + item.productVariant?.sku}
                           />
                         )}
                       </div>

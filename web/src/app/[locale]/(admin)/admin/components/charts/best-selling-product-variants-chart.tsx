@@ -1,6 +1,5 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -10,14 +9,7 @@ import {
   YAxis,
 } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -49,8 +41,8 @@ export function BestSellingProductVariantsChart({
     selectedData === "90D"
       ? data90Days
       : selectedData === "30D"
-      ? data30Days
-      : data7Days;
+        ? data30Days
+        : data7Days;
 
   const t = useTranslations("admin.dashboard.graphs");
 
@@ -80,8 +72,8 @@ export function BestSellingProductVariantsChart({
         selectedData === "90D"
           ? button90D
           : selectedData === "30D"
-          ? button30D
-          : button7D;
+            ? button30D
+            : button7D;
       indicator.style.transform = `translateX(${targetButton.offsetLeft}px)`;
     }
   }, [selectedData]);

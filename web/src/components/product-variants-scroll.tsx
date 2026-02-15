@@ -32,14 +32,16 @@ export function ProductVariantsScroll({ variants }: Props) {
       setForwardDisabled(true);
       return;
     }
+
+    const scrollEl = scrollElementRef.current;
+    const lastVariantEl = lastVariantRef.current;
+
     const handleScroll = () => {
-      if (scrollElementRef.current && lastVariantRef.current) {
-        const lastElementRight =
-          lastVariantRef.current.getBoundingClientRect().right;
-        const scrollLeft = scrollElementRef.current.scrollLeft || 0;
+      if (scrollEl && lastVariantEl) {
+        const lastElementRight = lastVariantEl.getBoundingClientRect().right;
+        const scrollLeft = scrollEl.scrollLeft || 0;
         const parentRight =
-          scrollElementRef.current.parentElement?.getBoundingClientRect()
-            .right || 0;
+          scrollEl.parentElement?.getBoundingClientRect().right || 0;
 
         setBackDisabled(scrollLeft < 1);
         setForwardDisabled(parentRight >= lastElementRight - 1);
@@ -50,13 +52,13 @@ export function ProductVariantsScroll({ variants }: Props) {
 
     window.addEventListener("resize", handleScroll);
 
-    if (scrollElementRef.current) {
-      scrollElementRef.current.addEventListener("scroll", handleScroll);
+    if (scrollEl) {
+      scrollEl.addEventListener("scroll", handleScroll);
     }
 
     return () => {
-      if (scrollElementRef.current) {
-        scrollElementRef.current.removeEventListener("scroll", handleScroll);
+      if (scrollEl) {
+        scrollEl.removeEventListener("scroll", handleScroll);
       }
     };
   }, [variants.length, scrollElementRef, lastVariantRef]);

@@ -1,13 +1,13 @@
 "use server";
 
 import { graphql } from "@/graphql";
-import { fetchGraphql } from "../../fetch-graphql";
 import { ActionResponse } from "../../formActionResponse";
 import { ExecutionResult } from "graphql";
 import { EditCategory_QueryDocumentQuery } from "@/graphql/graphql";
 import { execute } from "@/graphql/execute";
 import { handleGraphqlError } from "../handleGraphqlFormError";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const categoriesTableQueryDocument = graphql(`
   query categoriesTable_QueryDocument(
     $parentCategoryId: Int

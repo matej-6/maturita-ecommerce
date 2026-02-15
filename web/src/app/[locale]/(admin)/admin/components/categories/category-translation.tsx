@@ -8,15 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+
 import {
   CategoryTranslationSheetForm,
   CategoryTranslationSheetFormProps,
@@ -24,7 +16,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { deleteCategoryTranslationAction } from "@/app/data-access-layer/admin/category-translation/actions";
 import { useState } from "react";
-import { getQueryClient } from "@/lib/get-query-client";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -63,7 +54,7 @@ export function CategoryTranslation({
       }
       const res = await deleteCategoryTranslationAction(
         categoryId,
-        translationId
+        translationId,
       );
       if (!res.success) {
         toast.error(res.message);
@@ -103,8 +94,8 @@ export function CategoryTranslation({
           {isDeleting
             ? t("page.translations.deletePendingButton")
             : confirmation
-            ? t("page.translations.deleteConfirmButton")
-            : t("page.translations.deleteButton")}
+              ? t("page.translations.deleteConfirmButton")
+              : t("page.translations.deleteButton")}
         </Button>
       </CardFooter>
     </Card>

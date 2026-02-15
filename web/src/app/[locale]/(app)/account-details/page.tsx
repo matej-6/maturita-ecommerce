@@ -1,5 +1,3 @@
-"use server";
-
 import { getCurrentSessionAction } from "@/app/data-access-layer/auth/actions";
 import { getAccountDetailsPageData } from "@/app/data-access-layer/user.queries";
 import { getImageSrc } from "@/app/lib/utils";
@@ -8,7 +6,6 @@ import { EditUserFormSheet } from "@/components/form/edit-user-form-sheet";
 import { UpdateUserPasswordFormSheet } from "@/components/form/update-user-password-form-sheet";
 import { OrderStatusLabel } from "@/components/order-status";
 import { RemoveAccountAvatarButton } from "@/components/remove-account-avatar-button";
-import { ResponsiveButton } from "@/components/responsive-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -23,9 +20,13 @@ import {
 import { UpdateAccountAvatarButton } from "@/components/update-account-avatar-button";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function AccountDetailsPage() {
+  await headers();
   const data = await getAccountDetailsPageData();
   const session = await getCurrentSessionAction();
 

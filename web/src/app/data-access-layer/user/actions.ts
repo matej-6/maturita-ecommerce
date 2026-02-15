@@ -18,7 +18,6 @@ import {
 } from "@/graphql/graphql";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
-import { E } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
 
 export async function deleteUserAccountAction(): Promise<ActionResponse<void>> {
   const res = await execute(DeleteUserAccountMutation);

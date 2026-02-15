@@ -1,13 +1,12 @@
 "use client";
 
-import { TrendingDownIcon, TrendingUp, TrendingUpIcon } from "lucide-react";
+import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -51,8 +50,8 @@ export function TotalRevenueChartBar({
     selectedData === "90D"
       ? data90Days
       : selectedData === "30D"
-      ? data30Days
-      : data7Days;
+        ? data30Days
+        : data7Days;
 
   const t = useTranslations("admin.dashboard.graphs");
 
@@ -79,8 +78,8 @@ export function TotalRevenueChartBar({
         selectedData === "90D"
           ? button90D
           : selectedData === "30D"
-          ? button30D
-          : button7D;
+            ? button30D
+            : button7D;
       indicator.style.transform = `translateX(${targetButton.offsetLeft}px)`;
     }
   }, [selectedData]);
@@ -96,13 +95,13 @@ export function TotalRevenueChartBar({
               ? selectedData === "90D"
                 ? t("revenue.description.growth.90days")
                 : selectedData === "30D"
-                ? t("revenue.description.growth.30days")
-                : t("revenue.description.growth.7days")
+                  ? t("revenue.description.growth.30days")
+                  : t("revenue.description.growth.7days")
               : selectedData === "90D"
-              ? t("revenue.description.decline.90days")
-              : selectedData === "30D"
-              ? t("revenue.description.decline.30days")
-              : t("revenue.description.decline.7days")}
+                ? t("revenue.description.decline.90days")
+                : selectedData === "30D"
+                  ? t("revenue.description.decline.30days")
+                  : t("revenue.description.decline.7days")}
             {data.trend >= 0 ? (
               <TrendingUpIcon />
             ) : data.trend < 0 ? (

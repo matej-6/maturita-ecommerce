@@ -1,5 +1,3 @@
-"use server";
-
 import {
   getAdminUsersPageData,
   PagingArgs,
@@ -9,10 +7,10 @@ import {
 import { Role, UserSortingField } from "@/graphql/graphql";
 import { UsersTableWithFilters } from "../components/users/users-table-with-filters";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
-  searchParams: {
-    [key: string]: string | string[] | undefined;
-  };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export default async function UsersPage({ searchParams }: Props) {

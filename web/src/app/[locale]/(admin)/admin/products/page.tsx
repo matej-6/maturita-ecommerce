@@ -1,15 +1,11 @@
-"use server";
-
 import { getProductsPageData } from "@/app/data-access-layer/admin/product/queries";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
 import { ProductsTableWithFilters } from "../components/products/product-table-with-filters";
 import { ProductForm } from "../forms/product-sheet-form";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
-  searchParams: {
-    [key: string]: string | string[] | undefined;
-  };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 type PagingArgs = {

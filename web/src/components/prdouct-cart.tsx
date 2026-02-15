@@ -1,7 +1,5 @@
 import { cn } from "@/lib/utils";
-import { AddToCartButton } from "./add-to-cart-button";
 import { Card } from "./ui/card";
-import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ResponsiveButton } from "./responsive-button";
 
@@ -18,14 +16,12 @@ export function ProductCard({
   className,
   ...rest
 }: { product: ProductCardType } & React.ComponentPropsWithRef<"div">) {
-  const t = useTranslations("productVariantCard");
-
   return (
     <Card
       key={product.id}
       className={cn(
         "w-[196px] sm:w-[248px] h-fit flex flex-col gap-y-2 sm:gap-y-4 p-1.5 sm:p-2 shrink-0",
-        className
+        className,
       )}
       {...rest}
     >

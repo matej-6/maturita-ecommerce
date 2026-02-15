@@ -5,7 +5,6 @@ import {
   SortingArgs,
   FilterArgs,
 } from "@/app/data-access-layer/admin/product-variant-attribute/queries";
-import { OrderStatusLabel } from "@/components/order-status";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,13 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -61,6 +53,7 @@ export function AttributeKeysTableWithFilters({
   initialSortingArgs,
   initialTableArgs,
   searchParams,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sortableColumns,
   data,
 }: Props) {
@@ -232,15 +225,15 @@ export function AttributeKeysTableWithFilters({
                         initialSortingArgs.sortBy === null
                           ? true
                           : initialSortingArgs.sortBy !== column.sortingKey
-                          ? true
-                          : initialSortingArgs.ascending === null
-                          ? true
-                          : initialSortingArgs.ascending === true
-                          ? false
-                          : null;
+                            ? true
+                            : initialSortingArgs.ascending === null
+                              ? true
+                              : initialSortingArgs.ascending === true
+                                ? false
+                                : null;
                       changeSortingColumn(
                         nextIsAscending === null ? null : column.sortingKey,
-                        nextIsAscending === null ? true : nextIsAscending
+                        nextIsAscending === null ? true : nextIsAscending,
                       );
                     }}
                   >

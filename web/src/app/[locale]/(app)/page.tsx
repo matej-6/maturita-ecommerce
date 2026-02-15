@@ -1,5 +1,3 @@
-"use server";
-
 import Image from "next/image";
 import EN_Banner1 from "@/public/images/en/homepage/banner1.svg";
 import EN_Banner1Desktop from "@/public/images/en/homepage/banner1-desktop.svg";
@@ -10,7 +8,9 @@ import { getImageSrc } from "@/app/lib/utils";
 import { ProductsScroll } from "@/components/products-scroll";
 import { getLocale, getTranslations } from "next-intl/server";
 
-export default async function Home() {
+export const revalidate = 300;
+
+export default async function HomePage() {
   const t = await getTranslations("homePage");
   const locale = await getLocale();
 

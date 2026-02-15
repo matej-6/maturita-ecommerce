@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "../ui/input";
 import {
   NavigationMenuItem,
   NavigationMenuTrigger,
@@ -11,9 +10,7 @@ import {
 } from "../ui/navigation-menu";
 import { useTranslations } from "next-intl";
 import { getCategoryLink } from "@/app/lib/navigation";
-import { useEffect, useState } from "react";
-import { Link, useRouter } from "@/i18n/navigation";
-import { useSearchParams } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { HeaderSearch } from "./header-search";
 
 type HeaderNavProps = {
@@ -32,19 +29,6 @@ type HeaderNavProps = {
 
 export function HeaderNav({ categories }: HeaderNavProps) {
   const t = useTranslations("header");
-
-  const router = useRouter();
-
-  const [searchValue, setSearchValue] = useState("");
-
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const q = searchParams.get("q");
-    if (q) {
-      setSearchValue(q);
-    }
-  }, [searchParams]);
 
   return (
     <nav className="flex items-center z-50">

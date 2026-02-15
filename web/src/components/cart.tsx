@@ -27,7 +27,7 @@ export function Cart() {
   });
 
   const hasProductsMoreThanStock = cartItems?.some(
-    (item) => item.quantity > item.productVariant.stock
+    (item) => item.quantity > item.productVariant.stock,
   );
 
   return (
@@ -44,11 +44,11 @@ export function Cart() {
               item.productVariant.product.thumbnailImage ||
               null;
 
-            const variantName = `${item.productVariant.product
-              .name!} ${item.productVariant.attributes
-              .sort((a, b) => a.key!.key.localeCompare(b.key!.key))
-              .map((attr) => attr.value)
-              .join(", ")}`;
+            // const variantName = `${item.productVariant.product
+            //   .name!} ${item.productVariant.attributes
+            //   .sort((a, b) => a.key!.key.localeCompare(b.key!.key))
+            //   .map((attr) => attr.value)
+            //   .join(", ")}`;
 
             return (
               <div
@@ -61,7 +61,7 @@ export function Cart() {
                       <img
                         src={getImageSrc(
                           thumbnailImage.mimeType,
-                          thumbnailImage.base64
+                          thumbnailImage.base64,
                         )}
                         alt={`Image of ${item.productVariant.sku}`}
                         className="size-full object-cover"

@@ -1,6 +1,5 @@
 "use client";
 
-import { getCategoriesTableDataAction } from "@/app/data-access-layer/admin/category/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,7 +13,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -22,13 +20,10 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -39,12 +34,7 @@ import {
 } from "@/components/ui/table";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowUpRightIcon,
-  ChevronUpIcon,
-  MoreHorizontalIcon,
-} from "lucide-react";
+import { ChevronUpIcon, MoreHorizontalIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
@@ -117,7 +107,7 @@ export function ProductsTableWithFilters({
     newParams.set("slug", slug ?? "");
     newParams.set(
       "categoryId",
-      categoryId !== null ? categoryId.toString() : ""
+      categoryId !== null ? categoryId.toString() : "",
     );
     newParams.set("isSetup", isSetup !== null ? isSetup.toString() : "");
     newParams.set("isPublic", isPublic !== null ? isPublic.toString() : "");
@@ -217,8 +207,8 @@ export function ProductsTableWithFilters({
                   tableArgs.isPublic === null
                     ? "null"
                     : tableArgs.isPublic
-                    ? "true"
-                    : "false"
+                      ? "true"
+                      : "false"
                 }
               >
                 <SelectTrigger className="w-[180px]">
@@ -252,8 +242,8 @@ export function ProductsTableWithFilters({
                   tableArgs.isSetup === null
                     ? "null"
                     : tableArgs.isSetup
-                    ? "true"
-                    : "false"
+                      ? "true"
+                      : "false"
                 }
               >
                 <SelectTrigger className="w-[180px]">
@@ -342,15 +332,15 @@ export function ProductsTableWithFilters({
                           initialSortingArgs.sortBy === null
                             ? true
                             : initialSortingArgs.sortBy !== column.key
-                            ? true
-                            : initialSortingArgs.ascending === null
-                            ? true
-                            : initialSortingArgs.ascending === true
-                            ? false
-                            : null;
+                              ? true
+                              : initialSortingArgs.ascending === null
+                                ? true
+                                : initialSortingArgs.ascending === true
+                                  ? false
+                                  : null;
                         changeSortingColumn(
                           nextIsAscending === null ? null : column.key,
-                          nextIsAscending === null ? true : nextIsAscending
+                          nextIsAscending === null ? true : nextIsAscending,
                         );
                       }}
                     >
@@ -359,7 +349,7 @@ export function ProductsTableWithFilters({
                           "flex gap-x-1 justify-start items-center",
                           {
                             "cursor-pointer hover:underline": isSortByPossible,
-                          }
+                          },
                         )}
                       >
                         <span>{column.label}</span>

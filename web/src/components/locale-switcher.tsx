@@ -9,7 +9,7 @@ import {
 import { routing } from "@/i18n/routing";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
-import { ChangeEvent, useTransition } from "react";
+import { useTransition } from "react";
 
 export default function LocaleSwitcher() {
   const [isPending, startTransition] = useTransition();

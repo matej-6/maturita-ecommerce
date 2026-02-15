@@ -16,13 +16,12 @@ import {
 } from "./mutations";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
-import { productTranslationFormSchemaType } from "@/app/[locale]/(admin)/admin/schemas/product-translation-schema";
 
 export async function deleteProductTranslationAction(
   translationId: number,
   product: {
     id: number;
-  }
+  },
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -63,7 +62,7 @@ export async function createProductTranslationAction(
     locale: string;
     description?: string;
     markdownContent?: string;
-  }
+  },
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -108,7 +107,7 @@ export async function editProductTranslationAction(
     locale: string;
     description?: string;
     markdownContent?: string;
-  }
+  },
 ): Promise<
   ActionResponse<
     NonNullable<

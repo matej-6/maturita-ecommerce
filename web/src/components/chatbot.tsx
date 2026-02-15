@@ -43,37 +43,6 @@ export function Chatbot({
     return null;
   }, [pathname]);
 
-  useEffect(() => {
-    setPastChats([]);
-    setIsOpen(false);
-    setInputValue("");
-    setIsWaitingForResponse(false);
-    resetPrompt();
-  }, [session]);
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [pastChats, setPastChats] = useState<
-    Array<{
-      question: string;
-      response: {
-        text: string;
-        products?: {
-          id: number;
-          slug: string;
-          name: string | null;
-          imageUrl?: string;
-        }[];
-        success: boolean;
-      };
-    }>
-  >([]);
-
-  const [inputValue, setInputValue] = useState("");
-
-  const chatsRef = useRef<HTMLDivElement>(null);
-  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
-
   const {
     mutate: sendPrompt,
     isPending: isSendingPrompt,
@@ -176,6 +145,7 @@ export function Chatbot({
           }
         }, 2000);
       } catch (error) {
+        console.error(error);
         setIsWaitingForResponse(false);
       }
     },
@@ -186,6 +156,37 @@ export function Chatbot({
       setIsWaitingForResponse(false);
     },
   });
+
+  useEffect(() => {
+    setPastChats([]);
+    setIsOpen(false);
+    setInputValue("");
+    setIsWaitingForResponse(false);
+    resetPrompt();
+  }, [session, resetPrompt]);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [pastChats, setPastChats] = useState<
+    Array<{
+      question: string;
+      response: {
+        text: string;
+        products?: {
+          id: number;
+          slug: string;
+          name: string | null;
+          imageUrl?: string;
+        }[];
+        success: boolean;
+      };
+    }>
+  >([]);
+
+  const [inputValue, setInputValue] = useState("");
+
+  const chatsRef = useRef<HTMLDivElement>(null);
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
 
   useEffect(() => {
     const chatsDiv = chatsRef.current;

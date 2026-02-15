@@ -76,7 +76,7 @@ export const ProductVariantSheetForm = ({
       formData.stock !== initialData.stock ||
       formData.attributes.length !== initialData.attributes.length ||
       !formData.attributes.every(
-        (value, index) => value === initialData.attributes[index]
+        (value, index) => value === initialData.attributes[index],
       )
     );
   }, [formData, initialData]);
@@ -90,7 +90,7 @@ export const ProductVariantSheetForm = ({
       (keyId) => {
         const attr = allAttributes.find((a) => a.keyId === keyId)!;
         return { id: keyId, key: attr.key };
-      }
+      },
     );
   }, [allAttributes]);
 
@@ -99,19 +99,20 @@ export const ProductVariantSheetForm = ({
     key: string;
   } | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAttributeId, setSelectedAttributeId] = useState<number | null>(
-    null
+    null,
   );
 
   const getAttributesForSelectedKey = useCallback(
     (keyId: number | null) => {
       const availableAttributes = allAttributes.filter(
-        (attr) => !formData.attributes.some((a) => a === attr.id)
+        (attr) => !formData.attributes.some((a) => a === attr.id),
       );
       if (keyId === null) return availableAttributes;
       return availableAttributes.filter((attr) => attr.keyId === keyId);
     },
-    [allAttributes, formData]
+    [allAttributes, formData],
   );
 
   const { mutate, isPending } = useMutation({
@@ -120,12 +121,12 @@ export const ProductVariantSheetForm = ({
         const res = await editVariantAction(
           productId,
           productVariantId!,
-          formData
+          formData,
         );
         if (!res.success) {
           const fieldErrorsMap = new Map();
           res.fieldErrors?.forEach((e) =>
-            fieldErrorsMap.set(e.property, e.constraints)
+            fieldErrorsMap.set(e.property, e.constraints),
           );
           setFieldErrors(fieldErrorsMap);
           setErrorMessage(res.message);
@@ -138,7 +139,7 @@ export const ProductVariantSheetForm = ({
         if (!res.success) {
           const fieldErrorsMap = new Map();
           res.fieldErrors?.forEach((e) =>
-            fieldErrorsMap.set(e.property, e.constraints)
+            fieldErrorsMap.set(e.property, e.constraints),
           );
           setFieldErrors(fieldErrorsMap);
           setErrorMessage(res.message);
@@ -154,7 +155,7 @@ export const ProductVariantSheetForm = ({
     Map<string, string[]> | undefined
   >(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   return (
     <Sheet>
@@ -254,7 +255,7 @@ export const ProductVariantSheetForm = ({
                     return;
                   }
                   setSelectedAttributeKey(
-                    attributeKeys.find((a) => a.id === Number(v))!
+                    attributeKeys.find((a) => a.id === Number(v))!,
                   );
                 }}
               >
@@ -290,7 +291,7 @@ export const ProductVariantSheetForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     {getAttributesForSelectedKey(
-                      selectedAttributeKey?.id ?? null
+                      selectedAttributeKey?.id ?? null,
                     ).map((attr) => (
                       <SelectItem key={attr.id} value={attr.id.toString()}>
                         {attr.value}
@@ -316,7 +317,7 @@ export const ProductVariantSheetForm = ({
                           onClick={() => {
                             setFormData((prev) => {
                               const newAttributes = prev.attributes.filter(
-                                (id) => id !== attr.id
+                                (id) => id !== attr.id,
                               );
                               return { ...prev, attributes: newAttributes };
                             });

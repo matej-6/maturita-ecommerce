@@ -1,5 +1,3 @@
-"use server";
-
 import { OrderStatus } from "@/graphql/graphql";
 import z from "zod";
 import {
@@ -10,10 +8,12 @@ import {
 } from "@/app/data-access-layer/admin/order/queries";
 import { OrdersTableWithFilters } from "../components/orders/orders-table-with-filters";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     [key: string]: string | string[] | undefined;
-  };
+  }>;
 };
 
 export default async function OrdersPage({ searchParams }: Props) {

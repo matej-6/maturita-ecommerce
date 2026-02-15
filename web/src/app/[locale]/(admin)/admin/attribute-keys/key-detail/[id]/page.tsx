@@ -1,5 +1,3 @@
-"use server";
-
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
@@ -20,6 +18,8 @@ import {
 } from "@/components/ui/table";
 import { Link } from "@/i18n/navigation";
 import { AttributeSheetForm } from "../../../forms/attribute-sheet-form";
+
+export const dynamic = "force-dynamic";
 
 export default async function AttributeKeyDetailPage({
   params,
@@ -50,7 +50,7 @@ export default async function AttributeKeyDetailPage({
   const { productVariantAttributeKey: data, locales } = res.data;
 
   const missingLocales = locales.filter(
-    (l) => !data.translations.find((t) => t.locale === l.code)
+    (l) => !data.translations.find((t) => t.locale === l.code),
   );
 
   const t = await getTranslations("admin.attributeKeys.page");
@@ -93,7 +93,7 @@ export default async function AttributeKeyDetailPage({
 
         <div className="flex flex-wrap gap-4">
           {data.translations.map((t) => {
-            const { flag, name, code } =
+            const { flag, name } =
               locales.find((l) => l.code === t.locale) || {};
 
             return (
@@ -131,7 +131,7 @@ export default async function AttributeKeyDetailPage({
         <div className="flex flex-wrap gap-4">
           {data.attributes.map((attr) => {
             const missingAttributeLocales = locales.filter(
-              (l) => !attr.translations.find((at) => at.locale === l.code)
+              (l) => !attr.translations.find((at) => at.locale === l.code),
             );
 
             return (
@@ -175,7 +175,7 @@ export default async function AttributeKeyDetailPage({
                   </span>
                   <div className="flex flex-wrap gap-4">
                     {attr.translations.map((t) => {
-                      const { flag, name, code } =
+                      const { flag, name } =
                         locales.find((l) => l.code === t.locale) || {};
 
                       return (

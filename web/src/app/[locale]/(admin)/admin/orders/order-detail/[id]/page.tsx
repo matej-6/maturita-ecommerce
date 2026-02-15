@@ -3,7 +3,6 @@
 import { getAdminOrderDetailPageDataAction } from "@/app/data-access-layer/admin/order/queries";
 import { getImageSrc } from "@/app/lib/utils";
 import { OrderStatusLabel } from "@/components/order-status";
-import { ResponsiveButton } from "@/components/responsive-button";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -13,7 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { OrderStatus } from "@/graphql/graphql";
 import { Link } from "@/i18n/navigation";
 import { ArrowUpRightIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -159,7 +157,7 @@ export default async function AdminOrderPage({ params }: Props) {
                             {item.value}
                           </span>
                         </div>
-                      )
+                      ),
                   )}
                 </div>
               </div>
@@ -195,8 +193,9 @@ export default async function AdminOrderPage({ params }: Props) {
                             <img
                               src={getImageSrc(
                                 thumbnailImage.mimeType,
-                                thumbnailImage.base64
+                                thumbnailImage.base64,
                               )}
+                              alt={"Image of " + item.productVariant?.sku}
                             />
                           )}
                         </div>

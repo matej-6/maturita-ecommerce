@@ -1,11 +1,6 @@
 "use server";
 
-import {
-  Bricolage_Grotesque,
-  Geist,
-  Geist_Mono,
-  Inter,
-} from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import Providers from "@/providers";
 import { hasLocale, Locale } from "next-intl";
 import { routing } from "@/i18n/routing";
@@ -22,11 +17,6 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
 });
 

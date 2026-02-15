@@ -1,5 +1,3 @@
-"use server";
-
 import { AttributeKeySortingField } from "@/graphql/graphql";
 import {
   PagingArgs,
@@ -10,10 +8,12 @@ import { getPagedAttributeKeysQuery } from "@/app/data-access-layer/admin/produc
 import { AttributeKeysTableWithFilters } from "../components/attribute-keys/attribute-keys-table-with-filters";
 import { AttributeKeySheetForm } from "../forms/attribute-key-sheet-form";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     [key: string]: string | string[] | undefined;
-  };
+  }>;
 };
 
 export default async function AttributeKeysPage({ searchParams }: Props) {

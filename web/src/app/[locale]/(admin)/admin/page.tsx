@@ -1,9 +1,9 @@
-"use server";
-
 import { getAdminStatisticsPageData } from "@/app/data-access-layer/admin/statistics/actions";
 import { TotalRevenueChartBar } from "./components/charts/total-revenue-chart";
 import { BestSellingCategoriesChart } from "./components/charts/best-selling-categories-chart";
 import { BestSellingProductVariantsChart } from "./components/charts/best-selling-product-variants-chart";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const data = await getAdminStatisticsPageData();
@@ -33,9 +33,9 @@ export default async function AdminPage() {
               itemsSold: d.itemsSold,
               slug: d.category.slug,
               totalRevenue: parseFloat(
-                (d.totalRevenueInCents / 100).toFixed(2)
+                (d.totalRevenueInCents / 100).toFixed(2),
               ),
-            })
+            }),
           )}
           data7Days={BestSellingCategoriesStatisticLastSevenDays!.map((d) => ({
             itemsSold: d.itemsSold,
@@ -47,9 +47,9 @@ export default async function AdminPage() {
               itemsSold: d.itemsSold,
               slug: d.category.slug,
               totalRevenue: parseFloat(
-                (d.totalRevenueInCents / 100).toFixed(2)
+                (d.totalRevenueInCents / 100).toFixed(2),
               ),
-            })
+            }),
           )}
         />
         <BestSellingProductVariantsChart
@@ -57,19 +57,19 @@ export default async function AdminPage() {
             (d) => ({
               quantitySold: d.quantitySold,
               sku: d.productVariant.sku,
-            })
+            }),
           )}
           data30Days={BestSellingProductVariantsStatisticLastThirtyDaysFragment!.map(
             (d) => ({
               quantitySold: d.quantitySold,
               sku: d.productVariant.sku,
-            })
+            }),
           )}
           data90Days={BestSellingProductVariantsStatisticLastNinetyDaysFragment!.map(
             (d) => ({
               quantitySold: d.quantitySold,
               sku: d.productVariant.sku,
-            })
+            }),
           )}
         />
       </div>

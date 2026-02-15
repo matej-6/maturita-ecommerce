@@ -2,7 +2,6 @@
 
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
 import { CardVariant, ProductVariantCard } from "./product-variant-card";
 
 type Props = {
@@ -11,8 +10,6 @@ type Props = {
 };
 
 export function ProductsScroll({ variants, header }: Props) {
-  const t = useTranslations("productPage");
-
   const scrollElementRef = useRef<HTMLDivElement | null>(null);
   const lastVariantRef = useRef<HTMLDivElement | null>(null);
   const [backDisabled, setBackDisabled] = useState(true);
@@ -24,14 +21,14 @@ export function ProductsScroll({ variants, header }: Props) {
       setForwardDisabled(true);
       return;
     }
+    const scrollEl = scrollElementRef.current;
+    const lastVariantEl = lastVariantRef.current;
     const handleScroll = () => {
-      if (scrollElementRef.current && lastVariantRef.current) {
-        const lastElementRight =
-          lastVariantRef.current.getBoundingClientRect().right;
-        const scrollLeft = scrollElementRef.current.scrollLeft || 0;
+      if (scrollEl && lastVariantEl) {
+        const lastElementRight = lastVariantEl.getBoundingClientRect().right;
+        const scrollLeft = scrollEl.scrollLeft || 0;
         const scrollElementRight =
-          scrollElementRef.current.parentElement?.getBoundingClientRect()
-            .right || 0;
+          scrollEl.parentElement?.getBoundingClientRect().right || 0;
 
         setBackDisabled(scrollLeft < 1);
         setForwardDisabled(scrollElementRight >= lastElementRight - 1);
@@ -42,15 +39,14 @@ export function ProductsScroll({ variants, header }: Props) {
 
     window.addEventListener("resize", handleScroll);
 
-    if (scrollElementRef.current) {
-      scrollElementRef.current.addEventListener("scroll", handleScroll);
+    if (scrollEl) {
+      scrollEl.addEventListener("scroll", handleScroll);
     }
 
     return () => {
       window.removeEventListener("resize", handleScroll);
-
-      if (scrollElementRef.current) {
-        scrollElementRef.current.removeEventListener("scroll", handleScroll);
+      if (scrollEl) {
+        scrollEl.removeEventListener("scroll", handleScroll);
       }
     };
   }, [variants.length, scrollElementRef]);

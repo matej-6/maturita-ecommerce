@@ -1,12 +1,6 @@
 import "server-only";
-import { cache } from "react";
-import { getFragmentData, graphql } from "@/graphql";
-import { MeFragmentFragment, Role } from "@/graphql/graphql";
-import { execute } from "@/graphql/execute";
-
-export const isAdmin = cache(async () => {
-  return (await getCurrentSession())?.role === Role.Admin;
-});
+import { graphql } from "@/graphql";
+import { MeFragmentFragment } from "@/graphql/graphql";
 
 export const MeFragment = graphql(`
   fragment MeFragment on User {
@@ -30,13 +24,4 @@ export const meQueryDocument = graphql(`
   }
 `);
 
-export const getCurrentSession = async () => {
-  const res = await execute(meQueryDocument);
-  if (res.data) {
-    return getFragmentData(MeFragment, res.data.me);
-  }
-
-  return null;
-};
-
-export type CurrentSession = MeFragmentFragment;
+export type CurrentSession = MeFragmentFragment | null;

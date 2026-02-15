@@ -7,7 +7,6 @@ import { Avatar } from "@/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -20,15 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "@/i18n/navigation";
-import {
-  BadgeCheckIcon,
-  BellIcon,
-  ChevronsUpDownIcon,
-  CreditCardIcon,
-  HomeIcon,
-  LogOutIcon,
-  UserIcon,
-} from "lucide-react";
+import { ChevronsUpDownIcon, HomeIcon, UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { use } from "react";
 

@@ -35,6 +35,7 @@ export async function execute<TResult, TVariables>(
         query,
         variables,
       }),
+      cache: "no-store",
     },
   );
 

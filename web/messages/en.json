@@ -1,24 +1,4 @@
 {
-  "form": {
-    "invalidEmail": "Invalid email address",
-    "invalidPassword": "Invalid password",
-    "minLengthPassword": "Password must be at least {minLength, plural, =1 {# character} other {# characters}} long",
-    "required": "{fieldName} is required",
-    "maxLength": "{fieldName} can be at most {value, plural, =1 {# character} other {# characters}} long",
-    "minLength": "{fieldName} must be at least {value, plural, =1 {# character} other {# characters}} long",
-    "min": "{fieldName} must be at least {value}",
-    "max": "{fieldName} must be at most {value}",
-    "passwordsMustMatch": "Password and Confirm Password must match",
-    "uuid": "Invalid UUID",
-    "id": "Invalid ID",
-    "newCategoryFormSchema": {
-      "translations": {
-        "atLeastEnRequired": "An English translation is required"
-      }
-    },
-    "never": "No value is available for this field",
-    "positive": "{fieldName} must be a positive number"
-  },
   "LocaleLayout": {
     "title": "GoFitShop",
     "description": "Best online store for all your needs"

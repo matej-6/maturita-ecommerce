@@ -1,5 +1,3 @@
-"use server";
-
 import { getSearchProductsQueryData } from "@/app/data-access-layer/search.queries";
 import { getImageSrc } from "@/app/lib/utils";
 import { NextButton } from "@/components/next-button";
@@ -7,6 +5,8 @@ import { PrevButton } from "@/components/prev-button";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
 import { ProductVariantCard } from "@/components/product-variant-card";
 import { getTranslations } from "next-intl/server";
+
+export const revalidate = 300;
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -22,7 +22,7 @@ export default async function SearchPage({ searchParams }: Props) {
     }
   }
 
-  let pageSize = 3;
+  let pageSize = 25;
   if (typeof sp.pageSize === "string") {
     const parsedPageSize = parseInt(sp.pageSize, 10);
     if (!isNaN(parsedPageSize)) {
@@ -46,12 +46,13 @@ export default async function SearchPage({ searchParams }: Props) {
       }
     }
   });
+  const t = await getTranslations("searchPage");
 
   const query = sp.q;
   if (typeof query !== "string" || query.trim() === "") {
     return (
-      <div className="max-width-container bg-base/50 w-full mx-auto mt-8">
-        No products found
+      <div className="max-width-container w-full mx-auto mt-8">
+        <div className="text-muted-foreground">{t("noResults")}</div>
       </div>
     );
   }
@@ -63,11 +64,9 @@ export default async function SearchPage({ searchParams }: Props) {
     attributes,
   );
 
-  const t = await getTranslations("searchPage");
-
   if (!res.success) {
     return (
-      <div className="max-width-container bg-base/50 w-full mx-auto my-8 gap-y-8">
+      <div className="max-width-container  w-full mx-auto my-8 gap-y-8">
         {t("errorFetchingResults")}
       </div>
     );
@@ -107,7 +106,7 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <div className="max-width-container w-full my-8 gap-y-8 flex flex-col">
       <h1 className="text-4xl font-bold">
-        {t("title")} "{query}"
+        {t("title")} &quot;{query}&quot;
       </h1>
       {groupedAttributes.size > 0 && (
         <div className="">
@@ -128,10 +127,6 @@ export default async function SearchPage({ searchParams }: Props) {
             <div className="flex flex-wrap gap-4">
               {productVariants.edges.map((pv) => {
                 const productVariant = pv.node;
-                const image =
-                  productVariant.thumbnailImage ||
-                  productVariant.product.thumbnailImage ||
-                  null;
                 return (
                   <ProductVariantCard
                     key={productVariant.id}

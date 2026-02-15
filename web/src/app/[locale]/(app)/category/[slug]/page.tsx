@@ -5,7 +5,7 @@ import { getImageSrc } from "@/app/lib/utils";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { PrevButton } from "@/components/prev-button";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
 import { ProductVariantCard } from "@/components/product-variant-card";
@@ -53,7 +53,6 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       }
     }
   });
-
 
   const queryRes = await getCategoryQueryData(
     slug,

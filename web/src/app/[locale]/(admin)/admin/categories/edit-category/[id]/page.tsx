@@ -10,8 +10,6 @@ import { Button } from "@/components/ui/button";
 import { EditCategorySheetForm } from "../../../forms/edit-category-sheet-form";
 import { CategoryTranslation } from "../../../components/categories/category-translation";
 import { CategoryTranslationSheetForm } from "../../../forms/category-translation-sheet-form";
-import { PrevButton } from "@/components/prev-button";
-import { NextButton } from "@/components/next-button";
 
 export default async function EditCategoryEditPage({
   params,
@@ -48,7 +46,7 @@ export default async function EditCategoryEditPage({
   const { category, locales, allProducts: products, allCategories } = res.data;
 
   const missingTranslations = locales.filter(
-    (l) => !category.translations.some((t) => t.locale === l.code)
+    (l) => !category.translations.some((t) => t.locale === l.code),
   );
 
   return (

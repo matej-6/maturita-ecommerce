@@ -1,7 +1,7 @@
 "use client";
 
-import { Button, buttonVariants } from "../ui/button";
-import { MenuIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
+import { Button } from "../ui/button";
+import { MenuIcon, ShoppingCartIcon } from "lucide-react";
 import Link from "next/link";
 import {
   NavigationMenu,
@@ -27,7 +27,6 @@ import { Avatar } from "../avatar";
 import {
   Drawer,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,

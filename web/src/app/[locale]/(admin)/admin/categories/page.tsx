@@ -1,5 +1,3 @@
-"use server";
-
 import {
   CategoreisPagingArgs,
   CategoriesFilterArgs,
@@ -10,10 +8,12 @@ import { CategoriesTableWithFilters } from "../components/categories/categories-
 import { NewCategoryFormSheet } from "../forms/new-cateogry-form-sheet";
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     [key: string]: string | string[] | undefined;
-  };
+  }>;
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage({ searchParams }: Props) {
   const sp = await searchParams;

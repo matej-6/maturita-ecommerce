@@ -3,7 +3,6 @@
 import "server-only";
 import {
   AUTH_TOKEN_HEADER_NAME,
-  AUTHENTICATION_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
@@ -12,7 +11,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 import { setAuthCookies } from "./utils";
 import { cache } from "react";
-import { getCurrentSession, MeFragment, meQueryDocument } from "./queries";
+import { MeFragment, meQueryDocument } from "./queries";
 import { redirect } from "@/i18n/navigation";
 import { execute } from "@/graphql/execute";
 import { getFragmentData } from "@/graphql";
