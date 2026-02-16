@@ -12,19 +12,12 @@ type Props = {
 export function UpdateAccountAvatarButton({ imageUrl, firstName }: Props) {
   const { mutate: uploadAvatar, isPending: isUploading } = useMutation({
     mutationFn: async (file: File) => {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64String = reader.result?.toString().split("base64,")[1];
-        if (!base64String) return;
-        const mimeType = file.type;
-
-        await updateUserAvatarAction(base64String, mimeType);
-      };
-      reader.onerror = (error) => {
-        console.error("Error reading file:", error);
-      };
-
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      await updateUserAvatarAction(formData);
+    },
+    onError: (error) => {
+      console.error("Failed to update user avatar:", error);
     },
   });
 
@@ -58,7 +51,7 @@ export function UpdateAccountAvatarButton({ imageUrl, firstName }: Props) {
           if (!file) {
             return;
           }
-          await uploadAvatar(file);
+          uploadAvatar(file);
         }}
       />
     </form>

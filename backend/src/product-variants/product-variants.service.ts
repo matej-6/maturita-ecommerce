@@ -12,8 +12,7 @@ import {
 import { ProductFindAllQueryArgs } from 'src/products/products.resolver.args';
 import { SortingArgs } from 'src/args/sorting-args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
-import { Product } from 'src/products/entities/product.entity';
-import { ProductsService } from 'src/products/products.service';
+import { ImageStorageService } from 'src/image-storage/image-storage.service';
 
 @Injectable()
 export class ProductVariantsService {
@@ -22,7 +21,7 @@ export class ProductVariantsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly localesService: LocalesService,
-    private readonly productsService: ProductsService,
+    private readonly imageStorageService: ImageStorageService,
   ) {}
 
   async create(createProductVariantInput: CreateProductVariantInput) {
@@ -150,24 +149,33 @@ export class ProductVariantsService {
       );
     }
 
+    const images = await this.prisma.productVariantImage.findMany({
+      where: {
+        productVariantId: id,
+      },
+    });
+
+    for (const image of images) {
+      try {
+        await this.removeImage(image.id);
+      } catch (e) {
+        this.logger.error('Error removing image', e);
+      }
+    }
+
     const deleted = await this.prisma.productVariant.delete({
       where: { id },
     });
-
     return deleted.id;
   }
 
   async addImage(
     productVariantId: number,
-    base64: string,
-    mimeType: string,
+    file: {
+      buffer: Buffer;
+      mimeType: string;
+    },
   ): Promise<ProductVariantImage> {
-    if (!mimeType.startsWith('image/')) {
-      throw new BadRequestException(
-        'product-variants.service.invalidImageMimeType',
-      );
-    }
-
     const [productVariant, foundThumbnailImage] =
       await this.prisma.$transaction(async (tx) => {
         const pv = await tx.productVariant.findUnique({
@@ -177,7 +185,7 @@ export class ProductVariantsService {
           },
         });
 
-        const thumbnailImage = await tx.productImage.findFirst({
+        const thumbnailImage = await tx.productVariantImage.findFirst({
           where: {
             productVariantId: productVariantId,
             isThumbnail: true,
@@ -197,25 +205,32 @@ export class ProductVariantsService {
     }
     const isThumbnail = !foundThumbnailImage;
 
-    const created = await this.prisma.productImage.create({
+    const imageFileName = this.imageStorageService.getImageFileName(file);
+    await this.imageStorageService.saveImageFile(imageFileName, file.buffer);
+
+    const created = await this.prisma.productVariantImage.create({
       data: {
-        base64,
-        mimeType,
         isThumbnail,
         productVariantId: productVariant.id,
+        fileName: imageFileName,
       },
     });
 
     return {
       ...created,
       productVariantId: created.productVariantId!,
+      url: this.getImageUrl(created.fileName),
     };
+  }
+
+  getImageUrl(imageFileName: string) {
+    return this.imageStorageService.getImageUrl(imageFileName);
   }
 
   async removeImage(id: number): Promise<number> {
     const [imageToDelete, nextThumbnailImage] = await this.prisma.$transaction(
       async (tx) => {
-        const image = await tx.productImage.findUnique({
+        const image = await tx.productVariantImage.findUnique({
           where: { id },
         });
 
@@ -224,7 +239,7 @@ export class ProductVariantsService {
         }
         let nextThumbnail = null;
         if (image.isThumbnail) {
-          nextThumbnail = await tx.productImage.findFirst({
+          nextThumbnail = await tx.productVariantImage.findFirst({
             where: {
               productVariantId: image.productVariantId,
               id: {
@@ -244,28 +259,28 @@ export class ProductVariantsService {
       throw new BadRequestException('product-variants.service.imageNotFound');
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      await tx.productImage.delete({
-        where: { id: imageToDelete.id },
-      });
+    await this.imageStorageService.deleteImage(imageToDelete.fileName);
 
-      if (nextThumbnailImage) {
-        await tx.productImage.update({
-          where: {
-            id: nextThumbnailImage.id,
-          },
-          data: {
-            isThumbnail: true,
-          },
-        });
-      }
-
-      return imageToDelete.productVariantId!;
+    await this.prisma.productVariantImage.delete({
+      where: { id: imageToDelete.id },
     });
+
+    if (nextThumbnailImage) {
+      await this.prisma.productVariantImage.update({
+        where: {
+          id: nextThumbnailImage.id,
+        },
+        data: {
+          isThumbnail: true,
+        },
+      });
+    }
+
+    return imageToDelete.productVariantId!;
   }
 
   async setThumbnailImage(id: number): Promise<ProductVariantImage> {
-    const image = await this.prisma.productImage.findUnique({
+    const image = await this.prisma.productVariantImage.findUnique({
       where: { id },
     });
 
@@ -274,7 +289,7 @@ export class ProductVariantsService {
     }
 
     const updatedImage = await this.prisma.$transaction(async (tx) => {
-      await tx.productImage.updateMany({
+      await tx.productVariantImage.updateMany({
         where: {
           productVariantId: image.productVariantId,
           isThumbnail: true,
@@ -284,7 +299,7 @@ export class ProductVariantsService {
         },
       });
 
-      return tx.productImage.update({
+      return tx.productVariantImage.update({
         where: { id },
         data: {
           isThumbnail: true,
@@ -295,6 +310,7 @@ export class ProductVariantsService {
     return {
       ...updatedImage,
       productVariantId: updatedImage.productVariantId!,
+      url: this.getImageUrl(updatedImage.fileName),
     };
   }
 
@@ -796,7 +812,7 @@ export class ProductVariantsService {
   }
 
   async getAllImagesForVariantsByBatch(productVariantIds: number[]) {
-    const images = await this.prisma.productImage.findMany({
+    const images = await this.prisma.productVariantImage.findMany({
       where: {
         productVariantId: {
           in: productVariantIds,
@@ -819,53 +835,5 @@ export class ProductVariantsService {
     });
 
     return ids.map((id) => productVariants.find((pv) => pv.id === id)!);
-  }
-
-  async getProductsForVariantsByBatch(
-    productVariantIds: number[],
-  ): Promise<Product[]> {
-    const products = await this.prisma.productVariant.findMany({
-      where: {
-        id: {
-          in: productVariantIds,
-        },
-      },
-      select: {
-        id: true,
-        Product: {
-          select: {
-            id: true,
-            isPublic: true,
-            categoryId: true,
-            createdAt: true,
-            updatedAt: true,
-            slug: true,
-            _count: {
-              select: {
-                ProductTranslations: {
-                  where: {
-                    locale: {
-                      equals: this.localesService.getDefaultLocale().code,
-                    },
-                  },
-                },
-                ProductVariants: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return productVariantIds.map((pv) => {
-      const found = products.find((p) => p.id === pv)!;
-      return {
-        ...found.Product,
-        isSetup: this.productsService.getIsSetup(
-          found.Product._count.ProductTranslations > 0,
-          found.Product._count.ProductVariants,
-        ),
-      };
-    });
   }
 }

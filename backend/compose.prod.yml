@@ -8,7 +8,7 @@ services:
     # ports:
     # - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - gofitshop_db_data:/var/lib/mysql
     networks:
       - gofitshop_network
   redis:
@@ -16,14 +16,14 @@ services:
     restart: unless-stopped
     command: ["redis-server", "--loglevel", "warning"]
     volumes:
-      - redis_data:/data
+      - gofitshop_redis_data:/data
     networks:
       - gofitshop_network
   qdrant:
     image: qdrant/qdrant:latest
     restart: unless-stopped
     volumes:
-      - qdrant_data:/qdrant/storage
+      - gofitshop_qdrant_data:/qdrant/storage
     networks:
       - gofitshop_network
   ollama:
@@ -41,22 +41,33 @@ services:
       ollama pull qwen3-embedding:4b &&
       wait
       "
-  # api:
-  #   build: ./api
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - database
-  #     - ollama
-  #   environment:
-  #     - OLLAMA_BASE_URL=http://ollama:11434
-  #     - OLLAMA_LLM_MODEL=mistral:7b
-  #     - OLLAMA_EMBEDDING_MODEL=qwen3-embedding:4b
+  api:
+    build: .
+    networks:
+      - gofitshop_network
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+      - ollama
+      - redis
+      - qdrant
+  nextjs:
+    build: ../web
+    restart: unless-stopped
+    networks:
+      - gofitshop_network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - BACKEND_URL=http://api:8080
 
 networks:
   gofitshop_network:
 volumes:
-  db_data:
-  redis_data:
-  qdrant_data:
+  gofitshop_db_data:
+  gofitshop_redis_data:
+  gofitshop_qdrant_data:

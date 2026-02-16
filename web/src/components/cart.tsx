@@ -59,10 +59,7 @@ export function Cart() {
                   <div className="w-[96px] aspect-square overflow-hidden bg-accent flex items-center justify-center">
                     {thumbnailImage && (
                       <img
-                        src={getImageSrc(
-                          thumbnailImage.mimeType,
-                          thumbnailImage.base64,
-                        )}
+                        src={getImageSrc(thumbnailImage.url)}
                         alt={`Image of ${item.productVariant.sku}`}
                         className="size-full object-cover"
                       />

@@ -19,28 +19,13 @@ export function ProductImageForm({ productId, productVariantId }: Props) {
 
   const { mutate: uploadProductImage, isPending: isUploading } = useMutation({
     mutationFn: async (file: File) => {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64String = reader.result?.toString().split("base64,")[1];
-        if (!base64String) return;
-        const mimeType = file.type;
-
-        if (productVariantId !== undefined) {
-          await uploadVariantImageAction(
-            productId,
-            productVariantId,
-            base64String,
-            mimeType
-          );
-        } else {
-          await uploadProductImageAction(productId, base64String, mimeType);
-        }
-      };
-      reader.onerror = (error) => {
-        console.error("Error reading file:", error);
-      };
-
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      if (productVariantId !== undefined) {
+        await uploadVariantImageAction(productId, productVariantId, formData);
+      } else {
+        await uploadProductImageAction(productId, formData);
+      }
     },
   });
 
@@ -72,7 +57,7 @@ export function ProductImageForm({ productId, productVariantId }: Props) {
           if (!file) {
             return;
           }
-          await uploadProductImage(file);
+          uploadProductImage(file);
         }}
       />
     </form>

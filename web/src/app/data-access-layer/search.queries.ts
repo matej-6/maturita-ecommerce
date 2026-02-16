@@ -32,8 +32,7 @@ const SearchQueryDocument = graphql(`
           sku
           priceInCents
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
           attributes {
             value
@@ -43,8 +42,7 @@ const SearchQueryDocument = graphql(`
             slug
             name
             thumbnailImage {
-              base64
-              mimeType
+              url
             }
             description
           }

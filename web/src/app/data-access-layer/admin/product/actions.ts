@@ -34,6 +34,9 @@ import {
 } from "./mutations";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
+import { fetchInternal } from "../../fetch-internal";
+import { useLocale } from "next-intl";
+import { getAuthToken } from "../../auth/actions";
 
 export async function createProductAction(data: {
   categoryId: number | null;
@@ -114,30 +117,31 @@ export async function editProductAction(data: {
 
 export async function uploadProductImageAction(
   productId: number,
-  base64Image: string,
-  mimeType: string
-): Promise<
-  ActionResponse<
-    NonNullable<
-      ExecutionResult<AddImageMutationMutation>["data"]
-    >["addProductImage"]
-  >
-> {
-  const res = await execute(AddImageMutation, {
-    productId: productId,
-    mimeType: mimeType,
-    base64: base64Image,
-  });
+  formData: FormData,
+): Promise<ActionResponse<null>> {
+  const locale = await getLocale();
+  const authToken = await getAuthToken();
 
-  if (res.errors) {
-    return await handleGraphqlError(res.errors);
+  const headers: HeadersInit = {
+    "x-custom-lang": locale,
+  };
+  if (authToken) {
+    headers["Authorization"] = "Bearer " + authToken;
   }
 
-  const locale = await getLocale();
+  const res = await fetchInternal(
+    process.env.BACKEND_URL + `/products/upload-image/${productId}`,
+    {
+      method: "POST",
+      body: formData,
+      headers,
+    },
+  );
+
   revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
   revalidatePath(`/${locale}/admin/products`);
 
-  if (!res.data) {
+  if (!res.ok) {
     return {
       success: false,
       message: "An unknown error ocurred",
@@ -146,46 +150,49 @@ export async function uploadProductImageAction(
 
   return {
     success: true,
-    data: res.data.addProductImage,
+    data: null,
   };
 }
 
 export async function uploadVariantImageAction(
   productId: number,
   productVariantId: number,
-  base64Image: string,
-  mimeType: string
-): Promise<
-  ActionResponse<
-    NonNullable<
-      ExecutionResult<AddVariantImageMutationMutation>["data"]
-    >["addProductVariantImage"]
-  >
-> {
-  const res = await execute(AddVariantImageMutation, {
-    productVariantId: productVariantId,
-    mimeType: mimeType,
-    base64: base64Image,
-  });
+  formData: FormData,
+): Promise<ActionResponse<null>> {
+  const locale = await getLocale();
+  const authToken = await getAuthToken();
 
-  if (res.errors) {
-    return await handleGraphqlError(res.errors);
+  const headers: HeadersInit = {
+    "x-custom-lang": locale,
+  };
+  if (authToken) {
+    headers["Authorization"] = "Bearer " + authToken;
   }
 
-  const locale = await getLocale();
+  const res = await fetchInternal(
+    process.env.BACKEND_URL +
+      `/product-variants/upload-image/${productVariantId}`,
+    {
+      method: "POST",
+      body: formData,
+      headers,
+    },
+  );
+
   revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
   revalidatePath(`/${locale}/admin/products`);
 
-  if (!res.data) {
+  if (!res.ok) {
+    console.error("Failed to upload image:", res.statusText);
     return {
       success: false,
-      message: "An unknown error ocurred",
+      message: "Failed to upload image",
     };
   }
 
   return {
     success: true,
-    data: res.data.addProductVariantImage,
+    data: null,
   };
 }
 
@@ -214,7 +221,7 @@ export async function getDataForNewProductPage(): Promise<
 
 export async function setProductThumbnailImageAction(
   productId: number,
-  imageId: number
+  imageId: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(SetImageThumbnailMutation, {
     imageId: imageId,
@@ -244,7 +251,7 @@ export async function setProductThumbnailImageAction(
 export async function setVariantThumbnailImageAction(
   productId: number,
   productVariantId: number,
-  imageId: number
+  imageId: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(SetVariantImageThumbnailMutation, {
     imageId: imageId,
@@ -273,7 +280,7 @@ export async function setVariantThumbnailImageAction(
 
 export async function deleteProductImageAction(
   productId: number,
-  imageId: number
+  imageId: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(DeleteProductImageMutation, {
     imageId: imageId,
@@ -303,7 +310,7 @@ export async function deleteProductImageAction(
 export async function deleteVariantImageAction(
   productId: number,
   productVariantId: number,
-  imageId: number
+  imageId: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(DeleteVariantImageMutation, {
     imageId: imageId,
@@ -338,7 +345,7 @@ export async function createVariantAction(
     isPublic: boolean;
     stock: number;
     attributes?: number[];
-  }
+  },
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -385,7 +392,7 @@ export async function editVariantAction(
     isPublic: boolean;
     stock: number;
     attributes?: number[];
-  }
+  },
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -425,7 +432,7 @@ export async function editVariantAction(
 
 export async function generateProductEmbeddingAction(
   productId: number,
-  lang: string
+  lang: string,
 ): Promise<
   ActionResponse<
     ExecutionResult<GenerateProductEmbeddingMutationMutation>["data"]
@@ -448,7 +455,7 @@ export async function generateProductEmbeddingAction(
 
 export async function generateProdutContentEmbeddingAction(
   productId: number,
-  lang: string
+  lang: string,
 ): Promise<
   ActionResponse<
     ExecutionResult<GenerateProductContentEmbeddingMutationMutation>["data"]

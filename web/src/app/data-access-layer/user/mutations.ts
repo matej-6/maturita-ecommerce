@@ -7,12 +7,6 @@ export const DeleteUserAccountMutation = graphql(`
   }
 `);
 
-export const UpdateAccountAvatarMutation = graphql(`
-  mutation UpdateAccountAvatarMutation($base64: String!, $mimeType: String!) {
-    uploadAvatar(base64: $base64, mimeType: $mimeType)
-  }
-`);
-
 export const UpdateUserMutation = graphql(`
   mutation UpdateUserMutation(
     $name: String!

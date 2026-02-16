@@ -10,7 +10,6 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ProductForm } from "../../../forms/product-sheet-form";
 import { ProductTranslation } from "../../../components/products/product-translation";
-import { getImageSrc } from "@/app/lib/utils";
 import Image from "next/image";
 import { ProductImageForm } from "../../../forms/product-image-form";
 import { SetImageThumbnailButton } from "../../../components/products/set-image-thumbnail-button";
@@ -21,6 +20,7 @@ import { ProductVariantSheetForm } from "../../../forms/product-variant-sheet-fo
 import { GenerateEmbeddingsButton } from "../../../components/products/generate-embeddings-button";
 import { RegenerateAllEmbeddingsButton } from "../../../components/products/regenerate-all-embeddings-button";
 import { ProductTranslationSheetForm } from "../../../forms/product-translation-sheet-form";
+import { getImageSrc } from "@/app/lib/utils";
 
 export default async function ProductDetailPage({
   params,
@@ -53,7 +53,7 @@ export default async function ProductDetailPage({
     productVariantAttributeKeys: attributeKeys,
   } = res.data;
   const missingTranslations = locales.filter(
-    (l) => !product.translations.some((t) => t.locale === l.code)
+    (l) => !product.translations.some((t) => t.locale === l.code),
   );
 
   const t = await getTranslations("admin.products.productDetail.page");
@@ -165,8 +165,8 @@ export default async function ProductDetailPage({
                 key={img.id}
                 className="w-48 h-48 bg-muted rounded-md overflow-hidden flex items-center justify-center relative group"
               >
-                <Image
-                  src={getImageSrc(img.mimeType, img.base64)}
+                <img
+                  src={getImageSrc(img.url) ?? ""}
                   alt={product.slug}
                   className="object-cover w-full h-full"
                   width={200}
@@ -317,8 +317,8 @@ export default async function ProductDetailPage({
                             key={img.id}
                             className="w-48 h-48 bg-muted rounded-md overflow-hidden flex items-center justify-center relative group"
                           >
-                            <Image
-                              src={getImageSrc(img.mimeType, img.base64)}
+                            <img
+                              src={getImageSrc(img.url) ?? ""}
                               alt={variant.sku}
                               className="object-cover w-full h-full"
                               width={200}
@@ -372,7 +372,7 @@ export default async function ProductDetailPage({
                               key: val.key,
                               keyId: val.id,
                               value: a.value,
-                            })
+                            }),
                           );
                           return acc;
                         },
@@ -381,7 +381,7 @@ export default async function ProductDetailPage({
                           key: string;
                           keyId: number;
                           value: string;
-                        }[]
+                        }[],
                       )}
                     />
                   </div>
@@ -402,7 +402,7 @@ export default async function ProductDetailPage({
                     key: val.key,
                     keyId: val.id,
                     value: a.value,
-                  })
+                  }),
                 );
                 return acc;
               },
@@ -411,7 +411,7 @@ export default async function ProductDetailPage({
                 key: string;
                 keyId: number;
                 value: string;
-              }[]
+              }[],
             )}
           />
         </div>

@@ -140,17 +140,10 @@ export default async function SearchPage({ searchParams }: Props) {
                           .sort()
                           .join(" "),
                       productSlug: productVariant.product.slug,
-                      imageUrl: productVariant.thumbnailImage
-                        ? getImageSrc(
-                            productVariant.thumbnailImage.mimeType,
-                            productVariant.thumbnailImage.base64,
-                          )
-                        : productVariant.product.thumbnailImage
-                          ? getImageSrc(
-                              productVariant.product.thumbnailImage.mimeType,
-                              productVariant.product.thumbnailImage.base64,
-                            )
-                          : undefined,
+                      imageUrl: getImageSrc(
+                        productVariant.thumbnailImage?.url ??
+                          productVariant.product.thumbnailImage?.url,
+                      ),
                       description:
                         productVariant.product.description || undefined,
                     }}

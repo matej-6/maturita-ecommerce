@@ -35,6 +35,8 @@ services:
     ports:
       - "11434:11434"
     restart: unless-stopped
+    volumes:
+      - gofitshop_ollama_data_dev:/root/.ollama
     networks:
       - gofitshop_network_dev
     entrypoint: >
@@ -45,18 +47,36 @@ services:
       ollama pull qwen3-embedding:4b &&
       wait
       "
-  # api:
-  #   build: ./api
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - database
-  #     - ollama
-  #   environment:
-  #     - OLLAMA_BASE_URL=http://ollama:11434
-  #     - OLLAMA_LLM_MODEL=mistral:7b
-  #     - OLLAMA_EMBEDDING_MODEL=qwen3-embedding:4b
+  api:
+    image: node:22-bookworm
+    working_dir: /app
+    volumes:
+      - .:/app
+      - gofitshop_public_images_data_dev:/app/public/images
+    networks:
+      - gofitshop_network_dev
+    command: sh -c "NODE_ENV=development npm run dev"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+      - ollama
+      - redis
+      - qdrant
+  nextjs:
+    image: node:22-bookworm
+    working_dir: /app
+    volumes:
+      - ../web:/app
+    command: sh -c "NODE_ENV=development npm run dev"
+    networks:
+      - gofitshop_network_dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - BACKEND_URL=http://api:8080
 
 networks:
   gofitshop_network_dev:
@@ -64,3 +84,5 @@ volumes:
   gofitshop_db_data_dev:
   gofitshop_redis_data_dev:
   gofitshop_qdrant_data_dev:
+  gofitshop_ollama_data_dev:
+  gofitshop_public_images_data_dev:

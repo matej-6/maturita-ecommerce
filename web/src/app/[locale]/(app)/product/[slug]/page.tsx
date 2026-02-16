@@ -1,5 +1,3 @@
-"use server";
-
 import { getProductPageData } from "@/app/data-access-layer/product.queries";
 import { getImageSrc } from "@/app/lib/utils";
 import { AddToCartButton } from "@/components/add-to-cart-button";
@@ -62,15 +60,17 @@ export default async function ProductPage({ params, searchParams }: Props) {
     return notFound();
   }
 
+  const productThumbnailImage = data.data.productBySlug.images.find(
+    (i) => i.isThumbnail,
+  );
   const thumbnailImage =
-    selectedVariant.images.find((i) => i.isThumbnail) ||
-    data.data.productBySlug.images.find((i) => i.isThumbnail);
+    selectedVariant.images.find((i) => i.isThumbnail) || productThumbnailImage;
 
   const allImages = [
     ...selectedVariant.images,
     ...data.data.productBySlug.images,
   ].map((image) => ({
-    url: getImageSrc(image.mimeType, image.base64),
+    url: getImageSrc(image.url) ?? "`",
     altText: data.data!.productBySlug?.name || slug,
     id: image.id,
   }));
@@ -83,16 +83,15 @@ export default async function ProductPage({ params, searchParams }: Props) {
         .map((attr) => attr.value)
         .join(", ");
 
-      const thumbnail = v.images.find((i) => i.isThumbnail) || thumbnailImage;
+      const thumbnail =
+        v.images.find((i) => i.isThumbnail) || productThumbnailImage;
       return {
         id: v.id,
         productSlug: slug,
         sku: v.sku,
         name: (data.data?.productBySlug?.name ?? slug) + " " + variantName,
         priceInCents: v.priceInCents,
-        imageUrl: thumbnail
-          ? getImageSrc(thumbnail.mimeType, thumbnail.base64)
-          : undefined,
+        imageUrl: thumbnail ? getImageSrc(thumbnail.url) : undefined,
       };
     });
 
@@ -102,16 +101,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
     .join(", ");
   return (
     <div className="max-width-container w-full mx-auto mt-6 sm:mt-12 gap-y-6 sm:gap-y-12 flex flex-col relative items-center">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 sm:gap-y-8 gap-x-8">
+      <div className="grid grid-cols-1 sm:grid-cols-[600px_600px] gap-y-5 sm:gap-y-8 gap-x-8">
         <ProductImages
           images={allImages}
           thumbnailImage={
             thumbnailImage
               ? {
-                  url: getImageSrc(
-                    thumbnailImage.mimeType,
-                    thumbnailImage.base64,
-                  ),
+                  url: getImageSrc(thumbnailImage.url) ?? "",
                   altText: data.data!.productBySlug?.name || slug,
                   id: thumbnailImage.id,
                 }

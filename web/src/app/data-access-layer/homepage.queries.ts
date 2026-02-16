@@ -5,7 +5,7 @@ import "server-only";
 import { ActionResponse } from "./formActionResponse";
 import { ExecutionResult } from "graphql";
 import { HomepageQueryQuery } from "@/graphql/graphql";
-import { execute } from "@/graphql/execute";
+import { execute, executeWithCache } from "@/graphql/execute";
 import { handleGraphqlError } from "./admin/handleGraphqlFormError";
 
 const HomepageQueryDocument = graphql(`
@@ -21,8 +21,7 @@ const HomepageQueryDocument = graphql(`
             translatedValue
           }
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
           product {
             slug
@@ -30,8 +29,7 @@ const HomepageQueryDocument = graphql(`
             id
             description
             thumbnailImage {
-              base64
-              mimeType
+              url
             }
           }
         }
@@ -43,8 +41,7 @@ const HomepageQueryDocument = graphql(`
         sku
         priceInCents
         thumbnailImage {
-          base64
-          mimeType
+          url
         }
         product {
           id
@@ -52,8 +49,7 @@ const HomepageQueryDocument = graphql(`
           name
           description
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
         }
         attributes {
@@ -72,7 +68,7 @@ const HomepageQueryDocument = graphql(`
 export async function getHomepageData(): Promise<
   ActionResponse<ExecutionResult<HomepageQueryQuery>["data"]>
 > {
-  const res = await execute(HomepageQueryDocument);
+  const res = await executeWithCache(HomepageQueryDocument);
   if (res.errors) {
     return handleGraphqlError(res.errors);
   }

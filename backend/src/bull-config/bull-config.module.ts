@@ -9,13 +9,10 @@ import { Env } from 'src/config/validate';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory(configService: ConfigService<Env>) {
+      useFactory(configService: ConfigService<Env, true>) {
         return {
           connection: {
-            host: configService.get('REDIS_HOST'),
-            port: configService.get('REDIS_PORT'),
-            username: configService.get('REDIS_USERNAME'),
-            password: configService.get('REDIS_PASSWORD'),
+            url: configService.get('REDIS_URL'),
           },
         };
       },

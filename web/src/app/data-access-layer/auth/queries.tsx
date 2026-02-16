@@ -9,10 +9,7 @@ export const MeFragment = graphql(`
     lastName
     role
     email
-    avatar {
-      base64
-      mimeType
-    }
+    avatarUrl
   }
 `);
 

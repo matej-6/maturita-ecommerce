@@ -84,14 +84,10 @@ export default async function AccountDetailsPage() {
               </span>
               <UpdateAccountAvatarButton
                 firstName={user.firstName || undefined}
-                imageUrl={
-                  user.avatar
-                    ? getImageSrc(user.avatar.mimeType, user.avatar.base64)
-                    : undefined
-                }
+                imageUrl={getImageSrc(user.avatarUrl ?? undefined)}
               />
             </div>
-            {user.avatar && <RemoveAccountAvatarButton />}
+            {user.avatarUrl && <RemoveAccountAvatarButton />}
           </div>
           <div className="bg-muted h-0.5 w-full" />
           <div className="w-full flex justify-between items-start">

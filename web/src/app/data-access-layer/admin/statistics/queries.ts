@@ -75,15 +75,13 @@ export const AdminPageStatisticsQueryDocument = graphql(`
         id
         sku
         thumbnailImage {
-          base64
-          mimeType
+          url
         }
         product {
           id
           slug
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
         }
       }
@@ -97,15 +95,13 @@ export const AdminPageStatisticsQueryDocument = graphql(`
         id
         sku
         thumbnailImage {
-          base64
-          mimeType
+          url
         }
         product {
           id
           slug
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
         }
       }
@@ -119,15 +115,13 @@ export const AdminPageStatisticsQueryDocument = graphql(`
         id
         sku
         thumbnailImage {
-          base64
-          mimeType
+          url
         }
         product {
           id
           slug
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
         }
       }

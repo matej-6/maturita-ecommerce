@@ -26,6 +26,9 @@ export class User implements Partial<UserDto> {
 
   @Field(() => Date)
   updatedAt: Date;
+
+  @Field(() => String, { nullable: true })
+  avatarUrl: string | null;
 }
 
 registerEnumType(Role, {

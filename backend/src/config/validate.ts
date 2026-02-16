@@ -1,7 +1,6 @@
 import z from 'zod';
 
 const envSchema = z.object({
-  PORT: z.coerce.number().default(8080),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
@@ -14,7 +13,7 @@ const envSchema = z.object({
   STRIPE_API_KEY: z.string(),
   STRIPE_WEBHOOK_SECRET: z.string(),
   NEXTJS_URL: z.string(),
-  OLLAMA_BASE_URL: z.string().optional(),
+  OLLAMA_HOST: z.string().optional(),
   OLLAMA_LLM_MODEL: z.string().optional(),
   OLLAMA_EMBEDDING_MODEL: z.string().optional(),
   OLLAMA_EMBEDDING_MODEL_DIMENSION: z.coerce.number().optional(),

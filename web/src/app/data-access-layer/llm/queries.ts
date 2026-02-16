@@ -12,8 +12,7 @@ export const LLMUserTaskByIdQuery = graphql(`
           slug
           name
           thumbnailImage {
-            mimeType
-            base64
+            url
           }
         }
       }

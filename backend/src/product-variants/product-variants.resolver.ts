@@ -39,7 +39,6 @@ export class ProductVariantsResolver {
     @Args('attributeFilters', { type: () => [[String]], nullable: true })
     attributeFilters: string[][] | null,
   ): Promise<PaginatedProductVariant> {
-
     return this.productVariantsService.searchProductVariants(
       searchTerm,
       paginationArgs,
@@ -106,9 +105,8 @@ export class ProductVariantsResolver {
       await ctx.loaders.productVariantAllImagesLoader.load(productVariant.id)
     ).map((image) => ({
       id: image.id,
-      base64: image.base64,
-      mimeType: image.mimeType,
       isThumbnail: image.isThumbnail,
+      url: this.productVariantsService.getImageUrl(image.fileName),
       productVariantId: image.productVariantId!,
     }));
   }
@@ -130,25 +128,10 @@ export class ProductVariantsResolver {
     }
     return {
       id: thumbnail.id,
-      base64: thumbnail.base64,
-      mimeType: thumbnail.mimeType,
       isThumbnail: thumbnail.isThumbnail,
       productVariantId: thumbnail.productVariantId!,
+      url: this.productVariantsService.getImageUrl(thumbnail.fileName),
     };
-  }
-
-  @UseGuards(AdminGuard)
-  @Mutation(() => ProductVariantImage)
-  async addProductVariantImage(
-    @Args('productVariantId', { type: () => Int }) productVariantId: number,
-    @Args('base64', { type: () => String }) base64: string,
-    @Args('mimeType', { type: () => String }) mimeType: string,
-  ): Promise<ProductVariantImage> {
-    return this.productVariantsService.addImage(
-      productVariantId,
-      base64,
-      mimeType,
-    );
   }
 
   @UseGuards(AdminGuard)

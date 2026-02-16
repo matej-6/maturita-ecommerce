@@ -65,9 +65,7 @@ export default async function HomePage() {
                 priceInCents: variant.priceInCents,
                 productSlug: variant.product.slug,
                 sku: variant.sku,
-                imageUrl: thumbnailImage
-                  ? getImageSrc(thumbnailImage.mimeType, thumbnailImage.base64)
-                  : undefined,
+                imageUrl: getImageSrc(thumbnailImage?.url),
               };
             })}
           />
@@ -97,9 +95,7 @@ export default async function HomePage() {
                 priceInCents: variant.priceInCents,
                 productSlug: variant.product.slug,
                 sku: variant.sku,
-                imageUrl: thumbnailImage
-                  ? getImageSrc(thumbnailImage.mimeType, thumbnailImage.base64)
-                  : undefined,
+                imageUrl: getImageSrc(thumbnailImage?.url),
               };
             })}
           />

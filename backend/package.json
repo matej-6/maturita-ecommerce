@@ -8,8 +8,8 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start --env-file .env.production",
-    "dev": "nest start --watch --env-file .env",
+    "start": "nest start",
+    "dev": "nest start --watch",
     "seed": "ts-node -r tsconfig-paths/register ./src/seed.ts",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
@@ -73,6 +73,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",

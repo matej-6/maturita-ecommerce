@@ -74,8 +74,7 @@ export const ProductDetailPageQueryDocument = graphql(`
       }
       images {
         id
-        base64
-        mimeType
+        url
         isThumbnail
       }
       variants(includeHidden: true) {
@@ -100,8 +99,7 @@ export const ProductDetailPageQueryDocument = graphql(`
         }
         images {
           id
-          base64
-          mimeType
+          url
           isThumbnail
         }
       }

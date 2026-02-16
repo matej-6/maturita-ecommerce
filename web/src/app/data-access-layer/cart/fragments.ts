@@ -11,8 +11,7 @@ export const CartFragment = graphql(`
         stock
         id
         thumbnailImage {
-          base64
-          mimeType
+          url
         }
         attributes {
           key {
@@ -26,8 +25,7 @@ export const CartFragment = graphql(`
           name
           slug
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
         }
       }

@@ -49,7 +49,7 @@ type UserPromptResponse = {
 export class LLMTaskConsumer extends WorkerHost {
   private readonly logger = new Logger(LLMTaskConsumer.name);
 
-  private readonly LLM_BASE_URL: string;
+  private readonly OLLAMA_HOST: string;
   private readonly LLM_MODEL: string;
   private readonly EMBEDDING_MODEL: string;
   constructor(
@@ -62,7 +62,7 @@ export class LLMTaskConsumer extends WorkerHost {
     private readonly i18nService: I18nService,
   ) {
     super();
-    this.LLM_BASE_URL = this.configService.getOrThrow('OLLAMA_BASE_URL');
+    this.OLLAMA_HOST = this.configService.getOrThrow('OLLAMA_HOST');
     this.LLM_MODEL = this.configService.getOrThrow('OLLAMA_LLM_MODEL');
     this.EMBEDDING_MODEL = this.configService.getOrThrow(
       'OLLAMA_EMBEDDING_MODEL',
@@ -71,7 +71,7 @@ export class LLMTaskConsumer extends WorkerHost {
 
   private get ollamaClient(): Ollama {
     return new Ollama({
-      host: this.LLM_BASE_URL,
+      host: this.OLLAMA_HOST,
     });
   }
 

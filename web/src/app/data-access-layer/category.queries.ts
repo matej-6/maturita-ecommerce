@@ -55,8 +55,7 @@ const CategoryQueryDocument = graphql(`
             product {
               slug
               thumbnailImage {
-                base64
-                mimeType
+                url
               }
               name
               description
@@ -64,8 +63,7 @@ const CategoryQueryDocument = graphql(`
             id
             sku
             thumbnailImage {
-              base64
-              mimeType
+              url
             }
             priceInCents
             stock

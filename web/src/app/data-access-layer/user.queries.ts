@@ -14,10 +14,7 @@ const AccountDetailsPageDocument = graphql(`
       firstName
       lastName
       email
-      avatar {
-        base64
-        mimeType
-      }
+      avatarUrl
       createdAt
       updatedAt
       orders {

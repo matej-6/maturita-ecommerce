@@ -54,14 +54,17 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<UserDto | null> {
-    const user = await this.usersService.findOneByEmail(email);
-
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        email,
+      },
+    });
     const hashedPassword = hashPassword(password);
 
     if (user && user.hashedPassword === hashedPassword) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { hashedPassword, ...rest } = user;
-      return rest;
+      return this.usersService.toUserDTO(rest);
     }
     return null;
   }

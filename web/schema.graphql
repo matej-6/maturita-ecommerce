@@ -212,8 +212,6 @@ type Locale {
 
 type Mutation {
   addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
-  addProductImage(base64: String!, mimeType: String!, productId: Int!): ProductImage!
-  addProductVariantImage(base64: String!, mimeType: String!, productVariantId: Int!): ProductVariantImage!
   cancelOrder(id: Int!): Order!
   changePassword(currentPassword: String!, newPassword: String!): Void!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -261,7 +259,6 @@ type Mutation {
   updateProductVariantAttributeTranslation(input: UpdateProductVariantAttributeTranslationInput!): ProductVariantAttributeTranslation!
   updateUser(input: UpdateUserInput!): User!
   updateUserRole(newRole: Role!, userId: Int!): Void!
-  uploadAvatar(base64: String!, mimeType: String!): Void!
 }
 
 type Order {
@@ -403,11 +400,10 @@ type ProductEmbedding {
 }
 
 type ProductImage {
-  base64: String!
   id: Int!
   isThumbnail: Boolean!
-  mimeType: String!
   productId: Int!
+  url: String!
 }
 
 type ProductTranslation {
@@ -479,11 +475,10 @@ type ProductVariantEdge {
 }
 
 type ProductVariantImage {
-  base64: String!
   id: Int!
   isThumbnail: Boolean!
-  mimeType: String!
   productVariantId: Int!
+  url: String!
 }
 
 type Query {
@@ -666,7 +661,7 @@ input UpdateUserInput {
 }
 
 type User {
-  avatar: UserAvatar
+  avatarUrl: String
   createdAt: DateTime!
   email: String!
   firstName: String!
@@ -675,13 +670,6 @@ type User {
   orders: [Order!]!
   role: Role!
   updatedAt: DateTime!
-}
-
-type UserAvatar {
-  base64: String!
-  id: Int!
-  mimeType: String!
-  userId: Int!
 }
 
 type UserEdge {

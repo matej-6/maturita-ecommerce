@@ -100,20 +100,6 @@ export class ProductsResolver {
   }
 
   @UseGuards(AdminGuard)
-  @Mutation(() => ProductImage)
-  async addProductImage(
-    @Args('productId', { type: () => Int }) productId: number,
-    @Args('base64') base64: string,
-    @Args('mimeType') mimeType: string,
-  ) {
-    return await this.productsService.addProductImage(
-      productId,
-      base64,
-      mimeType,
-    );
-  }
-
-  @UseGuards(AdminGuard)
   @Mutation(() => Int)
   async deleteProductImage(
     @Args('productImageId', { type: () => Int }) productImageId: number,
@@ -235,9 +221,8 @@ export class ProductsResolver {
     const images = await ctx.loaders.productAllImagesLoader.load(product.id);
     return images.map((img) => ({
       id: img.id,
-      base64: img.base64,
+      url: this.productsService.getProductImageUrl(img.fileName),
       isThumbnail: img.isThumbnail,
-      mimeType: img.mimeType,
       productId: img.productId!,
     }));
   }
@@ -254,10 +239,9 @@ export class ProductsResolver {
     }
     return {
       id: thumbnail.id,
-      base64: thumbnail.base64,
       isThumbnail: thumbnail.isThumbnail,
-      mimeType: thumbnail.mimeType,
       productId: thumbnail.productId!,
+      url: this.productsService.getProductImageUrl(thumbnail.fileName),
     };
   }
 

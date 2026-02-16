@@ -13,7 +13,7 @@ export async function fetchInternal(
   }
 
   return fetch(input, {
-    ...init,
     cache: "no-store",
+    ...init,
   });
 }

@@ -10,7 +10,7 @@ import {
   UpdateUserPasswordMutation,
 } from "./mutations";
 import { handleGraphqlError } from "../admin/handleGraphqlFormError";
-import { authLogoutAction } from "../auth/actions";
+import { authLogoutAction, getAuthToken } from "../auth/actions";
 import { ExecutionResult } from "graphql";
 import {
   UpdateUserMutationMutation,
@@ -18,6 +18,8 @@ import {
 } from "@/graphql/graphql";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { fetchBackend } from "../fetch-backend";
+import { fetchInternal } from "../fetch-internal";
 
 export async function deleteUserAccountAction(): Promise<ActionResponse<void>> {
   const res = await execute(DeleteUserAccountMutation);
@@ -39,19 +41,32 @@ export async function deleteUserAccountAction(): Promise<ActionResponse<void>> {
 }
 
 export async function updateUserAvatarAction(
-  base64: string,
-  mimeType: string,
+  formData: FormData,
 ): Promise<ActionResponse<void>> {
-  const res = await execute(UpdateAccountAvatarMutation, {
-    base64: base64,
-    mimeType: mimeType,
-  });
+  const locale = await getLocale();
+  const authToken = await getAuthToken();
 
-  if (res.errors) {
-    return handleGraphqlError(res.errors);
+  const headers: HeadersInit = {
+    "x-custom-lang": locale,
+  };
+  if (authToken) {
+    headers["Authorization"] = "Bearer " + authToken;
   }
 
-  const locale = await getLocale();
+  const res = await fetchInternal(
+    process.env.BACKEND_URL + "/users/upload-avatar",
+    {
+      method: "POST",
+      body: formData,
+      headers,
+    },
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+
   revalidatePath(`/${locale}/account-details`);
 
   return {

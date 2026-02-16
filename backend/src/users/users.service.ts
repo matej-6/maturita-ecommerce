@@ -6,25 +6,43 @@ import {
 } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserDto } from './dto/user.dto';
-import { Role, User, UserAvatar } from 'generated/prisma/client';
+import { Role, User } from 'generated/prisma/client';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { UserFindAllQueryArgs, UserSortingArgs } from './user.resolver.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { PaginatedUser } from './entities/user.entity';
 import { ERROR } from 'src/errors';
 import { hashPassword } from 'src/lib/hashing';
+import { ImageStorageService } from 'src/image-storage/image-storage.service';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private imageStorageService: ImageStorageService,
+  ) {}
 
-  async create(createUserInput: CreateUserInput) {
-    let hashedPassword = hashPassword(createUserInput.password);
+  toUserDTO(user: Omit<User, 'hashedPassword'>): UserDto {
+    return {
+      createdAt: user.createdAt,
+      email: user.email,
+      firstName: user.firstName,
+      id: user.id,
+      lastName: user.lastName,
+      role: user.role,
+      updatedAt: user.updatedAt,
+      avatarUrl: user.avatarFileName
+        ? this.imageStorageService.getImageUrl(user.avatarFileName)
+        : null,
+    };
+  }
+
+  async create(createUserInput: CreateUserInput): Promise<UserDto> {
+    const hashedPassword = hashPassword(createUserInput.password);
 
     try {
       const user = await this.prisma.user.create({
@@ -36,7 +54,7 @@ export class UsersService {
         },
       });
       this.logger.log(`User created: ${user.id}`);
-      return user;
+      return this.toUserDTO(user);
     } catch (err: unknown) {
       if (
         err instanceof PrismaClientKnownRequestError &&
@@ -48,14 +66,15 @@ export class UsersService {
     }
   }
 
-  async findOneByEmail(email: string): Promise<User | null> {
+  async findOneByEmail(email: string): Promise<UserDto | null> {
     try {
       const user = await this.prisma.user.findUnique({
         where: {
           email,
         },
       });
-      return user;
+      if (!user) return null;
+      return this.toUserDTO(user);
     } catch (err) {
       this.logger.error('Failed to find user by email: ', err);
       throw new InternalServerErrorException(ERROR.unknownError);
@@ -71,11 +90,8 @@ export class UsersService {
           firstName: input.name,
           lastName: input.lastName,
         },
-        omit: {
-          hashedPassword: true,
-        },
       });
-      return user;
+      return this.toUserDTO(user);
     } catch (err) {
       if (
         err instanceof PrismaClientKnownRequestError &&
@@ -97,12 +113,12 @@ export class UsersService {
 
   async findAll(): Promise<UserDto[]> {
     try {
-      const users: UserDto[] = await this.prisma.user.findMany({
+      const users = await this.prisma.user.findMany({
         omit: {
           hashedPassword: true,
         },
       });
-      return users;
+      return users.map((u) => this.toUserDTO(u));
     } catch (err) {
       this.logger.error('Failed to find all users: ', err);
       throw new InternalServerErrorException(ERROR.unknownError);
@@ -117,7 +133,9 @@ export class UsersService {
           hashedPassword: true,
         },
       });
-      return user;
+
+      if (!user) return null;
+      return this.toUserDTO(user);
     } catch (err) {
       this.logger.error('Failed to find user: ', err);
       throw new InternalServerErrorException(ERROR.unknownError);
@@ -126,29 +144,60 @@ export class UsersService {
 
   async uploadAvatar(
     userId: number,
-    base64: string,
-    mimeType: string,
+    file: {
+      buffer: Buffer;
+      mimeType: string;
+    },
   ): Promise<void> {
-    await this.prisma.userAvatar.upsert({
+    const user = await this.prisma.user.findFirst({
       where: {
-        userId: userId,
+        id: userId,
       },
-      create: {
-        userId: userId,
-        base64: base64,
-        mimeType: mimeType,
+      select: {
+        avatarFileName: true,
       },
-      update: {
-        base64: base64,
-        mimeType: mimeType,
+    });
+
+    if (!user) {
+      throw new BadRequestException(ERROR.badRequest);
+    }
+
+    if (user.avatarFileName) {
+      await this.imageStorageService.deleteImage(user.avatarFileName);
+    }
+
+    const fileName = this.imageStorageService.getImageFileName(file);
+    await this.imageStorageService.saveImageFile(fileName, file.buffer);
+
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        avatarFileName: fileName,
       },
     });
   }
 
   async deleteAvatar(userId: number): Promise<void> {
-    await this.prisma.userAvatar.deleteMany({
+    const user = await this.prisma.user.findUnique({
       where: {
-        userId: userId,
+        id: userId,
+      },
+    });
+
+    if (!user || !user.avatarFileName) {
+      throw new BadRequestException(ERROR.badRequest);
+    }
+
+    await this.imageStorageService.deleteImage(user.avatarFileName);
+
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        avatarFileName: null,
       },
     });
   }
@@ -166,7 +215,8 @@ export class UsersService {
     }
 
     const newHashedPassword = hashPassword(newPassword);
-    if (user.hashedPassword === newHashedPassword) {
+    const currHashedPassword = hashPassword(currentPassword);
+    if (user.hashedPassword !== currHashedPassword) {
       throw new BadRequestException('users.service.currentPasswordIncorrect');
     }
 
@@ -176,12 +226,8 @@ export class UsersService {
     });
   }
 
-  async getAvatar(userId: number): Promise<UserAvatar | null> {
-    return (
-      (await this.prisma.userAvatar.findFirst({
-        where: { userId },
-      })) ?? null
-    );
+  getAvatarUrl(avatarFileName: string): string {
+    return this.imageStorageService.getImageUrl(avatarFileName);
   }
 
   async findAllPaginated(
@@ -230,7 +276,7 @@ export class UsersService {
       totalCount: users.length,
       edges: users.map((user) => ({
         cursor: user.id,
-        node: user,
+        node: this.toUserDTO(user),
       })),
     };
   }

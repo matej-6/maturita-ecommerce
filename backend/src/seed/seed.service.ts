@@ -242,21 +242,19 @@ export class SeedService implements OnModuleInit {
       },
     );
 
-    await this.productsService.addProductImage(
-      creatineMonohydrate.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(creatineMonohydrate.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/creatine-monohydrate-1.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
-    await this.productsService.addProductImage(
-      creatineMonohydrate.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(creatineMonohydrate.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/creatine-monohydrate-2.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
     const creatineGummies = await this.productsService.create({
       isPublic: true,
@@ -286,14 +284,13 @@ export class SeedService implements OnModuleInit {
       ),
     });
 
-    await this.productsService.addProductImage(
-      creatineGummies.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(creatineGummies.id, {
+      buffer: this.getFileBuffer(
         __dirname +
           '/../../prisma/seed/data/images/creatine-monohydrate-gummies-1.jpg',
       ),
-      'image/jpg',
-    );
+      mimeType: 'image/jpg',
+    });
 
     const proteinPowder = await this.productsService.create({
       isPublic: true,
@@ -323,21 +320,19 @@ export class SeedService implements OnModuleInit {
       ),
     });
 
-    await this.productsService.addProductImage(
-      proteinPowder.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(proteinPowder.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/protein-powder-1.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
-    await this.productsService.addProductImage(
-      proteinPowder.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(proteinPowder.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/protein-powder-2.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
     const proteinBar = await this.productsService.create({
       isPublic: true,
@@ -367,22 +362,20 @@ export class SeedService implements OnModuleInit {
       ),
     });
 
-    await this.productsService.addProductImage(
-      proteinBar.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(proteinBar.id, {
+      buffer: this.getFileBuffer(
         __dirname +
           '/../../prisma/seed/data/images/protein-bar-chocolate-1.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
-    await this.productsService.addProductImage(
-      proteinBar.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(proteinBar.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/protein-bar-vanilla-1.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
     const compressionShirt = await this.productsService.create({
       isPublic: true,
@@ -412,21 +405,19 @@ export class SeedService implements OnModuleInit {
       ),
     });
 
-    await this.productsService.addProductImage(
-      compressionShirt.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(compressionShirt.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/compression-shirt-1.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
-    await this.productsService.addProductImage(
-      compressionShirt.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(compressionShirt.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/compression-shirt-2.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
     const shorts = await this.productsService.create({
       isPublic: true,
@@ -456,13 +447,12 @@ export class SeedService implements OnModuleInit {
       ),
     });
 
-    await this.productsService.addProductImage(
-      shorts.id,
-      this.encodeToBase64(
+    await this.productsService.addProductImage(shorts.id, {
+      buffer: this.getFileBuffer(
         __dirname + '/../../prisma/seed/data/images/shorts-1.png',
       ),
-      'image/png',
-    );
+      mimeType: 'image/png',
+    });
 
     const weight300g = await this.attributesService.create({
       keyId: weightKey.id,
@@ -815,7 +805,7 @@ export class SeedService implements OnModuleInit {
     }
   }
 
-  private encodeToBase64(file: string) {
-    return fs.readFileSync(file, { encoding: 'base64' });
+  private getFileBuffer(file: string) {
+    return fs.readFileSync(file);
   }
 }

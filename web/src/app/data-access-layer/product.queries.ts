@@ -1,7 +1,7 @@
 "use server";
 
 import { graphql } from "@/graphql";
-import { execute } from "@/graphql/execute";
+import { execute, executeWithCache } from "@/graphql/execute";
 import { ProductIdBySlugQuery, ProductPageQueryQuery } from "@/graphql/graphql";
 import { ExecutionResult } from "graphql";
 import "server-only";
@@ -17,8 +17,7 @@ const ProductPageDocument = graphql(`
       markdownContent
       images {
         id
-        base64
-        mimeType
+        url
         isThumbnail
       }
       variants {
@@ -28,8 +27,7 @@ const ProductPageDocument = graphql(`
         priceInCents
         images {
           id
-          base64
-          mimeType
+          url
           isThumbnail
         }
         attributes {
@@ -56,7 +54,7 @@ const ProductIdBySlugDocument = graphql(`
 export async function getProductPageData(
   slug: string,
 ): Promise<ActionResponse<ExecutionResult<ProductPageQueryQuery>["data"]>> {
-  const res = await execute(ProductPageDocument, { slug: slug });
+  const res = await executeWithCache(ProductPageDocument, { slug: slug });
 
   if (res.errors) {
     return handleGraphqlError(res.errors);

@@ -33,6 +33,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     this.logger.debug(`
+      exception: {
+        message: ${exc.message},
+        stack: ${exc.stack}
+      }
       response: {
         message: ${message},
         statusCode: ${exc.getStatus()}

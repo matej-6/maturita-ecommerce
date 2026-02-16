@@ -11,6 +11,7 @@ import {
   AttributeKeyTranslation,
   AttributeTranslation,
   ProductImage,
+  ProductVariantImage,
 } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoriesService } from 'src/categories/categories.service';
@@ -247,7 +248,7 @@ export class DataloaderService {
   }
 
   private createProductVariantAllImagesLoader() {
-    return new DataLoader<number, ProductImage[]>(
+    return new DataLoader<number, ProductVariantImage[]>(
       async (productVariantIds: number[]) => {
         return await this.productVariantsService.getAllImagesForVariantsByBatch(
           productVariantIds,
@@ -267,7 +268,7 @@ export class DataloaderService {
   private createProductVariantProductLoader() {
     return new DataLoader<number, Product>(
       async (productVariantIds: number[]) => {
-        return await this.productVariantsService.getProductsForVariantsByBatch(
+        return await this.productsService.getProductsForVariantsByBatch(
           productVariantIds,
         );
       },

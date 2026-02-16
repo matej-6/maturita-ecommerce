@@ -20,6 +20,8 @@ import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { ProductEmbedding } from './entities/product-embedding.entity';
 import { ProductContentEmbedding } from './entities/product-content-embedding.entity';
 import { ERROR } from 'src/errors';
+import { ImageStorageService } from 'src/image-storage/image-storage.service';
+import { ProductVariantsService } from 'src/product-variants/product-variants.service';
 
 @Injectable()
 export class ProductsService {
@@ -30,6 +32,8 @@ export class ProductsService {
     private readonly localesService: LocalesService,
     private readonly qdrantService: QdrantService,
     private readonly llmService: LLMPromptsService,
+    private readonly imageStorageService: ImageStorageService,
+    private readonly productVariantsService: ProductVariantsService,
   ) {}
 
   async create(input: CreateProductInput) {
@@ -94,11 +98,13 @@ export class ProductsService {
     return updatedImage;
   }
 
-  async addProductImage(productId: number, base64: string, mimeType: string) {
-    if (!mimeType.startsWith('image/')) {
-      throw new BadRequestException('products.service.invalidImageMimeType');
-    }
-
+  async addProductImage(
+    productId: number,
+    file: {
+      buffer: Buffer;
+      mimeType: string;
+    },
+  ) {
     const [product, existingThumbnail] = await Promise.all([
       this.prisma.product.findFirst({
         where: {
@@ -125,11 +131,13 @@ export class ProductsService {
       );
     }
 
+    const fileName = this.imageStorageService.getImageFileName(file);
+    await this.imageStorageService.saveImageFile(fileName, file.buffer);
+
     const newImage = await this.prisma.productImage.create({
       data: {
         productId: productId,
-        base64: base64,
-        mimeType: mimeType,
+        fileName,
         isThumbnail: existingThumbnail ? false : true,
       },
     });
@@ -680,6 +688,10 @@ export class ProductsService {
     };
   }
 
+  getProductImageUrl(imageFileName: string) {
+    return this.imageStorageService.getImageUrl(imageFileName);
+  }
+
   async removeCategoryFromProducts(categoryId: number) {
     await this.prisma.product.updateMany({
       where: {
@@ -789,13 +801,41 @@ export class ProductsService {
       await this.deleteProductEmbeddings(id, embedding.lang);
     }
 
-    const deletedProductId = await this.prisma.$transaction(async (tx) => {
-      await tx.productImage.deleteMany({
-        where: {
-          OR: [{ productId: id }, { ProductVariant: { productId: id } }],
-        },
-      });
+    const imagesToDelete = await this.prisma.productImage.findMany({
+      where: {
+        productId: id,
+      },
+    });
 
+    for (const image of imagesToDelete) {
+      try {
+        await this.deleteProductImage(image.id);
+      } catch (e) {
+        this.logger.error(
+          `Failed to delete product image with id ${image.id}`,
+          e,
+        );
+      }
+    }
+
+    const productVariants = await this.prisma.productVariant.findMany({
+      where: {
+        productId: id,
+      },
+    });
+
+    for (const variant of productVariants) {
+      try {
+        await this.productVariantsService.remove(variant.id);
+      } catch (e) {
+        this.logger.error(
+          'failed to delete product variant with id ' + variant.id,
+          e,
+        );
+      }
+    }
+
+    const deletedProductId = await this.prisma.$transaction(async (tx) => {
       await tx.attribute.deleteMany({
         where: {
           ProductVariants: {
@@ -1124,17 +1164,13 @@ export class ProductsService {
       where: {
         id: productImageId,
       },
-      select: {
-        id: true,
-        isThumbnail: true,
-        productId: true,
-      },
     });
 
     if (!existingImage) {
       throw new BadRequestException('products.service.imageNotFound');
     }
 
+    await this.imageStorageService.deleteImage(existingImage.fileName);
     await this.prisma.productImage.delete({
       where: {
         id: productImageId,
@@ -1249,5 +1285,53 @@ export class ProductsService {
     });
 
     return embedding;
+  }
+
+  async getProductsForVariantsByBatch(
+    productVariantIds: number[],
+  ): Promise<Product[]> {
+    const products = await this.prisma.productVariant.findMany({
+      where: {
+        id: {
+          in: productVariantIds,
+        },
+      },
+      select: {
+        id: true,
+        Product: {
+          select: {
+            id: true,
+            isPublic: true,
+            categoryId: true,
+            createdAt: true,
+            updatedAt: true,
+            slug: true,
+            _count: {
+              select: {
+                ProductTranslations: {
+                  where: {
+                    locale: {
+                      equals: this.localesService.getDefaultLocale().code,
+                    },
+                  },
+                },
+                ProductVariants: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return productVariantIds.map((pv) => {
+      const found = products.find((p) => p.id === pv)!;
+      return {
+        ...found.Product,
+        isSetup: this.getIsSetup(
+          found.Product._count.ProductTranslations > 0,
+          found.Product._count.ProductVariants,
+        ),
+      };
+    });
   }
 }

@@ -39,38 +39,6 @@ export const EditProductMutation = graphql(`
   }
 `);
 
-export const AddImageMutation = graphql(`
-  mutation AddImageMutation(
-    $productId: Int!
-    $mimeType: String!
-    $base64: String!
-  ) {
-    addProductImage(
-      productId: $productId
-      mimeType: $mimeType
-      base64: $base64
-    ) {
-      id
-    }
-  }
-`);
-
-export const AddVariantImageMutation = graphql(`
-  mutation AddVariantImageMutation(
-    $productVariantId: Int!
-    $mimeType: String!
-    $base64: String!
-  ) {
-    addProductVariantImage(
-      productVariantId: $productVariantId
-      mimeType: $mimeType
-      base64: $base64
-    ) {
-      id
-    }
-  }
-`);
-
 export const SetImageThumbnailMutation = graphql(`
   mutation SetImageThumbnailMutation($imageId: Int!) {
     setProductThumbnailImage(productImageId: $imageId) {

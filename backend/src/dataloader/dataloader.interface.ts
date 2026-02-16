@@ -8,6 +8,7 @@ import {
   ProductImage,
   ProductTranslation,
   ProductVariant,
+  ProductVariantImage,
 } from 'generated/prisma/client';
 import DataLoader from 'dataloader';
 import { Product } from 'src/products/entities/product.entity';
@@ -29,7 +30,7 @@ export interface IDataLoaders {
     number,
     AttributeTranslation[]
   >;
-  productVariantAllImagesLoader: DataLoader<number, ProductImage[]>;
+  productVariantAllImagesLoader: DataLoader<number, ProductVariantImage[]>;
   attributeKeyByIdLoader: DataLoader<number, AttributeKey | null>;
   attributeKeyTranslationLoader: DataLoader<
     number,

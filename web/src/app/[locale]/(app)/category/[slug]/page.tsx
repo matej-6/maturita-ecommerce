@@ -166,9 +166,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                     key={productVariant.id}
                     variant={{
                       ...productVariant,
-                      imageUrl: image
-                        ? getImageSrc(image.mimeType, image.base64)
-                        : undefined,
+                      imageUrl: getImageSrc(image?.url),
                       productSlug: productVariant.product.slug,
                       name: name,
                       description: productVariant.product.description || "",

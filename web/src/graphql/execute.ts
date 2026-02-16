@@ -8,8 +8,11 @@ import { getAuthToken } from "@/app/data-access-layer/auth/actions";
 import { redirect } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 
-export async function execute<TResult, TVariables>(
+// https://the-guild.dev/graphql/codegen/docs/guides/vanilla-typescript
+
+async function _execute<TResult, TVariables>(
   query: TypedDocumentString<TResult, TVariables>,
+  cache: boolean = false,
   ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
 ) {
   const locale = await getLocale();
@@ -33,6 +36,7 @@ export async function execute<TResult, TVariables>(
       query,
       variables,
     }),
+    cache: cache ? "force-cache" : "no-store",
   });
 
   if ([401, 403].includes(response.status)) {
@@ -44,4 +48,18 @@ export async function execute<TResult, TVariables>(
   }
 
   return response.json() as ExecutionResult<TResult>;
+}
+
+export async function executeWithCache<TResult, TVariables>(
+  query: TypedDocumentString<TResult, TVariables>,
+  ...variables: TVariables extends Record<string, never> ? [] : [TVariables]
+) {
+  return _execute(query, true, ...variables);
+}
+
+export async function execute<TResult, TVariables>(
+  query: TypedDocumentString<TResult, TVariables>,
+  ...variables: TVariables extends Record<string, never> ? [] : [TVariables]
+) {
+  return _execute(query, false, ...variables);
 }

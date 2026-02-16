@@ -2,8 +2,8 @@
 
 import { Skeleton } from "./ui/skeleton";
 import { cn } from "@/lib/utils";
-import { getImageSrc } from "@/app/lib/utils";
 import { CurrentSession } from "@/app/data-access-layer/auth/queries";
+import { getImageSrc } from "@/app/lib/utils";
 
 const AvatarSizeClasses = {
   sm: "size-8",
@@ -27,9 +27,7 @@ export function Avatar({
     );
   }
 
-  const imageUrl = session.avatar
-    ? getImageSrc(session.avatar.mimeType, session.avatar.base64)
-    : null;
+  const imageUrl = getImageSrc(session.avatarUrl ?? undefined);
 
   const backupString = session.firstName[0]?.toUpperCase() || "";
 

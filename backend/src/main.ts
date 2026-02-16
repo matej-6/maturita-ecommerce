@@ -5,13 +5,14 @@ import { I18nMiddleware, I18nValidationPipe } from 'nestjs-i18n';
 import { AllExceptionsFilter } from './exception/all-exceptions.filter';
 import { ValidationFilter } from './validation/validation.filter';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
   });
   app.enableCors({
-    origin: process.env.NEXTJS_URL || ['http://localhost:3000'],
+    origin: [process.env.NEXTJS_URL!],
     credentials: true,
   });
   app.use(cookieParser());
@@ -30,6 +31,10 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 8080);
+  app.useStaticAssets(path.join(process.cwd(), 'public', 'images'), {
+    prefix: '/public/images/',
+  });
+
+  await app.listen(8080);
 }
 void bootstrap();

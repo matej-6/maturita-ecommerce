@@ -1,3 +1,4 @@
-export function getImageSrc(mimeType: string, base64: string) {
-  return `data:${mimeType};base64,${base64}`;
+export function getImageSrc(url?: string) {
+  if (!url) return undefined;
+  return process.env.NEXT_PUBLIC_BACKEND_URL + url;
 }

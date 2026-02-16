@@ -133,15 +133,13 @@ const AdminOrderDetailPageQueryDocument = graphql(`
           sku
           sku
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
           product {
             id
             slug
             thumbnailImage {
-              base64
-              mimeType
+              url
             }
           }
         }

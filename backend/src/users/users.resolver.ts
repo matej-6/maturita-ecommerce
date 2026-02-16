@@ -13,7 +13,6 @@ import { PaginatedUser, User } from './entities/user.entity';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserAvatar } from './entities/user-avatar.entity';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { GraphQLVoid } from 'graphql-scalars';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
@@ -55,29 +54,12 @@ export class UsersResolver {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ResolveField(() => UserAvatar, { name: 'avatar', nullable: true })
-  async getAvatar(@Parent() user: User): Promise<UserAvatar | null> {
-    return this.usersService.getAvatar(user.id);
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Mutation(() => User)
   async updateUser(
     @Args('input') input: UpdateUserInput,
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<User> {
     return this.usersService.update(user.id, input);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Mutation(() => GraphQLVoid)
-  async uploadAvatar(
-    @Args('base64') base64: string,
-    @Args('mimeType') mimeType: string,
-    @CurrentUser() user: AuthenticatedUserDto,
-  ): Promise<typeof GraphQLVoid> {
-    await this.usersService.uploadAvatar(user.id, base64, mimeType);
-    return GraphQLVoid;
   }
 
   @UseGuards(JwtAuthGuard)

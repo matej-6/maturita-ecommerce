@@ -33,14 +33,12 @@ const OrderDetailsPageDocument = graphql(`
           id
           sku
           thumbnailImage {
-            base64
-            mimeType
+            url
           }
           product {
             slug
             thumbnailImage {
-              base64
-              mimeType
+              url
             }
           }
         }
@@ -50,7 +48,7 @@ const OrderDetailsPageDocument = graphql(`
 `);
 
 export async function getOrderDetailsPageData(
-  id: number
+  id: number,
 ): Promise<
   ActionResponse<ExecutionResult<OrderDetailsPageQueryQuery>["data"]>
 > {

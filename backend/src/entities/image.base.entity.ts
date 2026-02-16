@@ -7,9 +7,7 @@ export abstract class BaseImageClass implements Partial<DbProductImage> {
   @Field(() => Int)
   id: number;
   @Field(() => String)
-  base64: string;
+  url: string;
   @Field(() => Boolean)
   isThumbnail: boolean;
-  @Field(() => String)
-  mimeType: string;
 }

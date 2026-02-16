@@ -4,9 +4,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // DOLEZITE: codegen command nefunguje dobre s bun. pouzivat len npm run codegen!!!!!!!
-
 const config: CodegenConfig = {
-  schema: process.env.GRAPHQL_URL!,
+  schema: process.env.BACKEND_URL + "/graphql",
   documents: [
     "src/**/*.tsx",
     "src/**/*queries.ts",
