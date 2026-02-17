@@ -5,8 +5,6 @@ services:
     environment:
       - MYSQL_DATABASE=app
       - MYSQL_ROOT_PASSWORD=password
-    # ports:
-    # - "3306:3306"
     volumes:
       - gofitshop_db_data:/var/lib/mysql
     networks:
@@ -14,7 +12,7 @@ services:
   redis:
     image: redis:7.4.1-alpine
     restart: unless-stopped
-    command: ["redis-server", "--loglevel", "warning"]
+    command: ["redis-server"]
     volumes:
       - gofitshop_redis_data:/data
     networks:
@@ -28,9 +26,9 @@ services:
       - gofitshop_network
   ollama:
     image: ollama/ollama:latest
-    # ports:
-    # - "11434:11434"
     restart: unless-stopped
+    volumes:
+      - gofitshop_ollama_data:/root/.ollama
     networks:
       - gofitshop_network
     entrypoint: >
@@ -42,28 +40,48 @@ services:
       wait
       "
   api:
-    build: .
+    image: node:22-bookworm
+    working_dir: /app
+    command: sh -c "NODE_ENV=production nest build && NODE_ENV=production nest start"
+    volumes:
+      - .:/app
+      - gofitshop_public_images_data:/app/public/images
     networks:
       - gofitshop_network
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     depends_on:
       - database
       - ollama
       - redis
       - qdrant
   nextjs:
-    build: ../web
+    image: node:22-bookworm
+    working_dir: /app
+    command: sh -c "NODE_ENV=production next start"
+    volumes:
+      - ../web:/app
     restart: unless-stopped
     networks:
       - gofitshop_network
-    ports:
-      - "3000:3000"
     depends_on:
       - api
-    environment:
-      - BACKEND_URL=http://api:8080
+  stripe-cli:
+    image: stripe/stripe-cli:v1.35.0
+    env_file:
+      - ./.env
+    command: "listen --api-key ${STRIPE_API_KEY} --device-name ${STRIPE_DEVICE_NAME} --forward-to http://api:8080/orders/webhook"
+    restart: unless-stopped
+    networks:
+      - gofitshop_network
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./conf:/etc/caddy
+    networks:
+      - gofitshop_network
 
 networks:
   gofitshop_network:
@@ -71,3 +89,5 @@ volumes:
   gofitshop_db_data:
   gofitshop_redis_data:
   gofitshop_qdrant_data:
+  gofitshop_public_images_data:
+  gofitshop_ollama_data:

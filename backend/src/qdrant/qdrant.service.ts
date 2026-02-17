@@ -23,7 +23,6 @@ export class QdrantService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    console.log('QdrantService initialized');
     this.logger.log('Initializing Qdrant client...');
 
     const qdrantUrl = this.configService.get('QDRANT_URL', { infer: true });

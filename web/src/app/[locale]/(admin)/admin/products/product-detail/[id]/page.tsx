@@ -10,7 +10,6 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ProductForm } from "../../../forms/product-sheet-form";
 import { ProductTranslation } from "../../../components/products/product-translation";
-import Image from "next/image";
 import { ProductImageForm } from "../../../forms/product-image-form";
 import { SetImageThumbnailButton } from "../../../components/products/set-image-thumbnail-button";
 import { DeleteImage } from "../../../components/products/delete-image-button";

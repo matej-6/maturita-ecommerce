@@ -11,8 +11,6 @@ import { setAuthCookies } from "./app/data-access-layer/auth/utils";
 import { fetchBackend } from "./app/data-access-layer/fetch-backend";
 
 export default async function middleware(req: NextRequest) {
-  console.log("RUNNING MIDDLEWARE");
-
   const handleI18nRouting = createMiddleware(routing);
 
   if (req.cookies.has(AUTHENTICATION_COOKIE_NAME)) {

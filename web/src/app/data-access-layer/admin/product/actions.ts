@@ -6,8 +6,6 @@ import { handleGraphqlError } from "../handleGraphqlFormError";
 import { NewProductPageQueryDocument } from "./queries";
 import { ExecutionResult } from "graphql";
 import {
-  AddImageMutationMutation,
-  AddVariantImageMutationMutation,
   CreateProductMutationMutation,
   CreateVariantMutationMutation,
   EditProductMutationMutation,
@@ -17,8 +15,6 @@ import {
   NewProductPage_QueryDocumentQuery,
 } from "@/graphql/graphql";
 import {
-  AddImageMutation,
-  AddVariantImageMutation,
   CreateProductMutation,
   CreateVariantMutation,
   DeleteProductImageMutation,
@@ -35,7 +31,6 @@ import {
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { fetchInternal } from "../../fetch-internal";
-import { useLocale } from "next-intl";
 import { getAuthToken } from "../../auth/actions";
 
 export async function createProductAction(data: {

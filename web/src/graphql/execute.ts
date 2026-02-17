@@ -2,7 +2,6 @@ import "server-only";
 
 import type { TypedDocumentString } from "./graphql";
 import { getLocale } from "next-intl/server";
-import { fetchInternal } from "@/app/data-access-layer/fetch-internal";
 import { ExecutionResult } from "graphql";
 import { getAuthToken } from "@/app/data-access-layer/auth/actions";
 import { redirect } from "@/i18n/navigation";
@@ -25,7 +24,7 @@ async function _execute<TResult, TVariables>(
     headers["Authorization"] = "Bearer " + authToken;
   }
 
-  const response = await fetchInternal(process.env.BACKEND_URL + "/graphql", {
+  const response = await fetch(process.env.BACKEND_URL + "/graphql", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

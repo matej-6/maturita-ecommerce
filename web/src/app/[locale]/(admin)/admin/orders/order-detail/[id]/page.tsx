@@ -191,10 +191,7 @@ export default async function AdminOrderPage({ params }: Props) {
                         <div className="w-full aspect-square overflow-hidden rounded-sm sm:rounded-md bg-muted flex items-center justify-center object-cover">
                           {thumbnailImage && (
                             <img
-                              src={getImageSrc(
-                                thumbnailImage.mimeType,
-                                thumbnailImage.base64,
-                              )}
+                              src={getImageSrc(thumbnailImage.url)}
                               alt={"Image of " + item.productVariant?.sku}
                             />
                           )}

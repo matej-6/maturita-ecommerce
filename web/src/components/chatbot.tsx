@@ -111,10 +111,7 @@ export function Chatbot({
                           ...p,
                           name: p.name || null,
                           imageUrl: p.thumbnailImage
-                            ? getImageSrc(
-                                p.thumbnailImage.mimeType,
-                                p.thumbnailImage.base64,
-                              )
+                            ? getImageSrc(p.thumbnailImage.url)
                             : undefined,
                         }))
                       : undefined,

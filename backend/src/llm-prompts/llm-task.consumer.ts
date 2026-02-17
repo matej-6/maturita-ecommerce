@@ -52,6 +52,7 @@ export class LLMTaskConsumer extends WorkerHost {
   private readonly OLLAMA_HOST: string;
   private readonly LLM_MODEL: string;
   private readonly EMBEDDING_MODEL: string;
+  private readonly EMBEDDING_MODEL_DIMENSIONS: number;
   constructor(
     @Inject(forwardRef(() => LLMPromptsService))
     private readonly llmPromptsService: LLMPromptsService,
@@ -66,6 +67,9 @@ export class LLMTaskConsumer extends WorkerHost {
     this.LLM_MODEL = this.configService.getOrThrow('OLLAMA_LLM_MODEL');
     this.EMBEDDING_MODEL = this.configService.getOrThrow(
       'OLLAMA_EMBEDDING_MODEL',
+    );
+    this.EMBEDDING_MODEL_DIMENSIONS = this.configService.getOrThrow(
+      'OLLAMA_EMBEDDING_MODEL_DIMENSION',
     );
   }
 
@@ -226,6 +230,7 @@ export class LLMTaskConsumer extends WorkerHost {
     const result = await this.ollamaClient.embed({
       model: this.EMBEDDING_MODEL,
       input: input,
+      dimensions: this.EMBEDDING_MODEL_DIMENSIONS,
     });
     for (const embedding of result.embeddings) {
       this.logger.log(`Embedding vector length: ${embedding.length}`);

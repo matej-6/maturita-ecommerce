@@ -5,7 +5,6 @@ import { ActionResponse } from "../formActionResponse";
 import {
   DeleteAccountAvatarMutation,
   DeleteUserAccountMutation,
-  UpdateAccountAvatarMutation,
   UpdateUserMutation,
   UpdateUserPasswordMutation,
 } from "./mutations";
@@ -18,7 +17,6 @@ import {
 } from "@/graphql/graphql";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
-import { fetchBackend } from "../fetch-backend";
 import { fetchInternal } from "../fetch-internal";
 
 export async function deleteUserAccountAction(): Promise<ActionResponse<void>> {

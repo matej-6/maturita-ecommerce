@@ -1,5 +1,4 @@
 import "server-only";
-import { fetchInternal } from "./fetch-internal";
 
 export async function fetchBackend(
   endpoint: string,
@@ -8,11 +7,12 @@ export async function fetchBackend(
   const backendUrl = process.env.BACKEND_URL;
   if (!backendUrl) throw new Error("No backend url found.");
   const { headers, ...rest } = init || {};
-  return fetchInternal(`${backendUrl}${endpoint}`, {
+  return fetch(`${backendUrl}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
       ...headers,
     },
+    cache: "no-store",
     ...rest,
   });
 }

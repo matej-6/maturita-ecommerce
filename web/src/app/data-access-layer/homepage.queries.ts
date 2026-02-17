@@ -5,7 +5,7 @@ import "server-only";
 import { ActionResponse } from "./formActionResponse";
 import { ExecutionResult } from "graphql";
 import { HomepageQueryQuery } from "@/graphql/graphql";
-import { execute, executeWithCache } from "@/graphql/execute";
+import { executeWithCache } from "@/graphql/execute";
 import { handleGraphqlError } from "./admin/handleGraphqlFormError";
 
 const HomepageQueryDocument = graphql(`

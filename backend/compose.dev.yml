@@ -5,8 +5,6 @@ services:
     environment:
       - MYSQL_DATABASE=app
       - MYSQL_ROOT_PASSWORD=password
-    ports:
-      - "3306:3306"
     volumes:
       - gofitshop_db_data_dev:/var/lib/mysql
     networks:
@@ -15,8 +13,6 @@ services:
     image: redis:7.4.1-alpine
     restart: unless-stopped
     command: ["redis-server", "--loglevel", "warning"]
-    ports:
-      - "6379:6379"
     volumes:
       - gofitshop_redis_data_dev:/data
     networks:
@@ -24,16 +20,12 @@ services:
   qdrant:
     image: qdrant/qdrant:latest
     restart: unless-stopped
-    ports:
-      - "6333:6333"
     volumes:
       - gofitshop_qdrant_data_dev:/qdrant/storage
     networks:
       - gofitshop_network_dev
   ollama:
     image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
     restart: unless-stopped
     volumes:
       - gofitshop_ollama_data_dev:/root/.ollama
@@ -56,8 +48,6 @@ services:
     networks:
       - gofitshop_network_dev
     command: sh -c "NODE_ENV=development npm run dev"
-    ports:
-      - "8080:8080"
     depends_on:
       - database
       - ollama
@@ -71,12 +61,25 @@ services:
     command: sh -c "NODE_ENV=development npm run dev"
     networks:
       - gofitshop_network_dev
-    ports:
-      - "3000:3000"
     depends_on:
       - api
-    environment:
-      - BACKEND_URL=http://api:8080
+  stripe-cli:
+    image: stripe/stripe-cli:v1.35.0
+    env_file:
+      - ./.env
+    command: "listen --api-key ${STRIPE_API_KEY} --device-name ${STRIPE_DEVICE_NAME} --forward-to http://api:8080/orders/webhook"
+    restart: unless-stopped
+    networks:
+      - gofitshop_network_dev
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./conf:/etc/caddy
+    networks:
+      - gofitshop_network_dev
 
 networks:
   gofitshop_network_dev:

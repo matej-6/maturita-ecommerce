@@ -1,0 +1,9 @@
+:80 {
+    reverse_proxy nextjs:3000
+    # reverse_proxy /api/* api:8080 - toto nemoze byt, pretoze chcem aby request isiel na api:8080, nie api:8080/api
+    handle_path /api/* {
+        reverse_proxy api:8080
+    }
+
+    log
+}
