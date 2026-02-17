@@ -42,7 +42,7 @@ services:
   api:
     image: node:22-bookworm
     working_dir: /app
-    command: sh -c "NODE_ENV=production nest build && NODE_ENV=production nest start"
+    command: sh -c "NODE_ENV=production npm run prod"
     volumes:
       - .:/app
       - gofitshop_public_images_data:/app/public/images
@@ -57,7 +57,7 @@ services:
   nextjs:
     image: node:22-bookworm
     working_dir: /app
-    command: sh -c "NODE_ENV=production next start"
+    command: sh -c "npm run start"
     volumes:
       - ../web:/app
     restart: unless-stopped

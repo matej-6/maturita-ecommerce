@@ -133,38 +133,7 @@ export class LLMPromptsService {
       : null;
   }
 
-  async markTaskAsFailed(id: number, errorMessage: string) {
-    await this.prisma.lLMTask.update({
-      where: { id },
-      data: {
-        status: LLMTaskStatus.FAILED,
-        response: { create: { text: errorMessage } },
-      },
-    });
-  }
-
-  async markTaskAsCompleted(
-    id: number,
-    response: string,
-    productIds?: number[],
-  ) {
-    await this.prisma.lLMTask.update({
-      where: { id },
-      data: {
-        status: LLMTaskStatus.COMPLETED,
-        response: {
-          create: {
-            text: response,
-            products: productIds
-              ? {
-                  connect: productIds.map((pid) => ({ id: pid })),
-                }
-              : undefined,
-          },
-        },
-      },
-    });
-  }
+  
 
   async cancelPrompt(id: number, userId: number): Promise<boolean> {
     const llmTask = await this.prisma.lLMTask.findUnique({

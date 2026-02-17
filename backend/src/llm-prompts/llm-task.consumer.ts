@@ -7,10 +7,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
-import { EmbeddingTaskStatus } from 'generated/prisma/enums';
+import { EmbeddingTaskStatus, LLMTaskStatus } from 'generated/prisma/enums';
 import { randomUUID } from 'node:crypto';
 import { Env } from 'src/config/validate';
-import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { LocalesService } from 'src/locales/locales.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
@@ -54,8 +53,6 @@ export class LLMTaskConsumer extends WorkerHost {
   private readonly EMBEDDING_MODEL: string;
   private readonly EMBEDDING_MODEL_DIMENSIONS: number;
   constructor(
-    @Inject(forwardRef(() => LLMPromptsService))
-    private readonly llmPromptsService: LLMPromptsService,
     private readonly prisma: PrismaService,
     private readonly qdrantService: QdrantService,
     private readonly configService: ConfigService<Env, true>,
@@ -79,6 +76,39 @@ export class LLMTaskConsumer extends WorkerHost {
     });
   }
 
+  async markTaskAsFailed(id: number, errorMessage: string) {
+    await this.prisma.lLMTask.update({
+      where: { id },
+      data: {
+        status: LLMTaskStatus.FAILED,
+        response: { create: { text: errorMessage } },
+      },
+    });
+  }
+
+  async markTaskAsCompleted(
+    id: number,
+    response: string,
+    productIds?: number[],
+  ) {
+    await this.prisma.lLMTask.update({
+      where: { id },
+      data: {
+        status: LLMTaskStatus.COMPLETED,
+        response: {
+          create: {
+            text: response,
+            products: productIds
+              ? {
+                  connect: productIds.map((pid) => ({ id: pid })),
+                }
+              : undefined,
+          },
+        },
+      },
+    });
+  }
+
   async process(job: Job<LLMTaskJob, any, string>): Promise<any> {
     this.logger.log(`Received job id ${job.id}, type ${job.name}`);
     switch (job.name as LLMTaskJobType) {
@@ -93,7 +123,7 @@ export class LLMTaskConsumer extends WorkerHost {
         }
         try {
           const response = await this.processUserPromptJob(jobData);
-          await this.llmPromptsService.markTaskAsCompleted(
+          await this.markTaskAsCompleted(
             jobData.id,
             response.text,
             response.productIds,
@@ -101,10 +131,7 @@ export class LLMTaskConsumer extends WorkerHost {
           return {};
         } catch (error) {
           this.logger.error('Error processing USER_PROMPT job', error);
-          await this.llmPromptsService.markTaskAsFailed(
-            jobData.id,
-            (error as Error).message,
-          );
+          await this.markTaskAsFailed(jobData.id, (error as Error).message);
           throw error;
         }
       }
