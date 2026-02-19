@@ -25,7 +25,6 @@ model User {
   hashedPassword String?
   firstName      String
   lastName       String
-  avatar         String?
   role           Role                  @default(USER)
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt

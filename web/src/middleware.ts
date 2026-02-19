@@ -25,7 +25,7 @@ export default async function middleware(req: NextRequest) {
   } else if (req.cookies.has(REFRESH_COOKIE_NAME)) {
     const newHeaders = new Headers(req.headers);
     const refreshToken = req.cookies.get(REFRESH_COOKIE_NAME)?.value;
-    const res = await fetchBackend(`/auth/refresh-token`, {
+    const res = await fetchBackend(`/auth/access-token`, {
       method: "POST",
       headers: {
         "x-refresh-token": refreshToken ?? "",
