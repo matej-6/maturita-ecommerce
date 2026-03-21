@@ -20,15 +20,14 @@ enum Role {
 }
 
 model User {
-  id             Int                   @id @default(autoincrement())
-  email          String                @unique
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
   hashedPassword String?
   firstName      String
   lastName       String
-  role           Role                  @default(USER)
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  Session        RefreshTokenSession[]
+  role           Role      @default(USER)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   Cart           Cart?
   orders         Order[]
   LLMTasks       LLMTask[]
@@ -36,21 +35,6 @@ model User {
 
   @@index([email])
   @@map("users")
-}
-
-model RefreshTokenSession {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  blacklisted Boolean  @default(false)
-  token       String   @unique
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([userId, blacklisted, expiresAt])
-  @@index([token])
-  @@map("refresh_token_sessions")
 }
 
 model Category {

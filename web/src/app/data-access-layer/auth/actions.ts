@@ -1,10 +1,6 @@
 "use server";
 
 import "server-only";
-import {
-  AUTH_TOKEN_HEADER_NAME,
-  REFRESH_COOKIE_NAME,
-} from "@/app/lib/auth.constants";
 import { fetchBackend } from "../fetch-backend";
 import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -15,12 +11,11 @@ import { MeFragment, meQueryDocument } from "./queries";
 import { redirect } from "@/i18n/navigation";
 import { execute } from "@/graphql/execute";
 import { getFragmentData } from "@/graphql";
+import { SESSION_COOKIE_NAME } from "@/app/lib/auth.constants";
 
 export type AuthResponse = {
-  accessToken: string;
-  accessTokenExpirationSeconds: number;
-  refreshToken: string;
-  refreshTokenExpirationSeconds: number;
+  sessionId: string;
+  expiresAt: string;
 };
 
 export type LogoutAllActionResult =
@@ -33,7 +28,7 @@ export type LogoutAllActionResult =
 
 export async function authLogoutAllAction(): Promise<LogoutAllActionResult> {
   const cookieStore = await cookies();
-  const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
   const locale = await getLocale();
   const t = await getTranslations("error");
 
@@ -42,35 +37,33 @@ export async function authLogoutAllAction(): Promise<LogoutAllActionResult> {
     statusCode: 500,
   };
 
-  if (refreshTokenCookie) {
-    const refreshToken = refreshTokenCookie.value;
-    try {
-      if (refreshToken) {
-        const res = await fetchBackend("/auth/logout-all", {
-          method: "POST",
-          headers: {
-            "x-refresh-token": refreshToken,
-            "x-custom-lang": locale,
-          },
-        });
-        if (!res.ok) {
-          const e = await res.json();
-          return {
-            success: false,
-            ...(newErrorResponse(e) || defaultErrorResponse),
-          };
-        } else {
-          setAuthCookies(cookieStore, null);
-          return redirect({ href: "/auth/login", locale: locale });
-        }
+  const sessionId = sessionCookie?.value;
+  try {
+    if (sessionId) {
+      const res = await fetchBackend("/auth/logout-all", {
+        method: "POST",
+        headers: {
+          "x-custom-lang": locale,
+          Authorization: `Bearer ${sessionId}`,
+        },
+      });
+      if (!res.ok) {
+        const e = await res.json();
+        return {
+          success: false,
+          ...(newErrorResponse(e) || defaultErrorResponse),
+        };
+      } else {
+        setAuthCookies(cookieStore, null);
+        return redirect({ href: "/auth/login", locale: locale });
       }
-    } catch (e) {
-      console.error(e);
-      return {
-        success: false,
-        ...defaultErrorResponse,
-      };
     }
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      ...defaultErrorResponse,
+    };
   }
   setAuthCookies(cookieStore, null);
   return redirect({ href: "/auth/login", locale: locale });
@@ -78,24 +71,22 @@ export async function authLogoutAllAction(): Promise<LogoutAllActionResult> {
 
 export async function authLogoutAction() {
   const cookieStore = await cookies();
-  const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
 
   const locale = await getLocale();
 
-  if (refreshTokenCookie) {
-    const refreshToken = refreshTokenCookie.value;
-    if (refreshToken) {
-      try {
-        await fetchBackend("/auth/logout", {
-          method: "POST",
-          headers: {
-            "x-refresh-token": refreshToken,
-            "x-custom-lang": locale,
-          },
-        });
-      } catch (e) {
-        console.error(e);
-      }
+  if (sessionCookie) {
+    const sessionId = sessionCookie.value;
+    try {
+      await fetchBackend("/auth/logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${sessionId}`,
+          "x-custom-lang": locale,
+        },
+      });
+    } catch (e) {
+      console.error(e);
     }
   }
   setAuthCookies(cookieStore, null);
@@ -202,45 +193,6 @@ export async function authRegisterAction(
   }
 }
 
-type RefreshAccessTokenActionResult =
-  | {
-      success: false;
-    }
-  | {
-      success: true;
-      accessToken: string;
-    };
-
-export async function refreshAccessTokenAction(): Promise<RefreshAccessTokenActionResult> {
-  const cookieStore = await cookies();
-  const refreshTokenCookie = cookieStore.get(REFRESH_COOKIE_NAME);
-  if (!refreshTokenCookie) {
-    return { success: false };
-  }
-  const refreshToken = refreshTokenCookie.value;
-  const locale = await getLocale();
-
-  const res = await fetchBackend(`/auth/access-token`, {
-    method: "POST",
-    headers: {
-      "x-refresh-token": refreshToken,
-      "x-custom-lang": locale,
-    },
-  });
-  if (res.ok) {
-    const data: AuthResponse = await res.json();
-    setAuthCookies(cookieStore, data);
-    return {
-      success: true,
-      accessToken: data.accessToken,
-    };
-  }
-  setAuthCookies(cookieStore, null);
-  return {
-    success: false,
-  };
-}
-
 export const getCurrentSessionAction = cache(async () => {
   const authToken = await getAuthToken();
   if (!authToken) {
@@ -257,7 +209,7 @@ export const getCurrentSessionAction = cache(async () => {
 
 export async function getAuthToken(): Promise<string | null> {
   const reqHeaders = await headers();
-  const accessTokenFromHeader = reqHeaders.get(AUTH_TOKEN_HEADER_NAME);
+  const accessTokenFromHeader = reqHeaders.get(SESSION_COOKIE_NAME);
 
   return accessTokenFromHeader || null;
 }

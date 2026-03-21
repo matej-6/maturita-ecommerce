@@ -19,7 +19,7 @@ import {
   ProductSortingArgs,
 } from './products.resolver.args';
 import { UseGuards } from '@nestjs/common';
-import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
+import { OptionalAuthGuard } from 'src/auth/guards/optional-auth.guard';
 import {
   OptionalCurrentUser,
   OptionalCurrentUserDto,
@@ -71,7 +71,7 @@ export class ProductsResolver {
     );
   }
 
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   @Query(() => PaginatedProduct, { name: 'products' })
   findAll(
     @Args() paginationArgs: PaginationArgs,
@@ -87,7 +87,7 @@ export class ProductsResolver {
     );
   }
 
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   @Query(() => [Product], { name: 'allProducts' })
   findAllWithoutPagination(
     @Args() findAllQueryArgs: ProductFindAllQueryArgs,
@@ -115,7 +115,7 @@ export class ProductsResolver {
     return await this.productsService.setProductImageThumbnail(productImageId);
   }
 
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   @Query(() => Product, { name: 'product', nullable: true })
   findOne(
     @Args() args: ProductFindOneQueryArgs,
@@ -190,7 +190,7 @@ export class ProductsResolver {
     return translations;
   }
 
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   @ResolveField(() => [ProductVariant], { name: 'variants' })
   async resolveProductVariants(
     @Parent() product: Product,

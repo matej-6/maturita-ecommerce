@@ -9,7 +9,7 @@ import {
   RawBodyRequest,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { Request, Response } from 'express';
@@ -21,7 +21,7 @@ export class OrdersController {
 
   constructor(private readonly ordersService: OrdersService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Post('/create-checkout-session')
   async createCheckoutSession(@CurrentUser() user: AuthenticatedUserDto) {
     const url = await this.ordersService.createOrderAndCheckoutSession(user.id);

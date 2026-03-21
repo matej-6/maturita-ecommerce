@@ -1,18 +1,9 @@
 export class AuthResponseDto {
-  constructor(
-    accessToken: string,
-    accessTokenExpirationSeconds: number,
-    refreshToken: string,
-    refreshTokenExpirationSeconds: number,
-  ) {
-    this.accessToken = accessToken;
-    this.accessTokenExpirationSeconds = accessTokenExpirationSeconds;
-    this.refreshToken = refreshToken;
-    this.refreshTokenExpirationSeconds = refreshTokenExpirationSeconds;
+  constructor(sessionId: string, expiresAt: Date) {
+    this.sessionId = sessionId;
+    this.expiresAt = expiresAt;
   }
 
-  accessToken: string;
-  accessTokenExpirationSeconds: number;
-  refreshToken: string;
-  refreshTokenExpirationSeconds: number;
+  sessionId: string;
+  expiresAt: Date;
 }

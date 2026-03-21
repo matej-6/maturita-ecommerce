@@ -1,10 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import {
-  forwardRef,
-  Inject,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
 import { EmbeddingTaskStatus, LLMTaskStatus } from 'generated/prisma/enums';

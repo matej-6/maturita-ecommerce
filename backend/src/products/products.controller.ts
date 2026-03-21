@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('products')
@@ -23,7 +23,7 @@ export class ProductsController {
 
   //https://docs.nestjs.com/techniques/file-upload
   @Post('upload-image/:productId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(204)
   async uploadImage(

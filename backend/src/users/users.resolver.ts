@@ -12,7 +12,7 @@ import { UsersService } from './users.service';
 import { PaginatedUser, User } from './entities/user.entity';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { GraphQLVoid } from 'graphql-scalars';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
@@ -53,7 +53,7 @@ export class UsersResolver {
     return this.usersService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => User)
   async updateUser(
     @Args('input') input: UpdateUserInput,
@@ -62,7 +62,7 @@ export class UsersResolver {
     return this.usersService.update(user.id, input);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => GraphQLVoid)
   async deleteAvatar(
     @CurrentUser() user: AuthenticatedUserDto,
@@ -71,13 +71,13 @@ export class UsersResolver {
     return GraphQLVoid;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @ResolveField(() => [Order], { name: 'orders' })
   async getOrdersForUser(@Parent() user: User): Promise<Order[]> {
     return this.ordersService.findAllOrdersByUserId(user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => GraphQLVoid)
   async updatePassword(
     @Args('input') input: UpdatePasswordInput,

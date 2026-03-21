@@ -13,7 +13,6 @@ import { UsersModule } from './users/users.module';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { Request, Response } from 'express';
-import { JwtModule } from '@nestjs/jwt';
 import { GraphQlContext } from './types/graphql-context';
 import { RedisModule } from './redis/redis.module';
 import { LocalesModule } from './locales/locales.module';
@@ -37,6 +36,7 @@ import { SeedModule } from './seed/seed.module';
 import { OrderItemsModule } from './order-items/order-items.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { ImageStorageModule } from './image-storage/image-storage.module';
+import { GuardsModule } from './auth/guards/guards.module';
 
 @Module({
   imports: [
@@ -98,9 +98,6 @@ import { ImageStorageModule } from './image-storage/image-storage.module';
     CategoriesModule,
     UsersModule,
     AuthModule,
-    JwtModule.register({
-      global: true,
-    }),
     RedisModule,
     LocalesModule,
     ProductsModule,
@@ -117,6 +114,7 @@ import { ImageStorageModule } from './image-storage/image-storage.module';
     OrderItemsModule,
     StatisticsModule,
     ImageStorageModule,
+    GuardsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

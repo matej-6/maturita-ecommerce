@@ -3,15 +3,15 @@
 import { redirect } from "next/navigation";
 import { fetchBackend } from "../fetch-backend";
 import { cookies } from "next/headers";
-import { AUTHENTICATION_COOKIE_NAME } from "@/app/lib/auth.constants";
+import { SESSION_COOKIE_NAME } from "@/app/lib/auth.constants";
 
 export async function checkoutAction() {
-  const authToken = (await cookies()).get(AUTHENTICATION_COOKIE_NAME)?.value;
+  const sessionId = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
 
   const headers: HeadersInit = {};
 
-  if (authToken) {
-    headers["Authorization"] = "Bearer " + authToken;
+  if (sessionId) {
+    headers["Authorization"] = "Bearer " + sessionId;
   }
 
   const response = await fetchBackend("/orders/create-checkout-session", {

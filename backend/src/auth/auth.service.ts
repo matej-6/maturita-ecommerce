@@ -3,9 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
@@ -17,37 +15,23 @@ import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 import { ERROR } from 'src/errors';
-import { hashPassword, hashToken } from 'src/lib/hashing';
+import { generateRandomToken, hashPassword } from 'src/lib/hashing';
+import { RedisService } from 'src/redis/redis.service';
+import { SESSION_COOKIE_NAME } from 'src/constants';
 @Injectable()
 export class AuthService {
-  private readonly accessTokenExpirationInSeconds: number;
-  private readonly refreshTokenExpirationInSeconds: number;
-
-  private readonly accessTokenSecret: string;
-  private readonly refreshTokenSecret: string;
+  private readonly sessionExpiration: number;
 
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<Env>,
     private readonly prismaService: PrismaService,
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+    private readonly redisService: RedisService,
   ) {
-    this.accessTokenExpirationInSeconds = this.configService.getOrThrow<
-      Env['JWT_ACCESS_EXPIRATION_IN_SECONDS']
-    >('JWT_ACCESS_EXPIRATION_IN_SECONDS');
-    this.refreshTokenExpirationInSeconds = this.configService.getOrThrow<
-      Env['JWT_REFRESH_EXPIRATION_IN_SECONDS']
-    >('JWT_REFRESH_EXPIRATION_IN_SECONDS');
-    this.accessTokenSecret =
-      this.configService.getOrThrow<Env['JWT_ACCESS_SECRET']>(
-        'JWT_ACCESS_SECRET',
-      );
-    this.refreshTokenSecret =
-      this.configService.getOrThrow<Env['JWT_REFRESH_SECRET']>(
-        'JWT_REFRESH_SECRET',
-      );
+    this.sessionExpiration =
+      this.configService.getOrThrow('SESSION_EXPIRATION');
   }
 
   async validateUserWithCredentials(
@@ -61,7 +45,7 @@ export class AuthService {
     });
     const hashedPassword = hashPassword(password);
 
-    if (user && user.hashedPassword === hashedPassword) {
+    if (!!user && user.hashedPassword === hashedPassword) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { hashedPassword, ...rest } = user;
       return this.usersService.toUserDTO(rest);
@@ -69,194 +53,85 @@ export class AuthService {
     return null;
   }
 
-  async verifyUserRefreshToken(hashedToken: string, userId: number) {
-    const refreshTokenSession =
-      await this.prismaService.refreshTokenSession.findFirst({
-        where: {
-          userId: userId,
-          token: hashedToken,
-        },
-        include: {
-          user: {
-            omit: {
-              hashedPassword: true,
-            },
-          },
-        },
-      });
-
-    if (!refreshTokenSession) {
-      this.logger.warn(
-        `No refresh token sessions found for this user id: ${userId}`,
-      );
-      throw new UnauthorizedException(ERROR.unauthorizedException);
-    }
-
-    if (refreshTokenSession.expiresAt < new Date()) {
-      this.logger.warn('Expired refresh token used.');
-      throw new UnauthorizedException(ERROR.unauthorizedException);
-    }
-
-    if (refreshTokenSession.blacklisted === true) {
-      this.logger.warn(
-        `Blacklisted refresh token used by user with id: ${userId}`,
-      );
-      await this.signOutAll(refreshTokenSession.userId);
-      throw new UnauthorizedException(ERROR.unauthorizedException);
-    }
-
-    return { user: refreshTokenSession.user, session: refreshTokenSession };
-  }
-
-  async blacklistRefreshToken(sessionId: number): Promise<void> {
-    await this.prismaService.refreshTokenSession.update({
-      where: {
-        id: sessionId,
-      },
-      data: {
-        blacklisted: true,
-      },
-    });
-  }
-
-  setAuthCookies(
-    res: Response,
-    accessToken: {
-      token: string;
-      expires: Date;
-    },
-    refreshToken: {
-      token: string;
-      expires: Date;
-    },
-  ) {
-    res.cookie('Authentication', accessToken.token, {
+  setAuthCookies(res: Response, sessionId: string, expiresAt: Date) {
+    res.cookie(SESSION_COOKIE_NAME, sessionId, {
       httpOnly: true,
       secure: false,
-      expires: accessToken.expires,
-      sameSite: 'lax',
-    });
-
-    res.cookie('Refresh', refreshToken.token, {
-      httpOnly: true,
-      secure: false,
-      expires: refreshToken.expires,
+      expires: expiresAt,
       sameSite: 'lax',
     });
   }
 
-  async login(user: {
-    id: number;
-    role: Role;
-    email: string;
-  }): Promise<AuthResponseDto> {
-    try {
-      const accessTokenExpirationSeconds = this.accessTokenExpirationInSeconds;
-      const refreshTokenExpirationSeconds =
-        this.refreshTokenExpirationInSeconds;
+  async login(userId: number): Promise<AuthResponseDto> {
+    const sessionId = generateRandomToken();
+    const expiresAt = new Date(Date.now() + this.sessionExpiration * 1000);
+    await this.redisService.client.set(sessionId, userId, {
+      expiration: {
+        type: 'EX',
+        value: this.sessionExpiration,
+      },
+    });
 
-      const accessTokenExpirationDate = new Date(
-        Date.now() + accessTokenExpirationSeconds * 1000,
-      );
-      const refreshTokenExpirationDate = new Date(
-        Date.now() + refreshTokenExpirationSeconds * 1000,
-      );
+    const activeSessions = await this.redisService.client.get(
+      userId.toString(),
+    );
 
-      this.logger.debug(`
-        Generating tokens for user ID: ${user.id} with role: ${user.role}
-        Access Token Expires at ${accessTokenExpirationDate.toUTCString()} (in ${accessTokenExpirationSeconds} seconds)
-        Refresh Token Expires at ${refreshTokenExpirationDate.toUTCString()} (in ${refreshTokenExpirationSeconds} seconds)
-      `);
-
-      const accessTokenPayload = {
-        userId: user.id,
-        role: user.role,
-        email: user.email,
-      };
-
-      const refreshTokenSession =
-        await this.prismaService.refreshTokenSession.create({
-          data: {
-            user: {
-              connect: {
-                id: user.id,
-              },
-            },
-            token: '',
-            expiresAt: refreshTokenExpirationDate,
-            blacklisted: false,
-          },
-        });
-
-      const refreshTokenPayload = {
-        userId: user.id,
-        sessionId: refreshTokenSession.id,
-      };
-
-      const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
-        expiresIn: `${this.accessTokenExpirationInSeconds.toString()}s`,
-        secret: this.accessTokenSecret,
-      });
-
-      const refreshToken = await this.jwtService.signAsync(
-        refreshTokenPayload,
+    if (activeSessions) {
+      const sessions = JSON.parse(activeSessions) as string[];
+      sessions.push(sessionId);
+      await this.redisService.client.set(
+        userId.toString(),
+        JSON.stringify(sessions),
         {
-          expiresIn: `${this.refreshTokenExpirationInSeconds.toString()}s`,
-          secret: this.refreshTokenSecret,
+          expiration: {
+            type: 'EX',
+            value: this.sessionExpiration,
+          },
         },
       );
-
-      const hashedRefreshToken = this.hashToken(refreshToken);
-
-      await this.prismaService.refreshTokenSession.update({
-        where: {
-          id: refreshTokenSession.id,
-        },
-        data: {
-          token: hashedRefreshToken,
-        },
-      });
-
-      return new AuthResponseDto(
-        accessToken,
-        accessTokenExpirationSeconds,
-        refreshToken,
-        refreshTokenExpirationSeconds,
-      );
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(ERROR.unknownError);
     }
-  }
 
-  hashToken(token: string): string {
-    return hashToken(token);
+    return new AuthResponseDto(sessionId, expiresAt);
   }
 
   async signOutAll(userId: number) {
-    try {
-      await this.prismaService.refreshTokenSession.deleteMany({
-        where: {
-          user: {
-            id: userId,
-          },
-        },
-      });
-    } catch (error) {
-      this.logger.error('Failed to sign out all.', error);
-      throw new InternalServerErrorException(ERROR.unknownError);
+    const activeSessions = await this.redisService.client.get(
+      userId.toString(),
+    );
+
+    if (activeSessions) {
+      const sessions = JSON.parse(activeSessions) as string[];
+      for (const sessionId of sessions) {
+        await this.redisService.client.del(sessionId);
+      }
+      await this.redisService.client.del(userId.toString());
     }
   }
 
-  async signOut(refreshToken: string, userId: number) {
-    const hashedRefreshToken = this.hashToken(refreshToken);
-
-    await this.prismaService.refreshTokenSession.delete({
-      where: {
-        userId: userId,
-        token: hashedRefreshToken,
-      },
-    });
+  async signOut(sessionId: string) {
+    const userId = await this.redisService.client.get(sessionId);
+    if (userId) {
+      await this.redisService.client.del(sessionId);
+      const activeSessions = await this.redisService.client.get(userId);
+      if (activeSessions) {
+        const sessions = JSON.parse(activeSessions) as string[];
+        const updatedSessions = sessions.filter((id) => id !== sessionId);
+        if (updatedSessions.length > 0) {
+          await this.redisService.client.set(
+            userId,
+            JSON.stringify(updatedSessions),
+            {
+              expiration: {
+                type: 'EX',
+                value: this.sessionExpiration,
+              },
+            },
+          );
+        } else {
+          await this.redisService.client.del(userId);
+        }
+      }
+    }
   }
 
   async register(registerDto: RegisterDto) {
@@ -278,7 +153,7 @@ export class AuthService {
           throw new BadRequestException(ERROR.emailAlreadyInUse);
         }
       }
-      this.logger.error('Failed to register user.', error);
+      this.logger.error('Failed to register user:', error);
       throw new InternalServerErrorException(ERROR.unknownError);
     }
   }
@@ -297,10 +172,27 @@ export class AuthService {
       throw new BadRequestException('auth.service.deleteAccount.pendingOrders');
     }
 
+    try {
+      await this.signOutAll(userId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to sign out user ${userId} during account deletion:`,
+        error,
+      );
+    }
+
     await this.prismaService.user.delete({
       where: {
         id: userId,
       },
     });
+  }
+
+  async getUserIdFromSession(sessionId: string): Promise<number | null> {
+    const userId = await this.redisService.client.get(sessionId);
+    if (userId) {
+      return parseInt(userId, 10);
+    }
+    return null;
   }
 }

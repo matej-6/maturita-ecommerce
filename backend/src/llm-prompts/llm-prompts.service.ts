@@ -133,8 +133,6 @@ export class LLMPromptsService {
       : null;
   }
 
-  
-
   async cancelPrompt(id: number, userId: number): Promise<boolean> {
     const llmTask = await this.prisma.lLMTask.findUnique({
       where: { id, userId },

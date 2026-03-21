@@ -101,7 +101,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
     .join(", ");
   return (
     <div className="max-width-container w-full mx-auto mt-6 sm:mt-12 gap-y-6 sm:gap-y-12 flex flex-col relative items-center">
-      <div className="grid grid-cols-1 sm:grid-cols-[600px_600px] gap-y-5 sm:gap-y-8 gap-x-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-y-5 sm:gap-y-8 gap-x-8">
         <ProductImages
           images={allImages}
           thumbnailImage={

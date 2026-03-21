@@ -15,7 +15,7 @@ import { UpdateCategoryInput } from './dto/update-category.input';
 import { GraphqlAppContext } from 'src/app.module';
 import { CategoryTranslation } from './entities/category-translation.entity';
 import { BadRequestException, UseGuards } from '@nestjs/common';
-import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
+import { OptionalAuthGuard } from 'src/auth/guards/optional-auth.guard';
 import {
   OptionalCurrentUser,
   OptionalCurrentUserDto,
@@ -52,7 +52,7 @@ export class CategoriesResolver {
   }
 
   @Query(() => [Category], { name: 'categories' })
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   findAll(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
     @Args() filterArgs: CategoryFindAllQueryFilterArgs,
@@ -66,7 +66,7 @@ export class CategoriesResolver {
   }
 
   @Query(() => PaginatedCategory, { name: 'paginatedCategories' })
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   findPaginated(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
     @Args() filterArgs: CategoryFindAllQueryFilterArgs,
@@ -82,7 +82,7 @@ export class CategoriesResolver {
   }
 
   @Query(() => Category, { name: 'category' })
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   findOne(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
     @Args('id', { type: () => Int, nullable: true }) id: number | null,

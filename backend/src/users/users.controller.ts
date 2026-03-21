@@ -10,7 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { CurrentUser } from 'src/auth/current-user.decorator';
@@ -24,7 +24,7 @@ export class UsersController {
 
   //https://docs.nestjs.com/techniques/file-upload
   @Post('upload-avatar')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(204)
   async uploadImage(

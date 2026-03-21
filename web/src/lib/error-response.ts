@@ -15,11 +15,6 @@ export const defaultErrorResponse: ErrorResponse = {
   message: "An unexpected error ocurred",
 };
 
-/**
- *
- * @param exc result body of a request to turn into an ErrorResponse
- * @returns ErrorResponse or undefined
- */
 export function newErrorResponse(body: unknown): ErrorResponse | undefined {
   try {
     return errorResponseSchema.parse(body);

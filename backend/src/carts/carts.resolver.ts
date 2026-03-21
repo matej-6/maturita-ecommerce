@@ -11,7 +11,7 @@ import { CartsService } from './carts.service';
 import { Cart } from './entities/cart.entity';
 import { CartItem } from '../cart-items/entities/cart-item.entity';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 
@@ -24,13 +24,13 @@ export class CartsResolver {
     return await this.cartsService.getCartItems(cart.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Query(() => Cart, { name: 'cart' })
   async queryGetCart(@CurrentUser() user: AuthenticatedUserDto) {
     return await this.cartsService.getCartByUserId(user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => Cart, { name: 'addItemToCart' })
   async mutationAddItemToCart(
     @CurrentUser() user: AuthenticatedUserDto,
@@ -41,7 +41,7 @@ export class CartsResolver {
     return await this.cartsService.getCartByUserId(user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => Cart, { name: 'updateCartItemQuantity' })
   async mutationUpdateCartItemQuantity(
     @CurrentUser() user: AuthenticatedUserDto,

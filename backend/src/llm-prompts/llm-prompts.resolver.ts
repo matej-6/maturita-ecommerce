@@ -2,7 +2,7 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { LLMPromptsService } from './llm-prompts.service';
 import { UseGuards } from '@nestjs/common';
 import { LLMTask } from './entities/llm-task.entity';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CreateLLMPromptInput } from './dto/create-llm-prompt.input';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
@@ -16,7 +16,7 @@ export class LLMPromptsResolver {
     private readonly localesService: LocalesService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => LLMTask)
   async createLlmTask(
     @Args('input') input: CreateLLMPromptInput,
@@ -29,7 +29,7 @@ export class LLMPromptsResolver {
     return await this.llmTasksService.createTask(input, user.id, lang);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Query(() => LLMTask, { nullable: true })
   async getUserLLMTaskById(
     @Args('id', { type: () => Int }) id: number,

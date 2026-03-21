@@ -6,7 +6,7 @@ import { GraphqlAppContext } from 'src/app.module';
 import { GraphQLVoid } from 'graphql-scalars';
 import { CurrentUser } from './current-user.decorator';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 import { User } from 'src/users/entities/user.entity';
 
 @Resolver()
@@ -18,7 +18,7 @@ export class AuthResolver {
     private readonly usersService: UsersService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => GraphQLVoid)
   async logoutAll(
     @Context() { res }: GraphqlAppContext,
@@ -31,7 +31,7 @@ export class AuthResolver {
     return GraphQLVoid;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Query(() => User, { name: 'me' })
   async me(@CurrentUser() user: AuthenticatedUserDto): Promise<User> {
     const foundUser = await this.usersService.findOne(user.id);
@@ -42,7 +42,7 @@ export class AuthResolver {
     return foundUser;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => GraphQLVoid)
   async changePassword(
     @Args('currentPassword') currentPassword: string,
@@ -57,7 +57,7 @@ export class AuthResolver {
     return GraphQLVoid;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteAccount(
     @Context() { res }: GraphqlAppContext,

@@ -1,14 +1,14 @@
 import { ExecutionContext } from '@nestjs/common';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthGuard } from './auth.guard';
 import { Request } from 'express';
 
-export class OptionalJwtAuthGuard extends JwtAuthGuard {
+export class OptionalAuthGuard extends AuthGuard {
   override async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
       await super.canActivate(context);
     } catch {
       const request = super.getRequest(context);
-      request['user'] = null;
+      request['user'] = undefined;
     }
     return true;
   }

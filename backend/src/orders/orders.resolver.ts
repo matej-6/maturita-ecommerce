@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { Order, PaginatedOrder } from './entities/order.entity';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { OrdersService } from './orders.service';
@@ -29,7 +29,7 @@ export class OrdersResolver {
     private readonly orderItemsService: OrderItemsService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Query(() => [Order], { name: 'orders' })
   async findAllForUser(
     @CurrentUser() user: AuthenticatedUserDto,
@@ -37,7 +37,7 @@ export class OrdersResolver {
     return this.ordersService.findAllOrdersByUserId(user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Query(() => PaginatedOrder, { name: 'findAllPaginatedOrders' })
   findAll(
     @Args() paginationArgs: PaginationArgs,
@@ -61,7 +61,7 @@ export class OrdersResolver {
     return this.ordersService.findOrderById(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Query(() => Order, { name: 'order', nullable: true })
   async findOneForUser(
     @Args('id', { type: () => Int }) id: number,
@@ -71,7 +71,7 @@ export class OrdersResolver {
   }
 
   @Mutation(() => Order)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   async cancelOrder(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: AuthenticatedUserDto,
@@ -79,7 +79,7 @@ export class OrdersResolver {
     return this.ordersService.cancelOrder(id, user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @ResolveField(() => [OrderItem], { name: 'items' })
   async resolveOrderItems(@Parent() order: Order) {
     return this.orderItemsService.findAllByOrderId(order.id);
@@ -95,7 +95,7 @@ export class OrdersResolver {
     return await this.ordersService.getOrderShippingDetails(order.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
   @Mutation(() => String, { name: 'retryPendingPayment' })
   async retryPendingPayment(
     @Args('orderId', { type: () => Int }) orderId: number,
