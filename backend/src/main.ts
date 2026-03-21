@@ -11,10 +11,6 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
   });
-  app.enableCors({
-    origin: [process.env.NEXTJS_URL!],
-    credentials: true,
-  });
   app.use(cookieParser());
 
   app.use(I18nMiddleware);

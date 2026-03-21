@@ -36,7 +36,6 @@ import { BullConfigModule } from './bull-config/bull-config.module';
 import { SeedModule } from './seed/seed.module';
 import { OrderItemsModule } from './order-items/order-items.module';
 import { StatisticsModule } from './statistics/statistics.module';
-import { ImageStorageService } from './image-storage/image-storage.service';
 import { ImageStorageModule } from './image-storage/image-storage.module';
 
 @Module({

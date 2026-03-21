@@ -3,9 +3,16 @@
 .env
 .env.*
 !.env.example
-/node_modules
 /generated/prisma
 /dist
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 .tsbuildinfo
 
