@@ -37,6 +37,7 @@ import { OrderItemsModule } from './order-items/order-items.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { ImageStorageModule } from './image-storage/image-storage.module';
 import { GuardsModule } from './auth/guards/guards.module';
+import { ProductReviewsModule } from './product-reviews/product-reviews.module';
 
 @Module({
   imports: [
@@ -115,6 +116,7 @@ import { GuardsModule } from './auth/guards/guards.module';
     StatisticsModule,
     ImageStorageModule,
     GuardsModule,
+    ProductReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
