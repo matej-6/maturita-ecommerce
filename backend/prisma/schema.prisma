@@ -20,18 +20,19 @@ enum Role {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  email          String    @unique
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
   hashedPassword String?
   firstName      String
   lastName       String
-  role           Role      @default(USER)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  role           Role            @default(USER)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   Cart           Cart?
   orders         Order[]
   LLMTasks       LLMTask[]
   avatarFileName String?
+  productReviews ProductReview[]
 
   @@index([email])
   @@map("users")
@@ -80,6 +81,7 @@ model Product {
   createdAt             DateTime                      @default(now())
   updatedAt             DateTime                      @updatedAt
   llmuserPromptResponse LLMUserPromptResponse[]
+  productReviews        ProductReview[]
 
   @@map("products")
 }
@@ -99,19 +101,20 @@ model ProductTranslation {
 }
 
 model ProductVariant {
-  id           Int                   @id @default(autoincrement())
-  sku          String                @unique
-  stock        Int
-  priceInCents Int
-  Attributes   Attribute[]
-  Product      Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
-  Images       ProductVariantImage[]
-  productId    Int
-  isPublic     Boolean               @default(true)
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
-  cartItems    CartItem[]
-  orderItems   OrderItem[]
+  id             Int                   @id @default(autoincrement())
+  sku            String                @unique
+  stock          Int
+  priceInCents   Int
+  Attributes     Attribute[]
+  Product        Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Images         ProductVariantImage[]
+  productId      Int
+  isPublic       Boolean               @default(true)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  productReviews ProductReview[]
 
   @@map("product_variants")
 }
@@ -254,6 +257,7 @@ model OrderItem {
   unitPriceInCents Int
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+  productReview    ProductReview?
 
   @@index([orderId])
   @@index([productVariantId])
@@ -331,4 +335,22 @@ enum LLMTaskStatus {
   IN_PROGRESS
   COMPLETED
   FAILED
+}
+
+model ProductReview {
+  id               Int             @id @default(autoincrement())
+  productId        Int
+  Product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVariantId Int?
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
+  userId           Int?
+  User             User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderItemId      Int?            @unique
+  OrderItem        OrderItem?      @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  rating           Int             @default(5)
+  comment          String?         @db.LongText
+  createdAt        DateTime        @default(now())
+  lang             String
+
+  @@index([productId])
 }
