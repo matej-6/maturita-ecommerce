@@ -43,6 +43,7 @@ export class SeedService implements OnModuleInit {
     await this.prismaService.lLMTask.deleteMany();
     await this.prismaService.productVariant.deleteMany();
     await this.prismaService.product.deleteMany();
+    await this.prismaService.productReview.deleteMany();
     await this.prismaService.category.deleteMany();
     await this.prismaService.user.deleteMany();
     await this.llmService.clearLlmTasksQueue();
@@ -94,7 +95,7 @@ export class SeedService implements OnModuleInit {
     this.logger.log('Users seeded.');
   }
 
-  async seed() {
+  async seed(skipLLMTasks = false) {
     await this.clearDatabase();
     await this.seedUsers();
     this.logger.log('Seeding attribute keys...');
@@ -718,36 +719,38 @@ export class SeedService implements OnModuleInit {
 
     this.logger.log('Products seeded.');
 
-    this.logger.log('Embed product data into Qdrant vector database...');
-    for (const product of [
-      creatineMonohydrate,
-      creatineGummies,
-      proteinPowder,
-      proteinBar,
-      compressionShirt,
-      shorts,
-    ]) {
-      for (const locale of this.localesService.findAll()) {
-        await this.productsService.generateProductEmbeddings(
-          product.id,
-          locale.code,
-        );
+    if (!skipLLMTasks) {
+      this.logger.log('Embed product data into Qdrant vector database...');
+      for (const product of [
+        creatineMonohydrate,
+        creatineGummies,
+        proteinPowder,
+        proteinBar,
+        compressionShirt,
+        shorts,
+      ]) {
+        for (const locale of this.localesService.findAll()) {
+          await this.productsService.generateProductEmbeddings(
+            product.id,
+            locale.code,
+          );
+        }
       }
-    }
 
-    while (
-      (await this.llmTasksQueue.getJobCountByTypes(
-        'waiting',
-        'active',
-        'wait',
-        'delayed',
-      )) > 0
-    ) {
-      this.logger.log('Waiting for LLM tasks to complete...');
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
+      while (
+        (await this.llmTasksQueue.getJobCountByTypes(
+          'waiting',
+          'active',
+          'wait',
+          'delayed',
+        )) > 0
+      ) {
+        this.logger.log('Waiting for LLM tasks to complete...');
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
 
-    this.logger.log('Product data embedded into Qdrant vector database.');
+      this.logger.log('Product data embedded into Qdrant vector database.');
+    }
 
     this.logger.log('Seeding orders...');
     // seed orders
@@ -768,7 +771,19 @@ export class SeedService implements OnModuleInit {
               quantity,
             };
           });
-        await this.prismaService.order.create({
+        const createdOrder = await this.prismaService.order.create({
+          include: {
+            orderItems: {
+              include: {
+                ProductVariant: {
+                  select: {
+                    productId: true,
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
           data: {
             userId: user.id,
             totalInCents: items.reduce(
@@ -800,6 +815,21 @@ export class SeedService implements OnModuleInit {
             },
           },
         });
+
+        this.logger.log(`Created order ${createdOrder.id}. Adding reviews...`);
+        for (const item of createdOrder.orderItems) {
+          await this.prismaService.productReview.create({
+            data: {
+              productId: item.ProductVariant!.productId,
+              userId: createdOrder.userId,
+              rating: fakerSK.number.int({ min: 1, max: 5 }),
+              comment: fakerSK.lorem.sentence({ min: 1, max: 5 }),
+              lang: this.localesService.locales().slovak.code,
+              productVariantId: item.productVariantId,
+              orderItemId: item.id,
+            },
+          });
+        }
       }
       this.logger.log('Seeding completed.');
     }
