@@ -598,6 +598,13 @@ export type PaginatedProduct = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type PaginatedProductReview = {
+  __typename?: 'PaginatedProductReview';
+  edges?: Maybe<Array<ProductReviewEdge>>;
+  nextCursor?: Maybe<Scalars['Int']['output']>;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type PaginatedProductVariant = {
   __typename?: 'PaginatedProductVariant';
   edges?: Maybe<Array<ProductVariantEdge>>;
@@ -678,6 +685,35 @@ export type ProductImage = {
   isThumbnail: Scalars['Boolean']['output'];
   productId: Scalars['Int']['output'];
   url: Scalars['String']['output'];
+};
+
+export type ProductReview = {
+  __typename?: 'ProductReview';
+  author?: Maybe<ProductReviewAuthor>;
+  comment?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  /** Product ID */
+  id: Scalars['Int']['output'];
+  lang: Scalars['String']['output'];
+  orderItemId: Scalars['Int']['output'];
+  product?: Maybe<Product>;
+  productId: Scalars['Int']['output'];
+  productVariant?: Maybe<ProductVariant>;
+  productVariantId: Scalars['Int']['output'];
+  rating: Scalars['Int']['output'];
+};
+
+export type ProductReviewAuthor = {
+  __typename?: 'ProductReviewAuthor';
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  firstName: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
+};
+
+export type ProductReviewEdge = {
+  __typename?: 'ProductReviewEdge';
+  cursor: Scalars['Int']['output'];
+  node: ProductReview;
 };
 
 export type ProductTranslation = {
@@ -786,6 +822,7 @@ export type Query = {
   order?: Maybe<Order>;
   orders: Array<Order>;
   paginatedCategories: PaginatedCategory;
+  paginatedProductReviewsByProductId: PaginatedProductReview;
   product?: Maybe<Product>;
   productBySlug?: Maybe<Product>;
   productContentEmbedding?: Maybe<ProductContentEmbedding>;
@@ -923,6 +960,13 @@ export type QueryPaginatedCategoriesArgs = {
   parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   slugQuery?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPaginatedProductReviewsByProductIdArgs = {
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  productId: Scalars['Int']['input'];
 };
 
 
@@ -1645,6 +1689,15 @@ export type ProductPageQueryQueryVariables = Exact<{
 
 
 export type ProductPageQueryQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number, name?: string | null, description?: string | null, markdownContent?: string | null, images: Array<{ __typename?: 'ProductImage', id: number, url: string, isThumbnail: boolean }>, variants: Array<{ __typename?: 'ProductVariant', id: number, sku: string, stock: number, priceInCents: number, images: Array<{ __typename?: 'ProductVariantImage', id: number, url: string, isThumbnail: boolean }>, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> }> } | null };
+
+export type PagedProductReviewsByIdQueryVariables = Exact<{
+  productId: Scalars['Int']['input'];
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  pageSize: Scalars['Int']['input'];
+}>;
+
+
+export type PagedProductReviewsByIdQuery = { __typename?: 'Query', paginatedProductReviewsByProductId: { __typename?: 'PaginatedProductReview', nextCursor?: number | null, totalCount: number, edges?: Array<{ __typename?: 'ProductReviewEdge', cursor: number, node: { __typename?: 'ProductReview', id: number, rating: number, comment?: string | null, createdAt: any, lang: string, author?: { __typename?: 'ProductReviewAuthor', avatarUrl?: string | null, firstName: string, lastName: string } | null, productVariant?: { __typename?: 'ProductVariant', sku: string } | null } }> | null } };
 
 export type ProductIdBySlugQueryVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -2912,6 +2965,36 @@ export const ProductPageQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductPageQueryQuery, ProductPageQueryQueryVariables>;
+export const PagedProductReviewsByIdDocument = new TypedDocumentString(`
+    query PagedProductReviewsById($productId: Int!, $cursor: Int, $pageSize: Int!) {
+  paginatedProductReviewsByProductId(
+    productId: $productId
+    cursor: $cursor
+    pageSize: $pageSize
+  ) {
+    nextCursor
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        rating
+        comment
+        createdAt
+        lang
+        author {
+          avatarUrl
+          firstName
+          lastName
+        }
+        productVariant {
+          sku
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PagedProductReviewsByIdQuery, PagedProductReviewsByIdQueryVariables>;
 export const ProductIdBySlugDocument = new TypedDocumentString(`
     query ProductIdBySlug($slug: String!) {
   productBySlug(slug: $slug) {

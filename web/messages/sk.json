@@ -84,7 +84,8 @@
       "inStock": "Na sklade",
       "limitedStock": "Obmedzený počet",
       "outOfStock": "Nedostupné"
-    }
+    },
+    "reviewsTitle": "Recenzie"
   },
   "homePage": {
     "newArrivals": "Novinky",

@@ -1,4 +1,9 @@
-import { getProductPageData } from "@/app/data-access-layer/product.queries";
+"use server";
+
+import {
+  getPagedProductReviewsById,
+  getProductPageData,
+} from "@/app/data-access-layer/product.queries";
 import { getImageSrc } from "@/app/lib/utils";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ProductImages } from "@/components/product-images";
@@ -6,8 +11,19 @@ import { ProductVariantsScroll } from "@/components/product-variants-scroll";
 import { redirect } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { getLocale, getTranslations } from "next-intl/server";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
+
+const ProductReviews = dynamic(() => import("@/components/product-reviews"), {
+  loading: () => {
+    return (
+      <div className="w-full py-10 flex items-center justify-center">
+        <span className="text-muted-foreground">Loading reviews...</span>
+      </div>
+    );
+  },
+});
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -99,6 +115,14 @@ export default async function ProductPage({ params, searchParams }: Props) {
     .sort((a, b) => a.key!.key.localeCompare(b.key!.key))
     .map((attr) => attr.value)
     .join(", ");
+
+  const reviewsCursor = sp.cursor ? parseInt(sp.cursor as string, 10) : null;
+
+  const reviewsPromise = getPagedProductReviewsById(
+    data.data.productBySlug.id,
+    reviewsCursor,
+    10,
+  );
   return (
     <div className="max-width-container w-full mx-auto mt-6 sm:mt-12 gap-y-6 sm:gap-y-12 flex flex-col relative items-center">
       <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-y-5 sm:gap-y-8 gap-x-8">
@@ -194,6 +218,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
           </div>
         </>
       )}
+      <div className="h-0.5 w-full bg-accent my-4" />
+      <div className="flex flex-col gap-y-4 w-full">
+        <h3 className="text-2xl font-medium">{t("reviewsTitle")}</h3>
+        <ProductReviews productReviewsPromise={reviewsPromise} />
+      </div>
     </div>
   );
 }

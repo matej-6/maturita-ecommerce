@@ -432,6 +432,7 @@ type ProductImage {
 }
 
 type ProductReview {
+  author: ProductReviewAuthor
   comment: String
   createdAt: DateTime!
 
@@ -439,9 +440,17 @@ type ProductReview {
   id: Int!
   lang: String!
   orderItemId: Int!
+  product: Product
   productId: Int!
+  productVariant: ProductVariant
   productVariantId: Int!
   rating: Int!
+}
+
+type ProductReviewAuthor {
+  avatarUrl: String
+  firstName: String!
+  lastName: String!
 }
 
 type ProductReviewEdge {
@@ -597,6 +606,7 @@ type Query {
     """Field to sort by"""
     sortBy: String
   ): PaginatedCategory!
+  paginatedProductReviewsByProductId(cursor: Int, pageSize: Int = 10, productId: Int!): PaginatedProductReview!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productBySlug(slug: String!): Product
   productContentEmbedding(id: Int!): ProductContentEmbedding
@@ -621,7 +631,6 @@ type Query {
     slug: String
     sortBy: String
   ): PaginatedProduct!
-  queryProductReviewsByProductId(cursor: Int, pageSize: Int = 10, productId: Int!): PaginatedProductReview!
   revenuePerDayStatistic(timePeriod: TimePeriod!): OverallTrendStatistic
   searchProductVariants(ascending: Boolean, attributeFilters: [[String!]!], cursor: Int, pageSize: Int = 10, searchTerm: String, sortBy: String): PaginatedProductVariant!
   user(id: ID!): User!

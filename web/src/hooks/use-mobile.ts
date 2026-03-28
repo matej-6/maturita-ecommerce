@@ -2,9 +2,11 @@ import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;
 
+// pridané od shadcn sidebar
+
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
-    undefined
+    undefined,
   );
 
   React.useEffect(() => {

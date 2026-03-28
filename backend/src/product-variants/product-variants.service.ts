@@ -24,6 +24,30 @@ export class ProductVariantsService {
     private readonly imageStorageService: ImageStorageService,
   ) {}
 
+  async findOne(
+    productVariantId: number,
+    isPublic: boolean,
+  ): Promise<ProductVariant | null> {
+    const productVariant = await this.prisma.productVariant.findUnique({
+      where: { id: productVariantId, isPublic: isPublic },
+    });
+
+    if (!productVariant) {
+      return null;
+    }
+
+    return {
+      id: productVariant.id,
+      isPublic: productVariant.isPublic,
+      priceInCents: productVariant.priceInCents,
+      productId: productVariant.productId,
+      sku: productVariant.sku,
+      stock: productVariant.stock,
+      createdAt: productVariant.createdAt,
+      updatedAt: productVariant.updatedAt,
+    };
+  }
+
   async create(createProductVariantInput: CreateProductVariantInput) {
     const attributes = await this.prisma.$transaction(async (tx) => {
       const attrs = [];

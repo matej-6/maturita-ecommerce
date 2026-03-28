@@ -14,12 +14,13 @@ const AvatarSizeClasses = {
 export function Avatar({
   size = "md",
   session,
+  imageSrc,
 }: {
   session: CurrentSession | null;
-  imageUrl?: string;
+  imageSrc?: string;
   size?: "sm" | "md" | "lg";
 }) {
-  if (!session) {
+  if (!session && !imageSrc) {
     return (
       <Skeleton
         className={cn("rounded-full bg-gray-200", AvatarSizeClasses[size])}
@@ -27,9 +28,11 @@ export function Avatar({
     );
   }
 
-  const imageUrl = getImageSrc(session.avatarUrl ?? undefined);
+  const imageUrl = session
+    ? getImageSrc(session.avatarUrl ?? undefined)
+    : getImageSrc(imageSrc ?? "");
 
-  const backupString = session.firstName[0]?.toUpperCase() || "";
+  const backupString = session?.firstName[0]?.toUpperCase() || "";
 
   return (
     <div

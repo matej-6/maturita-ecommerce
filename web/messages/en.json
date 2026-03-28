@@ -84,7 +84,8 @@
       "inStock": "In Stock",
       "limitedStock": "Limited Stock",
       "outOfStock": "Out of Stock"
-    }
+    },
+    "reviewsTitle": "Reviews"
   },
   "homePage": {
     "newArrivals": "New Arrivals",

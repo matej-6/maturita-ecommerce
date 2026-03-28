@@ -337,6 +337,12 @@ type PaginatedProduct {
   totalCount: Int!
 }
 
+type PaginatedProductReview {
+  edges: [ProductReviewEdge!]
+  nextCursor: Int
+  totalCount: Int!
+}
+
 type PaginatedProductVariant {
   edges: [ProductVariantEdge!]
   nextCursor: Int
@@ -404,6 +410,32 @@ type ProductImage {
   isThumbnail: Boolean!
   productId: Int!
   url: String!
+}
+
+type ProductReview {
+  author: ProductReviewAuthor
+  comment: String
+  createdAt: DateTime!
+  """Product ID"""
+  id: Int!
+  lang: String!
+  orderItemId: Int!
+  product: Product
+  productId: Int!
+  productVariant: ProductVariant
+  productVariantId: Int!
+  rating: Int!
+}
+
+type ProductReviewAuthor {
+  avatarUrl: String
+  firstName: String!
+  lastName: String!
+}
+
+type ProductReviewEdge {
+  cursor: Int!
+  node: ProductReview!
 }
 
 type ProductTranslation {
@@ -546,6 +578,7 @@ type Query {
     """Field to sort by"""
     sortBy: String
   ): PaginatedCategory!
+  paginatedProductReviewsByProductId(cursor: Int, pageSize: Int = 10, productId: Int!): PaginatedProductReview!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productBySlug(slug: String!): Product
   productContentEmbedding(id: Int!): ProductContentEmbedding
