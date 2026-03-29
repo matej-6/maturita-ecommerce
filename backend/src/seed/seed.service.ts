@@ -719,39 +719,6 @@ export class SeedService implements OnModuleInit {
 
     this.logger.log('Products seeded.');
 
-    if (!skipLLMTasks) {
-      this.logger.log('Embed product data into Qdrant vector database...');
-      for (const product of [
-        creatineMonohydrate,
-        creatineGummies,
-        proteinPowder,
-        proteinBar,
-        compressionShirt,
-        shorts,
-      ]) {
-        for (const locale of this.localesService.findAll()) {
-          await this.productsService.generateProductEmbeddings(
-            product.id,
-            locale.code,
-          );
-        }
-      }
-
-      while (
-        (await this.llmTasksQueue.getJobCountByTypes(
-          'waiting',
-          'active',
-          'wait',
-          'delayed',
-        )) > 0
-      ) {
-        this.logger.log('Waiting for LLM tasks to complete...');
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-      }
-
-      this.logger.log('Product data embedded into Qdrant vector database.');
-    }
-
     this.logger.log('Seeding orders...');
     // seed orders
     const allItems = await this.prismaService.productVariant.findMany();
@@ -831,6 +798,40 @@ export class SeedService implements OnModuleInit {
         }
       }
     }
+
+    if (!skipLLMTasks) {
+      this.logger.log('Embed product data into Qdrant vector database...');
+      for (const product of [
+        creatineMonohydrate,
+        creatineGummies,
+        proteinPowder,
+        proteinBar,
+        compressionShirt,
+        shorts,
+      ]) {
+        for (const locale of this.localesService.findAll()) {
+          await this.productsService.generateProductEmbeddings(
+            product.id,
+            locale.code,
+          );
+        }
+      }
+
+      while (
+        (await this.llmTasksQueue.getJobCountByTypes(
+          'waiting',
+          'active',
+          'wait',
+          'delayed',
+        )) > 0
+      ) {
+        this.logger.log('Waiting for LLM tasks to complete...');
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
+      this.logger.log('Product data embedded into Qdrant vector database.');
+    }
+
     this.logger.log('Seeding completed.');
   }
 

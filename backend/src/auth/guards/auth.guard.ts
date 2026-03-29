@@ -36,9 +36,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = this.getRequest(context);
-    const sessionId =
-      this.extractSessionFromHeader(request) ||
-      this.extractSessionFromCookie(request);
+    const sessionId = this.extractSessionFromHeader(request);
     if (!sessionId) {
       throw new UnauthorizedException(ERROR.unauthorizedException);
     }
@@ -77,14 +75,6 @@ export class AuthGuard implements CanActivate {
     const sessionToken = authHeader.slice(7).trim();
     if (sessionToken) {
       return sessionToken;
-    }
-    return null;
-  }
-
-  private extractSessionFromCookie(request: Request): string | null {
-    const token = request.cookies?.[SESSION_COOKIE_NAME] as string | undefined;
-    if (typeof token === 'string') {
-      return token;
     }
     return null;
   }
