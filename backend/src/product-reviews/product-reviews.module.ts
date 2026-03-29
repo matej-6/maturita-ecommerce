@@ -8,5 +8,6 @@ import { ImageStorageModule } from 'src/image-storage/image-storage.module';
 @Module({
   imports: [ProductsModule, ProductVariantsModule, ImageStorageModule],
   providers: [ProductReviewsResolver, ProductReviewsService],
+  exports: [ProductReviewsService],
 })
 export class ProductReviewsModule {}

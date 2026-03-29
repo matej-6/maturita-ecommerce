@@ -797,6 +797,7 @@ export class SeedService implements OnModuleInit {
                   quantity: item.quantity,
                   sku: item.sku,
                   unitPriceInCents: item.priceInCents,
+                  productId: item.productId,
                 })),
               },
             },
@@ -820,19 +821,17 @@ export class SeedService implements OnModuleInit {
         for (const item of createdOrder.orderItems) {
           await this.prismaService.productReview.create({
             data: {
-              productId: item.ProductVariant!.productId,
               userId: createdOrder.userId,
               rating: fakerSK.number.int({ min: 1, max: 5 }),
-              comment: fakerSK.lorem.sentence({ min: 1, max: 5 }),
+              comment: fakerSK.lorem.sentences({ min: 3, max: 10 }),
               lang: this.localesService.locales().slovak.code,
-              productVariantId: item.productVariantId,
               orderItemId: item.id,
             },
           });
         }
       }
-      this.logger.log('Seeding completed.');
     }
+    this.logger.log('Seeding completed.');
   }
 
   private getFileBuffer(file: string) {

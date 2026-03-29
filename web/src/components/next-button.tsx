@@ -11,11 +11,13 @@ export function NextButton({
   disabled,
   children,
   nextCursor,
+  cursorKey = "cursor",
   ...variantProps
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     nextCursor?: string | number | null;
+    cursorKey?: string;
   }) {
   const router = useRouter();
 
@@ -31,7 +33,7 @@ export function NextButton({
 
     const params = new URLSearchParams(sp.toString());
 
-    params.set("cursor", String(nextCursor));
+    params.set(cursorKey, String(nextCursor));
 
     router.push(`${pathname}?${params.toString()}`);
   };

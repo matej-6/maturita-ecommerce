@@ -1,0 +1,17 @@
+{
+  "service": {
+    "create": {
+      "orderItemNotFound": "The order item you're trying to review doesn't exist.",
+      "orderNotDelivered": "You can only review products from orders are delivered.",
+      "invalidLocale": "The provided locale is not supported.",
+      "reviewAlreadyExists": "You have already reviewed this product."
+    },
+    "update": {
+      "reviewNotFound": "The review you're trying to update doesn't exist.",
+      "invalidLocale": "The provided locale is not supported."
+    },
+    "delete": {
+      "reviewNotFound": "The review you're trying to delete doesn't exist."
+    }
+  }
+}

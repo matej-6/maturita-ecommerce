@@ -12,5 +12,8 @@
       "minLength": "At least {constraints.0} translation/s is/are required",
       "englishRequired": "English translation is required"
     }
-  }
+  },
+  "invalidType": "{property} must be of type {type}",
+  "min": "{property} must be greater than or equal to {constraints.0}",
+  "max": "{property} must be less than or equal to {constraints.0}"
 }

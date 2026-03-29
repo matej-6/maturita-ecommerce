@@ -1,0 +1,17 @@
+{
+  "service": {
+    "create": {
+      "orderItemNotFound": "Nepodarilo sa nájsť položku objednávky, ktorú chcete ohodnotiť.",
+      "orderNotDelivered": "Môžete ohodnotiť iba produkty z doručených objednávok.",
+      "invalidLocale": "Vybraný jazyk nie je podporovaný.",
+      "reviewAlreadyExists": "Na túto produkt si už vytvoril recenziu."
+    },
+    "update": {
+      "reviewNotFound": "Nepodarilo sa nájsť recenziu, ktorú chcete aktualizovať.",
+      "invalidLocale": "Vybraný jazyk nie je podporovaný."
+    },
+    "delete": {
+      "reviewNotFound": "Nepodrailo sa nájsť recenziu, ktorú chcete zmazať."
+    }
+  }
+}

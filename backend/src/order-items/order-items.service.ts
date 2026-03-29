@@ -25,4 +25,18 @@ export class OrderItemsService {
       return item ? item.ProductVariant : null;
     });
   }
+
+  async getProductReviewsByBatch(orderItemIds: number[]) {
+    const orderItems = await this.prisma.orderItem.findMany({
+      where: { id: { in: orderItemIds } },
+      include: {
+        productReview: true,
+      },
+    });
+
+    return orderItemIds.map((id) => {
+      const item = orderItems.find((oi) => oi.id === id);
+      return item ? item.productReview : null;
+    });
+  }
 }

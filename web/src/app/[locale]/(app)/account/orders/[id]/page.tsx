@@ -1,9 +1,18 @@
 import { getOrderDetailsPageData } from "@/app/data-access-layer/order/queries";
 import { getImageSrc } from "@/app/lib/utils";
 import { CancelOrderButton } from "@/components/cancel-order.button";
+import DeleteProductReviewButton from "@/components/delete-product-review-button";
+import ReviewFormDialog from "@/components/form/review-form-dialog";
 import { OrderStatusLabel } from "@/components/order-status";
 import { RetryOrderButton } from "@/components/retry-order-button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -14,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { OrderStatus } from "@/graphql/graphql";
 import { Link } from "@/i18n/navigation";
-import { ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRightIcon, MoreHorizontalIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
@@ -47,9 +56,15 @@ export default async function OrderPage({ params }: Props) {
   }
 
   const order = data.data.order;
+  const locales = data.data.locales.map((l) => ({
+    code: l.code,
+    name: `${l.name} (${l.code})`,
+  }));
 
   const t = await getTranslations("orderPage");
   const ft = await getTranslations("fields.order");
+
+  const canWriteReview = order.status === OrderStatus.Delivered;
 
   return (
     <div className="max-width-container py-6 xl:py-12 flex flex-col gap-y-6 sm:gap-y-12">
@@ -167,11 +182,14 @@ export default async function OrderPage({ params }: Props) {
           <h2 className="font-medium text-base">{t("items")}</h2>
           <Table className="w-full">
             <TableHeader className="w-full">
-              <TableRow className="w-full *:h-fit p-1 sm:p-2 *:font-mono *:text-muted-foreground *:font-medium *:text-xs *:sm:text-sm grid grid-cols-[48px_196px_1fr_1fr] sm:grid-cols-[64px_256px_1fr_1fr] items-center gap-x-1 sm:gap-x-4">
+              <TableRow className="w-full *:h-fit p-1 sm:p-2 *:font-mono *:text-muted-foreground *:font-medium *:text-xs *:sm:text-sm grid grid-cols-[48px_196px_1fr_1fr_1fr] sm:grid-cols-[64px_256px_1fr_1fr_1fr] items-center gap-x-1 sm:gap-x-4">
                 <TableHead>{t("itemsTable.image")}</TableHead>
                 <TableHead>{t("itemsTable.sku")}</TableHead>
                 <TableHead>{t("itemsTable.unitPrice")}</TableHead>
                 <TableHead>{t("itemsTable.quantity")}</TableHead>
+                <TableHead className="ml-auto">
+                  {t("itemsTable.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -181,10 +199,16 @@ export default async function OrderPage({ params }: Props) {
                   item.productVariant?.product.thumbnailImage ??
                   null;
 
+                console.log("Rendering item:", {
+                  id: item.id,
+                  sku: item.sku,
+                  productReview: item.productReview,
+                });
+
                 return (
                   <TableRow
                     key={i}
-                    className="w-full *:h-fit p-1 sm:p-2 *:text-sm *:sm:text-base grid grid-cols-[48px_196px_1fr_1fr] sm:grid-cols-[64px_256px_1fr_1fr] items-center gap-x-1 sm:gap-x-4"
+                    className="w-full *:h-fit p-1 sm:p-2 *:text-sm *:sm:text-base grid grid-cols-[48px_196px_1fr_1fr_1fr] sm:grid-cols-[64px_256px_1fr_1fr_1fr] items-center gap-x-1 sm:gap-x-4"
                   >
                     <TableCell>
                       <div className="w-full aspect-square overflow-hidden rounded-sm sm:rounded-md bg-muted flex items-center justify-center object-cover">
@@ -213,6 +237,45 @@ export default async function OrderPage({ params }: Props) {
                       {(item.unitPriceInCents / 100).toFixed(2)} €
                     </TableCell>
                     <TableCell>{item.quantity}</TableCell>
+                    <TableCell className="ml-auto">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost">
+                            <MoreHorizontalIcon className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuGroup className="flex flex-col gap-y-0.5">
+                            {item.productReview ? (
+                              <>
+                                <ReviewFormDialog
+                                  orderId={order.id}
+                                  locales={locales}
+                                  mode="update"
+                                  initialValues={{
+                                    comment: item.productReview.comment ?? "",
+                                    rating: item.productReview.rating,
+                                    lang: item.productReview.lang,
+                                  }}
+                                  reviewId={item.productReview.id}
+                                />
+                                <DeleteProductReviewButton
+                                  orderId={order.id}
+                                  reviewId={item.productReview.id}
+                                />
+                              </>
+                            ) : (
+                              <ReviewFormDialog
+                                orderId={order.id}
+                                locales={locales}
+                                orderItemId={item.id}
+                                mode="create"
+                              />
+                            )}
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 );
               })}

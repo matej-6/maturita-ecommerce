@@ -31,5 +31,6 @@ import { ProductVariantsModule } from 'src/product-variants/product-variants.mod
     ProductVariantsService,
     ProductVariantAttributesService,
   ],
+  exports: [CategoriesService],
 })
 export class CategoriesModule {}

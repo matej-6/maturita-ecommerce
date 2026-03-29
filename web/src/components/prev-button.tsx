@@ -27,6 +27,9 @@ export function PrevButton({
 
   const pt = useTranslations("pagination");
 
+  const hasPrevCursor =
+    (cursor !== undefined && cursor !== null) || cursorValue !== null;
+
   return (
     <Button
       onClick={() => {
@@ -35,12 +38,7 @@ export function PrevButton({
         }
       }}
       {...variantProps}
-      disabled={
-        disabled ||
-        cursor === null ||
-        cursor === undefined ||
-        cursorValue === null
-      }
+      disabled={disabled || !hasPrevCursor}
     >
       {children ?? (
         <>

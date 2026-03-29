@@ -27,6 +27,22 @@
       "system": "Systémový"
     }
   },
+  "reviewFormDialog": {
+    "triggerButtonCreate": "Napísať recenziu",
+    "triggerButtonUpdate": "Upraviť recenziu",
+    "titleCreate": "Napísať recenziu",
+    "titleUpdate": "Upraviť recenziu",
+    "ratingLabel": "Hodnotenie",
+    "commentLabel": "Recenzia",
+    "commentPlaceholder": "Tu napíš svoju recenziu...",
+    "languageLabel": "Jazyk",
+    "languagePlaceholder": "Vybrať jazyk",
+    "submitButtonCreate": "Odoslať recenziu",
+    "submitButtonUpdate": "Uložit zmeny",
+    "submittingButton": "Odosielam...",
+    "cancelButton": "Zrušiť",
+    "deleteReviewButton": "Zmazať recenziu"
+  },
   "chatbot": {
     "notLoggedIn": "Musíte sa prihlásiť, aby ste mohli používať chatbota.",
     "firstMessage": "Ahoj!. Som tvoj AI nákupný asistent. Môžem ti pomôcť nájsť produtky alebo ti poradiť ohľadom produktu, ktorý práve pozeráš. Ako ti dnes pomôžem?",
@@ -160,7 +176,8 @@
       "image": "Obrázok",
       "sku": "SKU",
       "unitPrice": "Jednotková cena",
-      "quantity": "Množstvo"
+      "quantity": "Množstvo",
+      "actions": "Možnosti"
     },
     "buttons": {
       "cancelOrder": "Zrušiť objednávku",

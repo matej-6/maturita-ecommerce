@@ -12,5 +12,8 @@
       "minLength": "Aspoň {constraints.0} preklad/prekladov je povinný/ch.",
       "englishRequired": "Preklad v angličtine je povinný"
     }
-  }
+  },
+  "invalidType": "{property}  musí byť typu {type}",
+  "min": "{property} musí byť väčšie alebo rovné {constraints.0}",
+  "max": "{property} musí byť menšie alebo rovné {constraints.0}"
 }

@@ -4,7 +4,7 @@ import { Paginated } from 'src/lib/pagination';
 
 @ObjectType()
 export class ProductReview implements Partial<DbProductReview> {
-  @Field(() => Int, { description: 'Product ID' })
+  @Field(() => Int)
   id: number;
 
   @Field(() => String, { nullable: true })
@@ -15,12 +15,6 @@ export class ProductReview implements Partial<DbProductReview> {
 
   @Field(() => Int)
   orderItemId: number | null;
-
-  @Field(() => Int)
-  productVariantId: number | null;
-
-  @Field(() => Int)
-  productId: number;
 
   @Field(() => Int)
   rating: number;

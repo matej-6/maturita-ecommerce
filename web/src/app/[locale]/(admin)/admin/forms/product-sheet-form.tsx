@@ -60,9 +60,8 @@ export const ProductForm = ({
   mode = "create",
   categories,
 }: ProductFormProps) => {
-  // translations
-  const ft = useTranslations("fields"); // fields translations
-  const t = useTranslations("admin.products.form"); // specific form translations
+  const ft = useTranslations("fields");
+  const t = useTranslations("admin.products.form");
 
   const [formData, setFormData] = useState(initialData);
 
@@ -94,7 +93,7 @@ export const ProductForm = ({
         if (!res.success) {
           const fieldErrorsMap = new Map();
           res.fieldErrors?.forEach((e) =>
-            fieldErrorsMap.set(e.property, e.constraints)
+            fieldErrorsMap.set(e.property, e.constraints),
           );
           setFieldErrors(fieldErrorsMap);
           setErrorMessage(res.message);
@@ -107,7 +106,7 @@ export const ProductForm = ({
         }
         const fieldErrorsMap = new Map();
         res.fieldErrors?.forEach((e) =>
-          fieldErrorsMap.set(e.property, e.constraints)
+          fieldErrorsMap.set(e.property, e.constraints),
         );
         setFieldErrors(fieldErrorsMap);
         setErrorMessage(res.message);
@@ -119,7 +118,7 @@ export const ProductForm = ({
     Map<string, string[]> | undefined
   >(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   return (
     <Sheet>

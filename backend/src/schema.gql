@@ -109,6 +109,13 @@ input CreateProductInput {
   slug: String!
 }
 
+input CreateProductReviewInput {
+  comment: String
+  lang: String!
+  orderItemId: Int!
+  rating: Int!
+}
+
 input CreateProductTranslationInput {
   """Product description"""
   description: String
@@ -229,12 +236,14 @@ type Locale {
 
 type Mutation {
   addItemToCart(productVariantId: Int!, quantity: Int!): Cart!
+  admin_deleteProductReview(reviewId: Int!): Boolean!
   cancelOrder(id: Int!): Order!
   changePassword(currentPassword: String!, newPassword: String!): Void!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createCategoryTranslation(newTranslationinput: CreateCategoryTranslationInput!): CategoryTranslation!
   createLlmTask(input: CreateLLMPromptInput!): LLMTask!
   createProduct(createProductInput: CreateProductInput!): Product!
+  createProductReview(input: CreateProductReviewInput!): ProductReview!
   createProductTranslation(createProductTranslationInput: CreateProductTranslationInput!, productId: Int!): ProductTranslation!
   createProductVariant(createProductVariantInput: CreateProductVariantInput!): ProductVariant!
   createProductVariantAttribute(createProductVariantAttributeInput: CreateProductVariantAttributeInput!): ProductVariantAttribute!
@@ -245,6 +254,7 @@ type Mutation {
   deleteAvatar: Void!
   deleteCategoryTranslation(categoryTranslationId: Int!): Int!
   deleteProductImage(productImageId: Int!): Int!
+  deleteProductReview(reviewId: Int!): Boolean!
   deleteProductTranslation(productTranslationId: Int!): Int!
   editProductTranslation(editProductTranslationInput: EditProductTranslationInput!): ProductTranslation!
   generateProductContentEmbedding(lang: String!, productId: Int!): ProductContentEmbedding
@@ -269,6 +279,7 @@ type Mutation {
   updateOrder(input: UpdateOrderDto!, orderId: Int!): Void!
   updatePassword(input: UpdatePasswordInput!): Void!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
+  updateProductReview(input: UpdateProductReviewInput!): ProductReview!
   updateProductVariant(updateProductVariantInput: UpdateProductVariantInput!): ProductVariant!
   updateProductVariantAttribute(updateProductVariantAttributeInput: UpdateProductVariantAttributeInput!): ProductVariantAttribute!
   updateProductVariantAttributeKey(updateProductVariantAttributeKeyInput: UpdateProductVariantAttributeKeyInput!): ProductVariantAttributeKey!
@@ -298,6 +309,7 @@ type OrderItem {
   createdAt: DateTime!
   id: Int!
   orderId: Int!
+  productReview: ProductReview
   productVariant: ProductVariant
   productVariantId: Int
   quantity: Int!
@@ -435,15 +447,10 @@ type ProductReview {
   author: ProductReviewAuthor
   comment: String
   createdAt: DateTime!
-
-  """Product ID"""
   id: Int!
   lang: String!
   orderItemId: Int!
-  product: Product
-  productId: Int!
   productVariant: ProductVariant
-  productVariantId: Int!
   rating: Int!
 }
 
@@ -682,6 +689,13 @@ input UpdateProductInput {
 
   """Product slug"""
   slug: String!
+}
+
+input UpdateProductReviewInput {
+  comment: String
+  id: Int!
+  lang: String!
+  rating: Int!
 }
 
 input UpdateProductVariantAttributeInput {

@@ -27,6 +27,22 @@
       "system": "System"
     }
   },
+  "reviewFormDialog": {
+    "triggerButtonCreate": "Write a Review",
+    "triggerButtonUpdate": "Edit Review",
+    "titleCreate": "Write a Review",
+    "titleUpdate": "Edit Your Review",
+    "ratingLabel": "Rating",
+    "commentLabel": "Comment",
+    "commentPlaceholder": "Write your review here...",
+    "languageLabel": "Language",
+    "languagePlaceholder": "Select language",
+    "submitButtonCreate": "Submit Review",
+    "submitButtonUpdate": "Save Changes",
+    "submittingButton": "Submitting...",
+    "cancelButton": "Cancel",
+    "deleteReviewButton": "Delete Review"
+  },
   "chatbot": {
     "notLoggedIn": "You must be logged in to use the chatbot.",
     "firstMessage": "Hello! I'm your AI shopping assistant. I can help you find products or answer questions about the product you're currently viewing. How can I assist you today?",
@@ -160,7 +176,8 @@
       "image": "Image",
       "sku": "SKU",
       "unitPrice": "Unit Price",
-      "quantity": "Quantity"
+      "quantity": "Quantity",
+      "actions": "Actions"
     },
     "buttons": {
       "cancelOrder": "Cancel Order",

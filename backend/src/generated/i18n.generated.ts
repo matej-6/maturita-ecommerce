@@ -68,6 +68,22 @@ export type I18nTranslations = {
             "onlyPendingOrProcessingOrdersCanBeCanceled": string;
         };
     };
+    "product-reviews": {
+        "service": {
+            "create": {
+                "orderItemNotFound": string;
+                "orderNotDelivered": string;
+                "invalidLocale": string;
+            };
+            "update": {
+                "reviewNotFound": string;
+                "invalidLocale": string;
+            };
+            "delete": {
+                "reviewNotFound": string;
+            };
+        };
+    };
     "product-variant-attribute-keys": {
         "service": {
             "attributeKeyAlreadyExists": string;
@@ -161,6 +177,9 @@ export type I18nTranslations = {
                 "englishRequired": string;
             };
         };
+        "invalidType": string;
+        "min": string;
+        "max": string;
     };
 };
 /* prettier-ignore */

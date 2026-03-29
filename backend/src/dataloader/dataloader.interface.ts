@@ -12,6 +12,8 @@ import {
 } from 'generated/prisma/client';
 import DataLoader from 'dataloader';
 import { Product } from 'src/products/entities/product.entity';
+import { ProductReview } from 'src/product-reviews/entities/productReview.entity';
+import { ProductReviewAuthor } from 'src/product-reviews/entities/productReviewAuthor.entity';
 
 export interface IDataLoaders {
   subcategoriesLoader: DataLoader<number, Category[]>;
@@ -45,4 +47,10 @@ export interface IDataLoaders {
   cartItemProductVariantLoader: DataLoader<number, ProductVariant | null>;
   orderItemProductVariantLoader: DataLoader<number, ProductVariant | null>;
   productVariantsByAttributeIdLoader: DataLoader<number, ProductVariant[]>;
+  orderItemProductReviewLoader: DataLoader<number, ProductReview | null>;
+  productReviewAuthorLoader: DataLoader<number, ProductReviewAuthor | null>;
+  productVariantByProductReviewIdLoader: DataLoader<
+    number,
+    ProductVariant | null
+  >;
 }

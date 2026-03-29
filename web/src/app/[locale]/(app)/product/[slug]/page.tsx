@@ -116,7 +116,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
     .map((attr) => attr.value)
     .join(", ");
 
-  const reviewsCursor = sp.cursor ? parseInt(sp.cursor as string, 10) : null;
+  const reviewsCursor = sp.reviewsCursor
+    ? parseInt(sp.reviewsCursor as string, 10)
+    : null;
 
   const reviewsPromise = getPagedProductReviewsById(
     data.data.productBySlug.id,

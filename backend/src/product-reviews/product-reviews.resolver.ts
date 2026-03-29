@@ -2,6 +2,7 @@ import {
   Args,
   Context,
   Int,
+  Mutation,
   Parent,
   Query,
   ResolveField,
@@ -13,12 +14,18 @@ import {
   ProductReview,
 } from './entities/productReview.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
-import { Product } from 'src/products/entities/product.entity';
 import { ProductsService } from 'src/products/products.service';
 import { GraphqlAppContext } from 'src/app.module';
 import { ProductVariant } from 'src/product-variants/entities/product-variant.entity';
 import { ProductVariantsService } from 'src/product-variants/product-variants.service';
 import { ProductReviewAuthor } from './entities/productReviewAuthor.entity';
+import { CreateProductReviewInput } from './inputs/createProductReview.input';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { UpdateProductReviewInput } from './inputs/updateProductReview.input';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 
 @Resolver(() => ProductReview)
 export class ProductReviewsResolver {
@@ -41,18 +48,6 @@ export class ProductReviewsResolver {
     );
   }
 
-  @ResolveField(() => Product, { name: 'product', nullable: true })
-  async resolveProduct(
-    @Parent() review: ProductReview,
-    @Context() ctx: GraphqlAppContext,
-  ) {
-    return this.productsService.findOne({
-      id: review.productId,
-      isPublic: true,
-      isSetup: null,
-    });
-  }
-
   @ResolveField(() => ProductVariant, {
     name: 'productVariant',
     nullable: true,
@@ -61,10 +56,9 @@ export class ProductReviewsResolver {
     @Parent() review: ProductReview,
     @Context() ctx: GraphqlAppContext,
   ) {
-    if (!review.productVariantId) {
-      return null;
-    }
-    return this.productVariantsService.findOne(review.productVariantId, true);
+    return await ctx.loaders.productVariantByProductReviewIdLoader.load(
+      review.id,
+    );
   }
 
   @ResolveField(() => ProductReviewAuthor, { name: 'author', nullable: true })
@@ -72,6 +66,46 @@ export class ProductReviewsResolver {
     @Parent() review: ProductReview,
     @Context() ctx: GraphqlAppContext,
   ) {
-    return this.productReviewsService.getAuthorByProductReviewId(review.id);
+    return await ctx.loaders.productReviewAuthorLoader.load(review.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => ProductReview)
+  async createProductReview(
+    @Args('input') input: CreateProductReviewInput,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ) {
+    const userId = user.id;
+    return this.productReviewsService.createProductReview(userId, input);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => ProductReview)
+  async updateProductReview(
+    @Args('input') input: UpdateProductReviewInput,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ) {
+    const userId = user.id;
+    return this.productReviewsService.updateProductReview(userId, input);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Boolean)
+  async deleteProductReview(
+    @Args({ name: 'reviewId', type: () => Int }) reviewId: number,
+    @CurrentUser() user: AuthenticatedUserDto,
+  ) {
+    const userId = user.id;
+    await this.productReviewsService.deleteProductReview(userId, reviewId);
+    return true;
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => Boolean)
+  async admin_deleteProductReview(
+    @Args({ name: 'reviewId', type: () => Int }) reviewId: number,
+  ) {
+    await this.productReviewsService.admin_deleteProductReview(reviewId);
+    return true;
   }
 }

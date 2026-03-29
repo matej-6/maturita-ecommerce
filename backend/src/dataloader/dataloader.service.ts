@@ -25,6 +25,9 @@ import { ProductVariantAttributeKeysService } from 'src/product-variant-attribut
 import { Product } from 'src/products/entities/product.entity';
 import { CartItemsService } from 'src/cart-items/cart-items.service';
 import { OrderItemsService } from 'src/order-items/order-items.service';
+import { ProductReview } from 'src/product-reviews/entities/productReview.entity';
+import { ProductReviewAuthor } from 'src/product-reviews/entities/productReviewAuthor.entity';
+import { ProductReviewsService } from 'src/product-reviews/product-reviews.service';
 
 @Injectable()
 export class DataloaderService {
@@ -37,6 +40,7 @@ export class DataloaderService {
     private readonly productVariantAttributeKeysService: ProductVariantAttributeKeysService,
     private readonly cartItemsService: CartItemsService,
     private readonly orderItemsService: OrderItemsService,
+    private readonly productReviewService: ProductReviewsService,
   ) {}
 
   getLoaders(): IDataLoaders {
@@ -75,6 +79,11 @@ export class DataloaderService {
       this.createOrderItemProductVariantLoader();
     const productVariantsByAttributeIdLoader =
       this.createProductVariantsByAttributeIdLoader();
+    const orderItemProductReviewLoader =
+      this.createOrderItemProductReviewLoader();
+    const productReviewAuthorLoader = this.createProductReviewAuthorLoader();
+    const productVariantByProductReviewIdLoader =
+      this.createProductVariantByProductReviewIdLoader();
     return {
       subcategoriesLoader,
       categoryTranslationLoader,
@@ -95,6 +104,9 @@ export class DataloaderService {
       cartItemProductVariantLoader,
       orderItemProductVariantLoader,
       productVariantsByAttributeIdLoader,
+      orderItemProductReviewLoader,
+      productReviewAuthorLoader,
+      productVariantByProductReviewIdLoader,
     };
   }
 
@@ -300,6 +312,36 @@ export class DataloaderService {
       async (attributeIds: number[]) => {
         return await this.productVariantAttributesService.getProductVariantsByBatch(
           attributeIds,
+        );
+      },
+    );
+  }
+
+  private createOrderItemProductReviewLoader() {
+    return new DataLoader<number, ProductReview | null>(
+      async (orderItemIds: number[]) => {
+        return await this.orderItemsService.getProductReviewsByBatch(
+          orderItemIds,
+        );
+      },
+    );
+  }
+
+  private createProductReviewAuthorLoader() {
+    return new DataLoader<number, ProductReviewAuthor | null>(
+      async (productReviewIds: number[]) => {
+        return await this.productReviewService.getReviewAuthorsByProductReviewIds(
+          productReviewIds,
+        );
+      },
+    );
+  }
+
+  private createProductVariantByProductReviewIdLoader() {
+    return new DataLoader<number, ProductVariant | null>(
+      async (productReviewIds: number[]) => {
+        return await this.productReviewService.getProductVariantsByProductReviewIds(
+          productReviewIds,
         );
       },
     );

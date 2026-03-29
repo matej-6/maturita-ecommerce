@@ -137,6 +137,13 @@ export type CreateProductInput = {
   slug: Scalars['String']['input'];
 };
 
+export type CreateProductReviewInput = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  lang: Scalars['String']['input'];
+  orderItemId: Scalars['Int']['input'];
+  rating: Scalars['Int']['input'];
+};
+
 export type CreateProductTranslationInput = {
   /** Product description */
   description?: InputMaybe<Scalars['String']['input']>;
@@ -242,12 +249,14 @@ export type Locale = {
 export type Mutation = {
   __typename?: 'Mutation';
   addItemToCart: Cart;
+  admin_deleteProductReview: Scalars['Boolean']['output'];
   cancelOrder: Order;
   changePassword: Scalars['Void']['output'];
   createCategory: Category;
   createCategoryTranslation: CategoryTranslation;
   createLlmTask: LlmTask;
   createProduct: Product;
+  createProductReview: ProductReview;
   createProductTranslation: ProductTranslation;
   createProductVariant: ProductVariant;
   createProductVariantAttribute: ProductVariantAttribute;
@@ -258,6 +267,7 @@ export type Mutation = {
   deleteAvatar: Scalars['Void']['output'];
   deleteCategoryTranslation: Scalars['Int']['output'];
   deleteProductImage: Scalars['Int']['output'];
+  deleteProductReview: Scalars['Boolean']['output'];
   deleteProductTranslation: Scalars['Int']['output'];
   editProductTranslation: ProductTranslation;
   generateProductContentEmbedding?: Maybe<ProductContentEmbedding>;
@@ -282,6 +292,7 @@ export type Mutation = {
   updateOrder: Scalars['Void']['output'];
   updatePassword: Scalars['Void']['output'];
   updateProduct: Product;
+  updateProductReview: ProductReview;
   updateProductVariant: ProductVariant;
   updateProductVariantAttribute: ProductVariantAttribute;
   updateProductVariantAttributeKey: ProductVariantAttributeKey;
@@ -295,6 +306,11 @@ export type Mutation = {
 export type MutationAddItemToCartArgs = {
   productVariantId: Scalars['Int']['input'];
   quantity: Scalars['Int']['input'];
+};
+
+
+export type MutationAdmin_DeleteProductReviewArgs = {
+  reviewId: Scalars['Int']['input'];
 };
 
 
@@ -326,6 +342,11 @@ export type MutationCreateLlmTaskArgs = {
 
 export type MutationCreateProductArgs = {
   createProductInput: CreateProductInput;
+};
+
+
+export type MutationCreateProductReviewArgs = {
+  input: CreateProductReviewInput;
 };
 
 
@@ -367,6 +388,11 @@ export type MutationDeleteCategoryTranslationArgs = {
 
 export type MutationDeleteProductImageArgs = {
   productImageId: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteProductReviewArgs = {
+  reviewId: Scalars['Int']['input'];
 };
 
 
@@ -479,6 +505,11 @@ export type MutationUpdateProductArgs = {
 };
 
 
+export type MutationUpdateProductReviewArgs = {
+  input: UpdateProductReviewInput;
+};
+
+
 export type MutationUpdateProductVariantArgs = {
   updateProductVariantInput: UpdateProductVariantInput;
 };
@@ -537,6 +568,7 @@ export type OrderItem = {
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['Int']['output'];
   orderId: Scalars['Int']['output'];
+  productReview?: Maybe<ProductReview>;
   productVariant?: Maybe<ProductVariant>;
   productVariantId?: Maybe<Scalars['Int']['output']>;
   quantity: Scalars['Int']['output'];
@@ -692,14 +724,10 @@ export type ProductReview = {
   author?: Maybe<ProductReviewAuthor>;
   comment?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
-  /** Product ID */
   id: Scalars['Int']['output'];
   lang: Scalars['String']['output'];
   orderItemId: Scalars['Int']['output'];
-  product?: Maybe<Product>;
-  productId: Scalars['Int']['output'];
   productVariant?: Maybe<ProductVariant>;
-  productVariantId: Scalars['Int']['output'];
   rating: Scalars['Int']['output'];
 };
 
@@ -1094,6 +1122,13 @@ export type UpdateProductInput = {
   slug: Scalars['String']['input'];
 };
 
+export type UpdateProductReviewInput = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  lang: Scalars['String']['input'];
+  rating: Scalars['Int']['input'];
+};
+
 export type UpdateProductVariantAttributeInput = {
   id: Scalars['Int']['input'];
   /** Attribute Value */
@@ -1236,16 +1271,6 @@ export type EditCategory_QueryDocumentQueryVariables = Exact<{
 
 
 export type EditCategory_QueryDocumentQuery = { __typename?: 'Query', category: { __typename?: 'Category', slug: string, name?: string | null, parentCategoryId?: number | null, isSetup: boolean, isPublic: boolean, productsCount: number, translations: Array<{ __typename?: 'CategoryTranslation', id: number, locale: string, name: string, description?: string | null }>, subcategories: Array<{ __typename?: 'Category', slug: string, id: number }> }, allProducts: Array<{ __typename?: 'Product', id: number, slug: string, name?: string | null }>, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }>, allCategories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> };
-
-export type Locales_QueryFragmentFragment = { __typename?: 'Query', locales: Array<{ __typename?: 'Locale', code: string, name: string }> } & { ' $fragmentName'?: 'Locales_QueryFragmentFragment' };
-
-export type LocalesQueryDocumentQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LocalesQueryDocumentQuery = (
-  { __typename?: 'Query' }
-  & { ' $fragmentRefs'?: { 'Locales_QueryFragmentFragment': Locales_QueryFragmentFragment } }
-);
 
 export type AdminUpdateOrderMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -1681,7 +1706,7 @@ export type OrderDetailsPageQueryQueryVariables = Exact<{
 }>;
 
 
-export type OrderDetailsPageQueryQuery = { __typename?: 'Query', order?: { __typename?: 'Order', id: number, status: OrderStatus, totalInCents: number, createdAt: any, updatedAt: any, shippingDetails?: { __typename?: 'OrderShippingDetails', line1: string, line2?: string | null, state?: string | null, postalCode: string, country: string, city?: string | null, phone?: string | null } | null, items: Array<{ __typename?: 'OrderItem', sku: string, unitPriceInCents: number, quantity: number, productVariant?: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', url: string } | null, product: { __typename?: 'Product', slug: string, thumbnailImage?: { __typename?: 'ProductImage', url: string } | null } } | null }> } | null };
+export type OrderDetailsPageQueryQuery = { __typename?: 'Query', order?: { __typename?: 'Order', id: number, status: OrderStatus, totalInCents: number, createdAt: any, updatedAt: any, shippingDetails?: { __typename?: 'OrderShippingDetails', line1: string, line2?: string | null, state?: string | null, postalCode: string, country: string, city?: string | null, phone?: string | null } | null, items: Array<{ __typename?: 'OrderItem', id: number, sku: string, unitPriceInCents: number, quantity: number, productVariant?: { __typename?: 'ProductVariant', id: number, sku: string, thumbnailImage?: { __typename?: 'ProductVariantImage', url: string } | null, product: { __typename?: 'Product', slug: string, thumbnailImage?: { __typename?: 'ProductImage', url: string } | null } } | null, productReview?: { __typename?: 'ProductReview', id: number, comment?: string | null, rating: number, lang: string } | null }> } | null, locales: Array<{ __typename?: 'Locale', code: string, name: string, flag: string }> };
 
 export type ProductPageQueryQueryVariables = Exact<{
   slug: Scalars['String']['input'];
@@ -1705,6 +1730,33 @@ export type ProductIdBySlugQueryVariables = Exact<{
 
 
 export type ProductIdBySlugQuery = { __typename?: 'Query', productBySlug?: { __typename?: 'Product', id: number } | null };
+
+export type CreateProductReviewMutationVariables = Exact<{
+  orderItemId: Scalars['Int']['input'];
+  rating: Scalars['Int']['input'];
+  comment?: InputMaybe<Scalars['String']['input']>;
+  lang: Scalars['String']['input'];
+}>;
+
+
+export type CreateProductReviewMutation = { __typename?: 'Mutation', createProductReview: { __typename?: 'ProductReview', id: number } };
+
+export type UpdateProductReviewMutationVariables = Exact<{
+  reviewId: Scalars['Int']['input'];
+  rating: Scalars['Int']['input'];
+  comment?: InputMaybe<Scalars['String']['input']>;
+  lang: Scalars['String']['input'];
+}>;
+
+
+export type UpdateProductReviewMutation = { __typename?: 'Mutation', updateProductReview: { __typename?: 'ProductReview', id: number } };
+
+export type DeleteProductReviewMutationVariables = Exact<{
+  reviewId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteProductReviewMutation = { __typename?: 'Mutation', deleteProductReview: boolean };
 
 export type SearchProductsQueryQueryVariables = Exact<{
   searchTerm: Scalars['String']['input'];
@@ -1776,14 +1828,6 @@ export const AllCategories_QueryFragmentFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"AllCategories_QueryFragment"}) as unknown as TypedDocumentString<AllCategories_QueryFragmentFragment, unknown>;
-export const Locales_QueryFragmentFragmentDoc = new TypedDocumentString(`
-    fragment Locales_QueryFragment on Query {
-  locales {
-    code
-    name
-  }
-}
-    `, {"fragmentName":"Locales_QueryFragment"}) as unknown as TypedDocumentString<Locales_QueryFragmentFragment, unknown>;
 export const MeFragmentFragmentDoc = new TypedDocumentString(`
     fragment MeFragment on User {
   id
@@ -1947,16 +1991,6 @@ export const EditCategory_QueryDocumentDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EditCategory_QueryDocumentQuery, EditCategory_QueryDocumentQueryVariables>;
-export const LocalesQueryDocumentDocument = new TypedDocumentString(`
-    query LocalesQueryDocument {
-  ...Locales_QueryFragment
-}
-    fragment Locales_QueryFragment on Query {
-  locales {
-    code
-    name
-  }
-}`) as unknown as TypedDocumentString<LocalesQueryDocumentQuery, LocalesQueryDocumentQueryVariables>;
 export const AdminUpdateOrderDocument = new TypedDocumentString(`
     mutation AdminUpdateOrder($id: Int!, $newStatus: OrderStatus!) {
   updateOrder(orderId: $id, input: {status: $newStatus})
@@ -2911,6 +2945,7 @@ export const OrderDetailsPageQueryDocument = new TypedDocumentString(`
       phone
     }
     items {
+      id
       sku
       unitPriceInCents
       quantity
@@ -2927,7 +2962,18 @@ export const OrderDetailsPageQueryDocument = new TypedDocumentString(`
           }
         }
       }
+      productReview {
+        id
+        comment
+        rating
+        lang
+      }
     }
+  }
+  locales {
+    code
+    name
+    flag
   }
 }
     `) as unknown as TypedDocumentString<OrderDetailsPageQueryQuery, OrderDetailsPageQueryQueryVariables>;
@@ -3002,6 +3048,29 @@ export const ProductIdBySlugDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductIdBySlugQuery, ProductIdBySlugQueryVariables>;
+export const CreateProductReviewDocument = new TypedDocumentString(`
+    mutation CreateProductReview($orderItemId: Int!, $rating: Int!, $comment: String, $lang: String!) {
+  createProductReview(
+    input: {orderItemId: $orderItemId, rating: $rating, comment: $comment, lang: $lang}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateProductReviewMutation, CreateProductReviewMutationVariables>;
+export const UpdateProductReviewDocument = new TypedDocumentString(`
+    mutation UpdateProductReview($reviewId: Int!, $rating: Int!, $comment: String, $lang: String!) {
+  updateProductReview(
+    input: {id: $reviewId, rating: $rating, comment: $comment, lang: $lang}
+  ) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateProductReviewMutation, UpdateProductReviewMutationVariables>;
+export const DeleteProductReviewDocument = new TypedDocumentString(`
+    mutation DeleteProductReview($reviewId: Int!) {
+  deleteProductReview(reviewId: $reviewId)
+}
+    `) as unknown as TypedDocumentString<DeleteProductReviewMutation, DeleteProductReviewMutationVariables>;
 export const SearchProductsQueryDocument = new TypedDocumentString(`
     query SearchProductsQuery($searchTerm: String!, $productsCursor: Int, $productsPageSize: Int, $attributeFilters: [[String!]!]) {
   searchProductVariants(

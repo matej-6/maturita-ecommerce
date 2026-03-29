@@ -26,6 +26,7 @@ const OrderDetailsPageDocument = graphql(`
         phone
       }
       items {
+        id
         sku
         unitPriceInCents
         quantity
@@ -42,7 +43,18 @@ const OrderDetailsPageDocument = graphql(`
             }
           }
         }
+        productReview {
+          id
+          comment
+          rating
+          lang
+        }
       }
+    }
+    locales {
+      code
+      name
+      flag
     }
   }
 `);

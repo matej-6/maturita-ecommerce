@@ -6,6 +6,7 @@ import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 import { getImageSrc } from "@/app/lib/utils";
 
 const AvatarSizeClasses = {
+  xs: "size-6",
   sm: "size-8",
   md: "size-12",
   lg: "size-20",
@@ -18,7 +19,7 @@ export function Avatar({
 }: {
   session: CurrentSession | null;
   imageSrc?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
 }) {
   if (!session && !imageSrc) {
     return (

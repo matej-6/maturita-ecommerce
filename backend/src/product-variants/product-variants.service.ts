@@ -505,6 +505,18 @@ export class ProductVariantsService {
     };
   }
 
+  async findAllByIds(ids: number[]): Promise<(ProductVariant | null)[]> {
+    const productVariants = await this.prisma.productVariant.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    return ids.map((id) => productVariants.find((pv) => pv.id === id) || null);
+  }
+
   async findAll(
     paginationArgs: PaginationArgs,
     productQueryArgs: ProductFindAllQueryArgs,
