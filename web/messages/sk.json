@@ -103,10 +103,15 @@
     },
     "reviewsTitle": "Recenzie"
   },
+  "review": {
+    "unknownUser": "Neznámy používateľ",
+    "variant": "Variant"
+  },
   "homePage": {
     "newArrivals": "Novinky",
     "bestSellers": "Naše najpredávanejšie produkty",
-    "errorLoadingProducts": "Máme momentálne problém s načítaním produktov. Skúste to prosím neskôr."
+    "errorLoadingProducts": "Máme momentálne problém s načítaním produktov. Skúste to prosím neskôr.",
+    "reviewsHeader": "Čo hovoria naši zákazníci..."
   },
   "productVariantCard": {
     "addToCartButton": "Pridať do košíka"

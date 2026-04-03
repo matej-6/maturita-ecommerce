@@ -1,12 +1,10 @@
 "use client";
 
 import { getPagedProductReviewsById } from "@/app/data-access-layer/product.queries";
-import { Card, CardContent } from "./ui/card";
-import { Avatar } from "./avatar";
-import { StarIcon } from "lucide-react";
 import { use } from "react";
 import { PrevButton } from "./prev-button";
 import { NextButton } from "./next-button";
+import ProductReviewCard from "./product-review-card";
 
 export default function ProductReviews({
   productReviewsPromise,
@@ -30,39 +28,28 @@ export default function ProductReviews({
           const review = reviewNode.node;
 
           return (
-            <Card className="w-full" key={review.id}>
-              <CardContent className="flex flex-col gap-y-2 sm:gap-y-4">
-                <div className="flex items-center justify-start gap-x-2">
-                  <Avatar
-                    size="sm"
-                    imageSrc={review.author?.avatarUrl || undefined}
-                    session={null}
-                  />
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    {review.author
-                      ? `${review.author.firstName} ${review.author.lastName}`
-                      : "Unknown"}
-                  </p>
-                  <p className="text-sm sm:text-base font-light text-muted-foreground ml-auto">
-                    {new Date(review.createdAt).toLocaleDateString("sk")}
-                  </p>
-                </div>
-                <div className="text-sm sm:text-base text-muted-foreground">
-                  <p>Variant {review.productVariant?.sku || "Unknown"}</p>
-                </div>
-                <div className="flex gap-x-0.5">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <StarIcon
-                      key={i}
-                      className="fill-amber-300 stroke-amber-300 size-4 sm:size-6"
-                    />
-                  ))}
-                </div>
-                <p className="text-base sm:text-lg text-foreground">
-                  {review.comment}
-                </p>
-              </CardContent>
-            </Card>
+            <ProductReviewCard
+              key={review.id}
+              className="w-full"
+              review={{
+                id: review.id,
+                rating: review.rating,
+                comment: review.comment ?? "",
+                createdAt: new Date(review.createdAt),
+                author: review.author
+                  ? {
+                      firstName: review.author.firstName,
+                      lastName: review.author.lastName,
+                      avatarUrl: review.author.avatarUrl || null,
+                    }
+                  : undefined,
+                productVariant: review.productVariant
+                  ? {
+                      sku: review.productVariant.sku,
+                    }
+                  : undefined,
+              }}
+            />
           );
         })}
       </div>

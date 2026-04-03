@@ -850,6 +850,7 @@ export type Query = {
   order?: Maybe<Order>;
   orders: Array<Order>;
   paginatedCategories: PaginatedCategory;
+  paginatedProductReviews: PaginatedProductReview;
   paginatedProductReviewsByProductId: PaginatedProductReview;
   product?: Maybe<Product>;
   productBySlug?: Maybe<Product>;
@@ -988,6 +989,12 @@ export type QueryPaginatedCategoriesArgs = {
   parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   slugQuery?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPaginatedProductReviewsArgs = {
+  cursor?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1670,7 +1677,7 @@ export type CategoryQueryQuery = { __typename?: 'Query', category: { __typename?
 export type HomepageQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomepageQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', edges?: Array<{ __typename?: 'ProductVariantEdge', node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, thumbnailImage?: { __typename?: 'ProductVariantImage', url: string } | null, product: { __typename?: 'Product', slug: string, name?: string | null, id: number, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', url: string } | null } } }> | null }, bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', productVariant: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, thumbnailImage?: { __typename?: 'ProductVariantImage', url: string } | null, product: { __typename?: 'Product', id: number, slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', url: string } | null }, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } }> | null };
+export type HomepageQueryQuery = { __typename?: 'Query', searchProductVariants: { __typename?: 'PaginatedProductVariant', edges?: Array<{ __typename?: 'ProductVariantEdge', node: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null }>, thumbnailImage?: { __typename?: 'ProductVariantImage', url: string } | null, product: { __typename?: 'Product', slug: string, name?: string | null, id: number, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', url: string } | null } } }> | null }, bestSellingProductVariantsStatistic?: Array<{ __typename?: 'BestSellingProductVariant', productVariant: { __typename?: 'ProductVariant', id: number, sku: string, priceInCents: number, thumbnailImage?: { __typename?: 'ProductVariantImage', url: string } | null, product: { __typename?: 'Product', id: number, slug: string, name?: string | null, description?: string | null, thumbnailImage?: { __typename?: 'ProductImage', url: string } | null }, attributes: Array<{ __typename?: 'ProductVariantAttribute', value: string, translatedValue?: string | null, key?: { __typename?: 'ProductVariantAttributeKey', key: string, translatedKey?: string | null } | null }> } }> | null, paginatedProductReviews: { __typename?: 'PaginatedProductReview', edges?: Array<{ __typename?: 'ProductReviewEdge', node: { __typename?: 'ProductReview', id: number, rating: number, comment?: string | null, createdAt: any, author?: { __typename?: 'ProductReviewAuthor', firstName: string, avatarUrl?: string | null, lastName: string } | null, productVariant?: { __typename?: 'ProductVariant', sku: string } | null } }> | null } };
 
 export type NewLlmTaskMutationVariables = Exact<{
   prompt: Scalars['String']['input'];
@@ -2834,7 +2841,7 @@ export const CategoryQueryDocument = new TypedDocumentString(`
     `) as unknown as TypedDocumentString<CategoryQueryQuery, CategoryQueryQueryVariables>;
 export const HomepageQueryDocument = new TypedDocumentString(`
     query HomepageQuery {
-  searchProductVariants(ascending: false, sortBy: "createdAt", pageSize: 6) {
+  searchProductVariants(ascending: false, sortBy: "createdAt", pageSize: 10) {
     edges {
       node {
         id
@@ -2859,7 +2866,7 @@ export const HomepageQueryDocument = new TypedDocumentString(`
       }
     }
   }
-  bestSellingProductVariantsStatistic(limit: 6, timePeriod: LAST_SEVEN_DAYS) {
+  bestSellingProductVariantsStatistic(limit: 10, timePeriod: LAST_SEVEN_DAYS) {
     productVariant {
       id
       sku
@@ -2882,6 +2889,24 @@ export const HomepageQueryDocument = new TypedDocumentString(`
         key {
           key
           translatedKey
+        }
+      }
+    }
+  }
+  paginatedProductReviews(pageSize: 10, cursor: null) {
+    edges {
+      node {
+        id
+        rating
+        comment
+        createdAt
+        author {
+          firstName
+          avatarUrl
+          lastName
+        }
+        productVariant {
+          sku
         }
       }
     }

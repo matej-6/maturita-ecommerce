@@ -74,6 +74,7 @@ export type I18nTranslations = {
                 "orderItemNotFound": string;
                 "orderNotDelivered": string;
                 "invalidLocale": string;
+                "reviewAlreadyExists": string;
             };
             "update": {
                 "reviewNotFound": string;

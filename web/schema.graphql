@@ -586,6 +586,7 @@ type Query {
     """Field to sort by"""
     sortBy: String
   ): PaginatedCategory!
+  paginatedProductReviews(cursor: Int, pageSize: Int = 10): PaginatedProductReview!
   paginatedProductReviewsByProductId(cursor: Int, pageSize: Int = 10, productId: Int!): PaginatedProductReview!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productBySlug(slug: String!): Product

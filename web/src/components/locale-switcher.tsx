@@ -24,7 +24,7 @@ export default function LocaleSwitcher() {
   function onSelectChange(value: string) {
     const nextLoc = value as Locale;
     startTransition(() => {
-      //@ts-expect-error Current pathname, params combination is always valid
+      //@ts-expect-error funguje
       router.replace({ pathname, params }, { locale: nextLoc });
     });
   }

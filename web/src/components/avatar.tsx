@@ -17,7 +17,7 @@ export function Avatar({
   session,
   imageSrc,
 }: {
-  session: CurrentSession | null;
+  session?: CurrentSession;
   imageSrc?: string;
   size?: "xs" | "sm" | "md" | "lg";
 }) {

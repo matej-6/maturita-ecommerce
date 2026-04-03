@@ -48,6 +48,16 @@ export class ProductReviewsResolver {
     );
   }
 
+  @Query(() => PaginatedProductReview, {
+    name: 'paginatedProductReviews',
+  })
+  async queryProductReviews(@Args() paginationArgs: PaginationArgs) {
+    return this.productReviewsService.getPaginatedProductReviewsByProductId(
+      null,
+      paginationArgs,
+    );
+  }
+
   @ResolveField(() => ProductVariant, {
     name: 'productVariant',
     nullable: true,

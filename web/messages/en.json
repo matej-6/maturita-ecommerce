@@ -103,10 +103,15 @@
     },
     "reviewsTitle": "Reviews"
   },
+  "review": {
+    "unknownUser": "Unknown User",
+    "variant": "Variant"
+  },
   "homePage": {
     "newArrivals": "New Arrivals",
     "bestSellers": "Our Best Selling Products",
-    "errorLoadingProducts": "We're having trouble loading products right now. Please try again later."
+    "errorLoadingProducts": "We're having trouble loading products right now. Please try again later.",
+    "reviewsHeader": "What our customers are saying..."
   },
   "productVariantCard": {
     "addToCartButton": "Add to Cart"

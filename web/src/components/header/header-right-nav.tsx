@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "../ui/button";
-import { MenuIcon, ShoppingCartIcon } from "lucide-react";
+import { LogOutIcon, MenuIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import {
   NavigationMenu,
@@ -76,20 +76,22 @@ export function HeaderRightNav({
               <MenuIcon className="size-6" />
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="max-h-[100vh]!">
-            <div className="mx-auto w-full max-w-sm overflow-y-scroll">
+          <DrawerContent className="max-h-[100vh]! min-h-[80vh]!">
+            <div className="mx-auto w-full max-w-sm overflow-y-scroll overflow-x-hidden">
               <DrawerHeader>
                 <DrawerTitle>
                   <Link href="/">GoFitShop</Link>
                 </DrawerTitle>
               </DrawerHeader>
               <div className="p-4 flex flex-col gap-y-8">
-                <div className="flex flex-col gap-y-2">
+                <div className="flex gap-x-1.5 items-center mx-auto">
                   {currentSession ? (
                     <>
                       <Sheet>
                         <SheetTrigger asChild>
-                          <Button>{t("cart")}</Button>
+                          <Button>
+                            {t("cart")} <ShoppingCartIcon className="w-8 h-8" />
+                          </Button>
                         </SheetTrigger>
                         <SheetContent className="min-w-full xs:min-w-[400px] grow flex flex-col z-[999]">
                           <SheetHeader>
@@ -102,8 +104,11 @@ export function HeaderRightNav({
                       </Sheet>
                       <Button variant={"outline"} asChild>
                         <Link href="/account-details">
-                          {t("account-details")}
+                          <UserIcon className="w-8 h-8" />
                         </Link>
+                      </Button>
+                      <Button variant={"outline"} onClick={() => logout()}>
+                        <LogOutIcon className="w-8 h-8" />
                       </Button>
                     </>
                   ) : (
@@ -111,7 +116,6 @@ export function HeaderRightNav({
                       <Button
                         variant={"outline"}
                         size={"sm"}
-                        asChild
                         className="text-sm"
                       >
                         <Link href="/auth/login">{t("login")}</Link>
@@ -119,7 +123,6 @@ export function HeaderRightNav({
                       <Button
                         variant={"default"}
                         size={"sm"}
-                        asChild
                         className="text-sm"
                       >
                         <Link href="/auth/register">{t("register")}</Link>
@@ -154,13 +157,6 @@ export function HeaderRightNav({
                     </div>
                   ))}
                 </div>
-                {currentSession && (
-                  <Button>
-                    <span onClick={() => logout()} className="w-full">
-                      {isLoggingOut ? t("logging-out") : t("logout")}
-                    </span>
-                  </Button>
-                )}
               </div>
             </div>
           </DrawerContent>
@@ -229,10 +225,10 @@ export function HeaderRightNav({
           </div>
         ) : (
           <div className="flex items-center gap-4">
-            <Button variant={"outline"} size={"sm"} asChild className="text-sm">
+            <Button variant={"outline"} size={"sm"} className="text-sm">
               <Link href="/auth/login">{t("login")}</Link>
             </Button>
-            <Button variant={"default"} size={"sm"} asChild className="text-sm">
+            <Button variant={"default"} size={"sm"} className="text-sm">
               <Link href="/auth/register">{t("register")}</Link>
             </Button>
           </div>

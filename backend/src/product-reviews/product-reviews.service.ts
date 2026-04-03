@@ -36,14 +36,14 @@ export class ProductReviewsService {
   }
 
   async getPaginatedProductReviewsByProductId(
-    productId: number,
+    productId: number | null,
     paginationParams: PaginationArgs,
   ): Promise<PaginatedProductReview> {
     this.validatePaginationParams(paginationParams);
     const productReviews = await this.prismaService.productReview.findMany({
       where: {
         OrderItem: {
-          productId: productId,
+          productId: productId !== null ? productId : undefined,
         },
       },
       cursor:

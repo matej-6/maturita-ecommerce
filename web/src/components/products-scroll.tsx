@@ -83,7 +83,7 @@ export function ProductsScroll({ variants, header }: Props) {
         </div>
       </div>
       <div
-        className="flex gap-x-2 sm:gap-x-4 overflow-x-auto max-w-full"
+        className="flex gap-x-2 sm:gap-x-4 overflow-x-auto disable-scrollbar max-w-full"
         ref={scrollElementRef}
       >
         {variants.map((v, i) => {
