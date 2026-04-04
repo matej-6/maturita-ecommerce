@@ -23,7 +23,7 @@ export function RemoveAccountAvatarButton() {
 
   return (
     <ResponsiveButton
-      variant={"secondary"}
+      variant={"default"}
       onClick={() => mutate()}
       disabled={isPending}
     >

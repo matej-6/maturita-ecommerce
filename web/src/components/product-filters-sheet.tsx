@@ -25,7 +25,7 @@ export function ProductFiltersSheet({ productFilterProps }: Props) {
   return (
     <Sheet open={open} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="secondary" className="w-fit">
+        <Button variant="outline" className="w-fit">
           {t("triggerButton")}
         </Button>
       </SheetTrigger>

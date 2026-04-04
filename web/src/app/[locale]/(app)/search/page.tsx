@@ -109,15 +109,13 @@ export default async function SearchPage({ searchParams }: Props) {
         {t("title")} &quot;{query}&quot;
       </h1>
       {groupedAttributes.size > 0 && (
-        <div className="">
-          <ProductFiltersSheet
-            productFilterProps={{
-              attributes: groupedAttributes,
-              baseUrl: `/search`,
-              searchParams: new URLSearchParams({ q: query }),
-            }}
-          />
-        </div>
+        <ProductFiltersSheet
+          productFilterProps={{
+            attributes: groupedAttributes,
+            baseUrl: `/search`,
+            searchParams: new URLSearchParams({ q: query }),
+          }}
+        />
       )}
       <div className="flex flex-wrap gap-4">
         {productVariants &&

@@ -97,7 +97,7 @@ export function HeaderRightNav({
                           <SheetHeader>
                             <SheetTitle>{t("cart")}</SheetTitle>
                           </SheetHeader>
-                          <div className="mt-4 m-2 grow flex">
+                          <div className="mt-4 m-2 overflow-y-auto">
                             <Cart />
                           </div>
                         </SheetContent>
@@ -168,11 +168,7 @@ export function HeaderRightNav({
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={
-                      "flex gap-x-2 w-fit hover:bg-background! data-[state=open]:bg-background! data-[state=open]:hover:bg-background! focus:bg-background!"
-                    }
-                  >
+                  <NavigationMenuTrigger className="size-fit! px-2! py-1!">
                     <Avatar session={currentSession} size="sm" />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
@@ -210,14 +206,14 @@ export function HeaderRightNav({
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant={"ghost"} size={"icon"}>
-                  <ShoppingCartIcon className="size-6 text-secondary-foreground" />
+                  <ShoppingCartIcon className="size-6" />
                 </Button>
               </SheetTrigger>
               <SheetContent className="min-w-full xs:min-w-[400px] grow flex flex-col z-[999]">
                 <SheetHeader>
                   <SheetTitle>{t("cart")}</SheetTitle>
                 </SheetHeader>
-                <div className="mt-4 m-2 grow flex">
+                <div className="mt-4 m-2 overflow-y-auto">
                   <Cart />
                 </div>
               </SheetContent>

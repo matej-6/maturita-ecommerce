@@ -117,15 +117,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   return (
     <div className="max-width-container  w-full mx-auto py-6 sm:py-12 gap-y-6 sm:gap-y-12 flex flex-col relative">
       <div className="flex flex-col gap-y-2 sm:gap-y-4">
-        <h1 className="text-2xl sm:text-4xl font-bold">{category.name}</h1>
-        <p className="text-muted-foreground">{category.description}</p>
+        <div className="flex flex-col gap-y-1 sm:gap-y-4">
+          <h1 className="text-2xl sm:text-4xl font-bold">{category.name}</h1>
+          <p className="text-accent-foreground text-lg sm:text-xl">
+            {category.description}
+          </p>
+        </div>
         {category.subcategories.length > 0 && (
           <div className="flex flex-col gap-y-1 sm:gap-y-2">
-            <h2 className="text-muted-foreground">{t("subcategories")}</h2>
+            <h2 className="text-accent-foreground">{t("subcategories")}</h2>
             <div className="flex flex-wrap gap-2">
               {category.subcategories.map((s) => (
                 <Link key={s.slug} href={`/category/${s.slug}`}>
-                  <Button variant={"outline"}>{s.name || s.slug}</Button>
+                  <Button variant={"secondary"}>{s.name || s.slug}</Button>
                 </Link>
               ))}
             </div>
@@ -183,13 +187,22 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               />
               {!!nextPageLink ? (
                 <Link href={nextPageLink}>
-                  <Button size={"sm"} className="items-center">
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    className="items-center"
+                  >
                     <span>{pt("next")}</span>
                     <ArrowRightIcon className="size-3.5" />
                   </Button>
                 </Link>
               ) : (
-                <Button size={"sm"} disabled className="items-center">
+                <Button
+                  size={"sm"}
+                  disabled
+                  variant={"outline"}
+                  className="items-center"
+                >
                   <span>{pt("next")}</span>
                   <ArrowRightIcon className="size-3.5" />
                 </Button>

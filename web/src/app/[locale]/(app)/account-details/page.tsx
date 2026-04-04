@@ -166,18 +166,7 @@ export default async function AccountDetailsPage() {
                   </TableCell>
                   <TableCell className="flex justify-end items-center gap-x-2">
                     <Link href={`/account/orders/${order.id}`}>
-                      <Button
-                        className="block sm:hidden"
-                        size={"xs"}
-                        variant={"secondary"}
-                      >
-                        {t("orders.viewOrder")}
-                      </Button>
-                      <Button
-                        className="hidden sm:block"
-                        size={"default"}
-                        variant={"secondary"}
-                      >
+                      <Button variant={"default"}>
                         {t("orders.viewOrder")}
                       </Button>
                     </Link>

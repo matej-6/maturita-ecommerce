@@ -47,7 +47,7 @@ export function UpdateUserRoleSheetForm({ userId, role }: Props) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant={"secondary"}>{t("button")}</Button>
+        <Button variant={"default"}>{t("button")}</Button>
       </SheetTrigger>
       <SheetContent className="p-2 sm:p-4 flex flex-col gap-y-4">
         <SheetHeader className="p-0!">

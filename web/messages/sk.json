@@ -20,7 +20,7 @@
     "locale": "{locale, select, sk {🇸🇰 Slovenský} en {🇺🇸 English} other {Neznámy}}"
   },
   "footer": {
-    "copyright": "© 2025 GoFitShop",
+    "copyright": "GoFitShop - 2026",
     "dark-mode": {
       "light": "Svetlý",
       "dark": "Tmavý",
@@ -391,7 +391,7 @@
         "actions": {
           "title": "Možnosti",
           "viewPage": "Zobraziť stránku",
-          "viewDetails": "Zobraziť detaily"
+          "viewDetails": "Zobraziť podrobnosti"
         }
       }
     },
@@ -534,7 +534,7 @@
         },
         "actions": {
           "label": "Možnosti",
-          "viewDetails": "Zobraziť detaily"
+          "viewDetails": "Zobraziť podrobnosti"
         }
       }
     },
@@ -568,7 +568,7 @@
         },
         "actions": {
           "label": "Možnosti",
-          "viewDetails": "Zobraziť detaily"
+          "viewDetails": "Zobraziť podrobnosti"
         }
       }
     },
@@ -655,7 +655,7 @@
         },
         "actions": {
           "label": "Možnosti",
-          "viewDetails": "Zobraziť detaily"
+          "viewDetails": "Zobraziť podrobnosti"
         },
         "filters": {
           "applyFiltersButton": "Použiť filtre",

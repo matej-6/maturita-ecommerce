@@ -31,7 +31,7 @@ export function Cart() {
   );
 
   return (
-    <div className="flex flex-col gap-y-8 overflow-y-scroll grow">
+    <div className="flex flex-col gap-y-8">
       <div className="flex flex-col gap-y-4">
         {isLoading && cartItems === undefined ? (
           [...Array(3)].map((_, idx) => <CartItemSkeleton key={idx} />)
@@ -44,16 +44,10 @@ export function Cart() {
               item.productVariant.product.thumbnailImage ||
               null;
 
-            // const variantName = `${item.productVariant.product
-            //   .name!} ${item.productVariant.attributes
-            //   .sort((a, b) => a.key!.key.localeCompare(b.key!.key))
-            //   .map((attr) => attr.value)
-            //   .join(", ")}`;
-
             return (
               <div
                 key={item.id}
-                className="flex justify-between p-2 items-start"
+                className="flex justify-between p-2 items-start w-full"
               >
                 <div className="flex gap-x-4 items-start">
                   <div className="w-[96px] aspect-square overflow-hidden bg-accent flex items-center justify-center">
@@ -70,7 +64,7 @@ export function Cart() {
                       <Link
                         href={`/product/${item.productVariant.product.slug}?variant=${item.productVariant.sku}`}
                       >
-                        <h4 className="text-sm font-medium">
+                        <h4 className="text-sm font-medium truncate">
                           {item.productVariant.sku}
                         </h4>
                       </Link>
@@ -133,6 +127,7 @@ export function Cart() {
                   size={"xs"}
                   onClick={() => removeFromCart(item.id)}
                   disabled={isRemoving}
+                  className="ml-1"
                 >
                   <XIcon className="size-4" />
                 </Button>

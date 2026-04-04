@@ -43,6 +43,7 @@ export function NextButton({
       onClick={() => {
         handleClick();
       }}
+      variant={"outline"}
       {...variantProps}
       disabled={disabled || nextCursor == null}
     >

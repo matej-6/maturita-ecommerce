@@ -6,6 +6,7 @@ import { AddToCartButton } from "./add-to-cart-button";
 import { Card } from "./ui/card";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { Button } from "./ui/button";
 
 type Props = {
   variants: {
@@ -66,11 +67,9 @@ export function ProductVariantsScroll({ variants }: Props) {
   return (
     <div className="flex flex-col gap-y-1">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm text-muted-foreground font-medium">
-          {t("otherVariants")}
-        </h2>
+        <h2 className="text-sm text-accent-foreground">{t("otherVariants")}</h2>
         <div className="flex items-center gap-x-1 ">
-          <button
+          <Button
             disabled={backDisabled}
             onClick={() => {
               scrollElementRef.current?.scrollBy({
@@ -78,11 +77,12 @@ export function ProductVariantsScroll({ variants }: Props) {
                 behavior: "smooth",
               });
             }}
-            className="rounded-full p-1 bg-primary disabled:bg-muted text-primary-foreground disabled:text-muted-foreground"
+            variant={"secondary"}
+            className="rounded-full p-1! w-fit! h-fit!"
           >
             <ArrowLeftIcon className="size-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             disabled={forwardDisabled}
             onClick={() => {
               scrollElementRef.current?.scrollBy({
@@ -90,10 +90,11 @@ export function ProductVariantsScroll({ variants }: Props) {
                 behavior: "smooth",
               });
             }}
-            className="rounded-full p-1 bg-primary disabled:bg-muted text-primary-foreground disabled:text-muted-foreground rotate-180"
+            variant={"secondary"}
+            className="rounded-full p-1! w-fit! h-fit! rotate-180"
           >
             <ArrowLeftIcon className="size-4" />
-          </button>
+          </Button>
         </div>
       </div>
       <div className="flex gap-x-2 overflow-x-auto max-w-full">
@@ -121,26 +122,6 @@ export function ProductVariantsScroll({ variants }: Props) {
                   {v.name}
                 </h3>
               </Link>
-              <AddToCartButton
-                className="block sm:hidden"
-                buttonProps={{
-                  size: "xs",
-                }}
-                productVariantId={v.id}
-                quantity={1}
-              >
-                {t("addToCartButton")}
-              </AddToCartButton>
-              <AddToCartButton
-                className="hidden sm:block"
-                buttonProps={{
-                  size: "sm",
-                }}
-                productVariantId={v.id}
-                quantity={1}
-              >
-                {t("addToCartButton")}
-              </AddToCartButton>
             </Card>
           );
         })}

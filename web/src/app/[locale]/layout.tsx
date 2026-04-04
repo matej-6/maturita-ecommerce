@@ -1,6 +1,6 @@
 "use server";
 
-import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
+import { Merriweather, Poppins, Roboto_Mono } from "next/font/google";
 import Providers from "@/providers";
 import { hasLocale, Locale } from "next-intl";
 import { routing } from "@/i18n/routing";
@@ -10,19 +10,20 @@ import { cn } from "@/lib/utils";
 import "../globals.css";
 import { Metadata } from "next";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fontSans = Poppins({
   subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fontSerif = Merriweather({
   subsets: ["latin"],
+  variable: "--font-serif",
 });
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
+const fontMono = Roboto_Mono({
   subsets: ["latin"],
+  variable: "--font-mono",
 });
 
 export async function generateStaticParams() {
@@ -64,9 +65,9 @@ export default async function LocaleLayout({
       <body
         id="root"
         className={cn(
-          geistSans.variable,
-          geistMono.variable,
-          bricolage.variable,
+          fontSans.variable,
+          fontSerif.variable,
+          fontMono.variable,
           "antialiased font-primary overflow-y-scroll!",
         )}
       >

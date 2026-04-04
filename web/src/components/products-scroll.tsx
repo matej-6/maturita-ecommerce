@@ -3,6 +3,7 @@
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CardVariant, ProductVariantCard } from "./product-variant-card";
+import { Button } from "./ui/button";
 
 type Props = {
   variants: CardVariant[];
@@ -56,7 +57,7 @@ export function ProductsScroll({ variants, header }: Props) {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl sm:text-3xl font-semibold">{header}</h2>
         <div className="flex items-center gap-x-1 sm:gap-x-2">
-          <button
+          <Button
             disabled={backDisabled}
             onClick={() => {
               scrollElementRef.current?.scrollBy({
@@ -64,11 +65,12 @@ export function ProductsScroll({ variants, header }: Props) {
                 behavior: "smooth",
               });
             }}
-            className="rounded-full p-1 sm:p-2 bg-primary disabled:bg-muted text-primary-foreground disabled:text-muted-foreground"
+            variant={"secondary"}
+            className="rounded-full p-1! size-fit!"
           >
             <ArrowLeftIcon className="size-4 sm:size-6" />
-          </button>
-          <button
+          </Button>
+          <Button
             disabled={forwardDisabled}
             onClick={() => {
               scrollElementRef.current?.scrollBy({
@@ -76,10 +78,11 @@ export function ProductsScroll({ variants, header }: Props) {
                 behavior: "smooth",
               });
             }}
-            className="rounded-full p-1 sm:p-2 bg-primary disabled:bg-muted text-primary-foreground disabled:text-muted-foreground rotate-180"
+            variant={"secondary"}
+            className="rounded-full p-1! size-fit! rotate-180"
           >
             <ArrowLeftIcon className="size-4 sm:size-6" />
-          </button>
+          </Button>
         </div>
       </div>
       <div

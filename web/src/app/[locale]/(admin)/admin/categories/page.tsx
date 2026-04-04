@@ -91,37 +91,35 @@ export default async function CategoriesPage({ searchParams }: Props) {
       <div>
         <NewCategoryFormSheet categories={allCategories ?? []} />
       </div>
-      <div className=" min-h-[100vh] flex-1 md:min-h-min flex flex-col">
-        <CategoriesTableWithFilters
-          initialPagingArgs={pagingArgs}
-          initialSortingArgs={sortingArgs}
-          initialTableArgs={tableArgs}
-          searchParams={urlSearchParams.toString()}
-          sortableColumns={[
-            "id",
-            "slug",
-            "isPublic",
-            "isSetup",
-            "createdAt",
-            "updatedAt",
-            "productsCount",
-          ]}
-          data={
-            paginatedCategories
-              ? paginatedCategories.edges?.map((c) => ({
-                  id: c.node.id,
-                  slug: c.node.slug,
-                  parentCategoryId: c.node.parentCategoryId || null,
-                  isPublic: c.node.isPublic,
-                  isSetup: c.node.isSetup,
-                  createdAt: new Date(c.node.createdAt),
-                  updatedAt: new Date(c.node.updatedAt),
-                  productsCount: c.node.productsCount,
-                })) || null
-              : null
-          }
-        />
-      </div>
+      <CategoriesTableWithFilters
+        initialPagingArgs={pagingArgs}
+        initialSortingArgs={sortingArgs}
+        initialTableArgs={tableArgs}
+        searchParams={urlSearchParams.toString()}
+        sortableColumns={[
+          "id",
+          "slug",
+          "isPublic",
+          "isSetup",
+          "createdAt",
+          "updatedAt",
+          "productsCount",
+        ]}
+        data={
+          paginatedCategories
+            ? paginatedCategories.edges?.map((c) => ({
+                id: c.node.id,
+                slug: c.node.slug,
+                parentCategoryId: c.node.parentCategoryId || null,
+                isPublic: c.node.isPublic,
+                isSetup: c.node.isSetup,
+                createdAt: new Date(c.node.createdAt),
+                updatedAt: new Date(c.node.updatedAt),
+                productsCount: c.node.productsCount,
+              })) || null
+            : null
+        }
+      />
     </div>
   );
 }

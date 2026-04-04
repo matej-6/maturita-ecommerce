@@ -114,26 +114,24 @@ export default async function UsersPage({ searchParams }: Props) {
   });
 
   return (
-    <div className="flex-1 flex flex-col gap-4">
-      <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
-        <UsersTableWithFilters
-          initialPagingArgs={pagingArgs}
-          initialSortingArgs={sortingArgs}
-          initialTableArgs={tableArgs}
-          searchParams={urlSearchParams.toString()}
-          data={
-            usersData.success
-              ? usersData.data?.findAllPaginatedUsers.edges?.map((p) => ({
-                  id: p.node.id,
-                  role: p.node.role,
-                  email: p.node.email,
-                  createdAt: new Date(p.node.createdAt),
-                  updatedAt: new Date(p.node.updatedAt),
-                })) || null
-              : null
-          }
-        />
-      </div>
+    <div className="flex flex-col gap-y-4">
+      <UsersTableWithFilters
+        initialPagingArgs={pagingArgs}
+        initialSortingArgs={sortingArgs}
+        initialTableArgs={tableArgs}
+        searchParams={urlSearchParams.toString()}
+        data={
+          usersData.success
+            ? usersData.data?.findAllPaginatedUsers.edges?.map((p) => ({
+                id: p.node.id,
+                role: p.node.role,
+                email: p.node.email,
+                createdAt: new Date(p.node.createdAt),
+                updatedAt: new Date(p.node.updatedAt),
+              })) || null
+            : null
+        }
+      />
     </div>
   );
 }

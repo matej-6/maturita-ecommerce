@@ -158,6 +158,8 @@ model AttributeTranslation {
   locale      String
   Attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
   attributeId Int
+
+  @@map("attribute_translations")
 }
 
 model AttributeKey {
@@ -179,6 +181,7 @@ model AttributeKeyTranslation {
   attributeKeyId Int
 
   @@index([locale, attributeKeyId])
+  @@map("attribute_key_translations")
 }
 
 model CartItem {
@@ -284,6 +287,7 @@ model EmbeddingTask {
 
   @@unique([productId, lang])
   @@index([productId, lang])
+  @@map("embedding_tasks")
 }
 
 model ProductContentEmbeddingTask {
@@ -296,6 +300,7 @@ model ProductContentEmbeddingTask {
 
   @@unique([productId, lang])
   @@index([productId, lang])
+  @@map("product_content_embedding_tasks")
 }
 
 enum EmbeddingTaskStatus {
@@ -350,4 +355,5 @@ model ProductReview {
   lang        String
 
   @@index([orderItemId])
+  @@map("product_reviews")
 }

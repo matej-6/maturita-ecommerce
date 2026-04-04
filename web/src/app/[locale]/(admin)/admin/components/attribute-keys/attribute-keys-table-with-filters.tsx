@@ -255,7 +255,9 @@ export function AttributeKeysTableWithFilters({
                     </div>
                   </TableHead>
                 ))}
-                <TableHead className="sr-only">{t("actions.label")}</TableHead>
+                <TableHead className="p-4 text-right">
+                  {t("actions.label")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -271,7 +273,7 @@ export function AttributeKeysTableWithFilters({
                   </TableCell>
                   <TableCell className="px-4 py-2 flex justify-end">
                     <Link href={`/admin/attribute-keys/key-detail/${keys.id}`}>
-                      <Button variant="secondary" size="sm">
+                      <Button variant="default" size="sm">
                         {t("actions.viewDetails")}
                       </Button>
                     </Link>
@@ -287,7 +289,7 @@ export function AttributeKeysTableWithFilters({
       <div className="flex items-center gap-x-2">
         <Button
           size={"sm"}
-          variant={"secondary"}
+          variant={"outline"}
           disabled={initialPagingArgs.cursor === null}
           onClick={() => {
             prevPage();
@@ -296,7 +298,7 @@ export function AttributeKeysTableWithFilters({
           {t("pagination.buttons.previous")}
         </Button>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           size={"sm"}
           disabled={initialPagingArgs.nextCursor === null}
           onClick={() => nextPage()}

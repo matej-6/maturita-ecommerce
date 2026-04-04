@@ -104,7 +104,7 @@ export function OrdersTableWithFilters({
     newParams.set("userId", userId !== null ? userId.toString() : "");
     newParams.set(
       "status",
-      status !== null ? status.toString().toLowerCase() : ""
+      status !== null ? status.toString().toLowerCase() : "",
     );
     newParams.set("minPrice", minPrice !== null ? minPrice.toString() : "");
     newParams.set("maxPrice", maxPrice !== null ? maxPrice.toString() : "");
@@ -294,7 +294,7 @@ export function OrdersTableWithFilters({
             <div className="flex gap-x-2 items-center justify-start">
               <Button
                 disabled={!isTableArgsChanged}
-                variant={"secondary"}
+                variant={"default"}
                 onClick={() => applyFilters()}
               >
                 {t("filters.buttons.applyFilters")}
@@ -353,15 +353,15 @@ export function OrdersTableWithFilters({
                           initialSortingArgs.sortBy === null
                             ? true
                             : initialSortingArgs.sortBy !== column.key
-                            ? true
-                            : initialSortingArgs.ascending === null
-                            ? true
-                            : initialSortingArgs.ascending === true
-                            ? false
-                            : null;
+                              ? true
+                              : initialSortingArgs.ascending === null
+                                ? true
+                                : initialSortingArgs.ascending === true
+                                  ? false
+                                  : null;
                         changeSortingColumn(
                           nextIsAscending === null ? null : column.key,
-                          nextIsAscending === null ? true : nextIsAscending
+                          nextIsAscending === null ? true : nextIsAscending,
                         );
                       }}
                     >
@@ -370,7 +370,7 @@ export function OrdersTableWithFilters({
                           "flex gap-x-1 justify-start items-center",
                           {
                             "cursor-pointer hover:underline": isSortByPossible,
-                          }
+                          },
                         )}
                       >
                         <span>{column.label}</span>
@@ -387,7 +387,9 @@ export function OrdersTableWithFilters({
                     </TableHead>
                   );
                 })}
-                <TableHead className="sr-only">{t("actions.label")}</TableHead>
+                <TableHead className="text-right p-4">
+                  {t("actions.label")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -411,7 +413,7 @@ export function OrdersTableWithFilters({
                   </TableCell>
                   <TableCell className="px-4 py-2 flex justify-end">
                     <Link href={`/admin/orders/order-detail/${order.id}`}>
-                      <Button variant="secondary" size="sm">
+                      <Button variant="default" size="sm">
                         {t("actions.viewDetails")}
                       </Button>
                     </Link>
@@ -427,7 +429,7 @@ export function OrdersTableWithFilters({
       <div className="flex items-center gap-x-2">
         <Button
           size={"sm"}
-          variant={"secondary"}
+          variant={"outline"}
           disabled={initialPagingArgs.cursor === null}
           onClick={() => {
             prevPage();
@@ -436,7 +438,7 @@ export function OrdersTableWithFilters({
           {t("paging.buttons.previous")}
         </Button>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           size={"sm"}
           disabled={initialPagingArgs.nextCursor === null}
           onClick={() => nextPage()}

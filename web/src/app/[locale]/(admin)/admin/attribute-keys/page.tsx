@@ -100,31 +100,29 @@ export default async function AttributeKeysPage({ searchParams }: Props) {
   });
 
   return (
-    <div className="flex-1 flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4">
       <div>
         <AttributeKeySheetForm />
       </div>
-      <div className="flex-1 flex flex-col">
-        <AttributeKeysTableWithFilters
-          initialPagingArgs={pagingArgs}
-          initialSortingArgs={sortingArgs}
-          initialTableArgs={tableArgs}
-          searchParams={urlSearchParams.toString()}
-          sortableColumns={Object.values(AttributeKeySortingField)}
-          data={
-            data.success
-              ? data.data?.findAllPaginatedProductVariantAttributeKeys.edges?.map(
-                  (k) => ({
-                    id: k.node.id,
-                    key: k.node.key,
-                    createdAt: new Date(k.node.createdAt),
-                    updatedAt: new Date(k.node.updatedAt),
-                  }),
-                ) || null
-              : null
-          }
-        />
-      </div>
+      <AttributeKeysTableWithFilters
+        initialPagingArgs={pagingArgs}
+        initialSortingArgs={sortingArgs}
+        initialTableArgs={tableArgs}
+        searchParams={urlSearchParams.toString()}
+        sortableColumns={Object.values(AttributeKeySortingField)}
+        data={
+          data.success
+            ? data.data?.findAllPaginatedProductVariantAttributeKeys.edges?.map(
+                (k) => ({
+                  id: k.node.id,
+                  key: k.node.key,
+                  createdAt: new Date(k.node.createdAt),
+                  updatedAt: new Date(k.node.updatedAt),
+                }),
+              ) || null
+            : null
+        }
+      />
     </div>
   );
 }

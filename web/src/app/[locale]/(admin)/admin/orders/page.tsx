@@ -143,35 +143,33 @@ export default async function OrdersPage({ searchParams }: Props) {
   });
 
   return (
-    <div className="flex-1 flex flex-col gap-4">
-      <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4 flex flex-col">
-        <OrdersTableWithFilters
-          initialPagingArgs={pagingArgs}
-          initialSortingArgs={sortingArgs}
-          initialTableArgs={tableArgs}
-          searchParams={urlSearchParams.toString()}
-          sortableColumns={[
-            "id",
-            "status",
-            "totalInCents",
-            "userId",
-            "createdAt",
-            "updatedAt",
-          ]}
-          data={
-            ordersData.success
-              ? ordersData.data?.findAllPaginatedOrders.edges?.map((p) => ({
-                  id: p.node.id,
-                  status: p.node.status,
-                  totalInCents: p.node.totalInCents,
-                  createdAt: new Date(p.node.createdAt),
-                  updatedAt: new Date(p.node.updatedAt),
-                  userId: p.node.userId ?? undefined,
-                })) || null
-              : null
-          }
-        />
-      </div>
+    <div className="flex flex-col gap-y-4">
+      <OrdersTableWithFilters
+        initialPagingArgs={pagingArgs}
+        initialSortingArgs={sortingArgs}
+        initialTableArgs={tableArgs}
+        searchParams={urlSearchParams.toString()}
+        sortableColumns={[
+          "id",
+          "status",
+          "totalInCents",
+          "userId",
+          "createdAt",
+          "updatedAt",
+        ]}
+        data={
+          ordersData.success
+            ? ordersData.data?.findAllPaginatedOrders.edges?.map((p) => ({
+                id: p.node.id,
+                status: p.node.status,
+                totalInCents: p.node.totalInCents,
+                createdAt: new Date(p.node.createdAt),
+                updatedAt: new Date(p.node.updatedAt),
+                userId: p.node.userId ?? undefined,
+              })) || null
+            : null
+        }
+      />
     </div>
   );
 }

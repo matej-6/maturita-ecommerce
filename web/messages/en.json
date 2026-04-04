@@ -20,7 +20,7 @@
     "locale": "{locale, select, en {🇺🇸 English} sk {🇸🇰 Slovenský} other {Unknown}}"
   },
   "footer": {
-    "copyright": "© 2025 GoFitShop",
+    "copyright": "GoFitShop - 2026",
     "dark-mode": {
       "light": "Light",
       "dark": "Dark",

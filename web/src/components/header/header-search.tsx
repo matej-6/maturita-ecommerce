@@ -48,7 +48,7 @@ export function HeaderSearch() {
           onChange={(e) => setSearchValue(e.target.value)}
         />
         <Button size={"icon"} variant={"outline"} type="submit">
-          <SearchIcon className="size-4 text-secondary-foreground" />
+          <SearchIcon className="size-4 text-accent-foreground" />
         </Button>
       </div>
     </form>

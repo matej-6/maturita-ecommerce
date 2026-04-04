@@ -33,7 +33,7 @@ export function UpdateUserPasswordFormSheet() {
   >(undefined);
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const handlechange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +50,7 @@ export function UpdateUserPasswordFormSheet() {
       if (!result.success) {
         const fieldErrorsMap = new Map();
         result.fieldErrors?.forEach((e) =>
-          fieldErrorsMap.set(e.property, e.constraints)
+          fieldErrorsMap.set(e.property, e.constraints),
         );
         setFieldErrors(fieldErrorsMap);
         setErrorMessage(result.message);
@@ -65,7 +65,7 @@ export function UpdateUserPasswordFormSheet() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <ResponsiveButton variant="secondary">
+        <ResponsiveButton variant="default">
           {t("buttons.changePassword")}
         </ResponsiveButton>
       </SheetTrigger>

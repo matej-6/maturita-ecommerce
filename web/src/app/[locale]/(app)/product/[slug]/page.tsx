@@ -126,7 +126,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
     10,
   );
   return (
-    <div className="max-width-container w-full mx-auto mt-6 sm:mt-12 gap-y-6 sm:gap-y-12 flex flex-col relative items-center">
+    <div className="max-width-container w-full mx-auto my-6 sm:my-12 gap-y-6 sm:gap-y-12 flex flex-col relative items-center">
       <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-y-5 sm:gap-y-8 gap-x-8">
         <ProductImages
           images={allImages}
@@ -146,10 +146,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
           </h1>
           {data.data.productBySlug.description && (
             <div className="flex flex-col gap-y-1">
-              <h2 className="text-muted-foreground text-sm font-medium">
+              <h2 className="text-accent-foreground text-sm">
                 {ft("productTranslation.description")}
               </h2>
-              <p className="text-secondary-foreground text-base">
+              <p className="text-accent-foreground text-base">
                 {data.data.productBySlug.description}
               </p>
             </div>
@@ -189,7 +189,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
           </div>
 
           <AddToCartButton
-            buttonProps={{ size: "lg" }}
+            buttonProps={{ size: "lg", variant: "default" }}
             productVariantId={selectedVariant.id}
             quantity={1}
             className="text-base"

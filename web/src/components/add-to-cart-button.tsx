@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { Button } from "./ui/button";
 import { useAddItemToCartMutation } from "@/lib/tanstack-query/mutations";
 import { VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
 export function AddToCartButton({
   children,
@@ -27,7 +28,7 @@ export function AddToCartButton({
         addToCart({ cartItemId: productVariantId, quantity });
       }}
       {...buttonProps}
-      className={className}
+      className={cn("font-medium", className)}
     >
       {children}
     </Button>

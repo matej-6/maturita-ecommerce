@@ -103,8 +103,8 @@ export function CategoriesTableWithFilters({
       tableArgs.parentCategoryId === null
         ? null
         : isNaN(tableArgs.parentCategoryId)
-        ? 0
-        : tableArgs.parentCategoryId;
+          ? 0
+          : tableArgs.parentCategoryId;
     const slug = tableArgs.slug || null;
     const isPublic = tableArgs.isPublic;
     const isSetup = tableArgs.isSetup;
@@ -113,12 +113,12 @@ export function CategoriesTableWithFilters({
     params.set("id", id !== null ? id.toString() : "");
     params.set(
       "parentCategoryId",
-      parentCategoryId !== null ? parentCategoryId.toString() : "null"
+      parentCategoryId !== null ? parentCategoryId.toString() : "null",
     );
     params.set("slug", slug !== null ? slug : "");
     params.set(
       "isPublic",
-      isPublic === null ? "" : isPublic ? "true" : "false"
+      isPublic === null ? "" : isPublic ? "true" : "false",
     );
     params.set("isSetup", isSetup === null ? "" : isSetup ? "true" : "false");
 
@@ -202,8 +202,8 @@ export function CategoriesTableWithFilters({
                   tableArgs.parentCategoryId === 0
                     ? ""
                     : tableArgs.parentCategoryId === null
-                    ? "null"
-                    : tableArgs.parentCategoryId
+                      ? "null"
+                      : tableArgs.parentCategoryId
                 }
                 onChange={(e) => {
                   if (e.target.value === "") {
@@ -250,8 +250,8 @@ export function CategoriesTableWithFilters({
                   tableArgs.isPublic === null
                     ? "any"
                     : tableArgs.isPublic
-                    ? "true"
-                    : "false"
+                      ? "true"
+                      : "false"
                 }
                 onValueChange={(value) => {
                   if (value === "any") {
@@ -298,8 +298,8 @@ export function CategoriesTableWithFilters({
                   tableArgs.isSetup === null
                     ? "any"
                     : tableArgs.isSetup
-                    ? "true"
-                    : "false"
+                      ? "true"
+                      : "false"
                 }
                 onValueChange={(value) => {
                   if (value === "any") {
@@ -345,7 +345,7 @@ export function CategoriesTableWithFilters({
             <div className="flex gap-x-2 items-center justify-start">
               <Button
                 disabled={!isTableArgsChanged}
-                variant={"secondary"}
+                variant={"default"}
                 onClick={() => applyFilters()}
               >
                 {t("table.filters.applyFilters")}
@@ -414,15 +414,15 @@ export function CategoriesTableWithFilters({
                           initialSortingArgs.sortBy === null
                             ? true
                             : initialSortingArgs.sortBy !== column.key
-                            ? true
-                            : initialSortingArgs.ascending === null
-                            ? true
-                            : initialSortingArgs.ascending === true
-                            ? false
-                            : null;
+                              ? true
+                              : initialSortingArgs.ascending === null
+                                ? true
+                                : initialSortingArgs.ascending === true
+                                  ? false
+                                  : null;
                         changeSortingColumn(
                           nextIsAscending === null ? null : column.key,
-                          nextIsAscending === null ? true : nextIsAscending
+                          nextIsAscending === null ? true : nextIsAscending,
                         );
                       }}
                     >
@@ -431,7 +431,7 @@ export function CategoriesTableWithFilters({
                           "flex gap-x-1 justify-start items-center",
                           {
                             "cursor-pointer hover:underline": isSortByPossible,
-                          }
+                          },
                         )}
                       >
                         <span>{column.label}</span>
@@ -448,9 +448,7 @@ export function CategoriesTableWithFilters({
                     </TableHead>
                   );
                 })}
-                <TableHead className="sr-only">
-                  {t("table.actions.title")}
-                </TableHead>
+                <TableHead>{t("table.actions.title")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -544,7 +542,7 @@ export function CategoriesTableWithFilters({
       <div className="max-w-fit flex justify-start items-center gap-x-2">
         <Button
           size={"sm"}
-          variant={"secondary"}
+          variant={"outline"}
           disabled={initialPagingArgs.cursor === null}
           onClick={() => {
             prevPage();
@@ -553,7 +551,7 @@ export function CategoriesTableWithFilters({
           {t("table.previous")}
         </Button>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           size={"sm"}
           disabled={initialPagingArgs.nextCursor === null}
           onClick={() => nextPage()}

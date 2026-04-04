@@ -267,7 +267,7 @@ export function ProductsTableWithFilters({
             <div className="flex gap-x-2 items-center justify-start">
               <Button
                 disabled={!isTableArgsChanged}
-                variant={"secondary"}
+                variant={"default"}
                 onClick={() => applyFilters()}
               >
                 {t("filters.applyFiltersButton")}
@@ -366,7 +366,7 @@ export function ProductsTableWithFilters({
                     </TableHead>
                   );
                 })}
-                <TableHead className="sr-only">{t("actions.title")}</TableHead>
+                <TableHead className="p-4">{t("actions.title")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -431,7 +431,7 @@ export function ProductsTableWithFilters({
       <div className="max-w-fit flex justify-start items-center gap-x-2">
         <Button
           size={"sm"}
-          variant={"secondary"}
+          variant={"outline"}
           disabled={initialPagingArgs.cursor === null}
           onClick={() => {
             prevPage();
@@ -440,7 +440,7 @@ export function ProductsTableWithFilters({
           {t("pagination.prevPageButton")}
         </Button>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           size={"sm"}
           disabled={initialPagingArgs.nextCursor === null}
           onClick={() => nextPage()}

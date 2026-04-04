@@ -64,13 +64,10 @@ export function UsersTableWithFilters({
     setTableArgs(initialTableArgs);
   }, [initialTableArgs]);
 
-  const isTableArgsChanged = useMemo(() => {
-    return (
-      initialTableArgs.id !== tableArgs.id ||
-      initialTableArgs.email !== tableArgs.email ||
-      initialTableArgs.role !== tableArgs.role
-    );
-  }, [initialTableArgs, tableArgs]);
+  const isTableArgsChanged =
+    initialTableArgs.id !== tableArgs.id ||
+    initialTableArgs.email !== tableArgs.email ||
+    initialTableArgs.role !== tableArgs.role;
 
   const router = useRouter();
 
@@ -195,7 +192,7 @@ export function UsersTableWithFilters({
             <div className="flex gap-x-2 items-center justify-start">
               <Button
                 disabled={!isTableArgsChanged}
-                variant={"secondary"}
+                variant={"default"}
                 onClick={() => applyFilters()}
               >
                 {t("filters.buttons.apply")}
@@ -253,17 +250,17 @@ export function UsersTableWithFilters({
                         initialSortingArgs.sortBy === null
                           ? true
                           : initialSortingArgs.sortBy !== column.sortingKey
-                          ? true
-                          : initialSortingArgs.ascending === null
-                          ? true
-                          : initialSortingArgs.ascending === true
-                          ? false
-                          : null;
+                            ? true
+                            : initialSortingArgs.ascending === null
+                              ? true
+                              : initialSortingArgs.ascending === true
+                                ? false
+                                : null;
                       changeSortingColumn(
                         nextIsAscending === null
                           ? null
                           : column.sortingKey.toString().toLowerCase(),
-                        nextIsAscending === null ? true : nextIsAscending
+                        nextIsAscending === null ? true : nextIsAscending,
                       );
                     }}
                   >
@@ -318,7 +315,7 @@ export function UsersTableWithFilters({
       <div className="flex items-center gap-x-2">
         <Button
           size={"sm"}
-          variant={"secondary"}
+          variant={"outline"}
           disabled={initialPagingArgs.cursor === null}
           onClick={() => {
             prevPage();
@@ -327,7 +324,7 @@ export function UsersTableWithFilters({
           {t("paging.buttons.previous")}
         </Button>
         <Button
-          variant={"secondary"}
+          variant={"outline"}
           size={"sm"}
           disabled={initialPagingArgs.nextCursor === null}
           onClick={() => nextPage()}

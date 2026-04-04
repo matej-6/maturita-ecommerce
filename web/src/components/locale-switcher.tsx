@@ -10,6 +10,7 @@ import { routing } from "@/i18n/routing";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useTransition } from "react";
+import { Button, buttonVariants } from "./ui/button";
 
 export default function LocaleSwitcher() {
   const [isPending, startTransition] = useTransition();
@@ -37,8 +38,11 @@ export default function LocaleSwitcher() {
         disabled={isPending}
         onValueChange={onSelectChange}
       >
-        <SelectTrigger>
-          <SelectValue placeholder={t("label")} />
+        <SelectTrigger className={buttonVariants({ variant: "default" })}>
+          <SelectValue
+            className="text-primary-foreground"
+            placeholder={t("label")}
+          />
         </SelectTrigger>
         <SelectContent className="w-[200px]">
           {routing.locales.map((loc) => (

@@ -104,7 +104,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   });
 
   return (
-    <div className="flex-1 flex flex-col gap-4">
+    <div className="flex flex-col gap-y-4">
       <div>
         <ProductForm
           categories={
@@ -115,34 +115,26 @@ export default async function ProductsPage({ searchParams }: Props) {
           mode="create"
         />
       </div>
-      <div className="flex-1 flex flex-col">
-        <ProductsTableWithFilters
-          initialPagingArgs={pagingArgs}
-          initialSortingArgs={sortingArgs}
-          initialTableArgs={tableArgs}
-          searchParams={urlSearchParams.toString()}
-          sortableColumns={[
-            "id",
-            "categoryId",
-            "slug",
-            "createdAt",
-            "updatedAt",
-          ]}
-          data={
-            productsPageData.success
-              ? productsPageData.data?.products.edges?.map((p) => ({
-                  id: p.node.id,
-                  categoryId: p.node.categoryId ?? null,
-                  createdAt: p.node.createdAt,
-                  updatedAt: p.node.updatedAt,
-                  isPublic: p.node.isPublic,
-                  isSetup: p.node.isSetup,
-                  slug: p.node.slug,
-                })) || null
-              : null
-          }
-        />
-      </div>
+      <ProductsTableWithFilters
+        initialPagingArgs={pagingArgs}
+        initialSortingArgs={sortingArgs}
+        initialTableArgs={tableArgs}
+        searchParams={urlSearchParams.toString()}
+        sortableColumns={["id", "categoryId", "slug", "createdAt", "updatedAt"]}
+        data={
+          productsPageData.success
+            ? productsPageData.data?.products.edges?.map((p) => ({
+                id: p.node.id,
+                categoryId: p.node.categoryId ?? null,
+                createdAt: p.node.createdAt,
+                updatedAt: p.node.updatedAt,
+                isPublic: p.node.isPublic,
+                isSetup: p.node.isSetup,
+                slug: p.node.slug,
+              })) || null
+            : null
+        }
+      />
     </div>
   );
 }

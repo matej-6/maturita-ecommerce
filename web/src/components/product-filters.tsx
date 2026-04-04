@@ -74,7 +74,7 @@ export function ProductFilters({
       {[...attributes.entries()].map(([key, value]) => {
         return (
           <div key={key} className="flex flex-col gap-y-2">
-            <span className="font-medium text-secondary-foreground capitalize">
+            <span className="font-medium text-accent-foreground capitalize">
               {value.keyTranslation || key}
             </span>
             <div className="flex flex-col gap-y-1">
@@ -117,27 +117,29 @@ export function ProductFilters({
           </div>
         );
       })}
-      <Button
-        disabled={!isFormChanged}
-        onClick={() => {
-          applyFilters();
-          setIsFormChanged(false);
-        }}
-        className="sticky bottom-2"
-      >
-        {t("applyFilters")}
-      </Button>
-      {selectedAttributes.size > 0 && (
+      <div className="flex flex-col gap-y-2">
         <Button
+          disabled={!isFormChanged}
           onClick={() => {
-            setSelectedAttributes(new Map());
-            setIsFormChanged(true);
+            applyFilters();
+            setIsFormChanged(false);
           }}
-          variant={"outline"}
+          className="sticky bottom-2"
         >
-          {t("clearAll")}
+          {t("applyFilters")}
         </Button>
-      )}
+        {selectedAttributes.size > 0 && (
+          <Button
+            onClick={() => {
+              setSelectedAttributes(new Map());
+              setIsFormChanged(true);
+            }}
+            variant={"outline"}
+          >
+            {t("clearAll")}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

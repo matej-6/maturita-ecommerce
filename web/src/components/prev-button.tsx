@@ -37,6 +37,7 @@ export function PrevButton({
           router.back();
         }
       }}
+      variant={"outline"}
       {...variantProps}
       disabled={disabled || !hasPrevCursor}
     >
