@@ -202,11 +202,9 @@ input EditProductTranslationInput {
   productTranslationId: Int!
 }
 
-enum EmbeddingTaskStatus {
-  COMPLETED
-  FAILED
-  IN_PROGRESS
-  PENDING
+enum EmbeddingTaskType {
+  PRODUCT
+  PRODUCT_CONTENT
 }
 
 type LLMTask {
@@ -257,7 +255,7 @@ type Mutation {
   deleteProductReview(reviewId: Int!): Boolean!
   deleteProductTranslation(productTranslationId: Int!): Int!
   editProductTranslation(editProductTranslationInput: EditProductTranslationInput!): ProductTranslation!
-  generateProductContentEmbedding(lang: String!, productId: Int!): ProductContentEmbedding
+  generateProductContentEmbedding(lang: String!, productId: Int!): ProductEmbedding
   generateProductEmbedding(lang: String!, productId: Int!): ProductEmbedding
   logoutAll: Void!
   regenerateAllProductContentEmbeddings: Void!
@@ -392,7 +390,7 @@ type PaginatedUser {
 
 type Product {
   categoryId: Int
-  contentEmbeddings: [ProductContentEmbedding!]!
+  contentEmbeddings: [ProductEmbedding!]!
   createdAt: DateTime!
   description: String
   embeddings: [ProductEmbedding!]!
@@ -415,14 +413,6 @@ type Product {
   variants(includeHidden: Boolean! = false): [ProductVariant!]!
 }
 
-type ProductContentEmbedding {
-  createdAt: DateTime!
-  id: Int!
-  lang: String!
-  productId: Int!
-  status: EmbeddingTaskStatus!
-}
-
 type ProductEdge {
   cursor: Int!
   node: Product!
@@ -433,7 +423,8 @@ type ProductEmbedding {
   id: Int!
   lang: String!
   productId: Int!
-  status: EmbeddingTaskStatus!
+  status: LLMTaskStatus!
+  type: EmbeddingTaskType!
 }
 
 type ProductImage {
@@ -617,8 +608,8 @@ type Query {
   paginatedProductReviewsByProductId(cursor: Int, pageSize: Int = 10, productId: Int!): PaginatedProductReview!
   product(id: Int!, isPublic: Boolean, isSetup: Boolean): Product
   productBySlug(slug: String!): Product
-  productContentEmbedding(id: Int!): ProductContentEmbedding
-  productContentEmbeddings(productId: Int!): [ProductContentEmbedding!]!
+  productContentEmbedding(id: Int!): ProductEmbedding
+  productContentEmbeddings(productId: Int!): [ProductEmbedding!]!
   productEmbedding(id: Int!): ProductEmbedding
   productEmbeddings(productId: Int!): [ProductEmbedding!]!
   productVariantAttributeKey(id: Int!): ProductVariantAttributeKey!

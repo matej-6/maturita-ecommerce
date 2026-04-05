@@ -32,7 +32,6 @@ import { ProductImage } from 'src/entities/product-image.entity';
 import { CreateProductTranslationInput } from './dto/create-product-translation.input';
 import { EditProductTranslationInput } from './dto/edit-product-translation.input';
 import { ProductEmbedding } from './entities/product-embedding.entity';
-import { ProductContentEmbedding } from './entities/product-content-embedding.entity';
 import { GraphQLVoid } from 'graphql-scalars';
 
 @Resolver(() => Product)
@@ -265,10 +264,10 @@ export class ProductsResolver {
   }
 
   @UseGuards(AdminGuard)
-  @ResolveField(() => [ProductContentEmbedding], { name: 'contentEmbeddings' })
+  @ResolveField(() => [ProductEmbedding], { name: 'contentEmbeddings' })
   async resolveProductContentEmbeddings(
     @Parent() product: Product,
-  ): Promise<ProductContentEmbedding[]> {
+  ): Promise<ProductEmbedding[]> {
     return await this.productsService.getProductContentEmbeddings(product.id);
   }
 
@@ -299,7 +298,7 @@ export class ProductsResolver {
   }
 
   @UseGuards(AdminGuard)
-  @Query(() => [ProductContentEmbedding], { name: 'productContentEmbeddings' })
+  @Query(() => [ProductEmbedding], { name: 'productContentEmbeddings' })
   async queryProductContentEmbeddings(
     @Args('productId', { type: () => Int }) productId: number,
   ) {
@@ -331,7 +330,7 @@ export class ProductsResolver {
   }
 
   @UseGuards(AdminGuard)
-  @Query(() => ProductContentEmbedding, {
+  @Query(() => ProductEmbedding, {
     name: 'productContentEmbedding',
     nullable: true,
   })
@@ -354,7 +353,7 @@ export class ProductsResolver {
   }
 
   @UseGuards(AdminGuard)
-  @Mutation(() => ProductContentEmbedding, {
+  @Mutation(() => ProductEmbedding, {
     name: 'generateProductContentEmbedding',
     nullable: true,
   })

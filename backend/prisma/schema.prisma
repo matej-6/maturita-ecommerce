@@ -68,18 +68,17 @@ model CategoryTranslation {
 }
 
 model Product {
-  id                    Int                           @id @default(autoincrement())
-  slug                  String                        @unique
-  Category              Category?                     @relation(fields: [categoryId], references: [id])
+  id                    Int                     @id @default(autoincrement())
+  slug                  String                  @unique
+  Category              Category?               @relation(fields: [categoryId], references: [id])
   categoryId            Int?
-  isPublic              Boolean                       @default(true)
+  isPublic              Boolean                 @default(true)
   ProductVariants       ProductVariant[]
   Images                ProductImage[]
   ProductTranslations   ProductTranslation[]
   EmbeddingTasks        EmbeddingTask[]
-  ContentEmbeddingTasks ProductContentEmbeddingTask[]
-  createdAt             DateTime                      @default(now())
-  updatedAt             DateTime                      @updatedAt
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
   llmuserPromptResponse LLMUserPromptResponse[]
   orderItems            OrderItem[]
 
@@ -278,36 +277,22 @@ enum OrderStatus {
 }
 
 model EmbeddingTask {
-  id        Int                 @id @default(autoincrement())
+  id        Int               @id @default(autoincrement())
   productId Int
-  Product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
-  status    EmbeddingTaskStatus @default(PENDING)
+  Product   Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  status    LLMTaskStatus     @default(PENDING)
+  type      EmbeddingTaskType @default(PRODUCT)
   lang      String
-  createdAt DateTime            @default(now())
+  createdAt DateTime          @default(now())
 
-  @@unique([productId, lang])
-  @@index([productId, lang])
+  @@unique([productId, lang, type])
+  @@index([productId, lang, type])
   @@map("embedding_tasks")
 }
 
-model ProductContentEmbeddingTask {
-  id        Int                 @id @default(autoincrement())
-  productId Int
-  Product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
-  status    EmbeddingTaskStatus @default(PENDING)
-  lang      String
-  createdAt DateTime            @default(now())
-
-  @@unique([productId, lang])
-  @@index([productId, lang])
-  @@map("product_content_embedding_tasks")
-}
-
-enum EmbeddingTaskStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  FAILED
+enum EmbeddingTaskType {
+  PRODUCT
+  PRODUCT_CONTENT
 }
 
 model LLMTask {

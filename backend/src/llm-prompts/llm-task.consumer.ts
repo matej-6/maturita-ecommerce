@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
-import { EmbeddingTaskStatus, LLMTaskStatus } from 'generated/prisma/enums';
+import { LLMTaskStatus } from 'generated/prisma/enums';
 import { randomUUID } from 'node:crypto';
 import { Env } from 'src/config/validate';
 import { LocalesService } from 'src/locales/locales.service';
@@ -136,9 +136,10 @@ export class LLMTaskConsumer extends WorkerHost {
         try {
           const dbEmbeddingTask = await this.prisma.embeddingTask.findUnique({
             where: {
-              productId_lang: {
+              productId_lang_type: {
                 productId: jobData.productId,
                 lang: jobData.lang,
+                type: 'PRODUCT',
               },
             },
           });
@@ -146,7 +147,8 @@ export class LLMTaskConsumer extends WorkerHost {
             await this.prisma.embeddingTask.create({
               data: {
                 productId: jobData.productId,
-                status: EmbeddingTaskStatus.PENDING,
+                status: LLMTaskStatus.PENDING,
+                type: 'PRODUCT',
                 lang: jobData.lang,
               },
             });
@@ -154,13 +156,14 @@ export class LLMTaskConsumer extends WorkerHost {
           await this.processProductEmbeddingJob(jobData);
           await this.prisma.embeddingTask.update({
             where: {
-              productId_lang: {
+              productId_lang_type: {
                 productId: jobData.productId,
                 lang: jobData.lang,
+                type: 'PRODUCT',
               },
             },
             data: {
-              status: EmbeddingTaskStatus.COMPLETED,
+              status: LLMTaskStatus.COMPLETED,
             },
           });
           return {};
@@ -168,13 +171,14 @@ export class LLMTaskConsumer extends WorkerHost {
           this.logger.error('Error processing PRODUCT_EMBEDDING job', error);
           await this.prisma.embeddingTask.update({
             where: {
-              productId_lang: {
+              productId_lang_type: {
                 productId: jobData.productId,
                 lang: jobData.lang,
+                type: 'PRODUCT',
               },
             },
             data: {
-              status: EmbeddingTaskStatus.FAILED,
+              status: LLMTaskStatus.FAILED,
             },
           });
           throw error;
@@ -183,20 +187,21 @@ export class LLMTaskConsumer extends WorkerHost {
       case LLMTaskJobType.PRODUCT_CONTENT_EMBEDDING: {
         const jobData = job.data as EmbeddingJob;
         try {
-          const dbEmbeddingTask =
-            await this.prisma.productContentEmbeddingTask.findUnique({
-              where: {
-                productId_lang: {
-                  productId: jobData.productId,
-                  lang: jobData.lang,
-                },
+          const dbEmbeddingTask = await this.prisma.embeddingTask.findUnique({
+            where: {
+              productId_lang_type: {
+                productId: jobData.productId,
+                lang: jobData.lang,
+                type: 'PRODUCT_CONTENT',
               },
-            });
+            },
+          });
           if (!dbEmbeddingTask) {
-            await this.prisma.productContentEmbeddingTask.create({
+            await this.prisma.embeddingTask.create({
               data: {
                 productId: jobData.productId,
-                status: EmbeddingTaskStatus.PENDING,
+                status: LLMTaskStatus.PENDING,
+                type: 'PRODUCT_CONTENT',
                 lang: jobData.lang,
               },
             });
@@ -208,15 +213,16 @@ export class LLMTaskConsumer extends WorkerHost {
             'Error processing PRODUCT_CONTENT_EMBEDDING job',
             error,
           );
-          await this.prisma.productContentEmbeddingTask.update({
+          await this.prisma.embeddingTask.update({
             where: {
-              productId_lang: {
+              productId_lang_type: {
                 productId: jobData.productId,
                 lang: jobData.lang,
+                type: 'PRODUCT_CONTENT',
               },
             },
             data: {
-              status: EmbeddingTaskStatus.FAILED,
+              status: LLMTaskStatus.FAILED,
             },
           });
           throw error;
@@ -497,15 +503,16 @@ export class LLMTaskConsumer extends WorkerHost {
       );
     }
 
-    await this.prisma.productContentEmbeddingTask.update({
+    await this.prisma.embeddingTask.update({
       where: {
-        productId_lang: {
+        productId_lang_type: {
           productId: job.productId,
           lang: job.lang,
+          type: 'PRODUCT_CONTENT',
         },
       },
       data: {
-        status: EmbeddingTaskStatus.COMPLETED,
+        status: LLMTaskStatus.COMPLETED,
       },
     });
   }
@@ -551,10 +558,11 @@ export class LLMTaskConsumer extends WorkerHost {
       );
     }
 
-    if (
-      (category === 'productInformation' || category === 'similiarProducts') &&
-      !job.productId
-    ) {
+    if (category === 'productSearch') {
+      return await this.processProductSearchPrompt(userPrompt, lang);
+    }
+
+    if (!job.productId) {
       throw new Error(
         this.i18nService.t('llm.consumer.missingProductId', {
           lang: lang,
@@ -565,18 +573,14 @@ export class LLMTaskConsumer extends WorkerHost {
     if (category === 'similiarProducts') {
       return await this.processSimiliarProductsPrompt(
         userPrompt,
-        job.productId!,
+        job.productId,
         lang,
       );
     }
 
-    if (category === 'productSearch') {
-      return await this.processProductSearchPrompt(userPrompt, lang);
-    }
-
     return await this.generateProductInformationResponse(
       userPrompt,
-      job.productId!,
+      job.productId,
       lang,
     );
   }

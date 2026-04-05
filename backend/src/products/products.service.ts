@@ -18,7 +18,6 @@ import { EditProductTranslationInput } from './dto/edit-product-translation.inpu
 import { QdrantCollections, QdrantService } from 'src/qdrant/qdrant.service';
 import { LLMPromptsService } from 'src/llm-prompts/llm-prompts.service';
 import { ProductEmbedding } from './entities/product-embedding.entity';
-import { ProductContentEmbedding } from './entities/product-content-embedding.entity';
 import { ERROR } from 'src/errors';
 import { ImageStorageService } from 'src/image-storage/image-storage.service';
 import { ProductVariantsService } from 'src/product-variants/product-variants.service';
@@ -227,7 +226,7 @@ export class ProductsService {
   async generateProductContentEmbedding(
     productId: number,
     lang: string,
-  ): Promise<ProductContentEmbedding> {
+  ): Promise<ProductEmbedding> {
     const isLangSupported = this.localesService
       .findAll()
       .some((l) => l.code.toString() === lang);
@@ -783,15 +782,15 @@ export class ProductsService {
       await this.deleteProductEmbeddings(id, embedding.lang);
     }
 
-    const productContentEmbeddings =
-      await this.prisma.productContentEmbeddingTask.findMany({
-        where: {
-          productId: id,
-        },
-        select: {
-          lang: true,
-        },
-      });
+    const productContentEmbeddings = await this.prisma.embeddingTask.findMany({
+      where: {
+        productId: id,
+        type: 'PRODUCT_CONTENT',
+      },
+      select: {
+        lang: true,
+      },
+    });
 
     for (const embedding of productContentEmbeddings) {
       await this.llmService.removeProductContentEmbeddingTask(
@@ -896,9 +895,10 @@ export class ProductsService {
     try {
       await this.prisma.embeddingTask.delete({
         where: {
-          productId_lang: {
+          productId_lang_type: {
             productId: productId,
             lang: lang,
+            type: 'PRODUCT',
           },
         },
       });
@@ -929,11 +929,12 @@ export class ProductsService {
     );
 
     try {
-      await this.prisma.productContentEmbeddingTask.delete({
+      await this.prisma.embeddingTask.delete({
         where: {
-          productId_lang: {
+          productId_lang_type: {
             productId: productId,
             lang: lang,
+            type: 'PRODUCT_CONTENT',
           },
         },
       });
@@ -966,9 +967,10 @@ export class ProductsService {
     try {
       await this.prisma.embeddingTask.delete({
         where: {
-          productId_lang: {
+          productId_lang_type: {
             productId: productId,
             lang: lang,
+            type: 'PRODUCT',
           },
         },
       });
@@ -997,11 +999,12 @@ export class ProductsService {
     );
 
     try {
-      await this.prisma.productContentEmbeddingTask.delete({
+      await this.prisma.embeddingTask.delete({
         where: {
-          productId_lang: {
+          productId_lang_type: {
             productId: productId,
             lang: lang,
+            type: 'PRODUCT',
           },
         },
       });
@@ -1030,15 +1033,18 @@ export class ProductsService {
   }
 
   async regenerateAllProductContentEmbeddings(): Promise<void> {
-    const allProductsWithEmbeddings =
-      await this.prisma.productContentEmbeddingTask.findMany();
+    const allProductsWithEmbeddings = await this.prisma.embeddingTask.findMany({
+      where: {
+        type: 'PRODUCT_CONTENT',
+      },
+    });
 
     for (const embedding of allProductsWithEmbeddings) {
       await this.llmService.removeProductContentEmbeddingTask(
         embedding.productId,
         embedding.lang,
       );
-      await this.prisma.productContentEmbeddingTask.delete({
+      await this.prisma.embeddingTask.delete({
         where: {
           id: embedding.id,
         },
@@ -1206,6 +1212,7 @@ export class ProductsService {
     const embeddings = await this.prisma.embeddingTask.findMany({
       where: {
         productId: productId,
+        type: 'PRODUCT',
       },
     });
 
@@ -1216,6 +1223,7 @@ export class ProductsService {
     const existingEmbeddings = await this.prisma.embeddingTask.findMany({
       where: {
         productId: productId,
+        type: 'PRODUCT',
       },
       select: {
         lang: true,
@@ -1234,9 +1242,10 @@ export class ProductsService {
   async getProductContentEmbeddings(
     productId: number,
   ): Promise<ProductEmbedding[]> {
-    const embeddings = await this.prisma.productContentEmbeddingTask.findMany({
+    const embeddings = await this.prisma.embeddingTask.findMany({
       where: {
         productId: productId,
+        type: 'PRODUCT_CONTENT',
       },
     });
 
@@ -1246,15 +1255,15 @@ export class ProductsService {
   async getMissingProductContentEmbeddings(
     productId: number,
   ): Promise<string[]> {
-    const existingEmbeddings =
-      await this.prisma.productContentEmbeddingTask.findMany({
-        where: {
-          productId: productId,
-        },
-        select: {
-          lang: true,
-        },
-      });
+    const existingEmbeddings = await this.prisma.embeddingTask.findMany({
+      where: {
+        productId: productId,
+        type: 'PRODUCT_CONTENT',
+      },
+      select: {
+        lang: true,
+      },
+    });
 
     const existingLangs = existingEmbeddings.map((e) => e.lang);
     const missingLangs = this.localesService
@@ -1269,6 +1278,7 @@ export class ProductsService {
     const embedding = await this.prisma.embeddingTask.findUnique({
       where: {
         id: id,
+        type: 'PRODUCT',
       },
     });
 
@@ -1278,9 +1288,10 @@ export class ProductsService {
   async getProductContentEmbeddingById(
     id: number,
   ): Promise<ProductEmbedding | null> {
-    const embedding = await this.prisma.productContentEmbeddingTask.findUnique({
+    const embedding = await this.prisma.embeddingTask.findUnique({
       where: {
         id: id,
+        type: 'PRODUCT_CONTENT',
       },
     });
 

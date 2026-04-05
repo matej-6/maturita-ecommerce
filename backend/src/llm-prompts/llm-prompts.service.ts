@@ -17,7 +17,6 @@ import { ERROR } from 'src/errors';
 export class LLMPromptsService {
   private readonly logger = new Logger(LLMPromptsService.name);
 
-  private readonly DAILY_USER_TASK_LIMIT = 20;
   constructor(
     private readonly prisma: PrismaService,
     @InjectQueue('llm-tasks') private readonly llmTasksQueue: Queue,
@@ -185,15 +184,14 @@ export class LLMPromptsService {
   }
 
   async addProductContentEmbeddingTask(data: EmbeddingJob) {
-    const newContentTask = await this.prisma.productContentEmbeddingTask.create(
-      {
-        data: {
-          productId: data.productId,
-          lang: data.lang,
-          status: LLMTaskStatus.PENDING,
-        },
+    const newContentTask = await this.prisma.embeddingTask.create({
+      data: {
+        productId: data.productId,
+        lang: data.lang,
+        status: LLMTaskStatus.PENDING,
+        type: 'PRODUCT_CONTENT',
       },
-    );
+    });
 
     await this.llmTasksQueue.add(
       LLMTaskJobType.PRODUCT_CONTENT_EMBEDDING,
@@ -236,7 +234,13 @@ export class LLMPromptsService {
     lang: string,
   ): Promise<void> {
     const task = await this.prisma.embeddingTask.findUnique({
-      where: { productId_lang: { productId: productId, lang: lang } },
+      where: {
+        productId_lang_type: {
+          productId: productId,
+          lang: lang,
+          type: 'PRODUCT',
+        },
+      },
     });
 
     if (!task) {
@@ -252,8 +256,14 @@ export class LLMPromptsService {
     productId: number,
     lang: string,
   ): Promise<void> {
-    const task = await this.prisma.productContentEmbeddingTask.findUnique({
-      where: { productId_lang: { productId: productId, lang: lang } },
+    const task = await this.prisma.embeddingTask.findUnique({
+      where: {
+        productId_lang_type: {
+          productId: productId,
+          lang: lang,
+          type: 'PRODUCT_CONTENT',
+        },
+      },
     });
 
     if (!task) {
@@ -262,7 +272,7 @@ export class LLMPromptsService {
     await this.llmTasksQueue.remove(
       this.getProductContentEmbeddingTaskJobId(productId, lang),
     );
-    await this.prisma.productContentEmbeddingTask.delete({
+    await this.prisma.embeddingTask.delete({
       where: { id: task.id },
     });
   }
