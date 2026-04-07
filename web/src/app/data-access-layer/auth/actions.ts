@@ -6,7 +6,6 @@ import { ErrorResponse, newErrorResponse } from "@/lib/error-response";
 import { getLocale, getTranslations } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 import { setAuthCookies } from "./utils";
-import { cache } from "react";
 import { MeFragment, meQueryDocument } from "./queries";
 import { redirect } from "@/i18n/navigation";
 import { execute } from "@/graphql/execute";
@@ -193,7 +192,7 @@ export async function authRegisterAction(
   }
 }
 
-export const getCurrentSessionAction = cache(async () => {
+export const getCurrentSessionAction = async () => {
   const authToken = await getAuthToken();
   if (!authToken) {
     return null;
@@ -205,7 +204,7 @@ export const getCurrentSessionAction = cache(async () => {
   }
 
   return null;
-});
+};
 
 export async function getAuthToken(): Promise<string | null> {
   const reqHeaders = await headers();

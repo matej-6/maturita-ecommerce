@@ -32,6 +32,7 @@ import { FormFieldErrorMessage } from "./formFieldErrorMessage";
 import { useTranslations } from "next-intl";
 
 type ReviewFormDialogProps = {
+  disabled?: boolean;
   orderId: number;
   locales: {
     code: string;
@@ -115,7 +116,12 @@ export default function ReviewFormDialog(props: ReviewFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full" size={"sm"}>
+        <Button
+          variant="ghost"
+          className="w-full"
+          size={"sm"}
+          disabled={props.disabled}
+        >
           {props.mode === "create"
             ? t("triggerButtonCreate")
             : t("triggerButtonUpdate")}

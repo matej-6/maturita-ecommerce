@@ -543,7 +543,7 @@ type Query {
   ): [Product!]!
   bestSellingCategoriesStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingCategory!]
   bestSellingProductVariantsStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingProductVariant!]
-  cart: Cart!
+  cart: Cart
   categories(
     """
     If true, sort in ascending order, else descending. If null, default sorting order is used

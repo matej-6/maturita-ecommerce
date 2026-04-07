@@ -12,7 +12,6 @@ import { ERROR } from 'src/errors';
 import { AuthenticatedUserDto } from '../dto/authenticated-user.dto';
 import { AuthService } from '../auth.service';
 import { UsersService } from 'src/users/users.service';
-import { SESSION_COOKIE_NAME } from 'src/constants';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

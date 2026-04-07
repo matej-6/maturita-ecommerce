@@ -46,7 +46,7 @@ export default async function OrderPage({ params }: Props) {
   if (!data.success) {
     return (
       <div className="max-width-container mt-6 xl:mt-12">
-        <h1 className="text-2xl font-medium">Failed to load order.</h1>
+        <h1 className="text-2xl font-medium">{data.message}</h1>
       </div>
     );
   }
@@ -199,12 +199,6 @@ export default async function OrderPage({ params }: Props) {
                   item.productVariant?.product.thumbnailImage ??
                   null;
 
-                console.log("Rendering item:", {
-                  id: item.id,
-                  sku: item.sku,
-                  productReview: item.productReview,
-                });
-
                 return (
                   <TableRow
                     key={i}
@@ -264,12 +258,20 @@ export default async function OrderPage({ params }: Props) {
                                   reviewId={item.productReview.id}
                                 />
                               </>
+                            ) : canWriteReview ? (
+                              <ReviewFormDialog
+                                orderId={order.id}
+                                locales={locales}
+                                orderItemId={item.id}
+                                mode="create"
+                              />
                             ) : (
                               <ReviewFormDialog
                                 orderId={order.id}
                                 locales={locales}
                                 orderItemId={item.id}
                                 mode="create"
+                                disabled={true}
                               />
                             )}
                           </DropdownMenuGroup>

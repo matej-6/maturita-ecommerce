@@ -16,7 +16,7 @@ export function CancelOrderButton({ orderId }: props) {
     mutationFn: async () => {
       const res = await cancelOrderMutationAction(orderId);
       if (!res.success) {
-        toast.error(res.message || "Failed to cancel order.");
+        toast.error(res.message);
       } else {
         router.push(`/account-details`);
       }

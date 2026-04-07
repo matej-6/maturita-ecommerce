@@ -25,7 +25,7 @@ export class CartsResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Query(() => Cart, { name: 'cart' })
+  @Query(() => Cart, { name: 'cart', nullable: true })
   async queryGetCart(@CurrentUser() user: AuthenticatedUserDto) {
     return await this.cartsService.getCartByUserId(user.id);
   }

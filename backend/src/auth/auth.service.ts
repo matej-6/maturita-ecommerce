@@ -15,7 +15,7 @@ import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 import { ERROR } from 'src/errors';
-import { generateRandomToken, hashPassword } from 'src/lib/hashing';
+import { generateSessionId, hashPassword } from 'src/lib/hashing';
 import { RedisService } from 'src/redis/redis.service';
 import { SESSION_COOKIE_NAME } from 'src/constants';
 @Injectable()
@@ -63,7 +63,7 @@ export class AuthService {
   }
 
   async login(userId: number): Promise<AuthResponseDto> {
-    const sessionId = generateRandomToken();
+    const sessionId = generateSessionId();
     const expiresAt = new Date(Date.now() + this.sessionExpiration * 1000);
     await this.redisService.client.set(sessionId, userId, {
       expiration: {

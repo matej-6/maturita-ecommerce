@@ -360,7 +360,7 @@ export class OrdersService {
       order.StripeSessionId!,
     );
 
-    if (session.status === 'expired') {
+  if (session.status === 'expired') {
       await this.prisma.order.update({
         where: { id: orderId },
         data: {

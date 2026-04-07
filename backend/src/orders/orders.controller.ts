@@ -39,7 +39,7 @@ export class OrdersController {
     const signature = req.headers['stripe-signature'];
 
     if (typeof signature !== 'string') {
-      this.logger.warn('Missing Stripe signature header');
+      this.logger.warn('Missing Stripe signature');
       res.status(400).end();
       return;
     }
