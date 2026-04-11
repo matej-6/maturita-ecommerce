@@ -17,7 +17,7 @@ type HeaderNavProps = {
   categories: {
     id: number;
     name: string;
-    description: string;
+    description?: string | null;
     slug: string;
     subcategories: {
       id: number;

@@ -64,14 +64,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     return <div>{queryRes.message}</div>;
   }
 
-  if (queryRes.data?.category == null) {
-    return notFound();
-  }
-
-  const category = queryRes.data.category;
+  const category = queryRes.data?.category;
+  if (!category) return notFound();
 
   let nextPageLink = null;
-  const nextCursor = queryRes.data.category.categoryProductVariants.nextCursor;
+  const nextCursor = queryRes.data!.category.categoryProductVariants.nextCursor;
   if (nextCursor) {
     const params = new URLSearchParams();
     params.append("cursor", nextCursor.toString());

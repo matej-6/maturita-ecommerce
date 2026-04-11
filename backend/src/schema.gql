@@ -41,7 +41,7 @@ type CartItem {
 type Category {
   categoryProductVariants(attributeFilters: [[String!]!], cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProductVariant!
   createdAt: DateTime!
-  description: String!
+  description: String
   id: Int!
   isPublic: Boolean!
   isSetup: Boolean!

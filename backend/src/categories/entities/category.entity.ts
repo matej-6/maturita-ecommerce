@@ -5,33 +5,27 @@ import { Paginated } from 'src/lib/pagination';
 @ObjectType()
 export class Category implements Partial<CategoryEntity> {
   @Field(() => Int)
-  id: number;
+  id!: number;
 
   @Field(() => String)
-  slug: string;
-
-  @Field(() => String, { nullable: true })
-  name?: string;
-
-  @Field(() => String, { nullable: true })
-  description?: string;
+  slug!: string;
 
   @Field(() => Int, { nullable: true })
-  parentCategoryId: number | null;
+  parentCategoryId!: number | null;
 
   @Field(() => Boolean, {
     description: 'If true, the category has a valid setup.',
   })
-  isSetup: boolean;
+  isSetup!: boolean;
 
   @Field(() => Boolean)
-  isPublic: boolean;
+  isPublic!: boolean;
 
   @Field(() => Date)
-  createdAt: Date;
+  createdAt!: Date;
 
   @Field(() => Date)
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 @ObjectType()

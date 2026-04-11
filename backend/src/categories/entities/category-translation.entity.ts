@@ -5,17 +5,17 @@ import { type CategoryTranslation as DbCategoryTranslation } from 'generated/pri
 @ObjectType()
 export class CategoryTranslation implements Partial<DbCategoryTranslation> {
   @Field(() => Int)
-  id: number;
+  id!: number;
 
   @Field(() => String)
-  name: string;
+  name!: string;
 
   @Field(() => String, { nullable: true })
   description?: string | null;
 
   @Field(() => Int)
-  categoryId: number;
+  categoryId!: number;
 
   @Field(() => String)
-  locale: string;
+  locale!: string;
 }

@@ -81,7 +81,7 @@ export class CategoriesResolver {
     );
   }
 
-  @Query(() => Category, { name: 'category' })
+  @Query(() => Category, { name: 'category', nullable: true })
   @UseGuards(OptionalAuthGuard)
   findOne(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
@@ -243,7 +243,7 @@ export class CategoriesResolver {
     return category.isSetup;
   }
 
-  @ResolveField(() => String, { name: 'description' })
+  @ResolveField(() => String, { name: 'description', nullable: true })
   async resolveCategoryDescription(
     @Parent() category: Category,
     @Context() ctx: GraphqlAppContext,

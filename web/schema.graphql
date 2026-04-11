@@ -42,7 +42,7 @@ type CartItem {
 type Category {
   categoryProductVariants(attributeFilters: [[String!]!], cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProductVariant!
   createdAt: DateTime!
-  description: String!
+  description: String
   id: Int!
   isPublic: Boolean!
   isSetup: Boolean!
@@ -524,7 +524,7 @@ type Query {
   ): [Product!]!
   bestSellingCategoriesStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingCategory!]
   bestSellingProductVariantsStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingProductVariant!]
-  cart: Cart!
+  cart: Cart
   categories(
     """
     If true, sort in ascending order, else descending. If null, default sorting order is used

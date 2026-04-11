@@ -7,7 +7,7 @@ import { CategoryQueryQuery } from "@/graphql/graphql";
 
 const HeaderQueryDocument = graphql(`
   query HeaderQuery {
-    categories(parentCategoryId: null) {
+    categories(parentCategoryId: null, isSetup: true) {
       id
       name
       description
@@ -32,7 +32,7 @@ const CategoryQueryDocument = graphql(`
     $productsPageSize: Int
     $attributeFilters: [[String!]!]
   ) {
-    category(slug: $slug) {
+    category(slug: $slug, isSetup: true) {
       id
       name
       slug
