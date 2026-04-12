@@ -39,10 +39,6 @@ export function ProductCard({
       >
         {product.name}
       </Link>
-
-      <Link href={`/product/${product.slug}`}>
-        <ResponsiveButton>View Product</ResponsiveButton>
-      </Link>
     </Card>
   );
 }

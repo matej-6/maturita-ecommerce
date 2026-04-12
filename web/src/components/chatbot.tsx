@@ -245,7 +245,7 @@ export function Chatbot({
                   <div className="flex flex-col gap-y-1" key={index}>
                     <div>
                       <div className="font-bold text-muted-foreground text-sm">
-                        You
+                        {t("you")}
                       </div>
                       <div className="mb-1">{chat.question}</div>
                     </div>

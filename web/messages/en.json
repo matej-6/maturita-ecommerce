@@ -48,7 +48,8 @@
     "firstMessage": "Hello! I'm your AI shopping assistant. I can help you find products or answer questions about the product you're currently viewing. How can I assist you today?",
     "inputPlaceholder": "Type your message here...",
     "noPastChatsAvailable": "No past chats available.",
-    "generatingResponse": "Generating response..."
+    "generatingResponse": "Generating response...",
+    "you": "You"
   },
   "auth": {
     "sign-in": {
