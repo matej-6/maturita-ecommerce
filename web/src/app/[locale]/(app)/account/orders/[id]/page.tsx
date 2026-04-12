@@ -1,4 +1,4 @@
-import { getOrderDetailsPageData } from "@/app/data-access-layer/order/queries";
+import { getOrderDetailsPageData } from "@/app/data-access-layer/order/actions";
 import { getImageSrc } from "@/app/lib/utils";
 import ReviewFormDialog from "@/components/form/review-form-dialog";
 import { CancelOrderButton } from "@/components/orders/cancel-order.button";

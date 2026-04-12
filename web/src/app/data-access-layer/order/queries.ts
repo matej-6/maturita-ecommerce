@@ -1,14 +1,7 @@
-"use server";
-
 import "server-only";
 import { graphql } from "@/graphql";
-import { execute } from "@/graphql/execute";
-import { OrderDetailsPageQueryQuery } from "@/graphql/graphql";
-import { ExecutionResult } from "graphql";
-import { ActionResponse } from "../formActionResponse";
-import { handleGraphqlError } from "../admin/handleGraphqlFormError";
 
-const OrderDetailsPageDocument = graphql(`
+export const OrderDetailsPageDocument = graphql(`
   query OrderDetailsPageQuery($id: Int!) {
     order(id: $id) {
       id
@@ -58,20 +51,3 @@ const OrderDetailsPageDocument = graphql(`
     }
   }
 `);
-
-export async function getOrderDetailsPageData(
-  id: number,
-): Promise<
-  ActionResponse<ExecutionResult<OrderDetailsPageQueryQuery>["data"]>
-> {
-  const res = await execute(OrderDetailsPageDocument, { id });
-
-  if (res.errors) {
-    return handleGraphqlError(res.errors);
-  }
-
-  return {
-    success: true,
-    data: res.data,
-  };
-}
