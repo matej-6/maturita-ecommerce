@@ -109,6 +109,10 @@ export class OrdersService {
       },
     });
 
+    if (input.status === 'CANCELED' || input.status === 'FAILED') {
+      await this.returnAllItemsInOrder(orderId);
+    }
+
     return updatedOrder;
   }
 
@@ -401,6 +405,7 @@ export class OrdersService {
           status: 'FAILED',
         },
       });
+      await this.returnAllItemsInOrder(orderId);
     }
   }
 
@@ -428,78 +433,22 @@ export class OrdersService {
     );
 
     if (session.payment_status === 'paid') {
-      const res = await this.prisma.$transaction(async (tx) => {
-        const order = await tx.order.update({
-          where: { id: orderId },
-          data: {
-            status: 'CANCELED',
-          },
-          include: {
-            orderItems: true,
-          },
-        });
-
-        for (const item of order.orderItems.filter(
-          (oi) => oi.productVariantId != null,
-        )) {
-          try {
-            await tx.productVariant.update({
-              where: { id: item.productVariantId! },
-              data: {
-                stock: {
-                  increment: item.quantity,
-                },
-              },
-            });
-          } catch (error) {
-            this.logger.error(
-              `Failed to restock product variant ID ${item.productVariantId} for order ID ${orderId}: ${error}`,
-            );
-          }
-        }
-
-        return order;
-      });
       await this.stripe.refunds.create({
         payment_intent: order.StripePaymentIntentId!,
       });
-      return res;
     } else {
       await this.stripe.checkout.sessions.expire(order.StripeSessionId!);
-      const res = await this.prisma.$transaction(async (tx) => {
-        const order = await tx.order.update({
-          where: { id: orderId },
-          data: {
-            status: 'CANCELED',
-          },
-          include: {
-            orderItems: true,
-          },
-        });
-
-        for (const item of order.orderItems.filter(
-          (oi) => oi.productVariantId != null,
-        )) {
-          try {
-            await tx.productVariant.update({
-              where: { id: item.productVariantId! },
-              data: {
-                stock: {
-                  increment: item.quantity,
-                },
-              },
-            });
-          } catch (error) {
-            this.logger.error(
-              `Failed to restock product variant ID ${item.productVariantId} for order ID ${orderId}: ${error}`,
-            );
-          }
-        }
-
-        return order;
-      });
-      return res;
     }
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: 'CANCELED',
+      },
+    });
+
+    await this.returnAllItemsInOrder(orderId);
+
+    return order;
   }
 
   async constructStripeEvent(payload: any, signature: string) {
@@ -605,5 +554,45 @@ export class OrdersService {
         node: order,
       })),
     };
+  }
+
+  async returnAllItemsInOrder(orderId: number): Promise<void> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        orderItems: true,
+      },
+    });
+
+    if (!order) {
+      throw new BadRequestException('orders.service.orderNotFound');
+    }
+
+    for (const item of order.orderItems.filter(
+      (oi) => oi.productVariantId != null,
+    )) {
+      try {
+        await this.prisma.$transaction(async (tx) => {
+          await tx.productVariant.update({
+            where: { id: item.productVariantId },
+            data: {
+              stock: {
+                increment: item.quantity,
+              },
+            },
+          });
+          await tx.orderItem.update({
+            where: { id: item.id },
+            data: {
+              quantity: 0,
+            },
+          });
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to restock product variant ID ${item.productVariantId} for order ID ${orderId}: ${error}`,
+        );
+      }
+    }
   }
 }

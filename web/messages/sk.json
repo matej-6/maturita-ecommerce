@@ -777,9 +777,9 @@
       },
       "orderStatus": {
         "pending": "Čakajúca",
-        "processing": "Spracovávaná",
+        "processing": "Spracováva sa",
         "shipped": "Odoslaná",
-        "delivered": "Doručená",
+        "delivered": "Doručené",
         "cancelled": "Zrušená",
         "failed": "Zlyhala"
       }
