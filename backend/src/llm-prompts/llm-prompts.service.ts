@@ -250,6 +250,9 @@ export class LLMPromptsService {
     await this.llmTasksQueue.remove(
       this.getProductEmbeddingTaskJobId(productId, lang),
     );
+    await this.prisma.embeddingTask.delete({
+      where: { id: task.id },
+    });
   }
 
   async removeProductContentEmbeddingTask(
