@@ -6,7 +6,6 @@ import { ResponsiveButton } from "./responsive-button";
 export type ProductCardType = {
   id: number;
   name: string;
-  description?: string;
   slug: string;
   imageUrl?: string;
 };
@@ -40,11 +39,10 @@ export function ProductCard({
       >
         {product.name}
       </Link>
-      <p className="text-sm sm:text-base font-light text-accent-foreground line-clamp-3 h-14 sm:h-18">
-        {product.description}
-      </p>
 
-      <ResponsiveButton>View Product</ResponsiveButton>
+      <Link href={`/product/${product.slug}`}>
+        <ResponsiveButton>View Product</ResponsiveButton>
+      </Link>
     </Card>
   );
 }

@@ -13,7 +13,7 @@ export function setAuthCookies(
   cookieStore.set(SESSION_COOKIE_NAME, data?.sessionId ?? "", {
     httpOnly: true,
     secure: false,
-    sameSite: "strict",
+    sameSite: "lax",
     expires: new Date(data?.expiresAt ?? 0),
   });
 }
