@@ -361,8 +361,7 @@
           "setupWarning": {
             "title": "Tento produkt nie je úplne nastavený",
             "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavený a viditeľný pre zákazníkov",
-            "englishTranslation": "Musí mať anglický preklad",
-            "atLeastOneVisibleVariant": "Musí obsahovať aspoň jednu viditeľnú variantu"
+            "englishTranslation": "Musí mať anglický preklad"
           }
         }
       },

@@ -63,7 +63,6 @@ export default async function EditCategoryEditPage({
                 <p>{t("setupWarning.description")}</p>
                 <ul className="list-inside list-disc text-sm">
                   <li>{t("setupWarning.englishTranslation")}</li>
-                  <li>{t("setupWarning.atLeastOneVisibleProduct")}</li>
                 </ul>
               </AlertDescription>
             </Alert>

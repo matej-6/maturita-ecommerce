@@ -998,11 +998,6 @@ export class ProductsService {
         embedding.productId,
         embedding.lang,
       );
-      await this.prisma.embeddingTask.delete({
-        where: {
-          id: embedding.id,
-        },
-      });
       await this.llmService.addProductEmbeddingTask({
         productId: embedding.productId,
         lang: embedding.lang,
@@ -1022,11 +1017,6 @@ export class ProductsService {
         embedding.productId,
         embedding.lang,
       );
-      await this.prisma.embeddingTask.delete({
-        where: {
-          id: embedding.id,
-        },
-      });
       await this.llmService.addProductContentEmbeddingTask({
         productId: embedding.productId,
         lang: embedding.lang,
