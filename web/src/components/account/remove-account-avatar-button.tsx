@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ResponsiveButton } from "./responsive-button";
 import { useMutation } from "@tanstack/react-query";
 import { removeUserAvatarAction } from "@/app/data-access-layer/user/actions";
 import { toast } from "sonner";
+import { ResponsiveButton } from "../responsive-button";
 
 export function RemoveAccountAvatarButton() {
   const t = useTranslations("accountDetailsPage.buttons");

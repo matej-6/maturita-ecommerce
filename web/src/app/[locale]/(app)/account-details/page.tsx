@@ -6,7 +6,6 @@ import { EditUserFormSheet } from "@/components/form/edit-user-form-sheet";
 import { UpdateUserPasswordFormSheet } from "@/components/form/update-user-password-form-sheet";
 import { LogoutAllButton } from "@/components/logout-all-button";
 import { OrderStatusLabel } from "@/components/orders/order-status";
-import { RemoveAccountAvatarButton } from "@/components/remove-account-avatar-button";
 import { ResponsiveButton } from "@/components/responsive-button";
 import { Card } from "@/components/ui/card";
 import {
@@ -23,6 +22,7 @@ import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { RemoveAccountAvatarButton } from "@/components/account/remove-account-avatar-button";
 
 export const dynamic = "force-dynamic";
 

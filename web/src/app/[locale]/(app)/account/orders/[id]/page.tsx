@@ -1,10 +1,10 @@
 import { getOrderDetailsPageData } from "@/app/data-access-layer/order/queries";
 import { getImageSrc } from "@/app/lib/utils";
-import { CancelOrderButton } from "@/components/cancel-order.button";
-import DeleteProductReviewButton from "@/components/delete-product-review-button";
 import ReviewFormDialog from "@/components/form/review-form-dialog";
+import { CancelOrderButton } from "@/components/orders/cancel-order.button";
 import { OrderStatusLabel } from "@/components/orders/order-status";
 import { RetryOrderButton } from "@/components/orders/retry-order-button";
+import DeleteProductReviewButton from "@/components/products/delete-product-review-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {

@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "./ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { cancelOrderMutationAction } from "@/app/data-access-layer/order/actions";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
+import { Button } from "../ui/button";
 
 type props = {
   orderId: number;

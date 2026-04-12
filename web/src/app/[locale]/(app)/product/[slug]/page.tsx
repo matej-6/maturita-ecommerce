@@ -3,7 +3,7 @@
 import { getProductPageData } from "@/app/data-access-layer/product/actions";
 import { getPagedProductReviewsById } from "@/app/data-access-layer/product/actions";
 import { getImageSrc } from "@/app/lib/utils";
-import { AddToCartButton } from "@/components/add-to-cart-button";
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductImages } from "@/components/products/product-images";
 import { ProductVariantsScroll } from "@/components/products/product-variants-scroll";
 import { redirect } from "@/i18n/navigation";

@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { EditCategorySheetForm } from "../../../forms/edit-category-sheet-form";
 import { CategoryTranslation } from "../../../components/categories/category-translation";
 import { CategoryTranslationSheetForm } from "../../../forms/category-translation-sheet-form";
-import { ResponsiveButton } from "@/components/responsive-button";
 import { DeleteCategoryButton } from "../../../components/categories/delete-category-button";
 
 export default async function EditCategoryEditPage({

@@ -2,7 +2,7 @@ import { getSearchProductsQueryData } from "@/app/data-access-layer/product/acti
 import { getImageSrc } from "@/app/lib/utils";
 import { NextButton } from "@/components/next-button";
 import { PrevButton } from "@/components/prev-button";
-import { ProductFiltersSheet } from "@/components/product-filters-sheet";
+import { ProductFiltersSheet } from "@/components/products/product-filters-sheet";
 import { ProductVariantCard } from "@/components/products/product-variant-card";
 import { getTranslations } from "next-intl/server";
 

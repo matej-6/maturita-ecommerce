@@ -7,9 +7,9 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "lucide-react";
 import { PrevButton } from "@/components/prev-button";
-import { ProductFiltersSheet } from "@/components/product-filters-sheet";
 import { ProductVariantCard } from "@/components/products/product-variant-card";
 import { getTranslations } from "next-intl/server";
+import { ProductFiltersSheet } from "@/components/products/product-filters-sheet";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -68,7 +68,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (!category) return notFound();
 
   let nextPageLink = null;
-  const nextCursor = queryRes.data!.category.categoryProductVariants.nextCursor;
+  const nextCursor =
+    queryRes.data!.category!.categoryProductVariants.nextCursor;
   if (nextCursor) {
     const params = new URLSearchParams();
     params.append("cursor", nextCursor.toString());
@@ -139,7 +140,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         category.categoryProductVariants.edges.length > 0 ? (
           <div className="flex flex-col gap-y-8">
             {groupedAttributes.size > 0 && (
-              <div className="">
+              <div>
                 <ProductFiltersSheet
                   productFilterProps={{
                     attributes: groupedAttributes,
