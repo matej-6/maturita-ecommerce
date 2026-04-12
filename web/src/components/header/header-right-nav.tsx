@@ -102,31 +102,45 @@ export function HeaderRightNav({
                           </div>
                         </SheetContent>
                       </Sheet>
-                      <Button variant={"outline"} asChild>
-                        <Link href="/account-details">
+                      <Link href="/account-details">
+                        <Button variant={"outline"}>
                           <UserIcon className="w-8 h-8" />
+                        </Button>
+                      </Link>
+
+                      {currentSession.role === Role.Admin && (
+                        <Link href="/admin">
+                          <Button variant={"outline"}>
+                            <span className="text-sm">
+                              {t("admin-dashboard")}
+                            </span>
+                          </Button>
                         </Link>
-                      </Button>
+                      )}
                       <Button variant={"outline"} onClick={() => logout()}>
                         <LogOutIcon className="w-8 h-8" />
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button
-                        variant={"outline"}
-                        size={"sm"}
-                        className="text-sm"
-                      >
-                        <Link href="/auth/login">{t("login")}</Link>
-                      </Button>
-                      <Button
-                        variant={"default"}
-                        size={"sm"}
-                        className="text-sm"
-                      >
-                        <Link href="/auth/register">{t("register")}</Link>
-                      </Button>
+                      <Link href="/auth/login">
+                        <Button
+                          variant={"outline"}
+                          size={"sm"}
+                          className="text-sm"
+                        >
+                          {t("login")}
+                        </Button>
+                      </Link>
+                      <Link href="/auth/register">
+                        <Button
+                          variant={"default"}
+                          size={"sm"}
+                          className="text-sm"
+                        >
+                          {t("register")}
+                        </Button>
+                      </Link>
                     </>
                   )}
                 </div>
@@ -221,12 +235,16 @@ export function HeaderRightNav({
           </div>
         ) : (
           <div className="flex items-center gap-4">
-            <Button variant={"outline"} size={"sm"} className="text-sm">
-              <Link href="/auth/login">{t("login")}</Link>
-            </Button>
-            <Button variant={"default"} size={"sm"} className="text-sm">
-              <Link href="/auth/register">{t("register")}</Link>
-            </Button>
+            <Link href="/auth/login">
+              <Button variant={"outline"} size={"sm"} className="text-sm">
+                {t("login")}
+              </Button>
+            </Link>
+            <Link href="/auth/register">
+              <Button variant={"default"} size={"sm"} className="text-sm">
+                {t("register")}
+              </Button>
+            </Link>
           </div>
         )}
       </div>

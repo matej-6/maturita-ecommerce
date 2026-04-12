@@ -283,7 +283,6 @@ export type Mutation = {
   removeProductVariantAttributeTranslation: Scalars['Void']['output'];
   removeProductVariantImage: Scalars['Int']['output'];
   retryPendingPayment: Scalars['String']['output'];
-  returnAllItemsInOrder: Scalars['Void']['output'];
   setProductThumbnailImage: ProductImage;
   setProductVariantThumbnailImage: ProductVariantImage;
   updateCartItemQuantity: Cart;
@@ -459,11 +458,6 @@ export type MutationRemoveProductVariantImageArgs = {
 
 
 export type MutationRetryPendingPaymentArgs = {
-  orderId: Scalars['Int']['input'];
-};
-
-
-export type MutationReturnAllItemsInOrderArgs = {
   orderId: Scalars['Int']['input'];
 };
 
