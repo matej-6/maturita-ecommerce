@@ -2,10 +2,14 @@
 
 import { deleteAttributeKeyAction } from "@/app/data-access-layer/admin/product-variant-attribute/actions";
 import { ResponsiveButton } from "@/components/responsive-button";
+import { useRouter } from "@/i18n/navigation";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 export function DeleteAttributeKeyButton({ id }: { id: number }) {
+  const router = useRouter();
+
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       const res = await deleteAttributeKeyAction(id);
@@ -16,7 +20,12 @@ export function DeleteAttributeKeyButton({ id }: { id: number }) {
     onError: (error) => {
       toast.error(error.message);
     },
+    onSuccess: () => {
+      router.push("/admin/attribute-keys");
+    },
   });
+
+  const t = useTranslations("admin.attributeKeys.page");
 
   return (
     <ResponsiveButton
@@ -24,7 +33,7 @@ export function DeleteAttributeKeyButton({ id }: { id: number }) {
       onClick={() => mutate()}
       disabled={isPending}
     >
-      {isPending ? "Deleting..." : "Delete Attribute Key"}
+      {t("deleteButton")}
     </ResponsiveButton>
   );
 }

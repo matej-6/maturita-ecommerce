@@ -27,7 +27,7 @@ import { Role, UserSortingField } from "@/graphql/graphql";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { ChevronUpIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { UpdateUserRoleSheetForm } from "./update-user-role-sheet-form";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

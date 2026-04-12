@@ -3,11 +3,11 @@ import EN_Banner1 from "@/public/images/en/homepage/banner1.svg";
 import EN_Banner1Desktop from "@/public/images/en/homepage/banner1-desktop.svg";
 import SK_Banner1 from "@/public/images/sk/homepage/banner1.svg";
 import SK_Banner1Desktop from "@/public/images/sk/homepage/banner1-desktop.svg";
-import { getHomepageData } from "@/app/data-access-layer/homepage.queries";
+import { getHomepageData } from "@/app/data-access-layer/homepage/actions";
 import { getImageSrc } from "@/app/lib/utils";
-import { ProductsScroll } from "@/components/products-scroll";
+import { ProductsScroll } from "@/components/products/products-scroll";
 import { getLocale, getTranslations } from "next-intl/server";
-import ProductReviewCard from "@/components/product-review-card";
+import ProductReviewCard from "@/components/products/product-review-card";
 
 export const revalidate = 300;
 

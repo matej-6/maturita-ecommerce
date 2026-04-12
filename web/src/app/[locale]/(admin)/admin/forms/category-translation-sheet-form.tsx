@@ -27,6 +27,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ResponsiveButton } from "@/components/responsive-button";
 
 export type CategoryTranslationSheetFormProps = {
   categoryId: number;
@@ -58,7 +59,7 @@ export const CategoryTranslationSheetForm = ({
 }: CategoryTranslationSheetFormProps) => {
   const ft = useTranslations("fields");
   const t = useTranslations(
-    "admin.categories.editCategory.page.translations.form"
+    "admin.categories.editCategory.page.translations.form",
   );
 
   const [formData, setFormData] = useState<CategoryTranslationFormData>({
@@ -69,13 +70,10 @@ export const CategoryTranslationSheetForm = ({
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const isFormChanged = useMemo(() => {
-    return (
-      formData.name !== initialData.name ||
-      (formData.description || "") !== (initialData.description || "") ||
-      formData.locale !== initialData.locale
-    );
-  }, [formData, initialData]);
+  const isFormChanged =
+    formData.name !== initialData.name ||
+    (formData.description || "") !== (initialData.description || "") ||
+    formData.locale !== initialData.locale;
 
   useEffect(() => {
     if (availableLocales.length === 0) {
@@ -95,7 +93,7 @@ export const CategoryTranslationSheetForm = ({
           : await editCategoryTranslationAction(
               categoryId!,
               translationId!,
-              formData
+              formData,
             );
 
       const fieldErrorsMap = new Map();
@@ -104,7 +102,7 @@ export const CategoryTranslationSheetForm = ({
         setFieldErrors(fieldErrorsMap);
       } else {
         res.fieldErrors?.forEach((e) =>
-          fieldErrorsMap.set(e.property, e.constraints)
+          fieldErrorsMap.set(e.property, e.constraints),
         );
         setFieldErrors(fieldErrorsMap);
         setErrorMessage(res.message);
@@ -117,18 +115,18 @@ export const CategoryTranslationSheetForm = ({
   >(undefined);
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   return (
     <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
       <SheetTrigger asChild>
         {mode === "create" ? (
-          <Button disabled={availableLocales.length === 0}>
+          <ResponsiveButton disabled={availableLocales.length === 0}>
             {t("triggerButtonCreate")}
-          </Button>
+          </ResponsiveButton>
         ) : (
-          <Button>{t("triggerButtonUpdate")}</Button>
+          <ResponsiveButton>{t("triggerButtonUpdate")}</ResponsiveButton>
         )}
       </SheetTrigger>
       <SheetContent className="p-0">
@@ -221,8 +219,8 @@ export const CategoryTranslationSheetForm = ({
                   ? t("submitButtonCreatePending")
                   : t("submitButtonCreate")
                 : isPending
-                ? t("submitButtonUpdatePending")
-                : t("submitButtonUpdate")}
+                  ? t("submitButtonUpdatePending")
+                  : t("submitButtonUpdate")}
             </Button>
             <SheetClose asChild>
               <Button variant={"outline"}>{t("closeButton")}</Button>

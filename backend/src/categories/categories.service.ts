@@ -12,7 +12,6 @@ import {
   CategoryTranslation,
 } from 'generated/prisma/client';
 import { LocalesService } from 'src/locales/locales.service';
-import { DEFAULT_LOCALE } from 'src/locales';
 import { CreateCategoryTranslationInput } from './dto/create-category-translation.input';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
@@ -37,7 +36,7 @@ export class CategoriesService {
     private readonly localesService: LocalesService,
     private readonly productsService: ProductsService,
   ) {}
-  async create(createCategoryInput: CreateCategoryInput) {
+  async create(createCategoryInput: CreateCategoryInput): Promise<Category> {
     const existingCategory = await this.prisma.category.findUnique({
       where: {
         slug: createCategoryInput.slug,
@@ -52,11 +51,16 @@ export class CategoriesService {
       throw new BadRequestException('categories.service.slugAlreadyInUse');
     }
 
-    return this.prisma.category.create({
+    const category = await this.prisma.category.create({
       data: {
         ...createCategoryInput,
       },
     });
+
+    return {
+      ...category,
+      isSetup: (await this.isSetupByIds(category.id))[0],
+    };
   }
 
   async createTranslation(
@@ -214,31 +218,16 @@ export class CategoriesService {
               [sortingArgs.sortBy]: sortingArgs.ascending ? 'asc' : 'desc',
             }
           : undefined,
-      select: {
-        id: true,
-        isPublic: true,
-        slug: true,
-        parentCategoryId: true,
-        updatedAt: true,
-        createdAt: true,
-        _count: {
-          select: {
-            CategoryTranslation: {
-              where: {
-                locale: {
-                  equals: this.localesService.getDefaultLocale().code,
-                },
-              },
-            },
-          },
-        },
-      },
     });
 
+    const categoriesWithIsSetup = await this.isSetupByIds(
+      ...categories.map((c) => c.id),
+    );
+
     return categories
-      .map((category) => ({
+      .map((category, index) => ({
         ...category,
-        isSetup: this.getIsSetup(category._count.CategoryTranslation > 0),
+        isSetup: categoriesWithIsSetup[index],
       }))
       .filter(
         (category) =>
@@ -297,38 +286,26 @@ export class CategoriesService {
               }
             : undefined,
         take: paginationArgs.pageSize + 1,
-        select: {
-          id: true,
-          isPublic: true,
-          slug: true,
-          parentCategoryId: true,
-          updatedAt: true,
-          createdAt: true,
-          _count: {
-            select: {
-              CategoryTranslation: {
-                where: {
-                  locale: {
-                    equals: this.localesService.getDefaultLocale().code,
-                  },
-                },
-              },
-            },
-          },
-        },
       });
 
       const hasNextPage = categories.length > paginationArgs.pageSize;
       const nextCursor = hasNextPage ? categories.pop()!.id : null;
+
+      const categoryIdToIsSetup = await this.isSetupByIds(
+        ...categories.map((c) => c.id),
+      );
+
+      const categoriesWithIsSetup = categories.map((category, index) => ({
+        ...category,
+        isSetup: categoryIdToIsSetup[index],
+      }));
+
       return {
         nextCursor,
         totalCount: categories.length,
-        edges: categories.map((c) => ({
+        edges: categoriesWithIsSetup.map((c) => ({
           cursor: c.id,
-          node: {
-            ...c,
-            isSetup: this.getIsSetup(c._count.CategoryTranslation > 0),
-          },
+          node: c,
         })),
       };
     } else {
@@ -445,7 +422,7 @@ export class CategoriesService {
           cursor: c.id,
           node: {
             ...c,
-            isSetup: this.getIsSetup(c._count.CategoryTranslation > 0),
+            isSetup: c._count.CategoryTranslation > 0,
           },
         })),
       };
@@ -480,6 +457,32 @@ export class CategoriesService {
         isPublic: true,
         createdAt: true,
         updatedAt: true,
+      },
+    });
+
+    if (!category) return null;
+
+    const isSetup = (await this.isSetupByIds(category.id))[0];
+
+    if (filterArgs.isSetup != null && filterArgs.isSetup !== isSetup) {
+      return null;
+    }
+
+    return {
+      ...category,
+      isSetup: isSetup,
+    };
+  }
+
+  private async isSetupByIds(...categoryIds: number[]) {
+    const categoriesWithTranslations = await this.prisma.category.findMany({
+      where: {
+        id: {
+          in: categoryIds,
+        },
+      },
+      select: {
+        id: true,
         _count: {
           select: {
             CategoryTranslation: {
@@ -494,30 +497,24 @@ export class CategoriesService {
       },
     });
 
-    if (!category) return null;
-
-    const isSetup = this.getIsSetup(category._count.CategoryTranslation > 0);
-
-    if (filterArgs.isSetup != null && filterArgs.isSetup !== isSetup) {
-      return null;
-    }
-
-    return {
-      ...category,
-      isSetup: isSetup,
-    };
+    return categoryIds.map((categoryId) => {
+      const category = categoriesWithTranslations.find(
+        (c) => c.id === categoryId,
+      );
+      return category ? category._count.CategoryTranslation > 0 : false;
+    });
   }
 
-  private getIsSetup(hasEnglishTranslation: boolean): boolean {
-    return hasEnglishTranslation;
-  }
-
-  async update(id: number, updateCategoryInput: UpdateCategoryInput) {
+  async update(
+    id: number,
+    updateCategoryInput: UpdateCategoryInput,
+  ): Promise<Category> {
     const currentCategory = await this.prisma.category.findFirst({
       where: { id },
       select: {
         id: true,
         parentCategoryId: true,
+        slug: true,
       },
     });
 
@@ -527,14 +524,16 @@ export class CategoriesService {
       );
     }
 
-    const countCategoriesWithNewSlug = await this.prisma.category.count({
-      where: {
-        slug: updateCategoryInput.slug,
-      },
-    });
+    if (updateCategoryInput.slug !== currentCategory.slug) {
+      const countCategoriesWithNewSlug = await this.prisma.category.count({
+        where: {
+          slug: updateCategoryInput.slug,
+        },
+      });
 
-    if (countCategoriesWithNewSlug > 0) {
-      throw new BadRequestException('categories.service.slugAlreadyInUse');
+      if (countCategoriesWithNewSlug > 0) {
+        throw new BadRequestException('categories.service.slugAlreadyInUse');
+      }
     }
 
     if (updateCategoryInput.parentCategoryId != null) {
@@ -583,32 +582,26 @@ export class CategoriesService {
       }
     }
 
-    return this.prisma.category.update({
+    const updatedCategory = await this.prisma.category.update({
       where: { id },
       data: {
         slug: updateCategoryInput.slug,
         parentCategoryId: updateCategoryInput.parentCategoryId,
+        isPublic: updateCategoryInput.isPublic,
       },
     });
+
+    return {
+      ...updatedCategory,
+      isSetup: (await this.isSetupByIds(updatedCategory.id))[0],
+    };
   }
 
   async remove(id: number) {
     try {
-      await this.prisma.$transaction(async (tx) => {
-        // 1. odstranit vsetky translations
-        await tx.categoryTranslation.deleteMany({
-          where: {
-            categoryId: id,
-          },
-        });
-
-        // 2. odstranit category
-        await tx.category.delete({
-          where: { id },
-        });
+      await this.prisma.category.delete({
+        where: { id },
       });
-
-      await this.productsService.removeCategoryFromProducts(id);
     } catch (error) {
       this.logger.error(
         `Failed to remove category with id ${id}: ${error instanceof Error ? error.message : String(error)}`,
@@ -631,11 +624,23 @@ export class CategoriesService {
 
   async getCategorySubcategoriesByBatch(
     parentIds: number[],
-  ): Promise<(DbCategory[] | null)[]> {
-    const categories = await this.findAllSubcategoriesByParentIds(parentIds);
+  ): Promise<(Category[] | null)[]> {
+    const subcategories = await this.findAllSubcategoriesByParentIds(parentIds);
+
+    const isSetupZoznam = await this.isSetupByIds(
+      ...subcategories.map((c) => c.id),
+    );
+
+    const subcategoriesWithIsSetup = subcategories.map(
+      (subcategory, index) => ({
+        ...subcategory,
+        isSetup: isSetupZoznam[index],
+      }),
+    );
+
     return parentIds.map(
       (parentId) =>
-        categories.filter(
+        subcategoriesWithIsSetup.filter(
           (category) => category.parentCategoryId === parentId,
         ) || null,
     );
@@ -652,10 +657,7 @@ export class CategoriesService {
 
   /**
    * Metóda navrhnutá pre data loader
-   * source: @link https://blog.logrocket.com/use-dataloader-nestjs/#setting-up-nestjs-graphql
-   * @param lang
-   * @param categoryIds
-   * @returns
+   * source https://blog.logrocket.com/use-dataloader-nestjs/#setting-up-nestjs-graphql
    */
   async getAllTranslationsByBatch(
     lang: string,

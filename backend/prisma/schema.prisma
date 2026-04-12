@@ -70,7 +70,7 @@ model CategoryTranslation {
 model Product {
   id                    Int                     @id @default(autoincrement())
   slug                  String                  @unique
-  Category              Category?               @relation(fields: [categoryId], references: [id])
+  Category              Category?               @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId            Int?
   isPublic              Boolean                 @default(true)
   ProductVariants       ProductVariant[]

@@ -691,17 +691,6 @@ export class ProductsService {
     return this.imageStorageService.getImageUrl(imageFileName);
   }
 
-  async removeCategoryFromProducts(categoryId: number) {
-    await this.prisma.product.updateMany({
-      where: {
-        categoryId: categoryId,
-      },
-      data: {
-        categoryId: null,
-      },
-    });
-  }
-
   async update(id: number, input: UpdateProductInput): Promise<Product> {
     input.slug = input.slug.trim().toLowerCase();
 
@@ -715,16 +704,21 @@ export class ProductsService {
       throw new BadRequestException('products.service.update.notFound');
     }
 
-    const countProductWithSameSlug = await this.prisma.product.count({
+    const currentProduct = await this.prisma.product.findFirst({
       where: {
-        slug: {
-          equals: input.slug,
-        },
+        id: id,
       },
     });
 
-    if (countProductWithSameSlug > 0) {
-      throw new BadRequestException('products.service.slugAlreadyInUse');
+    if (currentProduct?.slug !== input.slug) {
+      const existingProductWithSlug = await this.prisma.product.findFirst({
+        where: {
+          slug: input.slug,
+        },
+      });
+      if (existingProductWithSlug) {
+        throw new BadRequestException('products.service.slugAlreadyInUse');
+      }
     }
 
     const updatedProduct = await this.prisma.product.update({
@@ -835,22 +829,6 @@ export class ProductsService {
     }
 
     const deletedProductId = await this.prisma.$transaction(async (tx) => {
-      await tx.attribute.deleteMany({
-        where: {
-          ProductVariants: {
-            every: {
-              productId: id,
-            },
-          },
-        },
-      });
-
-      await tx.productVariant.deleteMany({
-        where: {
-          productId: id,
-        },
-      });
-
       await tx.productTranslation.deleteMany({
         where: {
           productId: id,

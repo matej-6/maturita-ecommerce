@@ -5,7 +5,7 @@ import {
   SortingArgs,
   TableArgs,
 } from "@/app/data-access-layer/admin/order/queries";
-import { OrderStatusLabel } from "@/components/order-status";
+import { OrderStatusLabel } from "@/components/orders/order-status";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

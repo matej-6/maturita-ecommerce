@@ -3,8 +3,8 @@ import { getImageSrc } from "@/app/lib/utils";
 import { CancelOrderButton } from "@/components/cancel-order.button";
 import DeleteProductReviewButton from "@/components/delete-product-review-button";
 import ReviewFormDialog from "@/components/form/review-form-dialog";
-import { OrderStatusLabel } from "@/components/order-status";
-import { RetryOrderButton } from "@/components/retry-order-button";
+import { OrderStatusLabel } from "@/components/orders/order-status";
+import { RetryOrderButton } from "@/components/orders/retry-order-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {

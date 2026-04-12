@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { Switch } from "@/components/ui/switch";
+import { ResponsiveButton } from "@/components/responsive-button";
 
 type EditCategoryFormProps = {
   categoryId: number;
@@ -46,6 +48,7 @@ type EditCategoryFormProps = {
 
 type EditCategoryFormData = {
   slug: string;
+  isPublic: boolean;
   parentCategoryId: number | null;
 };
 
@@ -55,12 +58,10 @@ export const EditCategorySheetForm = ({
   data,
 }: EditCategoryFormProps) => {
   const [formData, setFormData] = useState<EditCategoryFormData>(initialData);
-  const isFormChanged = useMemo(() => {
-    return (
-      formData.slug !== initialData.slug ||
-      formData.parentCategoryId !== initialData.parentCategoryId
-    );
-  }, [formData, initialData]);
+  const isFormChanged =
+    formData.slug !== initialData.slug ||
+    formData.parentCategoryId !== initialData.parentCategoryId ||
+    formData.isPublic !== initialData.isPublic;
 
   const availableCategories = useMemo(() => {
     if (!data?.allCategories) {
@@ -97,7 +98,7 @@ export const EditCategorySheetForm = ({
     return [...res, ...categoryMap.values()];
   }, [data, categoryId]);
 
-  const t = useTranslations("admin.categories.editCategory.form"); // specific form translations
+  const t = useTranslations("admin.categories.editCategory.form");
   const ft = useTranslations("fields.category");
 
   const comboboxCategories = [
@@ -108,7 +109,7 @@ export const EditCategorySheetForm = ({
     })) ?? []),
   ];
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       const res = await editCategoryAction(categoryId, formData);
       if (res.success) {
@@ -118,7 +119,7 @@ export const EditCategorySheetForm = ({
       }
       const fieldErrorsMap = new Map();
       res.fieldErrors?.forEach((e) =>
-        fieldErrorsMap.set(e.property, e.constraints)
+        fieldErrorsMap.set(e.property, e.constraints),
       );
       setFieldErrors(fieldErrorsMap);
       setErrorMessage(res.message);
@@ -129,12 +130,12 @@ export const EditCategorySheetForm = ({
     Map<string, string[]> | undefined
   >(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button>{t("triggerButton")}</Button>
+        <ResponsiveButton>{t("triggerButton")}</ResponsiveButton>
       </SheetTrigger>
       <SheetContent className="p-0">
         <SheetHeader className="p-2 sm:p-4">
@@ -163,22 +164,37 @@ export const EditCategorySheetForm = ({
               />
             </div>
             <div className="flex flex-col gap-y-1">
+              <div className="flex items-center gap-x-3 rounded-md border p-3">
+                <Label>{ft("isPublic")}</Label>
+                <Switch
+                  checked={formData.isPublic}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, isPublic: checked }))
+                  }
+                />
+              </div>
+              <FormFieldErrorMessage
+                fieldErrors={fieldErrors}
+                fieldName="isPublic"
+              />
+            </div>
+            <div className="flex flex-col gap-y-1">
               <Label htmlFor="parentCategoryId">{ft("parentCategoryId")}</Label>
               <FormComboBox
                 data={comboboxCategories}
                 selectedStatus={
                   comboboxCategories.find(
-                    (c) => c.value === formData.parentCategoryId
+                    (c) => c.value === formData.parentCategoryId,
                   )!
                 }
                 setSelectedValue={(v) =>
                   setFormData((prev) => ({ ...prev, parentCategoryId: v }))
                 }
                 noResultsFoundText={t(
-                  "parentCategoryId.combobox.noResultsFoundText"
+                  "parentCategoryId.combobox.noResultsFoundText",
                 )}
                 filterPlaceholderText={t(
-                  "parentCategoryId.combobox.filterPlaceholderText"
+                  "parentCategoryId.combobox.filterPlaceholderText",
                 )}
               />
               <FormFieldErrorMessage
@@ -195,7 +211,7 @@ export const EditCategorySheetForm = ({
             <Button
               type="submit"
               variant={"default"}
-              disabled={!isFormChanged}
+              disabled={!isFormChanged || isPending}
               className="mt-auto"
             >
               {t("submitButton")}

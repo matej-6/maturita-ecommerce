@@ -34,10 +34,6 @@ export function Breadcrumbs({ defaultBreadcrumb }: BreadcrumbsProps) {
         .split("/")
         .slice(2) // ak je pathname: '/admin', tak pathname.split('/') je ['', 'admin'], preto slice(2) a nie slice(1)
         .filter((b) => {
-          const res = z.safeParse(z.uuid(), b); //aby sa nezobrazoval uuid v breadcrumbs
-          return !res.success;
-        })
-        .filter((b) => {
           return isNaN(Number(b)); // aby sa nezobrazoval ciselny id v breadcrumbs
         })
         .map((b, index) => ({

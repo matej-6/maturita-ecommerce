@@ -2,7 +2,6 @@
 
 import { getProductDetailPageData } from "@/app/data-access-layer/admin/product/queries";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 
 import { Link } from "@/i18n/navigation";
 import { AlertCircleIcon, ArrowUpRightIcon } from "lucide-react";
@@ -20,6 +19,9 @@ import { GenerateEmbeddingsButton } from "../../../components/products/generate-
 import { RegenerateAllEmbeddingsButton } from "../../../components/products/regenerate-all-embeddings-button";
 import { ProductTranslationSheetForm } from "../../../forms/product-translation-sheet-form";
 import { getImageSrc } from "@/app/lib/utils";
+import { ResponsiveButton } from "@/components/responsive-button";
+import { DeleteProductButton } from "../../../components/products/delete-product-button";
+import { Button } from "@/components/ui/button";
 
 export default async function ProductDetailPage({
   params,
@@ -136,6 +138,7 @@ export default async function ProductDetailPage({
         <div className="flex items-center justify-start gap-x-4">
           <ProductForm
             categories={categories}
+            productId={product.id}
             mode="edit"
             initialData={{
               slug: product.slug,
@@ -291,10 +294,10 @@ export default async function ProductDetailPage({
                             key={attr.id}
                             href={`/admin/attribute-keys/key-detail/${attr.key?.id}`}
                           >
-                            <Button variant={"link"} size={"sm"}>
+                            <ResponsiveButton variant={"link"} size={"sm"}>
                               {attr.key?.key} {attr.value}{" "}
                               <ArrowUpRightIcon className="size-3.5 ml-1" />
-                            </Button>
+                            </ResponsiveButton>
                           </Link>
                         ))
                       )}
@@ -537,22 +540,26 @@ export default async function ProductDetailPage({
               </Card>
             );
           })}
+          {product.missingContentEmbeddingLanguages.map((lang) => (
+            <Card
+              key={lang}
+              className="p-2 sm:p-4 w-[400px] flex flex-col gap-y-4"
+            >
+              <div className="text-lg font-semibold">{lang}</div>
+              <div>{t("contentEmbeddings.noEmbeddings")}</div>
+              <GenerateEmbeddingsButton
+                productId={product.id}
+                lang={lang}
+                type="generate"
+                embeddingType="contentEmbedding"
+              />
+            </Card>
+          ))}
         </div>
-        {product.missingContentEmbeddingLanguages.map((lang) => (
-          <Card
-            key={lang}
-            className="p-2 sm:p-4 w-[400px] flex flex-col gap-y-4"
-          >
-            <div className="text-lg font-semibold">{lang}</div>
-            <div>{t("contentEmbeddings.noEmbeddings")}</div>
-            <GenerateEmbeddingsButton
-              productId={product.id}
-              lang={lang}
-              type="generate"
-              embeddingType="contentEmbedding"
-            />
-          </Card>
-        ))}
+      </div>
+      <div className="h-px w-full bg-accent rounded-full" />
+      <div>
+        <DeleteProductButton productId={parsedId} />
       </div>
     </div>
   );

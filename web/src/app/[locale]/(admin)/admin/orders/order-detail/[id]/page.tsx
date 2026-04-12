@@ -2,7 +2,7 @@
 
 import { getAdminOrderDetailPageDataAction } from "@/app/data-access-layer/admin/order/queries";
 import { getImageSrc } from "@/app/lib/utils";
-import { OrderStatusLabel } from "@/components/order-status";
+import { OrderStatusLabel } from "@/components/orders/order-status";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -211,7 +211,7 @@ export default async function AdminOrderPage({ params }: Props) {
                         )}
                       </TableCell>
                       <TableCell>
-                        ${(item.unitPriceInCents / 100).toFixed(2)}
+                        {(item.unitPriceInCents / 100).toFixed(2)} €
                       </TableCell>
                       <TableCell>{item.quantity}</TableCell>
                     </TableRow>

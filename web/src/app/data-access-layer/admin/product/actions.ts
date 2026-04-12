@@ -18,6 +18,7 @@ import {
   CreateProductMutation,
   CreateVariantMutation,
   DeleteProductImageMutation,
+  DeleteProductMutation,
   DeleteVariantImageMutation,
   EditProductMutation,
   EditVariantMutation,
@@ -107,6 +108,26 @@ export async function editProductAction(data: {
   return {
     success: true,
     data: res.data.updateProduct,
+  };
+}
+
+export async function deleteProductAction(
+  productId: number,
+): Promise<ActionResponse<null>> {
+  const res = await execute(DeleteProductMutation, {
+    id: productId,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/products`);
+
+  return {
+    success: true,
+    data: null,
   };
 }
 

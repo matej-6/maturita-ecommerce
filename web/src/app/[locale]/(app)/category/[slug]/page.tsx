@@ -1,6 +1,6 @@
 "use server";
 
-import { getCategoryQueryData } from "@/app/data-access-layer/category.queries";
+import { getCategoryQueryData } from "@/app/data-access-layer/category/actions";
 import { getImageSrc } from "@/app/lib/utils";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "lucide-react";
 import { PrevButton } from "@/components/prev-button";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
-import { ProductVariantCard } from "@/components/product-variant-card";
+import { ProductVariantCard } from "@/components/products/product-variant-card";
 import { getTranslations } from "next-intl/server";
 
 type Props = {

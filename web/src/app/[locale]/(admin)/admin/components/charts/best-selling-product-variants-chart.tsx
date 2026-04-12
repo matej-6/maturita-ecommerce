@@ -49,10 +49,7 @@ export function BestSellingProductVariantsChart({
   const chartConfig = {
     quantitySold: {
       label: t("bestSellingProductVariants.quantitySold"),
-      color: "var(--chart-2)",
-    },
-    sku: {
-      color: "var(--background)",
+      color: "var(--chart-3)",
     },
   } satisfies ChartConfig;
 
@@ -114,48 +111,22 @@ export function BestSellingProductVariantsChart({
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart
-            accessibilityLayer
-            data={data}
-            layout="vertical"
-            margin={{
-              right: 16,
-            }}
-          >
+          <BarChart data={data} layout="vertical">
             <CartesianGrid horizontal={false} />
-            <YAxis
-              dataKey="sku"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value.slice(0, 12)}
-              hide
-            />
-            <XAxis dataKey="quantitySold" type="number" hide />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
-            />
+            <YAxis dataKey="sku" type="category" hide />
+            <XAxis dataKey="quantitySold" type="number" />
+            <ChartTooltip content={<ChartTooltipContent />} />
             <Bar
               dataKey="quantitySold"
               layout="vertical"
-              fill="var(--color-desktop)"
+              fill="var(--color-quantitySold)"
               radius={4}
             >
               <LabelList
                 dataKey="sku"
                 position="insideLeft"
                 offset={8}
-                className="fill-(--color-background) font-medium"
-                fontSize={12}
-              />
-              <LabelList
-                dataKey="quantitySold"
-                position="right"
-                offset={8}
-                className="fill-foreground"
-                fontSize={12}
+                className="fill-(--color-primary-foreground) font-medium"
               />
             </Bar>
           </BarChart>

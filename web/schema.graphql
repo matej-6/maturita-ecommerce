@@ -75,6 +75,7 @@ type CategoryTranslation {
 }
 
 input CreateCategoryInput {
+  isPublic: Boolean!
   """Parent category id"""
   parentCategoryId: Int
   """Slug of the category"""
@@ -543,7 +544,7 @@ type Query {
     """Field to sort by"""
     sortBy: String
   ): [Category!]!
-  category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category!
+  category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category
   findAllPaginatedOrders(ascending: Boolean, cursor: Int, dateFrom: DateTime, dateTo: DateTime, id: Int, maxPrice: Int, minPrice: Int, pageSize: Int = 10, sortBy: String, status: OrderStatus, userId: Int): PaginatedOrder!
   findAllPaginatedProductVariantAttributeKeys(ascending: Boolean, cursor: Int, id: Int, key: String, pageSize: Int = 10, sortBy: AttributeKeySortingField): PaginatedProductVariantAttributeKey!
   findAllPaginatedUsers(ascending: Boolean, cursor: Int, email: String, id: Int, pageSize: Int = 10, role: Role, sortBy: UserSortingField): PaginatedUser!
@@ -627,6 +628,7 @@ enum TimePeriod {
 input UpdateCategoryInput {
   """Category id"""
   id: Int!
+  isPublic: Boolean!
   """Parent category id"""
   parentCategoryId: Int
   """Slug of the category"""

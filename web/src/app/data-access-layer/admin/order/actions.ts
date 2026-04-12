@@ -11,7 +11,7 @@ export async function AdminUpdateOrderAction(
   id: number,
   input: {
     status: OrderStatus;
-  }
+  },
 ): Promise<ActionResponse<null>> {
   const res = await execute(AdminUpdateOrderDocument, {
     id: id,

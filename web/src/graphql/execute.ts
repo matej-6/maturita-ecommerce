@@ -9,9 +9,8 @@ import { notFound } from "next/navigation";
 
 // https://the-guild.dev/graphql/codegen/docs/guides/vanilla-typescript
 
-async function _execute<TResult, TVariables>(
+export async function execute<TResult, TVariables>(
   query: TypedDocumentString<TResult, TVariables>,
-  cache: boolean = false,
   ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
 ) {
   const locale = await getLocale();
@@ -35,7 +34,7 @@ async function _execute<TResult, TVariables>(
       query,
       variables,
     }),
-    cache: cache ? "force-cache" : "no-store",
+    cache: "no-store",
   });
 
   if ([401, 403].includes(response.status)) {
@@ -47,18 +46,4 @@ async function _execute<TResult, TVariables>(
   }
 
   return response.json() as ExecutionResult<TResult>;
-}
-
-export async function executeWithCache<TResult, TVariables>(
-  query: TypedDocumentString<TResult, TVariables>,
-  ...variables: TVariables extends Record<string, never> ? [] : [TVariables]
-) {
-  return _execute(query, true, ...variables);
-}
-
-export async function execute<TResult, TVariables>(
-  query: TypedDocumentString<TResult, TVariables>,
-  ...variables: TVariables extends Record<string, never> ? [] : [TVariables]
-) {
-  return _execute(query, false, ...variables);
 }

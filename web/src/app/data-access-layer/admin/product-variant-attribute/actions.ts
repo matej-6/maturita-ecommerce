@@ -41,7 +41,7 @@ import {
 
 export async function createAttributeKeyAction(
   data: { key: string },
-  productId?: number
+  productId?: number,
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -79,7 +79,7 @@ export async function createAttributeKeyAction(
 export async function updateAttributeKeyAction(
   keyId: number,
   data: { key: string },
-  productId?: number
+  productId?: number,
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -118,7 +118,7 @@ export async function updateAttributeKeyAction(
 
 export async function createAttributeAction(
   data: { attributeKeyId: number; attributeValue: string },
-  productId?: number
+  productId?: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(CreateAttributeMutation, {
     attributeKeyId: data.attributeKeyId,
@@ -135,7 +135,7 @@ export async function createAttributeAction(
     revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
   }
   revalidatePath(
-    `/${locale}/admin/attribute-keys/key-detail/${data.attributeKeyId}`
+    `/${locale}/admin/attribute-keys/key-detail/${data.attributeKeyId}`,
   );
 
   if (!res.data) {
@@ -151,7 +151,7 @@ export async function createAttributeAction(
 }
 
 export async function getPagedAttributeKeysQuery(
-  args: FilterArgs & PagingArgs & SortingArgs
+  args: FilterArgs & PagingArgs & SortingArgs,
 ): Promise<
   ActionResponse<ExecutionResult<PagedAttributeKeysQueryQuery>["data"]>
 > {
@@ -170,7 +170,7 @@ export async function getPagedAttributeKeysQuery(
 }
 
 export async function getAttributeKeyDetailsPageQueryAction(
-  id: number
+  id: number,
 ): Promise<
   ActionResponse<
     ExecutionResult<AdminAttributeKeyDetailsPageQueryQuery>["data"]
@@ -206,7 +206,7 @@ export async function createAttributeKeyTranslationAction(input: {
 
   const locale = await getLocale();
   revalidatePath(
-    `/${locale}/admin/attribute-keys/key-detail/${input.attributeKeyId}`
+    `/${locale}/admin/attribute-keys/key-detail/${input.attributeKeyId}`,
   );
 
   return {
@@ -217,7 +217,7 @@ export async function createAttributeKeyTranslationAction(input: {
 
 export async function deleteAttributeKeyTranslationAction(
   id: number,
-  keyId: number
+  keyId: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(DeleteAttributeKeyTranslationMutation, { id });
   if (res.errors) {
@@ -239,7 +239,7 @@ export async function updateAttributeKeyTranslationAction(
     keyTranslation: string;
     locale: string;
   },
-  keyId: number
+  keyId: number,
 ): Promise<
   ActionResponse<
     ExecutionResult<UpdateAttributeKeyTranslationMutationMutation>["data"]
@@ -264,7 +264,7 @@ export async function updateAttributeKeyTranslationAction(
 
 export async function deleteAttributeAction(
   id: number,
-  keyId: number
+  keyId: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(DeleteAttributeMutation, { id });
   if (res.errors) {
@@ -283,7 +283,7 @@ export async function deleteAttributeAction(
 export async function updateAttributeAction(
   id: number,
   attributeValue: string,
-  keyId: number
+  keyId: number,
 ): Promise<
   ActionResponse<ExecutionResult<UpdateAttributeMutationMutation>["data"]>
 > {
@@ -307,7 +307,7 @@ export async function createAttributeTranslationAction(
     valueTranslation: string;
     locale: string;
   },
-  keyId: number
+  keyId: number,
 ): Promise<
   ActionResponse<
     ExecutionResult<CreateProductVariantAttributeTranslationMutation>["data"]
@@ -338,7 +338,7 @@ export async function updateAttributeTranslationAction(
     valueTranslation: string;
     locale: string;
   },
-  keyId: number
+  keyId: number,
 ): Promise<
   ActionResponse<
     ExecutionResult<UpdateProductVariantAttributeTranslationMutationMutation>["data"]
@@ -348,7 +348,7 @@ export async function updateAttributeTranslationAction(
     UpdateProductVariantAttributeTranslationMutationDocument,
     {
       ...input,
-    }
+    },
   );
 
   if (res.errors) {
@@ -366,7 +366,7 @@ export async function updateAttributeTranslationAction(
 
 export async function deleteAttributeTranslationAction(
   id: number,
-  keyId: number
+  keyId: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(DeleteAttributeTranslationMutationDocument, {
     id,
@@ -385,7 +385,7 @@ export async function deleteAttributeTranslationAction(
 }
 
 export async function deleteAttributeKeyAction(
-  id: number
+  id: number,
 ): Promise<ActionResponse<null>> {
   const res = await execute(DeleteAttributeKeyMutation, { id });
   if (res.errors) {
@@ -394,7 +394,6 @@ export async function deleteAttributeKeyAction(
 
   const locale = await getLocale();
   revalidatePath(`/${locale}/admin/attribute-keys`);
-  revalidatePath(`/${locale}/admin/attribute-keys/key-detail/${id}`);
 
   return {
     success: true,

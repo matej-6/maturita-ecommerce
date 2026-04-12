@@ -237,7 +237,6 @@ export class CategoriesResolver {
     return count;
   }
 
-  @UseGuards(AdminGuard)
   @ResolveField(() => Boolean, { name: 'isSetup' })
   categoryIsSetup(@Parent() category: Category) {
     return category.isSetup;

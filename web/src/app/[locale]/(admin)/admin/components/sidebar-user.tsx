@@ -1,7 +1,7 @@
 "use client";
 
 import { CurrentSession } from "@/app/data-access-layer/auth/queries";
-import { Avatar } from "@/components/avatar";
+import { Avatar } from "@/components/account/avatar";
 // https://ui.shadcn.com/blocks/sidebar#sidebar-08
 
 import {

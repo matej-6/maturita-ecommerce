@@ -17,7 +17,7 @@
   },
   "localeSwitcher": {
     "label": "Jazyk",
-    "locale": "{locale, select, sk {🇸🇰 Slovenský} en {🇺🇸 English} other {Neznámy}}"
+    "locale": "{locale, select, sk {🇸🇰 Slovenský} en {🇬🇧 English} other {Neznámy}}"
   },
   "footer": {
     "copyright": "GoFitShop - 2026",
@@ -131,7 +131,8 @@
       "changeAvatar": "Zmeniť avatar",
       "pendingChangeAvatar": "Aktualizujem avatar...",
       "removeAvatar": "Odstrániť avatar",
-      "deleteAccount": "Zmazať účet"
+      "deleteAccount": "Zmazať účet",
+      "logoutAll": "Odhlásiť sa zo všetkých relácií"
     },
     "deleteAccountModal": {
       "title": "Ste si istý, že chcete zmazať svoj účet?",
@@ -293,6 +294,7 @@
           "noVariants": "Žiadne varianty",
           "yes": "Áno",
           "no": "Nie",
+          "deleteButton": "Zmazať produkt",
           "images": {
             "title": "Obrázky",
             "noImages": "Žiadne obrázky neboli nahrané.",
@@ -461,6 +463,7 @@
           "title": "Prehľad",
           "viewPageButton": "Zobraziť stránku",
           "noSubcategories": "Žiadne podkategórie",
+          "deleteButton": "Zmazať kategóriu",
           "setupWarning": {
             "title": "Táto kategória nie je úplne nastavená",
             "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavená a vidiťeľná pre zákazníkov",
@@ -539,6 +542,14 @@
       }
     },
     "orders": {
+      "updateOrderStatus": {
+        "button": "Zmeniť stav",
+        "title": "Zmeniť stav objednávky",
+        "submitButton": "Uložiť zmeny",
+        "closeButton": "Zavrieť",
+        "toastSuccess": "Stav objednávky bol úspešne aktualizovaný.",
+        "statusPlaceholder": "Vybrať stav"
+      },
       "table": {
         "noOrdersFound": "Neboli nájdené žiadne objednávky.",
         "paging": {
@@ -579,6 +590,7 @@
           "title": "Preklady",
           "noTranslations": "Nie sú dostupné žiadne preklady."
         },
+        "deleteButton": "Zmazať kľúč atribútu",
         "attributes": {
           "title": "Atribúty",
           "noAttributes": "Nie sú dostupné žiadne atribúty.",
@@ -747,7 +759,7 @@
     },
     "order": {
       "id": "ID",
-      "status": "Status",
+      "status": "Stav",
       "userId": "ID používateľa",
       "total": "Spolu",
       "items": "Položky",
@@ -761,6 +773,14 @@
         "postalCode": "PSČ",
         "country": "Krajina",
         "phone": "Telefón"
+      },
+      "orderStatus": {
+        "pending": "Čakajúca",
+        "processing": "Spracovávaná",
+        "shipped": "Odoslaná",
+        "delivered": "Doručená",
+        "cancelled": "Zrušená",
+        "failed": "Zlyhala"
       }
     },
     "common": {

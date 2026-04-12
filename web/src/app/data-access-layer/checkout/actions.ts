@@ -25,6 +25,5 @@ export async function checkoutAction() {
   }
 
   const data: { url: string } = await response.json();
-  console.log(data);
   redirect(data.url);
 }

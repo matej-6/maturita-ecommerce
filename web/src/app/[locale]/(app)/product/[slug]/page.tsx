@@ -1,13 +1,11 @@
 "use server";
 
-import {
-  getPagedProductReviewsById,
-  getProductPageData,
-} from "@/app/data-access-layer/product.queries";
+import { getProductPageData } from "@/app/data-access-layer/product/actions";
+import { getPagedProductReviewsById } from "@/app/data-access-layer/product/actions";
 import { getImageSrc } from "@/app/lib/utils";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import { ProductImages } from "@/components/product-images";
-import { ProductVariantsScroll } from "@/components/product-variants-scroll";
+import { ProductImages } from "@/components/products/product-images";
+import { ProductVariantsScroll } from "@/components/products/product-variants-scroll";
 import { redirect } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -15,15 +13,18 @@ import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
 
-const ProductReviews = dynamic(() => import("@/components/product-reviews"), {
-  loading: () => {
-    return (
-      <div className="w-full py-10 flex items-center justify-center">
-        <span className="text-muted-foreground">Loading reviews...</span>
-      </div>
-    );
+const ProductReviews = dynamic(
+  () => import("@/components/products/product-reviews"),
+  {
+    loading: () => {
+      return (
+        <div className="w-full py-10 flex items-center justify-center">
+          <span className="text-muted-foreground">Loading reviews...</span>
+        </div>
+      );
+    },
   },
-});
+);
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -43,7 +44,8 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (
     !data.success ||
     !data.data?.productBySlug ||
-    data.data.productBySlug.variants.length === 0
+    data.data.productBySlug.variants.length === 0 ||
+    data.data.productBySlug.isPublic === false
   ) {
     return notFound();
   }
@@ -72,7 +74,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const selectedVariant = data.data.productBySlug.variants.find(
     (v) => v.sku === variant,
   );
-  if (!selectedVariant) {
+  if (!selectedVariant || selectedVariant.isPublic === false) {
     return notFound();
   }
 
@@ -92,7 +94,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   }));
 
   const otherVariants = data.data.productBySlug.variants
-    .filter((v) => v.sku !== selectedVariant.sku)
+    .filter((v) => v.sku !== selectedVariant.sku && v.isPublic !== false)
     .map((v) => {
       const variantName = v.attributes
         .sort((a, b) => a.key!.key.localeCompare(b.key!.key))

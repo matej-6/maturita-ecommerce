@@ -23,7 +23,7 @@ export const OptionalCurrentUser = createParamDecorator(
       case 'graphql': {
         const ctx =
           GqlExecutionContext.create(context).getContext<GraphqlAppContext>();
-        const req = ctx.req as { user?: AuthenticatedUserDto };
+        const req = ctx.req as unknown as { user?: AuthenticatedUserDto };
         return req.user || null;
       }
       default:

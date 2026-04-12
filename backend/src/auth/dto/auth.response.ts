@@ -9,9 +9,6 @@ export class AuthResponse implements Partial<UserDto> {
   @Field(() => String)
   email: string;
 
-  @Field(() => Boolean)
-  emailVerified: boolean;
-
   @Field(() => String)
   firstName: string;
 

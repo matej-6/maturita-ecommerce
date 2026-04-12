@@ -31,7 +31,7 @@ export class ProductVariantAttributeKeysService {
     });
 
     if (existingKey) {
-      throw new Error(
+      throw new BadRequestException(
         'product-variant-attribute-keys.service.attributeKeyAlreadyExists',
       );
     }
@@ -82,6 +82,21 @@ export class ProductVariantAttributeKeysService {
     if (!keyToUpdate) {
       throw new BadRequestException(
         'product-variant-attribute-keys.service.attributeKeyNotFound',
+      );
+    }
+
+    const existingKeyWithSameValue = await this.prisma.attributeKey.findFirst({
+      where: {
+        key: updateProductVariantAttributeKeyInput.key,
+        id: {
+          not: updateProductVariantAttributeKeyInput.id,
+        },
+      },
+    });
+
+    if (existingKeyWithSameValue) {
+      throw new BadRequestException(
+        'product-variant-attribute-keys.service.attributeKeyAlreadyExists',
       );
     }
 
@@ -192,7 +207,7 @@ export class ProductVariantAttributeKeysService {
   ) {
     const locale = this.localesService.findOne(input.localeCode);
     if (!locale) {
-      throw new Error('locales.service.localeNotFound');
+      throw new BadRequestException('locales.service.localeNotFound');
     }
 
     const existingTranslation =
@@ -204,7 +219,7 @@ export class ProductVariantAttributeKeysService {
       });
 
     if (existingTranslation) {
-      throw new Error(
+      throw new BadRequestException(
         'product-variant-attribute-keys.service.translationAlreadyExists',
       );
     }
@@ -229,7 +244,7 @@ export class ProductVariantAttributeKeysService {
       });
 
     if (!translationToUpdate) {
-      throw new Error(
+      throw new BadRequestException(
         'product-variant-attribute-keys.service.translationNotFound',
       );
     }
@@ -237,7 +252,7 @@ export class ProductVariantAttributeKeysService {
     if (input.localeCode !== translationToUpdate.locale) {
       const locale = this.localesService.findOne(input.localeCode);
       if (!locale) {
-        throw new Error('locales.service.localeNotFound');
+        throw new BadRequestException('locales.service.localeNotFound');
       }
 
       const existingTranslation =
@@ -249,7 +264,7 @@ export class ProductVariantAttributeKeysService {
         });
 
       if (existingTranslation) {
-        throw new Error(
+        throw new BadRequestException(
           'product-variant-attribute-keys.service.translationAlreadyExists',
         );
       }
@@ -319,7 +334,7 @@ export class ProductVariantAttributeKeysService {
     });
 
     const hasNextPage = keys.length > paginationArgs.pageSize;
-    const nextCursor = hasNextPage ? keys.pop()!.id : null;
+    const nextCursor = hasNextPage ? keys.pop().id : null;
 
     return {
       nextCursor,

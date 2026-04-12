@@ -1,5 +1,7 @@
 "use client";
 
+// https://ui.shadcn.com/charts/bar#charts
+
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +38,7 @@ export function BestSellingCategoriesChart({
   const chartConfig = {
     itemsSold: {
       label: t("bestSellingCategories.itemsSold"),
-      color: "var(--chart-2)",
+      color: "var(--chart-1)",
     },
     totalRevenue: {
       label: t("bestSellingCategories.totalRevenue"),
@@ -48,8 +50,8 @@ export function BestSellingCategoriesChart({
     selectedData === "90D"
       ? data90Days
       : selectedData === "30D"
-      ? data30Days
-      : data7Days;
+        ? data30Days
+        : data7Days;
 
   const button90DRef = useRef<HTMLButtonElement>(null);
   const button7DRef = useRef<HTMLButtonElement>(null);
@@ -67,8 +69,8 @@ export function BestSellingCategoriesChart({
         selectedData === "90D"
           ? button90D
           : selectedData === "30D"
-          ? button30D
-          : button7D;
+            ? button30D
+            : button7D;
       indicator.style.transform = `translateX(${targetButton.offsetLeft}px)`;
     }
   }, [selectedData]);
@@ -109,19 +111,10 @@ export function BestSellingCategoriesChart({
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={data}>
+          <BarChart data={data}>
             <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="slug"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value.slice(0, 8)}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dashed" />}
-            />
+            <XAxis dataKey="slug" tickLine={false} axisLine={false} />
+            <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="itemsSold" fill="var(--color-itemsSold)" radius={4} />
             <Bar
               dataKey="totalRevenue"

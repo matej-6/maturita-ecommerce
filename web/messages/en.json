@@ -17,7 +17,7 @@
   },
   "localeSwitcher": {
     "label": "Language",
-    "locale": "{locale, select, en {🇺🇸 English} sk {🇸🇰 Slovenský} other {Unknown}}"
+    "locale": "{locale, select, en {🇬🇧 English} sk {🇸🇰 Slovenský} other {Unknown}}"
   },
   "footer": {
     "copyright": "GoFitShop - 2026",
@@ -131,7 +131,8 @@
       "changeAvatar": "Change Avatar",
       "pendingChangeAvatar": "Updating Avatar...",
       "removeAvatar": "Remove Avatar",
-      "deleteAccount": "Delete Account"
+      "deleteAccount": "Delete Account",
+      "logoutAll": "Logout from all sessions"
     },
     "deleteAccountModal": {
       "title": "Are you sure you want to delete your account?",
@@ -300,6 +301,7 @@
             "uploadImageButton": "Upload Image",
             "uploadingButton": "Uploading..."
           },
+          "deleteButton": "Delete Product",
           "translations": {
             "title": "Translations",
             "noTranslations": "No translations available.",
@@ -461,6 +463,7 @@
           "title": "Overview",
           "viewPageButton": "View page",
           "noSubcategories": "No subcategories",
+          "deleteButton": "Delete Category",
           "setupWarning": {
             "title": "This category has not been setup completely",
             "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
@@ -539,6 +542,14 @@
       }
     },
     "orders": {
+      "updateOrderStatus": {
+        "button": "Update Status",
+        "title": "Update Order Status",
+        "submitButton": "Update Status",
+        "closeButton": "Close",
+        "toastSuccess": "Order status updated successfully.",
+        "statusPlaceholder": "Select status"
+      },
       "table": {
         "noOrdersFound": "No orders found.",
         "paging": {
@@ -579,6 +590,7 @@
           "title": "Translations",
           "noTranslations": "No translations available."
         },
+        "deleteButton": "Delete Attribute Key",
         "attributes": {
           "title": "Attributes",
           "noAttributes": "No attributes available.",
@@ -761,6 +773,14 @@
         "postalCode": "Postal Code",
         "country": "Country",
         "phone": "Phone"
+      },
+      "orderStatus": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled",
+        "failed": "Failed"
       }
     },
     "common": {

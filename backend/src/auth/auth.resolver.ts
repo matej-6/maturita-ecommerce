@@ -60,13 +60,10 @@ export class AuthResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteAccount(
-    @Context() { res }: GraphqlAppContext,
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<typeof GraphQLVoid> {
     await this.authService.deleteAccount(user.id);
     await this.authService.signOutAll(user.id);
-    res.clearCookie('Authentication');
-    res.clearCookie('Refresh');
     return GraphQLVoid;
   }
 }

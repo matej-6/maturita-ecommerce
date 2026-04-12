@@ -9,7 +9,7 @@ import {
   getLLMTaskByIdAction,
   newLLMTaskAction,
 } from "@/app/data-access-layer/llm/actions";
-import { getProductIdBySlugAction } from "@/app/data-access-layer/product.queries";
+import { getProductIdBySlugAction } from "@/app/data-access-layer/product/actions";
 import { LlmTaskStatus } from "@/graphql/graphql";
 import { getImageSrc } from "@/app/lib/utils";
 import { ProductCard } from "./prdouct-cart";

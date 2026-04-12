@@ -7,6 +7,18 @@ import {
 import { Product } from 'src/products/entities/product.entity';
 
 @ObjectType()
+export class UserPromptResponse implements Partial<DbLLMUserPromptResponse> {
+  @Field(() => Int)
+  id: number;
+
+  @Field(() => String)
+  text: string;
+
+  @Field(() => [Product], { nullable: true })
+  products: Product[] | null;
+}
+
+@ObjectType()
 export class LLMTask implements Partial<DbLLMTask> {
   @Field(() => Int)
   id: number;
@@ -29,15 +41,3 @@ export class LLMTask implements Partial<DbLLMTask> {
 registerEnumType(LLMTaskStatus, {
   name: 'LLMTaskStatus',
 });
-
-@ObjectType()
-export class UserPromptResponse implements Partial<DbLLMUserPromptResponse> {
-  @Field(() => Int)
-  id: number;
-
-  @Field(() => String)
-  text: string;
-
-  @Field(() => [Product], { nullable: true })
-  products: Product[] | null;
-}

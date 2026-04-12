@@ -1,12 +1,13 @@
 import { getCurrentSessionAction } from "@/app/data-access-layer/auth/actions";
-import { getAccountDetailsPageData } from "@/app/data-access-layer/user.queries";
+import { getAccountDetailsPageData } from "@/app/data-access-layer/user/actions";
 import { getImageSrc } from "@/app/lib/utils";
-import { DeleteAccountButton } from "@/components/delete-account-button";
+import { DeleteAccountButton } from "@/components/account/delete-account-button";
 import { EditUserFormSheet } from "@/components/form/edit-user-form-sheet";
 import { UpdateUserPasswordFormSheet } from "@/components/form/update-user-password-form-sheet";
-import { OrderStatusLabel } from "@/components/order-status";
+import { LogoutAllButton } from "@/components/logout-all-button";
+import { OrderStatusLabel } from "@/components/orders/order-status";
 import { RemoveAccountAvatarButton } from "@/components/remove-account-avatar-button";
-import { Button } from "@/components/ui/button";
+import { ResponsiveButton } from "@/components/responsive-button";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -17,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UpdateAccountAvatarButton } from "@/components/update-account-avatar-button";
+import { UpdateAccountAvatarButton } from "@/components/account/update-account-avatar-button";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
@@ -120,8 +121,9 @@ export default async function AccountDetailsPage() {
               </span>
             </div>
           </div>
-          <div>
+          <div className="flex flex-wrap items-center gap-2">
             <DeleteAccountButton />
+            <LogoutAllButton />
           </div>
         </Card>
       </div>
@@ -153,7 +155,7 @@ export default async function AccountDetailsPage() {
                 >
                   <TableCell className="font-mono">{order.id}</TableCell>
                   <TableCell>
-                    <OrderStatusLabel status={order.status.toString()} />
+                    <OrderStatusLabel status={order.status} />
                   </TableCell>
                   <TableCell>
                     {(order.totalInCents / 100).toFixed(2)}€
@@ -166,9 +168,9 @@ export default async function AccountDetailsPage() {
                   </TableCell>
                   <TableCell className="flex justify-end items-center gap-x-2">
                     <Link href={`/account/orders/${order.id}`}>
-                      <Button variant={"default"}>
+                      <ResponsiveButton variant={"default"}>
                         {t("orders.viewOrder")}
-                      </Button>
+                      </ResponsiveButton>
                     </Link>
                   </TableCell>
                 </TableRow>

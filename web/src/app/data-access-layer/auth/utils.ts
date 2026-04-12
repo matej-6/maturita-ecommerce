@@ -12,7 +12,7 @@ export function setAuthCookies(
 ) {
   cookieStore.set(SESSION_COOKIE_NAME, data?.sessionId ?? "", {
     httpOnly: true,
-    secure: false, //process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "strict",
     expires: new Date(data?.expiresAt ?? 0),
   });

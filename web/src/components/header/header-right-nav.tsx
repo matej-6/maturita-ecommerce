@@ -22,8 +22,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
-import { Cart } from "../cart";
-import { Avatar } from "../avatar";
+import { Cart } from "../cart/cart";
+import { Avatar } from "../account/avatar";
 import {
   Drawer,
   DrawerContent,
@@ -31,14 +31,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "../ui/drawer";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { HeaderSearch } from "./header-search";
 import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 
 export function HeaderRightNav({
   categories,
-  sessionPromise,
+  session,
 }: {
   categories: {
     id: number;
@@ -46,9 +46,9 @@ export function HeaderRightNav({
     slug: string;
     subcategories: { id: number; name: string; slug: string }[];
   }[];
-  sessionPromise: Promise<CurrentSession | null>;
+  session: CurrentSession | null;
 }) {
-  const currentSession = use(sessionPromise);
+  const currentSession = session;
   const t = useTranslations("header");
   const router = useRouter();
 

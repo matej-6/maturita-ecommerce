@@ -1,7 +1,11 @@
 "use server";
 
 import { execute } from "@/graphql/execute";
-import { EditCategoryMutation, NewCategoryMutation } from "./mutations";
+import {
+  DeleteCategoryMutation,
+  EditCategoryMutation,
+  NewCategoryMutation,
+} from "./mutations";
 import { ActionResponse } from "../../formActionResponse";
 import { ExecutionResult } from "graphql";
 import {
@@ -34,7 +38,7 @@ export type CategoriesFilterArgs = {
 export async function getCategoriesTableDataAction(
   pagingArgs: CategoreisPagingArgs,
   sortingArgs: CategoriesSortingArgs,
-  filterArgs: CategoriesFilterArgs
+  filterArgs: CategoriesFilterArgs,
 ): Promise<
   ActionResponse<NonNullable<
     ExecutionResult<CategoriesTable_QueryDocumentQuery>["data"]
@@ -65,10 +69,12 @@ export async function getCategoriesTableDataAction(
 export async function createCategoryAction(data: {
   parentCategoryId: number | null;
   slug: string;
+  isPublic: boolean;
 }): Promise<ActionResponse<{ id: number }>> {
   const res = await execute(NewCategoryMutation, {
     parentCategoryId: data.parentCategoryId || undefined,
     slug: data.slug,
+    isPublic: data.isPublic,
   });
 
   if (res.errors) {
@@ -95,7 +101,7 @@ export async function createCategoryAction(data: {
 
 export async function editCategoryAction(
   id: number,
-  data: { parentCategoryId: number | null; slug: string }
+  data: { parentCategoryId: number | null; slug: string; isPublic: boolean },
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -107,6 +113,7 @@ export async function editCategoryAction(
     id: id,
     parentCategoryId: data.parentCategoryId || undefined,
     slug: data.slug,
+    isPublic: data.isPublic,
   });
 
   if (res.errors) {
@@ -127,5 +134,24 @@ export async function editCategoryAction(
   return {
     success: true,
     data: res.data.updateCategory,
+  };
+}
+export async function deleteCategoryAction(
+  id: number,
+): Promise<ActionResponse<null>> {
+  const res = await execute(DeleteCategoryMutation, {
+    id: id,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/admin/categories`);
+
+  return {
+    success: true,
+    data: null,
   };
 }

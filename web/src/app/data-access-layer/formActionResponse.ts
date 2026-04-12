@@ -6,5 +6,5 @@ export type ActionResponse<T> =
   | {
       success: false;
       message: string;
-      fieldErrors?: { property: string; constraints: string[] }[]; // only if form validation error
+      fieldErrors?: { property: string; constraints: string[] }[];
     };

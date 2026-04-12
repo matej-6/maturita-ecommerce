@@ -33,7 +33,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "codegen.ts",
-    "messages/en.d.json.ts"
+    "messages/en.d.json.ts",
+    "src/app/data-access-layer/user/queries.ts"
   ],
   "exclude": ["node_modules"]
 }

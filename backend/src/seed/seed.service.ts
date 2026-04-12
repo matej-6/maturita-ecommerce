@@ -134,6 +134,7 @@ export class SeedService implements OnModuleInit {
     this.logger.log('Seeding categories...');
     const regenerationCategory = await this.categoriesService.create({
       slug: 'regeneration',
+      isPublic: true,
     });
 
     await this.categoriesService.createTranslation(regenerationCategory.id, {
@@ -153,6 +154,7 @@ export class SeedService implements OnModuleInit {
     const creatineCategory = await this.categoriesService.create({
       slug: 'creatine',
       parentCategoryId: regenerationCategory.id,
+      isPublic: true,
     });
 
     await this.categoriesService.createTranslation(creatineCategory.id, {
@@ -172,6 +174,7 @@ export class SeedService implements OnModuleInit {
     const proteinCategory = await this.categoriesService.create({
       slug: 'protein',
       parentCategoryId: regenerationCategory.id,
+      isPublic: true,
     });
 
     await this.categoriesService.createTranslation(proteinCategory.id, {
@@ -190,6 +193,7 @@ export class SeedService implements OnModuleInit {
 
     const clothingCategory = await this.categoriesService.create({
       slug: 'clothing',
+      isPublic: true,
     });
 
     await this.categoriesService.createTranslation(clothingCategory.id, {

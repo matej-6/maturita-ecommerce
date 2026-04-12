@@ -12,12 +12,14 @@ import { handleGraphqlError } from "../admin/handleGraphqlFormError";
 import { authLogoutAction, getAuthToken } from "../auth/actions";
 import { ExecutionResult } from "graphql";
 import {
+  AccountDetailsPageQueryQuery,
   UpdateUserMutationMutation,
   UpdateUserPasswordMutationMutation,
 } from "@/graphql/graphql";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { fetchInternal } from "../fetch-internal";
+import { AccountDetailsPageDocument } from "./queries";
 
 export async function deleteUserAccountAction(): Promise<ActionResponse<void>> {
   const res = await execute(DeleteUserAccountMutation);
@@ -120,6 +122,20 @@ export async function updateUserPasswordAction(formData: {
   const res = await execute(UpdateUserPasswordMutation, {
     ...formData,
   });
+
+  if (res.errors) {
+    return handleGraphqlError(res.errors);
+  }
+
+  return {
+    success: true,
+    data: res.data,
+  };
+}
+export async function getAccountDetailsPageData(): Promise<
+  ActionResponse<ExecutionResult<AccountDetailsPageQueryQuery>["data"]>
+> {
+  const res = await execute(AccountDetailsPageDocument);
 
   if (res.errors) {
     return handleGraphqlError(res.errors);

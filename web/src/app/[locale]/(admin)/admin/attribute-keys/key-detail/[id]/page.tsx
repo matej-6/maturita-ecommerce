@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Link } from "@/i18n/navigation";
 import { AttributeSheetForm } from "../../../forms/attribute-sheet-form";
+import { DeleteAttributeKeyButton } from "../../../components/attribute-keys/delete-attribute-key-button";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,7 @@ export default async function AttributeKeyDetailPage({
           ))}
         </div>
       </div>
+      <div className="h-px w-full rounded-full bg-accent" />
       <div className="flex flex-col gap-y-8">
         <h2 className="font-medium font-secondary">
           {t("translations.title")}
@@ -125,6 +127,7 @@ export default async function AttributeKeyDetailPage({
           </div>
         )}
       </div>
+      <div className="h-px w-full rounded-full bg-accent" />
       <div className="flex flex-col gap-y-8">
         <h2 className="font-medium font-secondary">{t("attributes.title")}</h2>
 
@@ -208,7 +211,7 @@ export default async function AttributeKeyDetailPage({
                     </div>
                   )}
                 </div>
-                <div className="h-px w-full bg-muted" />
+                <div className="h-px w-full rounded-full bg-accent" />
                 <div className="flex flex-col gap-y-1">
                   <span className="text-sm text-muted-foreground">
                     {t("attributes.productVariants.title")}
@@ -249,7 +252,7 @@ export default async function AttributeKeyDetailPage({
                     </TableBody>
                   </Table>
                 </div>
-                <div className="h-px w-full bg-accent" />
+                <div className="h-px w-full rounded-full bg-accent" />
                 <div>
                   <DeleteAttributeButton id={attr.id} keyId={data.id} />
                 </div>
@@ -268,6 +271,10 @@ export default async function AttributeKeyDetailPage({
             showKeyOptions={false}
           />
         </div>
+      </div>
+      <div className="h-px w-full rounded-full bg-accent" />
+      <div>
+        <DeleteAttributeKeyButton id={data.id} />
       </div>
     </div>
   );

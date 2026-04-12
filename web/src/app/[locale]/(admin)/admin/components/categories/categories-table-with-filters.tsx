@@ -85,15 +85,12 @@ export function CategoriesTableWithFilters({
     setTableArgs(initialTableArgs);
   }, [initialTableArgs]);
 
-  const isTableArgsChanged = useMemo(() => {
-    return (
-      initialTableArgs.id !== tableArgs.id ||
-      initialTableArgs.parentCategoryId !== tableArgs.parentCategoryId ||
-      initialTableArgs.slug !== tableArgs.slug ||
-      initialTableArgs.isPublic !== tableArgs.isPublic ||
-      initialTableArgs.isSetup !== tableArgs.isSetup
-    );
-  }, [initialTableArgs, tableArgs]);
+  const isTableArgsChanged =
+    initialTableArgs.id !== tableArgs.id ||
+    initialTableArgs.parentCategoryId !== tableArgs.parentCategoryId ||
+    initialTableArgs.slug !== tableArgs.slug ||
+    initialTableArgs.isPublic !== tableArgs.isPublic ||
+    initialTableArgs.isSetup !== tableArgs.isSetup;
 
   const router = useRouter();
 

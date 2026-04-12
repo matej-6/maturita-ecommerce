@@ -39,6 +39,14 @@ export const EditProductMutation = graphql(`
   }
 `);
 
+export const DeleteProductMutation = graphql(`
+  mutation DeleteProductMutation($id: Int!) {
+    removeProduct(id: $id) {
+      id
+    }
+  }
+`);
+
 export const SetImageThumbnailMutation = graphql(`
   mutation SetImageThumbnailMutation($imageId: Int!) {
     setProductThumbnailImage(productImageId: $imageId) {

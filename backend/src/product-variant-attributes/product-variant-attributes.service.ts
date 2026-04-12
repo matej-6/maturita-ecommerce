@@ -85,11 +85,11 @@ export class ProductVariantAttributesService {
       },
     });
 
-    if (existingAttribute?.id === updateProductVariantAttributeInput.id) {
-      return existingAttribute;
-    }
-
-    if (existingAttribute) {
+    if (
+      existingAttribute &&
+      existingAttribute.id !== updateProductVariantAttributeInput.id &&
+      existingAttribute.value === updateProductVariantAttributeInput.value
+    ) {
       throw new BadRequestException(
         'product-variant-attributes.service.attributeAlreadyExists',
       );

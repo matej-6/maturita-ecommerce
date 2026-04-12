@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { FormFieldErrorMessage } from "@/components/form/formFieldErrorMessage";
+import { Switch } from "@/components/ui/switch";
 
 type NewCategoryFormProps = {
   categories: {
@@ -47,9 +48,11 @@ export const NewCategoryFormSheet = ({ categories }: NewCategoryFormProps) => {
   const [formState, setFormState] = useState<{
     slug: string;
     parentCategoryId: number | null;
+    isPublic: boolean;
   }>({
     slug: "",
     parentCategoryId: null,
+    isPublic: true,
   });
 
   const comboboxCategories = [
@@ -111,6 +114,21 @@ export const NewCategoryFormSheet = ({ categories }: NewCategoryFormProps) => {
               }
             />
             <FormFieldErrorMessage fieldErrors={fieldErrors} fieldName="slug" />
+          </div>
+          <div className="flex flex-col gap-y-1">
+            <div className="flex items-center gap-x-3 rounded-md border p-3">
+              <Label>{ft("product.isPublic")}</Label>
+              <Switch
+                checked={formState.isPublic}
+                onCheckedChange={(checked) =>
+                  setFormState((prev) => ({ ...prev, isPublic: checked }))
+                }
+              />
+            </div>
+            <FormFieldErrorMessage
+              fieldErrors={fieldErrors}
+              fieldName="isPublic"
+            />
           </div>
           <div className="flex flex-col gap-y-1">
             <Label>{ft("category.parentCategoryId")}</Label>

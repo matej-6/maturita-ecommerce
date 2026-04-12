@@ -23,10 +23,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useMutation } from "@tanstack/react-query";
-import {
-  createProductReview,
-  updateProductReview,
-} from "@/app/data-access-layer/product/mutations";
+import { createProductReview } from "@/app/data-access-layer/product/actions";
+import { updateProductReview } from "@/app/data-access-layer/product/actions";
 import { Textarea } from "../ui/textarea";
 import { FormFieldErrorMessage } from "./formFieldErrorMessage";
 import { useTranslations } from "next-intl";

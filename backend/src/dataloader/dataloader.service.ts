@@ -131,16 +131,8 @@ export class DataloaderService {
 
   private createSubcategoriesLoader() {
     return new DataLoader<number, Category[]>(async (categoryIds: number[]) => {
-      const subcategories = await this.db.category.findMany({
-        where: {
-          parentCategoryId: {
-            in: categoryIds,
-          },
-        },
-      });
-
-      return categoryIds.map((id) =>
-        subcategories.filter((subc) => subc.parentCategoryId === id),
+      return await this.categoriesService.getCategorySubcategoriesByBatch(
+        categoryIds,
       );
     });
   }

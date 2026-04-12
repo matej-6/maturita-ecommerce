@@ -1,9 +1,9 @@
-import { getSearchProductsQueryData } from "@/app/data-access-layer/search.queries";
+import { getSearchProductsQueryData } from "@/app/data-access-layer/product/actions";
 import { getImageSrc } from "@/app/lib/utils";
 import { NextButton } from "@/components/next-button";
 import { PrevButton } from "@/components/prev-button";
 import { ProductFiltersSheet } from "@/components/product-filters-sheet";
-import { ProductVariantCard } from "@/components/product-variant-card";
+import { ProductVariantCard } from "@/components/products/product-variant-card";
 import { getTranslations } from "next-intl/server";
 
 export const revalidate = 300;

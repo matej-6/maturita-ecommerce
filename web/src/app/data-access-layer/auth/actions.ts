@@ -11,6 +11,7 @@ import { redirect } from "@/i18n/navigation";
 import { execute } from "@/graphql/execute";
 import { getFragmentData } from "@/graphql";
 import { SESSION_COOKIE_NAME } from "@/app/lib/auth.constants";
+import { revalidatePath } from "next/cache";
 
 export type AuthResponse = {
   sessionId: string;
@@ -54,7 +55,7 @@ export async function authLogoutAllAction(): Promise<LogoutAllActionResult> {
         };
       } else {
         setAuthCookies(cookieStore, null);
-        return redirect({ href: "/auth/login", locale: locale });
+        return { success: true };
       }
     }
   } catch (e) {
@@ -65,7 +66,7 @@ export async function authLogoutAllAction(): Promise<LogoutAllActionResult> {
     };
   }
   setAuthCookies(cookieStore, null);
-  return redirect({ href: "/auth/login", locale: locale });
+  return { success: true };
 }
 
 export async function authLogoutAction() {
@@ -131,12 +132,13 @@ export async function authLoginAction(
     const authData: AuthResponse = await res.json();
     setAuthCookies(cookieStore, authData);
 
+    revalidatePath(`/${locale}`);
     return {
       success: true,
     };
   } catch (e) {
     console.error(e);
-
+    revalidatePath(`/${locale}`);
     return {
       success: false,
       ...defaultErrorResponse,
@@ -182,9 +184,11 @@ export async function authRegisterAction(
     const authData: AuthResponse = await res.json();
     setAuthCookies(cookieStore, authData);
 
+    revalidatePath(`/${locale}`);
     return { success: true };
   } catch (e) {
     console.error(e);
+    revalidatePath(`/${locale}`);
     return {
       success: false,
       ...defaultErrorResponse,

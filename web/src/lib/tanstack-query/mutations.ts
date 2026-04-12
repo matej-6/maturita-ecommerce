@@ -8,7 +8,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
 import { getCartData } from "@/app/data-access-layer/cart/queries";
 
-const cartQueryKey = ["cart"];
+const cartQueryKey = ["cart", "session"];
 
 export const useCartQuery = () =>
   useQuery({
@@ -21,8 +21,9 @@ export const useCartQuery = () =>
 
       const data = getFragmentData(CartFragment, res.data.cart);
 
-      return data.items;
+      return data?.items || [];
     },
+    retry: false,
   });
 
 export const useUpdateCartItemQuantityMutation = () =>
@@ -36,7 +37,7 @@ export const useUpdateCartItemQuantityMutation = () =>
     }) => {
       const res = await updateCartItemQuantityMutationAction(
         cartItemId,
-        quantity
+        quantity,
       );
 
       if (!res.success) {
@@ -45,7 +46,7 @@ export const useUpdateCartItemQuantityMutation = () =>
 
       const data = getFragmentData(
         CartFragment,
-        res.data?.updateCartItemQuantity
+        res.data?.updateCartItemQuantity,
       );
 
       const queryClient = getQueryClient();

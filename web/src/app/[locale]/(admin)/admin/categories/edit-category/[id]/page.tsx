@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { EditCategorySheetForm } from "../../../forms/edit-category-sheet-form";
 import { CategoryTranslation } from "../../../components/categories/category-translation";
 import { CategoryTranslationSheetForm } from "../../../forms/category-translation-sheet-form";
+import { ResponsiveButton } from "@/components/responsive-button";
+import { DeleteCategoryButton } from "../../../components/categories/delete-category-button";
 
 export default async function EditCategoryEditPage({
   params,
@@ -135,6 +137,7 @@ export default async function EditCategoryEditPage({
             initialData={{
               slug: category.slug,
               parentCategoryId: category.parentCategoryId ?? null,
+              isPublic: category.isPublic,
             }}
             data={{ allCategories }}
           />
@@ -214,6 +217,10 @@ export default async function EditCategoryEditPage({
             ))
           )}
         </div>
+      </div>
+      <div className="h-px w-full bg-accent rounded-full" />
+      <div>
+        <DeleteCategoryButton categoryId={parsedId} />
       </div>
     </div>
   );

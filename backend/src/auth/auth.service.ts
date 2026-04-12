@@ -72,16 +72,13 @@ export class AuthService {
       },
     });
 
-    const activeSessions = await this.redisService.client.get(
-      userId.toString(),
-    );
+    const activeSessions = await this.getActiveSessions(userId.toString());
 
     if (activeSessions) {
-      const sessions = JSON.parse(activeSessions) as string[];
-      sessions.push(sessionId);
+      activeSessions.push(sessionId);
       await this.redisService.client.set(
         userId.toString(),
-        JSON.stringify(sessions),
+        JSON.stringify(activeSessions),
         {
           expiration: {
             type: 'EX',
@@ -95,13 +92,9 @@ export class AuthService {
   }
 
   async signOutAll(userId: number) {
-    const activeSessions = await this.redisService.client.get(
-      userId.toString(),
-    );
-
+    const activeSessions = await this.getActiveSessions(userId.toString());
     if (activeSessions) {
-      const sessions = JSON.parse(activeSessions) as string[];
-      for (const sessionId of sessions) {
+      for (const sessionId of activeSessions) {
         await this.redisService.client.del(sessionId);
       }
       await this.redisService.client.del(userId.toString());
@@ -112,10 +105,9 @@ export class AuthService {
     const userId = await this.redisService.client.get(sessionId);
     if (userId) {
       await this.redisService.client.del(sessionId);
-      const activeSessions = await this.redisService.client.get(userId);
+      const activeSessions = await this.getActiveSessions(userId.toString());
       if (activeSessions) {
-        const sessions = JSON.parse(activeSessions) as string[];
-        const updatedSessions = sessions.filter((id) => id !== sessionId);
+        const updatedSessions = activeSessions.filter((id) => id !== sessionId);
         if (updatedSessions.length > 0) {
           await this.redisService.client.set(
             userId,
@@ -190,9 +182,17 @@ export class AuthService {
 
   async getUserIdFromSession(sessionId: string): Promise<number | null> {
     const userId = await this.redisService.client.get(sessionId);
-    if (userId) {
+    if (userId && typeof userId === 'string') {
       return parseInt(userId, 10);
     }
     return null;
+  }
+
+  async getActiveSessions(userId: string): Promise<string[]> {
+    const activeSessions = await this.redisService.client.get(userId);
+    if (typeof activeSessions === 'string') {
+      return JSON.parse(activeSessions) as string[];
+    }
+    return [];
   }
 }

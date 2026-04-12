@@ -138,12 +138,8 @@ export function TotalRevenueChartBar({
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
+        <ChartContainer config={chartConfig} className="h-[250px] w-full">
           <BarChart
-            accessibilityLayer
             data={data.points}
             margin={{
               left: 12,
@@ -168,7 +164,6 @@ export function TotalRevenueChartBar({
               content={
                 <ChartTooltipContent
                   className="w-[150px]"
-                  nameKey="views"
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString(undefined, {
                       month: "short",

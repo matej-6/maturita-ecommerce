@@ -4,14 +4,14 @@ import { Cart as DbCart } from 'generated/prisma/client';
 @ObjectType()
 export class Cart implements Partial<DbCart> {
   @Field(() => Int)
-  id!: number;
+  id: number;
 
   @Field(() => Int)
-  userId!: number;
+  userId: number;
 
   @Field(() => Date)
-  createdAt!: Date;
+  createdAt: Date;
 
   @Field(() => Date)
-  updatedAt!: Date;
+  updatedAt: Date;
 }

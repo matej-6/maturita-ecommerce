@@ -23,4 +23,7 @@ export class CreateCategoryInput {
   @ValidateIf((obj, value) => ![undefined, null].includes(value))
   @IsInt({ message: i18nValidationMessage('validation.invalid') })
   parentCategoryId?: number;
+
+  @Field(() => Boolean)
+  isPublic: boolean;
 }

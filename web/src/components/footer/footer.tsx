@@ -1,6 +1,6 @@
 "use client";
 
-import LocaleSwitcher from "../locale-switcher";
+import LocaleSwitcher from "./locale-switcher";
 import { useTranslations } from "next-intl";
 
 export function Footer() {

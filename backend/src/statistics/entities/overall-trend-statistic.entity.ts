@@ -2,6 +2,15 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { TimePeriod } from '../enum/time-period.enum';
 
 @ObjectType()
+export class RevenueDataPoint {
+  @Field(() => String)
+  date: string;
+
+  @Field(() => Number)
+  revenue: number;
+}
+
+@ObjectType()
 export class OverallTrendStatistic {
   @Field(() => Number)
   percentChange: number;
@@ -11,13 +20,4 @@ export class OverallTrendStatistic {
 
   @Field(() => [RevenueDataPoint])
   points: RevenueDataPoint[];
-}
-
-@ObjectType()
-export class RevenueDataPoint {
-  @Field(() => String)
-  date: string;
-
-  @Field(() => Number)
-  revenue: number;
 }
