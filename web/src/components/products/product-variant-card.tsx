@@ -30,10 +30,10 @@ export function ProductVariantCard({
       )}
       {...rest}
     >
-      <div className="w-full aspect-square rounded-md overflow-hidden object-cover">
+      <div className="w-full aspect-square rounded-md overflow-hidden object-cover bg-accent">
         {variant.imageUrl && (
           <img
-            className="size-full"
+            className="size-full bg-cover"
             src={variant.imageUrl}
             alt={variant.name}
           />
