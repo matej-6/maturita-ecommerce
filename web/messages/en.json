@@ -361,7 +361,8 @@
           "setupWarning": {
             "title": "This product has not been setup completely",
             "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
-            "englishTranslation": "Ensure an english translation exists"
+            "englishTranslation": "Ensure an english translation exists",
+            "atLeastOneVisibleVariant": "Make sure it has at least one visible variant"
           }
         }
       },
@@ -467,8 +468,7 @@
           "setupWarning": {
             "title": "This category has not been setup completely",
             "description": "Please make sure to complete all of the points below for it to be setup and visible to customers.",
-            "englishTranslation": "Ensure an english translation exists",
-            "atLeastOneVisibleProduct": "Make sure at least one visible product is sold in this category"
+            "englishTranslation": "Ensure an english translation exists"
           },
           "yes": "Yes",
           "no": "No",

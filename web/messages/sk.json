@@ -361,7 +361,8 @@
           "setupWarning": {
             "title": "Tento produkt nie je úplne nastavený",
             "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavený a viditeľný pre zákazníkov",
-            "englishTranslation": "Musí mať anglický preklad"
+            "englishTranslation": "Musí mať anglický preklad",
+            "atLeastOneVisibleVariant": "Musí obsahovať aspoň jednu viditeľnú variantu"
           }
         }
       },
@@ -467,8 +468,7 @@
           "setupWarning": {
             "title": "Táto kategória nie je úplne nastavená",
             "description": "Dokonči všetky body uvedené nižšie, aby bolá nastavená a vidiťeľná pre zákazníkov",
-            "englishTranslation": "Musí mať anglický preklad",
-            "atLeastOneVisibleProduct": "Musí sa obsahovať aspoň jeden viditeľný produkt na predaj"
+            "englishTranslation": "Musí mať anglický preklad"
           },
           "yes": "Áno",
           "no": "Nie",
