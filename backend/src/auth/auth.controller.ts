@@ -4,7 +4,6 @@ import {
   Logger,
   Post,
   Req,
-  Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +16,6 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { ERROR } from 'src/errors';
-import { SESSION_COOKIE_NAME } from 'src/constants';
 
 @Controller('auth')
 export class AuthController {
@@ -26,10 +24,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<AuthResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.authService.validateUserWithCredentials(
       loginDto.email,
       loginDto.password,
@@ -41,11 +36,6 @@ export class AuthController {
     }
 
     const authResponse = await this.authService.login(user.id);
-    this.authService.setAuthCookies(
-      res,
-      authResponse.sessionId,
-      authResponse.expiresAt,
-    );
     return authResponse;
   }
 
@@ -55,13 +45,6 @@ export class AuthController {
     @CurrentUser() user: AuthenticatedUserDto,
     @Req() req: Request,
   ): Promise<void> {
-    const sessionCookie = req.cookies[SESSION_COOKIE_NAME] as
-      | string
-      | undefined;
-    if (sessionCookie) {
-      await this.authService.signOut(sessionCookie);
-      return;
-    }
     const authHeader = req.headers['authorization'];
     if (authHeader) {
       const sessionId = authHeader.startsWith('Bearer ')
@@ -81,17 +64,9 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(
-    @Body() registerDto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<AuthResponseDto> {
+  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
     const user = await this.authService.register(registerDto);
     const authResponse = await this.authService.login(user.id);
-    this.authService.setAuthCookies(
-      res,
-      authResponse.sessionId,
-      authResponse.expiresAt,
-    );
     return authResponse;
   }
 }

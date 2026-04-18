@@ -16,8 +16,7 @@ export class ImageStorageService {
   private readonly baseImageUrl = '/public/images';
 
   getImageUrl(fileName: string) {
-    const safeFileName = path.basename(fileName);
-    return `${this.baseImageUrl}/${safeFileName}`;
+    return `${this.baseImageUrl}/${fileName}`;
   }
 
   getImageFileName(file: { mimeType: string }): string {
@@ -34,8 +33,7 @@ export class ImageStorageService {
   }
 
   async deleteImage(fileName: string) {
-    const safeFileName = path.basename(fileName);
-    const filePath = path.join(this.imageStoragePath, safeFileName);
+    const filePath = path.join(this.imageStoragePath, fileName);
     if (fs.existsSync(filePath)) {
       await fs.promises.unlink(filePath);
     }

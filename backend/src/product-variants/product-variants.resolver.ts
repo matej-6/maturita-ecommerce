@@ -21,8 +21,8 @@ import { ProductVariantImage } from 'src/entities/product-variant.image.entity';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { PaginationArgs } from 'src/lib/pagination.args';
-import { SortingArgs } from 'src/args/sorting-args';
 import { Product } from 'src/products/entities/product.entity';
+import { SortingArgs } from 'src/args/sorting-args';
 
 @Resolver(() => ProductVariant)
 export class ProductVariantsResolver {

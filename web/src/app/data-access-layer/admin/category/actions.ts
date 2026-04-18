@@ -11,11 +11,16 @@ import { ExecutionResult } from "graphql";
 import {
   CategoriesTable_QueryDocumentDocument,
   CategoriesTable_QueryDocumentQuery,
+  EditCategory_QueryDocumentQuery,
   EditCategoryMutationMutation,
 } from "@/graphql/graphql";
 import { handleGraphqlError } from "../handleGraphqlFormError";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import {
+  categoriesTableQueryDocument,
+  editCategoryQueryDocument,
+} from "./queries";
 
 export type CategoreisPagingArgs = {
   cursor: number | null;
@@ -44,7 +49,7 @@ export async function getCategoriesTableDataAction(
     ExecutionResult<CategoriesTable_QueryDocumentQuery>["data"]
   > | null>
 > {
-  const res = await execute(CategoriesTable_QueryDocumentDocument, {
+  const res = await execute(categoriesTableQueryDocument, {
     pageSize: pagingArgs.pageSize,
     cursor: pagingArgs.cursor,
     sortBy: sortingArgs.sortBy,
@@ -154,4 +159,19 @@ export async function deleteCategoryAction(
     success: true,
     data: null,
   };
+}
+export async function getEditCategoryQueryDocumentData(
+  id: number,
+): Promise<
+  ActionResponse<ExecutionResult<EditCategory_QueryDocumentQuery>["data"]>
+> {
+  const res = await execute(editCategoryQueryDocument, {
+    id: id,
+  });
+
+  if (res.errors) {
+    return await handleGraphqlError(res.errors);
+  }
+
+  return { success: true, data: res.data };
 }

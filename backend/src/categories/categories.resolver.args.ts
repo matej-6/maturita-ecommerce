@@ -29,23 +29,6 @@ export class CategoryFindAllQueryFilterArgs extends CategoryFindOneQueryFilterAr
   })
   idQuery?: number | null;
 }
-
-@ArgsType()
-export class CategorySortByArgs {
-  @Field(() => String, {
-    description: 'Field to sort by',
-    nullable: true,
-  })
-  sortBy?: string | null;
-
-  @Field(() => Boolean, {
-    description:
-      'If true, sort in ascending order, else descending. If null, default sorting order is used',
-    nullable: true,
-  })
-  ascending?: boolean | null;
-}
-
 @ArgsType()
 export class CategoryTranslationsQueryFilterArgs {
   @Field(() => [String], {

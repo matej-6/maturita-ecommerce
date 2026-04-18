@@ -39,7 +39,7 @@ type CartItem {
 }
 
 type Category {
-  categoryProductVariants(attributeFilters: [[String!]!], cursor: Int, includeSubcategories: Boolean, pageSize: Int = 10): PaginatedProductVariant!
+  categoryProductVariants(attributeFilters: [[String!]!], cursor: Int, pageSize: Int = 10): PaginatedProductVariant!
   createdAt: DateTime!
   description: String
   id: Int!
@@ -259,7 +259,6 @@ type Mutation {
   editProductTranslation(editProductTranslationInput: EditProductTranslationInput!): ProductTranslation!
   generateProductContentEmbedding(lang: String!, productId: Int!): ProductEmbedding
   generateProductEmbedding(lang: String!, productId: Int!): ProductEmbedding
-  logoutAll: Void!
   regenerateAllProductContentEmbeddings: Void!
   regenerateAllProductEmbeddings: Void!
   removeCategory(id: Int!): Category!
@@ -547,9 +546,6 @@ type Query {
   bestSellingProductVariantsStatistic(limit: Int, timePeriod: TimePeriod!): [BestSellingProductVariant!]
   cart: Cart
   categories(
-    """
-    If true, sort in ascending order, else descending. If null, default sorting order is used
-    """
     ascending: Boolean
 
     """Filter categories by id equal to this value"""
@@ -564,8 +560,6 @@ type Query {
 
     """Filter categories by slug containing this query string"""
     slugQuery: String
-
-    """Field to sort by"""
     sortBy: String
   ): [Category!]!
   category(id: Int, isPublic: Boolean, isSetup: Boolean, slug: String): Category
@@ -583,9 +577,6 @@ type Query {
   order(id: Int!): Order
   orders: [Order!]!
   paginatedCategories(
-    """
-    If true, sort in ascending order, else descending. If null, default sorting order is used
-    """
     ascending: Boolean
     cursor: Int
 
@@ -602,8 +593,6 @@ type Query {
 
     """Filter categories by slug containing this query string"""
     slugQuery: String
-
-    """Field to sort by"""
     sortBy: String
   ): PaginatedCategory!
   paginatedProductReviews(cursor: Int, pageSize: Int = 10): PaginatedProductReview!

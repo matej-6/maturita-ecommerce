@@ -1,6 +1,6 @@
 "use server";
 
-import { getEditCategoryQueryDocumentData } from "@/app/data-access-layer/admin/category/queries";
+import { getEditCategoryQueryDocumentData } from "@/app/data-access-layer/admin/category/actions";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

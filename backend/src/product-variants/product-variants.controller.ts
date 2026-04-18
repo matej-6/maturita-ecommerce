@@ -11,9 +11,9 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductVariantsService } from './product-variants.service';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 
 @Controller('product-variants')
 export class ProductVariantsController {
@@ -25,7 +25,7 @@ export class ProductVariantsController {
 
   //https://docs.nestjs.com/techniques/file-upload
   @Post('upload-image/:productId')
-  @UseGuards(AuthGuard)
+  @UseGuards(AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(204)
   async uploadImage(

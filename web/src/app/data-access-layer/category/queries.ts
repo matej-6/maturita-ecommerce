@@ -23,7 +23,6 @@ export const CategoryQueryDocument = graphql(`
       categoryProductVariants(
         cursor: $productsCursor
         pageSize: $productsPageSize
-        includeSubcategories: true
         attributeFilters: $attributeFilters
       ) {
         nextCursor

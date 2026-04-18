@@ -11,7 +11,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import z from "zod";
 
 type BreadcrumbsProps = {
   defaultBreadcrumb: { label: string; href: string };

@@ -422,7 +422,10 @@ export default async function ProductDetailPage({
       <div className="flex flex-col gap-y-8">
         <h2 className="font-medium">{t("embeddings.title")}</h2>
         <div>
-          <RegenerateAllEmbeddingsButton embeddingType="embedding" />
+          <RegenerateAllEmbeddingsButton
+            disabled={product.embeddings.length === 0}
+            embeddingType="embedding"
+          />
         </div>
         <div className="flex flex-wrap gap-8">
           {product.embeddings.map((embedding) => {
@@ -491,7 +494,10 @@ export default async function ProductDetailPage({
       <div className="flex flex-col gap-y-8">
         <h2 className="font-medium">{t("contentEmbeddings.title")}</h2>
         <div>
-          <RegenerateAllEmbeddingsButton embeddingType="contentEmbedding" />
+          <RegenerateAllEmbeddingsButton
+            disabled={product.contentEmbeddings.length === 0}
+            embeddingType="contentEmbedding"
+          />
         </div>
         <div className="flex flex-wrap gap-8">
           {product.contentEmbeddings.map((embedding) => {

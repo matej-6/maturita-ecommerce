@@ -1,14 +1,7 @@
-"use server";
-
 import { graphql } from "@/graphql";
-import { ActionResponse } from "../../formActionResponse";
-import { ExecutionResult } from "graphql";
-import { EditCategory_QueryDocumentQuery } from "@/graphql/graphql";
-import { execute } from "@/graphql/execute";
-import { handleGraphqlError } from "../handleGraphqlFormError";
+import "server-only";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const categoriesTableQueryDocument = graphql(`
+export const categoriesTableQueryDocument = graphql(`
   query categoriesTable_QueryDocument(
     $parentCategoryId: Int
     $pageSize: Int
@@ -60,7 +53,7 @@ const categoriesTableQueryDocument = graphql(`
   }
 `);
 
-const editCategoryQueryDocument = graphql(`
+export const editCategoryQueryDocument = graphql(`
   query editCategory_QueryDocument($id: Int!) {
     category(id: $id, isPublic: null, isSetup: null) {
       slug
@@ -101,19 +94,3 @@ const editCategoryQueryDocument = graphql(`
     }
   }
 `);
-
-export async function getEditCategoryQueryDocumentData(
-  id: number,
-): Promise<
-  ActionResponse<ExecutionResult<EditCategory_QueryDocumentQuery>["data"]>
-> {
-  const res = await execute(editCategoryQueryDocument, {
-    id: id,
-  });
-
-  if (res.errors) {
-    return await handleGraphqlError(res.errors);
-  }
-
-  return { success: true, data: res.data };
-}

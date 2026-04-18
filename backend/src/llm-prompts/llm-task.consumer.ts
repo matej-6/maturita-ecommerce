@@ -144,14 +144,9 @@ export class LLMTaskConsumer extends WorkerHost {
             },
           });
           if (!dbEmbeddingTask) {
-            await this.prisma.embeddingTask.create({
-              data: {
-                productId: jobData.productId,
-                status: LLMTaskStatus.PENDING,
-                type: 'PRODUCT',
-                lang: jobData.lang,
-              },
-            });
+            throw new Error(
+              `Embedding task not found for productId ${jobData.productId} and lang ${jobData.lang}`,
+            );
           }
           await this.processProductEmbeddingJob(jobData);
           await this.prisma.embeddingTask.update({
@@ -197,14 +192,9 @@ export class LLMTaskConsumer extends WorkerHost {
             },
           });
           if (!dbEmbeddingTask) {
-            await this.prisma.embeddingTask.create({
-              data: {
-                productId: jobData.productId,
-                status: LLMTaskStatus.PENDING,
-                type: 'PRODUCT_CONTENT',
-                lang: jobData.lang,
-              },
-            });
+            throw new Error(
+              `Embedding task not found for productId ${jobData.productId} and lang ${jobData.lang}`,
+            );
           }
           await this.processProductContentEmbeddingJob(jobData);
           return {};

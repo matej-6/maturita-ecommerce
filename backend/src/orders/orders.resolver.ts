@@ -17,10 +17,11 @@ import { OrderItem } from '../order-items/entities/order-item.entity';
 import { OrderItemsService } from 'src/order-items/order-items.service';
 import { OrderShippingDetails } from './entities/shipping-details.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
-import { OrderFindAllQueryArgs, OrderSortingArgs } from './order.resolver.args';
+import { OrderFindAllQueryArgs } from './order.resolver.args';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { GraphQLVoid } from 'graphql-scalars';
+import { SortingArgs } from 'src/args/sorting-args';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -42,7 +43,7 @@ export class OrdersResolver {
   findAll(
     @Args() paginationArgs: PaginationArgs,
     @Args() findAllQueryArgs: OrderFindAllQueryArgs,
-    @Args() sortByArgs: OrderSortingArgs,
+    @Args() sortByArgs: SortingArgs,
     @CurrentUser() user: AuthenticatedUserDto,
   ): Promise<PaginatedOrder> {
     return this.ordersService.findAllPaginated(

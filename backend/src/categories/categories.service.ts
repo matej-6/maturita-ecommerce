@@ -20,12 +20,12 @@ import { Category, PaginatedCategory } from './entities/category.entity';
 import {
   CategoryFindAllQueryFilterArgs,
   CategoryFindOneQueryFilterArgs,
-  CategorySortByArgs,
   CategoryTranslationsQueryFilterArgs,
 } from './categories.resolver.args';
 import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
 import { PaginationArgs } from 'src/lib/pagination.args';
 import { ERROR } from 'src/errors';
+import { SortingArgs } from 'src/args/sorting-args';
 
 @Injectable()
 export class CategoriesService {
@@ -178,7 +178,7 @@ export class CategoriesService {
     }
   }
 
-  private validateSortingArgs(args: CategorySortByArgs): void {
+  private validateSortingArgs(args: SortingArgs): void {
     const validSortFields = [
       'createdAt',
       'updatedAt',
@@ -199,7 +199,7 @@ export class CategoriesService {
 
   async findAll(
     filterArgs: CategoryFindAllQueryFilterArgs,
-    sortingArgs: CategorySortByArgs,
+    sortingArgs: SortingArgs,
     userRole?: AuthenticatedUserDto['role'],
   ): Promise<Category[]> {
     this.validateFindAllArgs(filterArgs, userRole);
@@ -244,7 +244,7 @@ export class CategoriesService {
 
   async findPaginated(
     filterArgs: CategoryFindAllQueryFilterArgs,
-    sortingArgs: CategorySortByArgs,
+    sortingArgs: SortingArgs,
     paginationArgs: PaginationArgs,
     userRole?: AuthenticatedUserDto['role'],
   ): Promise<PaginatedCategory> {

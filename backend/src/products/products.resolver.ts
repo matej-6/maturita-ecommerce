@@ -16,7 +16,6 @@ import { PaginationArgs } from 'src/lib/pagination.args';
 import {
   ProductFindAllQueryArgs,
   ProductFindOneQueryArgs,
-  ProductSortingArgs,
 } from './products.resolver.args';
 import { UseGuards } from '@nestjs/common';
 import { OptionalAuthGuard } from 'src/auth/guards/optional-auth.guard';
@@ -33,6 +32,7 @@ import { CreateProductTranslationInput } from './dto/create-product-translation.
 import { EditProductTranslationInput } from './dto/edit-product-translation.input';
 import { ProductEmbedding } from './entities/product-embedding.entity';
 import { GraphQLVoid } from 'graphql-scalars';
+import { SortingArgs } from 'src/args/sorting-args';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -75,7 +75,7 @@ export class ProductsResolver {
   findAll(
     @Args() paginationArgs: PaginationArgs,
     @Args() findAllQueryArgs: ProductFindAllQueryArgs,
-    @Args() sortByArgs: ProductSortingArgs,
+    @Args() sortByArgs: SortingArgs,
     @OptionalCurrentUser() user: OptionalCurrentUserDto,
   ) {
     return this.productsService.findAll(

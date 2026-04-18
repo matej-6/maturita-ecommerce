@@ -7,7 +7,6 @@ import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaN
 import {
   ProductFindAllQueryArgs as ProductFindAllQueryArgs,
   ProductFindOneQueryArgs,
-  ProductSortingArgs,
 } from './products.resolver.args';
 import { PaginatedProduct, Product } from './entities/product.entity';
 import { PaginationArgs } from 'src/lib/pagination.args';
@@ -21,6 +20,7 @@ import { ProductEmbedding } from './entities/product-embedding.entity';
 import { ERROR } from 'src/errors';
 import { ImageStorageService } from 'src/image-storage/image-storage.service';
 import { ProductVariantsService } from 'src/product-variants/product-variants.service';
+import { SortingArgs } from 'src/args/sorting-args';
 
 @Injectable()
 export class ProductsService {
@@ -303,7 +303,7 @@ export class ProductsService {
       queryArgs.categoryId === null ? null : Math.abs(queryArgs.categoryId);
   }
 
-  private validateSortingArgs(args: ProductSortingArgs) {
+  private validateSortingArgs(args: SortingArgs) {
     const validSortByFields = [
       'createdAt',
       'updatedAt',
@@ -380,7 +380,7 @@ export class ProductsService {
   async findAll(
     paginationArgs: PaginationArgs,
     queryArgs: ProductFindAllQueryArgs,
-    sortingArgs: ProductSortingArgs,
+    sortingArgs: SortingArgs,
     role?: AuthenticatedUserDto['role'],
   ): Promise<PaginatedProduct> {
     this.validatePaginationArgs(paginationArgs);

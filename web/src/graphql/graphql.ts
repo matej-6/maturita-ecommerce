@@ -82,7 +82,6 @@ export type Category = {
 export type CategoryCategoryProductVariantsArgs = {
   attributeFilters?: InputMaybe<Array<Array<Scalars['String']['input']>>>;
   cursor?: InputMaybe<Scalars['Int']['input']>;
-  includeSubcategories?: InputMaybe<Scalars['Boolean']['input']>;
   pageSize?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -271,7 +270,6 @@ export type Mutation = {
   editProductTranslation: ProductTranslation;
   generateProductContentEmbedding?: Maybe<ProductEmbedding>;
   generateProductEmbedding?: Maybe<ProductEmbedding>;
-  logoutAll: Scalars['Void']['output'];
   regenerateAllProductContentEmbeddings: Scalars['Void']['output'];
   regenerateAllProductEmbeddings: Scalars['Void']['output'];
   removeCategory: Category;
@@ -1230,8 +1228,6 @@ export type EditCategoryTranslationMutationMutationVariables = Exact<{
 
 export type EditCategoryTranslationMutationMutation = { __typename?: 'Mutation', updateCategoryTranslation: { __typename?: 'CategoryTranslation', name: string, description?: string | null, locale: string } };
 
-export type AllCategories_QueryFragmentFragment = { __typename?: 'Query', categories: Array<{ __typename?: 'Category', id: number, slug: string, parentCategoryId?: number | null }> } & { ' $fragmentName'?: 'AllCategories_QueryFragmentFragment' };
-
 export type NewCategoryMutationMutationVariables = Exact<{
   parentCategoryId?: InputMaybe<Scalars['Int']['input']>;
   slug: Scalars['String']['input'];
@@ -1834,15 +1830,6 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
-export const AllCategories_QueryFragmentFragmentDoc = new TypedDocumentString(`
-    fragment AllCategories_QueryFragment on Query {
-  categories(parentCategoryId: 0, isPublic: null, isSetup: null) {
-    id
-    slug
-    parentCategoryId
-  }
-}
-    `, {"fragmentName":"AllCategories_QueryFragment"}) as unknown as TypedDocumentString<AllCategories_QueryFragmentFragment, unknown>;
 export const MeFragmentFragmentDoc = new TypedDocumentString(`
     fragment MeFragment on User {
   id
@@ -2804,7 +2791,6 @@ export const CategoryQueryDocument = new TypedDocumentString(`
     categoryProductVariants(
       cursor: $productsCursor
       pageSize: $productsPageSize
-      includeSubcategories: true
       attributeFilters: $attributeFilters
     ) {
       nextCursor

@@ -79,11 +79,7 @@ export class LLMPromptsService {
           },
         },
         include: {
-          response: {
-            include: {
-              products: true,
-            },
-          },
+          response: true,
         },
       });
       return {
@@ -92,11 +88,7 @@ export class LLMPromptsService {
           ? {
               id: res.response.id,
               text: res.response.text,
-              products:
-                res.response.products.map((p) => ({
-                  ...p,
-                  isSetup: true,
-                })) || null,
+              products: null,
             }
           : null,
       };

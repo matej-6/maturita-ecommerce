@@ -2,7 +2,6 @@
 
 import { Button } from "../ui/button";
 import { LogOutIcon, MenuIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
-import Link from "next/link";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -32,7 +31,7 @@ import {
   DrawerTrigger,
 } from "../ui/drawer";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { HeaderSearch } from "./header-search";
 import { CurrentSession } from "@/app/data-access-layer/auth/queries";
 

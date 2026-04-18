@@ -254,8 +254,8 @@ model OrderItem {
   productVariantId Int?
   sku              String
   ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
-  productId        Int
-  Product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId        Int?
+  Product          Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
   quantity         Int             @default(1)
   unitPriceInCents Int
   createdAt        DateTime        @default(now())

@@ -11,9 +11,13 @@ import { toast } from "sonner";
 
 type Props = {
   embeddingType: "embedding" | "contentEmbedding";
+  disabled?: boolean;
 };
 
-export function RegenerateAllEmbeddingsButton({ embeddingType }: Props) {
+export function RegenerateAllEmbeddingsButton({
+  embeddingType,
+  disabled = false,
+}: Props) {
   const { mutate: generateEmbeddings, isPending: isGenerating } = useMutation({
     mutationFn: async () => {
       if (embeddingType === "embedding") {
@@ -25,7 +29,7 @@ export function RegenerateAllEmbeddingsButton({ embeddingType }: Props) {
         const res = await regenerateProductContentEmeddingsAction();
         if (!res.success) {
           throw new Error(
-            res.message || "Failed to regenerate content embeddings..."
+            res.message || "Failed to regenerate content embeddings...",
           );
         }
       }
@@ -40,7 +44,7 @@ export function RegenerateAllEmbeddingsButton({ embeddingType }: Props) {
   return (
     <ResponsiveButton
       onClick={() => generateEmbeddings()}
-      disabled={isGenerating}
+      disabled={isGenerating || disabled}
       variant={"secondary"}
     >
       {isGenerating ? t("generating") : t("regenerateAll")}

@@ -5,6 +5,7 @@ import { cancelOrderMutationAction } from "@/app/data-access-layer/order/actions
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "../ui/button";
+import { useTranslations } from "next-intl";
 
 type props = {
   orderId: number;
@@ -23,6 +24,8 @@ export function CancelOrderButton({ orderId }: props) {
     },
   });
 
+  const t = useTranslations("orderPage.buttons");
+
   return (
     <>
       <Button
@@ -30,7 +33,7 @@ export function CancelOrderButton({ orderId }: props) {
         disabled={isCancelling}
         onClick={() => cancelOrder()}
       >
-        {isCancelling ? "Cancelling..." : "Cancel Order"}
+        {isCancelling ? t("pendingCancelOrder") : t("cancelOrder")}
       </Button>
     </>
   );

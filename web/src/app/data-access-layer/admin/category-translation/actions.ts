@@ -19,7 +19,7 @@ import { revalidatePath } from "next/cache";
 
 export async function deleteCategoryTranslationAction(
   categoryId: number,
-  translationId: number
+  translationId: number,
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -53,7 +53,7 @@ export async function deleteCategoryTranslationAction(
 
 export async function createCategoryTranslationAction(
   categoryId: number,
-  data: { name: string; description?: string; locale: string }
+  data: { name: string; description?: string; locale: string },
 ): Promise<
   ActionResponse<
     NonNullable<
@@ -72,6 +72,10 @@ export async function createCategoryTranslationAction(
     return await handleGraphqlError(res.errors);
   }
 
+  const locale = await getLocale();
+
+  revalidatePath(`${locale}/admin/categories/edit-category/${categoryId}`);
+
   if (!res.data) {
     return {
       success: false,
@@ -88,7 +92,7 @@ export async function createCategoryTranslationAction(
 export async function editCategoryTranslationAction(
   categoryId: number,
   categoryTranslationId: number,
-  data: { name: string; description?: string; locale: string }
+  data: { name: string; description?: string; locale: string },
 ): Promise<
   ActionResponse<
     NonNullable<

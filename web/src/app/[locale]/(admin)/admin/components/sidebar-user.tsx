@@ -43,7 +43,6 @@ export function SidebarUser({ currentSessionPromise }: SidebarUserProps) {
               size={"lg"}
               className="data-[state=open]:bg-sidebar-accent text-sidebar-accent-foreground"
             >
-              <Avatar size="sm" session={session} />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
                   {session.firstName} {session.lastName}
@@ -61,7 +60,6 @@ export function SidebarUser({ currentSessionPromise }: SidebarUserProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar size="sm" session={session} />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
                     {session.firstName} {session.lastName}

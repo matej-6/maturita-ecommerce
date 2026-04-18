@@ -379,7 +379,14 @@ export class ProductVariantsService {
   }
 
   private validateSortingArgs(args: SortingArgs) {
-    const validSortByFields = ['priceInCents', null];
+    const validSortByFields = [
+      'id',
+      'updatedAt',
+      'sku',
+      'priceInCents',
+      'createdAt',
+      null,
+    ];
     if (!validSortByFields.includes(args.sortBy)) {
       args.sortBy = null;
     }
@@ -392,7 +399,6 @@ export class ProductVariantsService {
     attributeFilters?: string[][],
   ): Promise<PaginatedProductVariant> {
     this.validatePaginationArgs(paginationArgs);
-    this.validateSortingArgs(sortingArgs);
     const filters = attributeFilters
       ? await this.extractAttributeFilters(attributeFilters)
       : {};
@@ -467,12 +473,12 @@ export class ProductVariantsService {
       orderBy: [
         { productId: 'asc' },
         { id: 'asc' },
-        sortingArgs.sortBy
-          ? {
+        sortingArgs.sortBy === null
+          ? {}
+          : {
               [sortingArgs.sortBy]:
                 sortingArgs.ascending === false ? 'desc' : 'asc',
-            }
-          : {},
+            },
       ],
       cursor:
         paginationArgs.cursor == null

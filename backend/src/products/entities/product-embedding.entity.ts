@@ -5,6 +5,14 @@ import {
   LLMTaskStatus,
 } from 'generated/prisma/client';
 
+registerEnumType(LLMTaskStatus, {
+  name: 'LLMTaskStatus',
+});
+
+registerEnumType(EmbeddingTaskType, {
+  name: 'EmbeddingTaskType',
+});
+
 @ObjectType()
 export class ProductEmbedding implements Partial<DbProductEmbedding> {
   @Field(() => Int)
@@ -25,11 +33,3 @@ export class ProductEmbedding implements Partial<DbProductEmbedding> {
   @Field(() => EmbeddingTaskType)
   type: EmbeddingTaskType;
 }
-
-registerEnumType(LLMTaskStatus, {
-  name: 'LLMTaskStatus',
-});
-
-registerEnumType(EmbeddingTaskType, {
-  name: 'EmbeddingTaskType',
-});

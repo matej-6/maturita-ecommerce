@@ -1,8 +1,7 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
 import { Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { GraphqlAppContext } from 'src/app.module';
 import { GraphQLVoid } from 'graphql-scalars';
 import { CurrentUser } from './current-user.decorator';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
@@ -17,19 +16,6 @@ export class AuthResolver {
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
   ) {}
-
-  @UseGuards(AuthGuard)
-  @Mutation(() => GraphQLVoid)
-  async logoutAll(
-    @Context() { res }: GraphqlAppContext,
-    @CurrentUser() user: AuthenticatedUserDto,
-  ) {
-    await this.authService.signOutAll(user.id);
-    res.clearCookie('Authentication');
-    res.clearCookie('Refresh');
-
-    return GraphQLVoid;
-  }
 
   @UseGuards(AuthGuard)
   @Query(() => User, { name: 'me' })

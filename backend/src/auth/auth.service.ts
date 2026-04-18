@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/validate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDto } from 'src/users/dto/user.dto';
-import { Response } from 'express';
 import { Role } from 'generated/prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
@@ -17,7 +16,6 @@ import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaN
 import { ERROR } from 'src/errors';
 import { generateSessionId, hashPassword } from 'src/lib/hashing';
 import { RedisService } from 'src/redis/redis.service';
-import { SESSION_COOKIE_NAME } from 'src/constants';
 @Injectable()
 export class AuthService {
   private readonly sessionExpiration: number;
@@ -51,15 +49,6 @@ export class AuthService {
       return this.usersService.toUserDTO(rest);
     }
     return null;
-  }
-
-  setAuthCookies(res: Response, sessionId: string, expiresAt: Date) {
-    res.cookie(SESSION_COOKIE_NAME, sessionId, {
-      httpOnly: true,
-      secure: false,
-      expires: expiresAt,
-      sameSite: 'lax',
-    });
   }
 
   async login(userId: number): Promise<AuthResponseDto> {

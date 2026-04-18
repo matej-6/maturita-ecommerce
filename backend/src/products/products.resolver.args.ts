@@ -32,15 +32,6 @@ export class ProductFindAllQueryArgs {
 }
 
 @ArgsType()
-export class ProductSortingArgs {
-  @Field(() => String, { nullable: true })
-  sortBy: string | null;
-
-  @Field(() => Boolean, { nullable: true })
-  ascending: boolean | null;
-}
-
-@ArgsType()
 export class ProductTranslationsQueryArgs {
   @Field(() => [String], {
     defaultValue: [],

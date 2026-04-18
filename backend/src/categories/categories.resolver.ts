@@ -25,7 +25,6 @@ import { CreateCategoryTranslationInput } from './dto/create-category-translatio
 import {
   CategoryFindAllQueryFilterArgs,
   CategoryFindOneQueryFilterArgs,
-  CategorySortByArgs,
   CategoryTranslationsQueryFilterArgs,
 } from './categories.resolver.args';
 import { EditCategoryTranslationInput } from './dto/edit-category-translation.input';
@@ -34,6 +33,7 @@ import { ProductVariantAttribute } from 'src/product-variant-attributes/entities
 import { ProductVariantAttributesService } from 'src/product-variant-attributes/product-variant-attributes.service';
 import { PaginatedProductVariant } from 'src/product-variants/entities/product-variant.entity';
 import { ProductVariantsService } from 'src/product-variants/product-variants.service';
+import { SortingArgs } from 'src/args/sorting-args';
 
 @Resolver(() => Category)
 export class CategoriesResolver {
@@ -56,7 +56,7 @@ export class CategoriesResolver {
   findAll(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
     @Args() filterArgs: CategoryFindAllQueryFilterArgs,
-    @Args() sortingArgs: CategorySortByArgs,
+    @Args() sortingArgs: SortingArgs,
   ) {
     return this.categoriesService.findAll(
       filterArgs,
@@ -70,7 +70,7 @@ export class CategoriesResolver {
   findPaginated(
     @OptionalCurrentUser() currentUser: OptionalCurrentUserDto,
     @Args() filterArgs: CategoryFindAllQueryFilterArgs,
-    @Args() sortingArgs: CategorySortByArgs,
+    @Args() sortingArgs: SortingArgs,
     @Args() paginationArgs: PaginationArgs,
   ) {
     return this.categoriesService.findPaginated(
@@ -104,8 +104,6 @@ export class CategoriesResolver {
     name: 'categoryProductVariants',
   })
   async findCategoryProductVariants(
-    @Args('includeSubcategories', { type: () => Boolean, nullable: true })
-    includeSubcategories: boolean | null,
     @Args('attributeFilters', { type: () => [[String]], nullable: true })
     attributeFilters: string[][] | null,
     @Args()
@@ -120,26 +118,10 @@ export class CategoriesResolver {
       };
     }
 
-    if (includeSubcategories != null && includeSubcategories === true) {
-      return await this.productVariantsService.findAllForCategory(
-        category.id,
-        paginationArgs,
-        attributeFilters || undefined,
-      );
-    }
-
-    return await this.productVariantsService.findAll(
+    return await this.productVariantsService.findAllForCategory(
+      category.id,
       paginationArgs,
-      {
-        categoryId: category.id,
-        isPublic: true,
-        isSetup: true,
-        slug: null,
-      },
-      {
-        ascending: null,
-        sortBy: null,
-      },
+      attributeFilters || undefined,
     );
   }
 
