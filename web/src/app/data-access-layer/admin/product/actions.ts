@@ -142,17 +142,14 @@ export async function uploadProductImageAction(
     "x-custom-lang": locale,
   };
   if (authToken) {
-    headers["Authorization"] = "Bearer " + authToken;
+    headers["authorization"] = "Bearer " + authToken;
   }
 
-  const res = await fetchInternal(
-    process.env.BACKEND_URL + `/products/upload-image/${productId}`,
-    {
-      method: "POST",
-      body: formData,
-      headers,
-    },
-  );
+  const res = await fetchInternal(`/products/upload-image/${productId}`, {
+    method: "POST",
+    body: formData,
+    headers,
+  });
 
   revalidatePath(`/${locale}/admin/products/product-detail/${productId}`);
   revalidatePath(`/${locale}/admin/products`);
@@ -182,12 +179,11 @@ export async function uploadVariantImageAction(
     "x-custom-lang": locale,
   };
   if (authToken) {
-    headers["Authorization"] = "Bearer " + authToken;
+    headers["authorization"] = "Bearer " + authToken;
   }
 
   const res = await fetchInternal(
-    process.env.BACKEND_URL +
-      `/product-variants/upload-image/${productVariantId}`,
+    `/product-variants/upload-image/${productVariantId}`,
     {
       method: "POST",
       body: formData,

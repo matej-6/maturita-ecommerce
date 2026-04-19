@@ -20,7 +20,7 @@ export async function execute<TResult, TVariables>(
     "x-custom-lang": locale,
   };
   if (authToken) {
-    headers["Authorization"] = "Bearer " + authToken;
+    headers["authorization"] = "Bearer " + authToken;
   }
 
   const response = await fetch(process.env.BACKEND_URL + "/graphql", {
@@ -37,7 +37,7 @@ export async function execute<TResult, TVariables>(
     cache: "no-store",
   });
 
-  if ([401, 403].includes(response.status)) {
+  if (response.status === 401) {
     redirect({ href: "/auth/login", locale });
   }
 

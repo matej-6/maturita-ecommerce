@@ -68,18 +68,15 @@ export const ProductVariantSheetForm = ({
 }: ProductVariantFormProps) => {
   const [formData, setFormData] = useState<FormData>(initialData);
 
-  const isFormChanged = useMemo(() => {
-    return (
-      formData.sku !== initialData.sku ||
-      formData.priceInCents !== initialData.priceInCents ||
-      formData.isPublic !== initialData.isPublic ||
-      formData.stock !== initialData.stock ||
-      formData.attributes.length !== initialData.attributes.length ||
-      !formData.attributes.every(
-        (value, index) => value === initialData.attributes[index],
-      )
+  const isFormChanged =
+    formData.sku !== initialData.sku ||
+    formData.priceInCents !== initialData.priceInCents ||
+    formData.isPublic !== initialData.isPublic ||
+    formData.stock !== initialData.stock ||
+    formData.attributes.length !== initialData.attributes.length ||
+    !formData.attributes.every(
+      (value, index) => value === initialData.attributes[index],
     );
-  }, [formData, initialData]);
 
   // translations
   const ft = useTranslations("fields"); // fields translations

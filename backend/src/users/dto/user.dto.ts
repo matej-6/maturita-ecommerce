@@ -1,8 +1,5 @@
 import { User } from 'generated/prisma/client';
 
-export type UserDto = Omit<
-  User,
-  'hashedPassword' | 'avatarFileName' | 'avatar'
-> & {
+export type UserDto = Omit<User, 'hashedPassword' | 'avatarFileName'> & {
   avatarUrl: string | null;
 };

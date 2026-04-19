@@ -9,22 +9,10 @@ import { ProductVariantsScroll } from "@/components/products/product-variants-sc
 import { redirect } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { getLocale, getTranslations } from "next-intl/server";
-import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
-
-const ProductReviews = dynamic(
-  () => import("@/components/products/product-reviews"),
-  {
-    loading: () => {
-      return (
-        <div className="w-full py-10 flex items-center justify-center">
-          <span className="text-muted-foreground">Loading reviews...</span>
-        </div>
-      );
-    },
-  },
-);
+import ProductReviews from "@/components/products/product-reviews";
+import { Suspense } from "react";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -225,7 +213,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
       <div className="h-0.5 w-full bg-accent my-4" />
       <div className="flex flex-col gap-y-4 w-full">
         <h3 className="text-2xl font-medium">{t("reviewsTitle")}</h3>
-        <ProductReviews productReviewsPromise={reviewsPromise} />
+        <Suspense fallback={<div>...</div>}>
+          <ProductReviews productReviewsPromise={reviewsPromise} />
+        </Suspense>
       </div>
     </div>
   );

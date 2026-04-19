@@ -68,18 +68,15 @@ export const ProductTranslationSheetForm = ({
     }
   }, [mode, availableLocales]);
 
-  const isFormChanged = useMemo(() => {
-    return (
-      formData.name !== initialData.name ||
-      formData.description !== initialData.description ||
-      formData.locale !== initialData.locale ||
-      formData.markdownContent !== initialData.markdownContent
-    );
-  }, [formData, initialData]);
+  const isFormChanged =
+    formData.name !== initialData.name ||
+    formData.description !== initialData.description ||
+    formData.locale !== initialData.locale ||
+    formData.markdownContent !== initialData.markdownContent;
 
   const ft = useTranslations("fields");
   const t = useTranslations(
-    "admin.products.productDetail.page.translations.form"
+    "admin.products.productDetail.page.translations.form",
   );
 
   if (mode === "edit" && !translationId) {
@@ -94,7 +91,7 @@ export const ProductTranslationSheetForm = ({
           : await editProductTranslationAction(
               translationId!,
               productId,
-              formData
+              formData,
             );
 
       const fieldErrorsMap = new Map();
@@ -103,7 +100,7 @@ export const ProductTranslationSheetForm = ({
         setFieldErrors(fieldErrorsMap);
       } else {
         res.fieldErrors?.forEach((e) =>
-          fieldErrorsMap.set(e.property, e.constraints)
+          fieldErrorsMap.set(e.property, e.constraints),
         );
         setFieldErrors(fieldErrorsMap);
         setErrorMessage(res.message);
@@ -116,7 +113,7 @@ export const ProductTranslationSheetForm = ({
   >(undefined);
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   return (

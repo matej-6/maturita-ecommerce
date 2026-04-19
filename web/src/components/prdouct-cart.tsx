@@ -24,10 +24,10 @@ export function ProductCard({
       )}
       {...rest}
     >
-      <div className="w-full aspect-square rounded-md overflow-hidden object-cover">
+      <div className="w-full aspect-square rounded-md overflow-hidden">
         {product.imageUrl && (
           <img
-            className="size-full"
+            className="size-full object-cover"
             src={product.imageUrl}
             alt={product.name}
           />

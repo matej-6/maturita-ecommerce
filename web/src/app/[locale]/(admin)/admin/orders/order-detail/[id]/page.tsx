@@ -188,11 +188,12 @@ export default async function AdminOrderPage({ params }: Props) {
                       className="w-full *:h-fit p-1 sm:p-2 *:text-sm *:sm:text-base grid grid-cols-[48px_196px_1fr_1fr] sm:grid-cols-[64px_256px_1fr_1fr] items-center gap-x-1 sm:gap-x-4"
                     >
                       <TableCell>
-                        <div className="w-full aspect-square overflow-hidden rounded-sm sm:rounded-md bg-muted flex items-center justify-center object-cover">
+                        <div className="w-full aspect-square overflow-hidden rounded-sm sm:rounded-md bg-muted flex items-center justify-center">
                           {thumbnailImage && (
                             <img
                               src={getImageSrc(thumbnailImage.url)}
                               alt={"Image of " + item.productVariant?.sku}
+                              className="size-full object-cover"
                             />
                           )}
                         </div>

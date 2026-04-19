@@ -188,7 +188,9 @@
     },
     "buttons": {
       "cancelOrder": "Cancel Order",
-      "pendingCancelOrder": "Cancelling Order..."
+      "pendingCancelOrder": "Cancelling Order...",
+      "retryPayment": "Retry Payment",
+      "pendingRetryPayment": "Retrying Payment..."
     }
   },
   "searchPage": {
@@ -300,7 +302,9 @@
             "noImages": "No images uploaded.",
             "thumbnailLabel": "Thumbnail",
             "uploadImageButton": "Upload Image",
-            "uploadingButton": "Uploading..."
+            "uploadingButton": "Uploading...",
+            "setAsThumbnailButton": "Set as thumbnail",
+            "settingAsThumbnailButton": "Setting as thumbnail..."
           },
           "deleteButton": "Delete Product",
           "translations": {

@@ -188,7 +188,9 @@
     },
     "buttons": {
       "cancelOrder": "Zrušiť objednávku",
-      "pendingCancelOrder": "Zrušovanie objednávky..."
+      "pendingCancelOrder": "Ruším objednávky...",
+      "retryPayment": "Znovu zaplatit",
+      "pendingRetryPayment": "Prebieha spracovanie platby..."
     }
   },
   "searchPage": {
@@ -301,7 +303,9 @@
             "noImages": "Žiadne obrázky neboli nahrané.",
             "thumbnailLabel": "Thumbnail",
             "uploadImageButton": "Nahrať obrázok",
-            "uploadingButton": "Nahrávanie..."
+            "uploadingButton": "Nahrávanie...",
+            "setAsThumbnailButton": "Nastaviť ako thumbnail",
+            "settingAsThumbnailButton": "Nastavujem..."
           },
           "translations": {
             "title": "Preklady",

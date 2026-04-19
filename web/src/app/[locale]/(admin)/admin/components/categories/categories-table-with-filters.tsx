@@ -499,7 +499,7 @@ export function CategoriesTableWithFilters({
                         </DropdownMenuLabel>
                         <DropdownMenuItem>
                           <Link
-                            className="grow hover:underline"
+                            className="hover:underline"
                             href={`/category/${category.slug}`}
                           >
                             {t("table.actions.visitPage")}
@@ -507,7 +507,7 @@ export function CategoriesTableWithFilters({
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Link
-                            className="grow hover:underline"
+                            className="hover:underline"
                             href={`categories/edit-category/${category.id}`}
                           >
                             {t("table.actions.edit")}

@@ -54,7 +54,7 @@ export default async function EditCategoryEditPage({
     <div className="flex flex-col gap-y-10">
       <div className="flex flex-col gap-y-8">
         <div className="flex flex-col gap-y-8">
-          <h1 className="font-medium font-secondary">{t("title")}</h1>
+          <h1 className="font-medium">{t("title")}</h1>
           {!category.isSetup && (
             <Alert className="w-fit" variant="destructive">
               <AlertCircleIcon />
@@ -149,9 +149,7 @@ export default async function EditCategoryEditPage({
       </div>
       <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">
-          {t("translations.title")}
-        </h2>
+        <h2 className="font-medium">{t("translations.title")}</h2>
         <div className="flex flex-wrap gap-x-8 gap-y-4">
           {category.translations.map((translation) => {
             const locale = locales.find((l) => l.code === translation.locale)!;
@@ -196,7 +194,7 @@ export default async function EditCategoryEditPage({
       </div>
       <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">{t("products.title")}</h2>
+        <h2 className="font-medium">{t("products.title")}</h2>
         <div className="flex flex-wrap gap-4">
           {!products || products.length === 0 ? (
             <p>{t("products.noProducts")}</p>

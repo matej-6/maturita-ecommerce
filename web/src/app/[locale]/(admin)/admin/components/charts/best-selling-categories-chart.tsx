@@ -77,14 +77,14 @@ export function BestSellingCategoriesChart({
 
   return (
     <Card className="p-0">
-      <CardHeader className="flex flex-col items-stretch border-b sm:flex-row py-4!">
+      <CardHeader className="flex flex-col border-b sm:flex-row py-4!">
         <div className="flex flex-1/2 flex-col justify-center gap-1 sm:p-0!">
           <CardTitle>{t("bestSellingCategories.title")}</CardTitle>
         </div>
         <div className="flex gap-y-0 relative">
           <div
             ref={indicatorRef}
-            className="absolute inset-0 w-[64px] h-[24px] rounded-md border-2 border-accent transition-transform duration-500 ease-in-out pointer-events-none"
+            className="absolute left-0 top-0 bottom-0 w-[64px] h-[24px] rounded-md border-2 border-accent transition-transform duration-500 ease-in-out pointer-events-none"
           />
           <button
             ref={button90DRef}

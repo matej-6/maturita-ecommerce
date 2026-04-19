@@ -60,7 +60,7 @@ export default async function AttributeKeyDetailPage({
   return (
     <div className=" flex flex-col p-2 sm:p-4 gap-y-8">
       <div className="flex flex-col gap-y-8">
-        <h1 className="font-medium font-secondary">{t("title")}</h1>
+        <h1 className="font-medium ">{t("title")}</h1>
         <div className="flex flex-wrap gap-4">
           {[
             { label: ft("attributeKey.id"), node: <span>{data.id}</span> },
@@ -89,9 +89,7 @@ export default async function AttributeKeyDetailPage({
       </div>
       <div className="h-px w-full rounded-full bg-accent" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">
-          {t("translations.title")}
-        </h2>
+        <h2 className="font-medium">{t("translations.title")}</h2>
 
         <div className="flex flex-wrap gap-4">
           {data.translations.map((t) => {
@@ -129,7 +127,7 @@ export default async function AttributeKeyDetailPage({
       </div>
       <div className="h-px w-full rounded-full bg-accent" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">{t("attributes.title")}</h2>
+        <h2 className="font-medium">{t("attributes.title")}</h2>
 
         <div className="flex flex-wrap gap-4">
           {data.attributes.map((attr) => {

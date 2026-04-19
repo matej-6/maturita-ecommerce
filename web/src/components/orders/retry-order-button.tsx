@@ -4,6 +4,7 @@ import { retryPendingOrderAction } from "@/app/data-access-layer/order/actions";
 import { Button } from "../ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 type props = {
   orderId: number;
@@ -19,9 +20,11 @@ export function RetryOrderButton({ orderId }: props) {
     },
   });
 
+  const t = useTranslations("orderPage.buttons");
+
   return (
     <Button disabled={isRetrying} onClick={() => retryOrder()}>
-      {isRetrying ? "Retrying..." : "Retry Payment"}
+      {isRetrying ? t("pendingRetryPayment") : t("retryPayment")}
     </Button>
   );
 }

@@ -11,7 +11,7 @@ export async function checkoutAction() {
   const headers: HeadersInit = {};
 
   if (sessionId) {
-    headers["Authorization"] = "Bearer " + sessionId;
+    headers["authorization"] = "Bearer " + sessionId;
   }
 
   const response = await fetchBackend("/orders/create-checkout-session", {

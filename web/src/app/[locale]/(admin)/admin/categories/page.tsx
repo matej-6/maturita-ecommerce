@@ -56,7 +56,7 @@ export default async function CategoriesPage({ searchParams }: Props) {
   );
 
   if (!data.success) {
-    return <div>Error loading data...</div>;
+    return <div>Error loading data: {data.message}</div>;
   }
 
   const paginatedCategories = data.data?.paginatedCategories;
@@ -99,11 +99,10 @@ export default async function CategoriesPage({ searchParams }: Props) {
         sortableColumns={[
           "id",
           "slug",
-          "isPublic",
-          "isSetup",
           "createdAt",
           "updatedAt",
           "productsCount",
+          "parentCategoryId",
         ]}
         data={
           paginatedCategories

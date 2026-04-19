@@ -186,7 +186,7 @@ export class StatisticsService {
     const allOrderItems = await this.prismaService.orderItem.findMany({
       where: {
         Order: {
-          createdAt: { gte: startDate, lte: now },
+          createdAt: { gte: startDate },
           status: 'DELIVERED',
         },
       },

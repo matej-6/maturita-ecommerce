@@ -10,11 +10,6 @@ const errorResponseSchema = z.object({
 
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
 
-export const defaultErrorResponse: ErrorResponse = {
-  statusCode: 500,
-  message: "An unexpected error ocurred",
-};
-
 export function newErrorResponse(body: unknown): ErrorResponse | undefined {
   try {
     return errorResponseSchema.parse(body);

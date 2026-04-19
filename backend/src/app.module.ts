@@ -93,7 +93,7 @@ import { ProductReviewsModule } from './product-reviews/product-reviews.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+      envFilePath: ['.env'],
     }),
     PrismaModule,
     CategoriesModule,

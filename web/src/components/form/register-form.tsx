@@ -75,31 +75,26 @@ export default function RegisterForm() {
               name: "firstName",
               label: t("form.firstName"),
               type: "text",
-              required: true,
             },
             {
               name: "lastName",
               label: t("form.lastName"),
               type: "text",
-              required: true,
             },
             {
               name: "email",
               label: t("form.email"),
               type: "email",
-              required: true,
             },
             {
               name: "password",
               label: t("form.password"),
               type: "password",
-              required: true,
             },
             {
               name: "confirmPassword",
               label: t("form.confirmPassword"),
               type: "password",
-              required: true,
             },
           ].map((field) => (
             <div key={field.name} className="flex flex-col gap-y-1">
@@ -108,7 +103,7 @@ export default function RegisterForm() {
                 id={field.name}
                 name={field.name}
                 type={field.type}
-                required={field.required}
+                required={true}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormState((prev) => ({
                     ...prev,

@@ -44,7 +44,7 @@ export async function authLogoutAllAction(): Promise<LogoutAllActionResult> {
         method: "POST",
         headers: {
           "x-custom-lang": locale,
-          Authorization: `Bearer ${sessionId}`,
+          authorization: `Bearer ${sessionId}`,
         },
       });
       if (!res.ok) {
@@ -81,7 +81,7 @@ export async function authLogoutAction() {
       await fetchBackend("/auth/logout", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${sessionId}`,
+          authorization: `Bearer ${sessionId}`,
           "x-custom-lang": locale,
         },
       });

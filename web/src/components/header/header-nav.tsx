@@ -59,7 +59,6 @@ export function HeaderNav({ categories }: HeaderNavProps) {
                               {category.description}
                             </p>
                           </Link>
-                          <span className="sr-only">Subcategories:</span>
                           <div className="flex flex-col gap-2 justify-start items-start">
                             {category.subcategories
                               .slice(0, 5)

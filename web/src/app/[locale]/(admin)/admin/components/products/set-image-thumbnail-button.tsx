@@ -6,6 +6,7 @@ import {
 } from "@/app/data-access-layer/admin/product/actions";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 type Props = {
   productId: number;
@@ -24,13 +25,15 @@ export function SetImageThumbnailButton({
         await setVariantThumbnailImageAction(
           productId,
           productVariantId,
-          imageId
+          imageId,
         );
       } else {
         await setProductThumbnailImageAction(productId, imageId);
       }
     },
   });
+
+  const t = useTranslations("admin.products.productDetail.page.images");
 
   return (
     <Button
@@ -39,7 +42,9 @@ export function SetImageThumbnailButton({
       variant={"blackTransparent"}
       size={"xs"}
     >
-      {isPending ? "Setting..." : "Set as Thumbnail"}
+      <span className="text-xs">
+        {isPending ? t("settingAsThumbnailButton") : t("setAsThumbnailButton")}
+      </span>
     </Button>
   );
 }

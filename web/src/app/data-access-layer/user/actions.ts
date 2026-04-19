@@ -18,8 +18,9 @@ import {
 } from "@/graphql/graphql";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
-import { fetchInternal } from "../fetch-internal";
 import { AccountDetailsPageDocument } from "./queries";
+import { fetchBackend } from "../fetch-backend";
+import { fetchInternal } from "../fetch-internal";
 
 export async function deleteUserAccountAction(): Promise<ActionResponse<void>> {
   const res = await execute(DeleteUserAccountMutation);
@@ -50,17 +51,14 @@ export async function updateUserAvatarAction(
     "x-custom-lang": locale,
   };
   if (authToken) {
-    headers["Authorization"] = "Bearer " + authToken;
+    headers["authorization"] = "Bearer " + authToken;
   }
 
-  const res = await fetchInternal(
-    process.env.BACKEND_URL + "/users/upload-avatar",
-    {
-      method: "POST",
-      body: formData,
-      headers,
-    },
-  );
+  const res = await fetchInternal("/users/upload-avatar", {
+    method: "POST",
+    body: formData,
+    headers,
+  });
 
   if (!res.ok) {
     const text = await res.text();

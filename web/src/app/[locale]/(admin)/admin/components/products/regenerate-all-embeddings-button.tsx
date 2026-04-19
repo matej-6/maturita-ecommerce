@@ -23,13 +23,13 @@ export function RegenerateAllEmbeddingsButton({
       if (embeddingType === "embedding") {
         const res = await regenerateAllProductEmbeddingsAction();
         if (!res.success) {
-          throw new Error(res.message || "Failed to regenerate embeddings...");
+          throw new Error(res.message || "Failed to regenerate embeddings");
         }
       } else if (embeddingType === "contentEmbedding") {
         const res = await regenerateProductContentEmeddingsAction();
         if (!res.success) {
           throw new Error(
-            res.message || "Failed to regenerate content embeddings...",
+            res.message || "Failed to regenerate content embeddings",
           );
         }
       }

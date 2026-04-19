@@ -70,17 +70,14 @@ export function OrdersTableWithFilters({
     setTableArgs(initialTableArgs);
   }, [initialTableArgs]);
 
-  const isTableArgsChanged = useMemo(() => {
-    return (
-      initialTableArgs.id !== tableArgs.id ||
-      initialTableArgs.userId !== tableArgs.userId ||
-      initialTableArgs.status !== tableArgs.status ||
-      initialTableArgs.minPrice !== tableArgs.minPrice ||
-      initialTableArgs.maxPrice !== tableArgs.maxPrice ||
-      initialTableArgs.dateFrom !== tableArgs.dateFrom ||
-      initialTableArgs.dateTo !== tableArgs.dateTo
-    );
-  }, [initialTableArgs, tableArgs]);
+  const isTableArgsChanged =
+    initialTableArgs.id !== tableArgs.id ||
+    initialTableArgs.userId !== tableArgs.userId ||
+    initialTableArgs.status !== tableArgs.status ||
+    initialTableArgs.minPrice !== tableArgs.minPrice ||
+    initialTableArgs.maxPrice !== tableArgs.maxPrice ||
+    initialTableArgs.dateFrom !== tableArgs.dateFrom ||
+    initialTableArgs.dateTo !== tableArgs.dateTo;
 
   const router = useRouter();
 

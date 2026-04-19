@@ -64,7 +64,7 @@ export default async function ProductDetailPage({
     <div className="flex flex-col gap-y-8 ">
       <div className="flex flex-col gap-y-8">
         <div className="flex flex-col gap-y-8">
-          <h1 className="font-medium font-secondary">{t("title")}</h1>
+          <h1 className="font-medium">{t("title")}</h1>
           {!product.isSetup && (
             <Alert className="w-fit" variant={"destructive"}>
               <AlertCircleIcon />
@@ -157,7 +157,7 @@ export default async function ProductDetailPage({
       </div>
       <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">{t("images.title")}</h2>
+        <h2 className="font-medium">{t("images.title")}</h2>
         {product.images.length === 0 ? (
           <span>{t("images.noImages")}</span>
         ) : (
@@ -199,9 +199,7 @@ export default async function ProductDetailPage({
       </div>
       <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">
-          {t("translations.title")}
-        </h2>
+        <h2 className="font-medium">{t("translations.title")}</h2>
         <div className="flex flex-wrap gap-8">
           {product.translations.map((t) => {
             const locale = locales.find((l) => l.code === t.locale);
@@ -249,7 +247,7 @@ export default async function ProductDetailPage({
       </div>
       <div className="h-px w-full bg-accent rounded-full" />
       <div className="flex flex-col gap-y-8">
-        <h2 className="font-medium font-secondary">{t("variants.title")}</h2>
+        <h2 className="font-medium">{t("variants.title")}</h2>
 
         <div className="flex flex-wrap gap-8">
           {product.variants.map((variant) => {

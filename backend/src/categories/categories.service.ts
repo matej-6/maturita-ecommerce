@@ -185,6 +185,7 @@ export class CategoriesService {
       'slug',
       'id',
       'productsCount',
+      'parentCategoryId',
       null,
     ];
     if (
@@ -655,10 +656,6 @@ export class CategoriesService {
     });
   }
 
-  /**
-   * Metóda navrhnutá pre data loader
-   * source https://blog.logrocket.com/use-dataloader-nestjs/#setting-up-nestjs-graphql
-   */
   async getAllTranslationsByBatch(
     lang: string,
     categoryIds: number[],

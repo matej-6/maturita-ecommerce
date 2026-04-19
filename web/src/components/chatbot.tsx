@@ -191,16 +191,6 @@ export function Chatbot({
       chatsDiv.scrollTo({ top: chatsDiv.scrollHeight, behavior: "smooth" });
     }
   }, [pastChats, isSendingPrompt, isOpen]);
-  // if (!isOpen) {
-  //   return (
-  //     <button
-  //       onClick={() => setIsOpen(true)}
-  //       className="rounded-full hover:cursor-pointer size-12 flex justify-center items-center overflow-hidden bg-zinc-100 text-zinc-900 font-bold border border-zinc-200 shadow-lg hover:shadow-xl transition-shadow mb-2"
-  //     >
-  //       <span>AI</span>
-  //     </button>
-  //   );
-  // }
 
   return (
     <div className="fixed bottom-0 right-2 sm:right-4 lg:right-32 flex justify-end z-[99]">

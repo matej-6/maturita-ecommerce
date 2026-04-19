@@ -44,16 +44,8 @@ export function AttributeKeySheetForm({ initialData }: Props) {
   >(undefined);
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
-
-  const handlechange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -70,7 +62,7 @@ export function AttributeKeySheetForm({ initialData }: Props) {
       if (!result.success) {
         const fieldErrorsMap = new Map();
         result.fieldErrors?.forEach((e) =>
-          fieldErrorsMap.set(e.property, e.constraints)
+          fieldErrorsMap.set(e.property, e.constraints),
         );
         setFieldErrors(fieldErrorsMap);
         setErrorMessage(result.message);
@@ -108,7 +100,7 @@ export function AttributeKeySheetForm({ initialData }: Props) {
               id="key"
               type="text"
               value={formData.key}
-              onChange={handlechange}
+              onChange={(e) => setFormData(() => ({ key: e.target.value }))}
             />
             <FormFieldErrorMessage fieldErrors={fieldErrors} fieldName="key" />
           </div>
@@ -121,8 +113,8 @@ export function AttributeKeySheetForm({ initialData }: Props) {
                   ? t("loadingButton")
                   : t("submitButtonUpdate")
                 : isPending
-                ? t("loadingButton")
-                : t("submitButtonCreate")}
+                  ? t("loadingButton")
+                  : t("submitButtonCreate")}
             </Button>
             <SheetClose asChild>
               <Button variant={"outline"}>{t("closeButton")}</Button>

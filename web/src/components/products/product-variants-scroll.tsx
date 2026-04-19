@@ -57,6 +57,7 @@ export function ProductVariantsScroll({ variants }: Props) {
     }
 
     return () => {
+      window.addEventListener("resize", handleScroll);
       if (scrollEl) {
         scrollEl.removeEventListener("scroll", handleScroll);
       }
@@ -117,7 +118,7 @@ export function ProductVariantsScroll({ variants }: Props) {
                     </p>
                   )}
                 </div>
-                <h3 className="font-medium text-sm sm:text-base break-words break-normal">
+                <h3 className="font-medium text-sm sm:text-base break-words">
                   {v.name}
                 </h3>
               </Link>

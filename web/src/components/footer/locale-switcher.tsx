@@ -8,9 +8,9 @@ import {
 } from "../ui/select";
 import { routing } from "@/i18n/routing";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { useParams } from "next/navigation";
 import { useTransition } from "react";
 import { buttonVariants } from "../ui/button";
+import { useParams } from "next/navigation";
 
 export default function LocaleSwitcher() {
   const [isPending, startTransition] = useTransition();

@@ -399,6 +399,7 @@ export class ProductVariantsService {
     attributeFilters?: string[][],
   ): Promise<PaginatedProductVariant> {
     this.validatePaginationArgs(paginationArgs);
+    this.validateSortingArgs(sortingArgs);
     const filters = attributeFilters
       ? await this.extractAttributeFilters(attributeFilters)
       : {};
@@ -470,16 +471,13 @@ export class ProductVariantsService {
           },
         ],
       },
-      orderBy: [
-        { productId: 'asc' },
-        { id: 'asc' },
-        sortingArgs.sortBy === null
-          ? {}
+      orderBy:
+        sortingArgs.sortBy == null
+          ? { productId: 'asc', id: 'asc' }
           : {
               [sortingArgs.sortBy]:
                 sortingArgs.ascending === false ? 'desc' : 'asc',
             },
-      ],
       cursor:
         paginationArgs.cursor == null
           ? undefined

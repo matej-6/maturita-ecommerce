@@ -309,6 +309,7 @@ export class ProductsService {
       'updatedAt',
       'id',
       'categoryId',
+      'slug',
       null,
     ];
     if (!validSortByFields.includes(args.sortBy)) {
@@ -561,10 +562,6 @@ export class ProductsService {
     }
   }
 
-  /**
-   * Metóda navrhnutá pre data loader
-   * source: @link https://blog.logrocket.com/use-dataloader-nestjs/#setting-up-nestjs-graphql
-   */
   async getAllTranslationsByBatch(
     lang: string,
     productIds: number[],
