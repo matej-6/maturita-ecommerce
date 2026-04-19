@@ -473,7 +473,7 @@ export class ProductVariantsService {
       },
       orderBy:
         sortingArgs.sortBy == null
-          ? { productId: 'asc', id: 'asc' }
+          ? [{ productId: 'asc' }, { id: 'asc' }]
           : {
               [sortingArgs.sortBy]:
                 sortingArgs.ascending === false ? 'desc' : 'asc',
